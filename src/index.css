@@ -1,8 +1,6 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -10,4 +8,38 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+video {
+  outline: none;
+  background: black
+}
+
+.icon-fullscreen-alt:before {
+  content: "\e000";
+}
+.icon-fullscreen-out:before{
+  content: "U+25A1";
+}
+.icon-fullscreen-exit-alt:before {
+  content: "\e001";
+}
+.icon-play:before {
+  content: "\e002";
+}
+.icon-pause:before {
+  content: "\e003";
+}
+.icon-volume:before {
+  content: "\e004";
+}
+.icon-volume-2:before {
+  content: "\e005";
+}
+.icon-square-corners:before {
+  content: "U+26F6"
 }
