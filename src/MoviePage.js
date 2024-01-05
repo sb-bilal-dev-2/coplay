@@ -9,9 +9,10 @@ import { debounce } from './debounce';
 import { useParams } from 'react-router-dom';
 
 const TAP_TIMEOUT = 160
-const REWIND_TIME = 2.5
-const VOLUE_STEP = 0.1
+const REWIND_TIME = 5
+const VOLUE_STEP = 0.05
 const REWIND_SUBTITLE_TIMEOUT = 5000
+const VOLUME_SHOW_TIMEOUT = 500
 
 const MoviePage = () => {
   const [settings, setSettings] = useState({})
@@ -19,21 +20,26 @@ const MoviePage = () => {
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
   const [showEnSubtitles, setShowEnSubtitles] = useState(true)
-  const [currentTime, setCurrentTime] = useState(Number(localStorage.getItem('currentTime')))
+  const [currentTime, setCurrentTime] = useState(Number(localStorage.getItem('currentTime' + title)))
   const videoRef = useRef(null)
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null)
   const fullScreenContainer = useRef(null)
+  const volumeInfoShowTimeout = useRef(null)
 
   useEffect(() => {
     const video = videoRef.current;
 
     // Set the currentTime to the timestamp value (332995.39999999106)
-    const previousCurrentTime = Number(localStorage.getItem('currentTime'))
+    const previousCurrentTime = Number(localStorage.getItem('currentTime' + title))
     if (previousCurrentTime) {
       video.currentTime = previousCurrentTime;
     }
 
+    const localVolume = Number(localStorage.getItem('volume')) || 0.8
+    if (localVolume) {
+      video.volume = localVolume
+    }
     const rewindTime = REWIND_TIME; // in seconds
     const skipForwardTime = REWIND_TIME; // in seconds
 
@@ -55,17 +61,33 @@ const MoviePage = () => {
           break;
         case 'ArrowUp':
           // Increase volume
-          if (videoRef.current.volume <= 1 - VOLUE_STEP) {
-            videoRef.current.volume += VOLUE_STEP;
+          if (video.volume <= 1 - VOLUE_STEP) {
+            const newVolume = round(video.volume + VOLUE_STEP, VOLUE_STEP)
+            video.volume = newVolume;
+            localStorage.setItem('volume', newVolume)
           }
+          clearTimeout(volumeInfoShowTimeout.current)
+          volumeInfoShowTimeout.current = null;
+          volumeInfoShowTimeout.current = setTimeout(() => {
+            clearTimeout(volumeInfoShowTimeout.current)
+            volumeInfoShowTimeout.current = null;
+          }, VOLUME_SHOW_TIMEOUT)
           break;
         case 'ArrowDown':
           // Decrease volume
-          if (videoRef.current.volume >= VOLUE_STEP) {
-            videoRef.current.volume -= VOLUE_STEP;
+          if (video.volume >= VOLUE_STEP) {
+            const newVolume = round(video.volume - VOLUE_STEP, VOLUE_STEP)
+            localStorage.setItem('volume', newVolume)
+            video.volume = newVolume;
           } else {
-            videoRef.current.volume = 0
+            video.volume = 0
           }
+          clearTimeout(volumeInfoShowTimeout.current)
+          volumeInfoShowTimeout.current = null;
+          volumeInfoShowTimeout.current = setTimeout(() => {
+            clearTimeout(volumeInfoShowTimeout.current)
+            volumeInfoShowTimeout.current = null;
+          }, VOLUME_SHOW_TIMEOUT)
           break;
 
         case 'Enter':
@@ -104,12 +126,12 @@ const MoviePage = () => {
 
   const handleTimeUpdate = useCallback(() => {
     setCurrentTime(videoRef.current.currentTime)
-    localStorage.setItem('currentTime', videoRef.current.currentTime)
+    localStorage.setItem('currentTime' + title, videoRef.current.currentTime)
   }, [videoRef?.current?.currentTime])
   const throttledHandleTimeUpdate = throttle(handleTimeUpdate, 1000);
 
   const handleEnd = useCallback(() => {
-    localStorage.setItem('currentTime', "0")
+    localStorage.removeItem('currentTime' + title)
   })
   // const videoRef = useRef(null);
   let tapCount = 0;
@@ -169,8 +191,13 @@ const MoviePage = () => {
             onTouchStart={handleTap}
             onEnded={handleEnd}
           >
-            <source src="http://localhost:3001/movie?name=fight-club" type="video/mp4" />
+            <source src={`http://localhost:3001/movie?name=${title}`} type="video/mp4" />
           </video>
+          <div
+            className={classNames('volumeInfo', { 'hidden': !volumeInfoShowTimeout.current })}
+          >
+            {Math.round((videoRef?.current?.volume || 0) * 100)}%
+          </div>
           <div className='controls'>
             <div className='row1'>
               <span className='timeLeft'>{secondsToDisplayTime(videoRef?.current?.currentTime)} / {secondsToDisplayTime(videoRef?.current?.duration)}</span>
@@ -189,12 +216,21 @@ const MoviePage = () => {
               />
             </div>
           </div>
-          {justRewinded &&
             <Subtitles
               videoRef={videoRef}
               currentTime={currentTime}
+              title={title}
+              // hideSubtitles={!justRewinded}
+              tooltip
             />
-          }
+            <Subtitles
+              positionY={0.3}
+              locale='uz'
+              videoRef={videoRef}
+              currentTime={currentTime}
+              title={title}
+              hideSubtitles={!justRewinded}
+            />
         </div>
       </div>
     </div>
@@ -223,6 +259,12 @@ function secondsToDisplayTime(seconds = 0) {
     }
     displayItem += s
     return displayItem
+}
+
+function round(value, step) {
+  step || (step = 1.0);
+  var inv = 1.0 / step;
+  return Math.round(value * inv) / inv;
 }
 
 export default MoviePage

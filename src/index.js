@@ -3,11 +3,23 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import MoviePage from './MoviePage';
 import reportWebVitals from './reportWebVitals';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <MoviePage />
+    <Router>
+      <Routes>
+        {/* <Route exact path="/">
+          <Home />
+        </Route> */}
+        <Route path="movie/:title" element={<MoviePage />}/>
+      </Routes>
+    </Router>
   </React.StrictMode>
 );
 

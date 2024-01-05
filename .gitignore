@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.env
 
 # testing
 /coverage
@@ -23,3 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 
 public/movies
+google_stored_key.json

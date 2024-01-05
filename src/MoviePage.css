@@ -99,3 +99,20 @@
 .controls .row1 {
   padding: 8px;
 }
+.volumeInfo {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  color: aliceblue;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 16px 24px;
+  opacity: 0.8;
+  border-radius: 8px;
+  font-weight: bold;
+  font-family:'Times New Roman', Times, serif;
+  user-select: none;
+}
+.hidden {
+  visibility: hidden;
+}
