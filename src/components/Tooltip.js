@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
 import './Tooltip.css';
 import axios from 'axios';
+import classNames from 'classnames';
 
 function Tooltip(props) {
-  const { text, selectionText } = props;
+  const { text, selectionText, className } = props;
 
   const subtitlePartRef = useRef(null)
   const tooltipRef = useRef(null)
@@ -28,7 +29,7 @@ function Tooltip(props) {
 
   return (
     <div className="tooltip">
-      <span className='tooltipTarget' onMouseEnter={handleMouseEnter}>
+      <span className={classNames(['tooltipTarget', 'tooltipTarget-opacity-05', className])} onMouseEnter={handleMouseEnter}>
         {text}&#xa0;
       </span>
       <div className="tooltipContent" ref={tooltipRef}>

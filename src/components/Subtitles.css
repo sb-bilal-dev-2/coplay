@@ -11,3 +11,11 @@
     color: white;
     font-weight: bold;
 }
+
+.editingText {
+    width: 60%;
+}
+
+.subtitleLine {
+    cursor: default;
+}

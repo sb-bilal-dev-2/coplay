@@ -1,11 +1,20 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# google api
+elevated-apex-389717-c9d682bc1fd2.json
+
+# movie files and images
+/files
+
+# (deprecated) local movie stored location
+public/movies
+
+/src/ip.js
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
 .env
-
 # testing
 /coverage
 
@@ -22,6 +31,3 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-public/movies
-google_stored_key.json

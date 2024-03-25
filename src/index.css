@@ -1,24 +1,65 @@
-body {
-  margin: 0;
-  font-family: sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Roboto', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-align: center;
+  font-size: initial;
+  font-weight: bold;
+  font-family: 'Arial Black';
+}
+
+button {
+  filter: brightness(0.96);
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+html, body {
+  overscroll-behavior-x: none;
+}
+
+* {
+  box-sizing: border-box;
+}
 
 video {
   outline: none;
   background: black
 }
 
+form button:hover {
+  opacity: 0.8;
+}
+
+/* Remove autofill styles START */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #ffffff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px #23232329;
+}
+/* Remove autofill styles END */
+
+/* ICONS START */
 .icon-fullscreen-alt:before {
   content: "\e000";
 }
@@ -43,3 +84,93 @@ video {
 .icon-square-corners:before {
   content: "U+26F6"
 }
+
+/* ICONS END */
+
+/* SHARED CLASSES */
+.page-container {
+  display: block;
+}
+.section {
+  display: block;
+  padding-top: 24px;
+  padding-bottom: 40px;
+}
+.section-container {
+  margin: auto;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+@media screen and (min-width: 800px) {
+  .section {
+    padding-top: 64px;
+    padding-bottom: 80px;  
+  }
+  .section-container {
+    width: 700px;
+  }
+}
+
+@media screen and (min-width: 1100px) {
+  .section-container {
+    width: 1024px;
+  }
+}
+
+@media screen and (min-width: 1500px) {
+  .section-container {
+    width: 1400px;
+  }
+}
+
+.bg-primary {
+  background-color: #fdfdfd;
+}
+
+.bg-secondary {
+  background: linear-gradient(#f48e4e, #f98787);
+}
+
+.bg-secondary-2 {
+  background: linear-gradient(#f5e7df, #feeaea);
+}
+
+.bg-green {
+  background: linear-gradient(#dff5df, #f6feea);
+}
+
+.bg-yellow {
+  background: linear-gradient(#f5e9df, #fae4b0);
+}
+
+.paper {
+  background: white;
+  box-shadow: 1px 1px 5px 5px rgba(0, 0, 0, 0.0.5), 1px 1px 2px 2px rgba(0, 0, 0, 0.0.2);
+}
+
+.text-primary {
+  color: #f48e4e;
+}
+
+.text-primary-helper {
+  color: #f98787;
+}
+
+.text-gray {
+  color: #7d7875;
+}
+
+.text-secondary {
+  color: #fdfdfd;
+}
+
+.h1-primary {
+  color: #f48e4e;
+}
+
+.h1-secondary {
+  color: #fdfdfd;
+}
+
+/* SHARED CLASSES END */

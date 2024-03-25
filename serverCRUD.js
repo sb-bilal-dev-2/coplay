@@ -10,8 +10,10 @@ const DB_PWD = process.env.DATABASE_PASSWORD;
 const SCHEMAS_PATH = './schemas'
 // Initialize Express app and middleware
 let app;
+let models = {}
+
 // Function to initialize MongoDB connection
-const initCRUD = (ownApp) => {
+const initCRUDAndDatabase = (ownApp) => {
   if (!app) {
     if (ownApp) {
       app = ownApp;
@@ -31,39 +33,47 @@ const initCRUD = (ownApp) => {
     app,
     mongoose,
     createCRUDEndpoints,
+    models,
   }
 };
-
 // Function to create CRUD endpoints
-const createCRUDEndpoints = (uri) => {
+const createCRUDEndpoints = (uri, model, requireAuth) => {
   // Load Mongoose schema from the provided path
-  const schema = require(`${SCHEMAS_PATH}/${uri}.js`);
+  let Model = model;
 
-  // Add createdTime, updatedTime, and note keys to the schema
-  schema.add({
-    createdTime: { type: Date, default: Date.now },
-    updatedTime: { type: Date, default: Date.now },
-    note: String,
-  });
+  if (!model) {
+    // const schema = require(`${SCHEMAS_PATH}/${uri}.js`);
 
-  // Create a Mongoose model
-  const Model = mongoose.model(uri, schema);
+    // // Add createdTime, updatedTime, and note keys to the schema
+    // schema.add({
+    //   createdTime: { type: Date, default: Date.now },
+    //   updatedTime: { type: Date, default: Date.now },
+    //   note: String,
+    // });
+  
+    // Create a Mongoose model
+    Model = require(`${SCHEMAS_PATH}/${uri}.js`).model;
+  }
+  models[uri] = Model;
 
   // CRUD Endpoints
+  const DEFAULT_ITEM_LIMIT = 20;
   app.get(`/${uri}`, async (req, res) => {
     // Retrieve data from the database
     try {
       let query = Model.find();
 
       // Search functionality
-      if (req.query.search) {
-        const searchKey = req.query.search_by || '_id';
-        const searchValue = req.query.search;
-        query = query.where(searchKey).equals(searchValue);
+      if (req.query.match) {
+        const matchKey = req.query.matchKey || 'title';
+
+        const match = req.query.match;
+        query = query.where(matchKey).equals(match);
       }
+
       // Pagination
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = parseInt(req.query.limit) || DEFAULT_ITEM_LIMIT;
       const startIndex = (page - 1) * limit;
       const endIndex = page * limit;
 
@@ -104,6 +114,9 @@ const createCRUDEndpoints = (uri) => {
     // Retrieve a single object by ID
     try {
       const id = req.params.id;
+      console.log('Model', Model)
+      console.log('Model.findById', Model.findById)
+
       const data = await Model.findById(id);
 
       if (!data) {
@@ -115,25 +128,10 @@ const createCRUDEndpoints = (uri) => {
       res.status(500).send(error.message);
     }
   });
-  app.post(`/${uri}`, async (req, res) => {
-    // Create a new document or multiple documents
-    try {
-      if (Array.isArray(req.body)) {
-        const newData = await Model.insertMany(req.body);
-        res.json(newData);
-      } else {
-        const newData = new Model(req.body);
-        const savedData = await newData.save();
-        res.json(savedData);
-      }
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
-  app.put(`/${uri}/:id`, async (req, res) => {
+  app.post(`/${uri}/:id`, async (req, res) => {
     // Update a single object or multiple objects by ID
     try {
-      if (!req.params.id) { // if no id provided then update bulk
+      if (!req.params._id) { // if no id provided then update bulk
         const bulkUpdateOps = req.body.map(update => ({
           updateOne: {
             filter: { _id: update._id },
@@ -146,9 +144,33 @@ const createCRUDEndpoints = (uri) => {
       } else { // update single item
         const id = req.params.id;
         const updatedData = await Model.findByIdAndUpdate(id, req.body, { new: true });
-        res.json(updatedData);
+        res.json(updatedData);  
       }
     } catch (error) {
+      res.status(500).send(error.message);
+    }
+  });
+  app.put(`/${uri}`, async (req, res) => {
+    // Create a new document or multiple documents
+    try {
+
+      console.log('post', req.body)
+      if (Array.isArray(req.body)) {
+
+        const newData = await Model.insertMany(req.body);
+        res.json(newData);
+      } else {
+        const newData = new Model(req.body);
+        const savedData = await newData.save();
+        res.json(savedData);
+      }
+    } catch (error) {
+      console.log('code', error.code)
+      console.log('code', error.statusCode)
+      console.log('err', error.message)
+      if (error.message.includes("validation failed:")) {
+        return res.status(400).send(error.message)
+      }
       res.status(500).send(error.message);
     }
   });
@@ -178,7 +200,7 @@ const createCRUDEndpoints = (uri) => {
     // Delete document by ID
     try {
       const id = req.params.id;
-      const deletedData = await Model.findByIdAndRemove(id);
+      const deletedData = await Model.findByIdAndDelete(id);
 
       if (!deletedData) {
         return res.status(404).send('Data not found');
@@ -193,6 +215,7 @@ const createCRUDEndpoints = (uri) => {
 
 // Export the functions
 module.exports = {
-  initCRUD,
+  initCRUDAndDatabase,
   createCRUDEndpoints,
+  models
 };

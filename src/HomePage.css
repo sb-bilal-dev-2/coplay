@@ -1,0 +1,38 @@
+
+.home-page {
+    color: #222;
+
+    h1 {
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    }
+}
+
+.home-page .section h2 {
+    color: silver;
+}
+
+.heroContainer > img {
+    height: 320px;
+    object-fit: cover;
+    filter: brightness(0.96);
+}
+
+@media (min-width: 625px) {
+    .heroContainer > img {
+        height: 80vh;
+    }    
+}
+
+.heroContainer .info {
+    max-width: 90vw;
+    font-family: 'Arial Black';
+    color: orange;
+}
+
+.primary-button-2 {
+    color: gainsboro;
+    background: rgba(0, 0, 0, 0.2);
+    font-weight: bolder;
+    border: 2px solid gainsboro;
+    border-radius: 4px;
+}

@@ -1,0 +1,70 @@
+.horizontal-scroll-menu {
+    width: 100%;
+    white-space: nowrap;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.menu-list {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    position: relative;
+    padding: 8px;
+    margin: 0;
+    display: flex;
+}
+
+.list-card {
+    float: left;
+    display: block;
+    flex: 1 0 160px;
+    height: 240px;
+    margin: 8px;
+    background-color: silver;
+    padding: 8px 16px;
+    user-select: 'none';
+    cursor: pointer;
+    background-position: center;
+    background-size: cover;
+    filter: brightness(0.95);
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 1px black;
+}
+
+.list-card:hover {
+    filter: brightness(1);
+}
+
+.menu-item:hover {
+    background-color: #dcdcdc;
+}
+
+/* Scroll Buttons Styles */
+.scroll-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    border: none;
+    width: 24px;
+    height: calc(100% - 32px);
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 100;
+    opacity: 0.3;
+    font-weight: bolder;
+}
+
+.scroll-button:hover {
+    opacity: 0.8;
+}
+
+.scroll-button:first-child {
+    left: 0;
+}
+
+.scroll-button:last-child {
+    right: 0;
+}

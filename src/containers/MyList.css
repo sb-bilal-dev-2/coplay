@@ -1,0 +1,25 @@
+
+.MyListMain {
+    /* background: rgb(255, 145, 0); */
+    flex-grow: 1;
+}
+
+.TagListItems {
+    box-shadow: inset 1px 1px 5px 1px rgba(0, 0, 0, 0.05), 1px 1px 5px 1px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    min-height: 84px;
+    border-radius: 4px;
+}
+
+.TagItem {
+    border: 1px solid whitesmoke;
+    padding: 2px 4px;
+    margin: 2px;
+    font-weight: bolder;
+    border-radius: 2px;
+}
+
+.TagItem.selected {
+    border: 1px solid black;
+    /* box-shadow: -1px -1px black; */
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netflix Clone</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<style>
+  body { font-family: 'Roboto', sans-serif; }
+</style>
+</head>
+<body class="bg-black text-white">
+
+<!-- Navbar -->
+<div class="px-10 py-5">
+  <div class="flex items-center justify-between">
+    <img class="h-8" src="https://placehold.co/92x32.png?text=NETFLIX&bg=0b0b0b" alt="Netflix logo placeholder">
+    <div class="flex items-center">
+      <a href="#" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors mr-4">TV Shows</a>
+      <a href="#" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors mr-4">Movies</a>
+      <a href="#" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors">Latest</a>
+      <a href="#" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors ml-6">My List</a>
+      <a href="#" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors ml-6">Browse by Languages</a>
+      <div class="text-gray-400 ml-6">
+        <i class="fas fa-search"></i>
+      </div>
+      <div class="text-gray-400 ml-4">
+        <i class="fas fa-gift"></i>
+      </div>
+      <div class="text-gray-400 ml-4">
+        <i class="fas fa-bell"></i>
+      </div>
+      <img class="h-8 ml-4" src="https://placehold.co/32x32.png?text=K&bg=8b8b8b" alt="User avatar placeholder">
+    </div>
+  </div>
+</div>
+
+<!-- Main Feature -->
+<div class="relative">
+  <img class="w-full h-auto" src="https://placehold.co/768x432.png?text=AMERICAN+NIGHTMARE&bg=1a1a1a" alt="American Nightmare banner placeholder">
+  <div class="absolute bottom-10 left-10">
+    <div class="text-4xl font-bold mb-4">AMERICAN NIGHTMARE</div>
+    <div class="text-sm mb-4">After a harrowing home invasion and kidnapping in 2015, a couple is accused of staging the ordeal when the woman reappears in this true-crime docuseries.</div>
+    <div class="flex">
+      <button class="flex items-center bg-white text-black px-4 py-2 mr-4">
+        <i class="fas fa-play mr-2"></i> Play
+      </button>
+      <button class="flex items-center border border-gray-300 text-gray-300 px-4 py-2">
+        <i class="fas fa-info-circle mr-2"></i> More Info
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Content Rows -->
+<div class="px-10">
+  <div class="mb-10">
+    <h2 class="text-xl font-semibold mb-4">Hollywood Movies</h2>
+    <div class="flex overflow-x-scroll no-scrollbar">
+      <!-- Repeat this for each movie -->
+      <img class="w-40 h-56 mr-4" src="https://placehold.co/160x224.png?text=Movie+Thumbnail&bg=333333" alt="Movie thumbnail placeholder">
+      <!-- ... -->
+    </div>
+  </div>
+
+  <!-- Repeat this section for each category -->
+  <div class="mb-10">
+    <h2 class="text-xl font-semibold mb-4">Continue Watching for Bilal</h2>
+    <div class="flex overflow-x-scroll no-scrollbar">
+      <!-- Repeat this for each series -->
+      <img class="w-40 h-56 mr-4" src="https://placehold.co/160x224.png?text=Series+Thumbnail&bg=333333" alt="Series thumbnail placeholder">
+      <!-- ... -->
+    </div>
+  </div>
+
+  <!-- ... More categories ... -->
+</div>
+
+<!-- Footer -->
+<div class="border-t border-gray-800 py-6 px-10">
+  <div class="flex justify-between">
+    <div class="flex">
+      <!-- Repeat for each social icon -->
+      <a href="#" class="text-gray-400 hover:text-white transition-colors mr-4">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+      <a href="#" class="text-gray-400 hover:text-white transition-colors mr-4">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="#" class="text-gray-400 hover:text-white transition-colors">
+        <i class="fab fa-youtube"></i>
+      </a>
+      <!-- ... -->
+    </div>
+    <div class="flex">
+      <!-- Repeat for each footer link -->
+      <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors mr-6">Audio Description</a>
+      <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors mr-6">Help Center</a>
+      <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors mr-6">Gift Cards</a>
+      <!-- ... -->
+    </div>
+  </div>
+  <div class="text-center text-gray-600 mt-6 text-xs">
+    © 1997-2024 Netflix, Inc.
+  </div>
+</div>
+
+</body>
+</html>
