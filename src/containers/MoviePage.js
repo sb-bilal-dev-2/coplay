@@ -64,7 +64,7 @@ const MoviePage = () => {
   useEffect(() => {
     const requestMovieInfo = async () => {
       try {
-        const response = await axios(`http://localhost:3001/movies?match=${title}`);
+        const response = await axios(`http://localhost:3001/movies?title=${title}`);
         const newMovieInfo = response.data?.results[0]
         console.log('newMovieInfo', newMovieInfo)
         setCurrentItem(newMovieInfo)

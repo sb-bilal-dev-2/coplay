@@ -10,8 +10,85 @@ const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
 const subtitles = fromVtt(subtitlesVtt, 'ms');
 console.log(subtitles.length);
 const ultimateLemmaInfoMap = require('./en50kLemmaInfoMapped.json')
+const { initCRUDAndDatabase } = require('./serverCRUD');
+initCRUDAndDatabase()
+const WordsModel = require('./schemas/wordInfos').model;
 
 const usedWords = []
+const englishWordsMap = mapItems(englishWordsFull, 'the_word')
+
+let subtitlesWithUsedWords = subtitles.map((sbt) => {
+    const usedWordsPerLine = sbt.text.toLowerCase()
+    .replaceAll('\n', ' ')
+    .replaceAll('[', ' ')
+    .replaceAll(']', ' ')
+    .replaceAll('{', ' ')
+    .replaceAll('}', ' ')
+    .replaceAll('...', ' ')
+    .replaceAll('..', ' ')
+    .replaceAll('.', ' ')
+    .replaceAll('---', ' ')
+    .replaceAll('--', ' ')
+    .replaceAll('(', ' ')
+    .replaceAll(')', ' ')
+    .replaceAll('"', ' ')
+    .replaceAll('<', ' ')
+    .replaceAll('>', ' ')
+    .replaceAll('!', ' ')
+    .replaceAll('?', ' ')
+    .replaceAll('#', ' ')
+    .replaceAll('&', ' ')
+    .replaceAll('$', ' ')
+    .replaceAll(',', ' ')
+    .replaceAll("'", ' ')
+    .split(' ')
+    .map(wrd => wrd[0] === "-" ? wrd.slice(1) : wrd) // case "-word"
+    .map(wrd => wrd[wrd.length - 1] === "-" ? wrd.slice(0, wrd.length -1) : wrd) // case "word-"
+    .map(wrd => wrd.trimEnd().trimStart())
+    .filter(wrd => wrd)
+    .filter(wrd => englishWordsMap[wrd]);
+
+    return {
+        ...sbt,
+        usedWords: usedWordsPerLine
+    }
+})
+
+console.log('subtitles', subtitlesWithUsedWords)
+
+subtitlesWithUsedWords = (async function getUsedLemmasByUsedWords(list) {
+    lemmasByInflection = await getAllLemmasMappedByInflection()
+    console.log('lemmasByInflection', lemmasByInflection)
+    const listWithUsedLemmas = list.map((subtitleLine) => {
+        return {
+            ...subtitleLine,
+            usedLemmas: subtitleLine.usedWords.map(inflection => lemmasByInflection[inflection])
+        }
+    })
+    console.log('listWithUsedLemmas', listWithUsedLemmas);
+    fs.writeFileSync(`./files/movieFiles/${movieName}.subtitles.usedWords.json`, JSON.stringify(listWithUsedLemmas))
+
+    return listWithUsedLemmas
+    async function getAllLemmasMappedByInflection() {
+        const lemma = await WordsModel.find();
+        const mappedByInflection = {}
+    
+        lemma.forEach((lemma) => {
+            if (!mappedByInflection[lemma.lemma]) {
+                mappedByInflection[lemma.lemma] = lemma.lemma
+            }
+            if (!lemma.inflections) {
+                mappedByInflection[lemma.lemma] = lemma.lemma
+            } else {
+                lemma.inflections.forEach((infl) => {
+                    mappedByInflection[infl] = lemma.lemma
+                })
+            }
+        })
+    
+        return mappedByInflection
+    }    
+})(subtitlesWithUsedWords)
 
 const words = subtitles.map(sbt => sbt.text)
   .join('\n')
@@ -35,13 +112,16 @@ const words = subtitles.map(sbt => sbt.text)
   .replaceAll('?', ' ')
   .replaceAll('#', ' ')
   .replaceAll('&', ' ')
+  .replaceAll('$', ' ')
+  .replaceAll(',', ' ')
+  .replaceAll("'", ' ')
   .split(' ')
   .filter(wrd => wrd)
-  .map(wrd => wrd[0] === "-" ? wrd.slice(1) : wrd)
-  .map(wrd => wrd[wrd.length - 1] === "-" ? wrd.slice(0, wrd.length -1) : wrd)
-usedWords.push(...words.map(wrd => wrd.trimEnd().trimStart()))
+  .map(wrd => wrd[0] === "-" ? wrd.slice(1) : wrd) // case "-word"
+  .map(wrd => wrd[wrd.length - 1] === "-" ? wrd.slice(0, wrd.length -1) : wrd) // case "word-"
+  .map(wrd => wrd.trimEnd().trimStart())
+usedWords.push(...words)
 const en50kMap = mapItems(englishWords50k, 'the_word')
-const englishWordsMap = mapItems(englishWordsFull, 'the_word')
 const usedWords50k = {}
 const usedWordsPost50k = {}
 const usedLemmas50k = {}
@@ -91,8 +171,8 @@ function mapItems(array, key) {
 let usedLemmas50kInfosList = Object.keys(usedLemmas50k).map(lemma => ultimateLemmaInfoMap[lemma])
 
 
-fs.writeFileSync(`./files/movieFiles/${movieName}.usedWords50k.json`, JSON.stringify(usedWords50k))
-fs.writeFileSync(`./files/movieFiles/${movieName}.usedWordsPost50k.json`, JSON.stringify(usedWordsPost50k))
+// fs.writeFileSync(`./files/movieFiles/${movieName}.usedWords50k.json`, JSON.stringify(usedWords50k))
+// fs.writeFileSync(`./files/movieFiles/${movieName}.usedWordsPost50k.json`, JSON.stringify(usedWordsPost50k))
 fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50k.json`, JSON.stringify(usedLemmas50k))
 fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50kInfosList.json`, JSON.stringify(usedLemmas50kInfosList))
 
@@ -138,3 +218,5 @@ fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50kInfosList.json`, 
 
 //     return mapped
 // }
+
+module.exports = { mapItems }

@@ -61,15 +61,16 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
   app.get(`/${uri}`, async (req, res) => {
     // Retrieve data from the database
     try {
-      let query = Model.find();
+      const filterQuery = getFilterFromQuery(req.query)
+      let query = Model.find(filterQuery);
 
       // Search functionality
-      if (req.query.match) {
-        const matchKey = req.query.matchKey || 'title';
+      // if (req.query.match) {
+      //   const matchKey = req.query.matchKey || 'title';
 
-        const match = req.query.match;
-        query = query.where(matchKey).equals(match);
-      }
+      //   const match = req.query.match;
+      //   query = query.where(matchKey).equals(match);
+      // }
 
       // Pagination
       const page = parseInt(req.query.page) || 1;
@@ -112,7 +113,7 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
   });
   app.get(`/${uri}/:id`, async (req, res) => {
     // Retrieve a single object by ID
-    try {
+    try {      
       const id = req.params.id;
       console.log('Model', Model)
       console.log('Model.findById', Model.findById)
@@ -212,6 +213,25 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
     }
   });
 };
+
+function getFilterFromQuery(query) {
+  const filterQuery = { ...query, limit: null, page: null, match: null }
+
+  Object.keys(query).forEach((key) => {
+    const queryValue = query[key]
+    let queryValueJSON;
+    try {
+      queryValueJSON = JSON.parse(queryValue)
+      if (queryValueJSON !== null) {
+        query[key] = queryValueJSON;
+      }
+    } catch (err) {
+
+    }
+  })
+
+  return filterQuery;
+}
 
 // Export the functions
 module.exports = {

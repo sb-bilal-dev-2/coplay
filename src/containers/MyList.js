@@ -11,39 +11,15 @@ import { redirect } from 'react-router';
 
 
 const MyList = () => {
-    const dispatch = useDispatch();
-    const learningList1 = useSelector((state) => state.user.user?.words?.filter(item => !item.learned))
-    const learnedList1 = useSelector((state) => state.user.user?.words?.filter(item => item.learned))
-
-    const getUserWords = async () => {
-        try {
-            const userProps = await api().get('/get-user?allProps=1')
-            console.log('userProps', userProps)
-            dispatch(updateUser(userProps?.data))
-        } catch (err) {
-            if (err.message === "Request failed with status code 403") {
-                localStorage.removeItem('token');
-                redirect('/')
-            }
-            console.log('err', err)
-        }
-    }
-
-    const handleUserUpdate = (userUpdate) => {
-
-    } 
-
-    useEffect(() => {
-        getUserWords()
-    }, [])
+    const { learningList, learnedList } = useRequestUserWordLists()
 
     return (
         <>
             <StickyHeader />
             <div className='section MyListMain bg-secondary text-gray-100'>
                 <div className="p-4">
-                    <RenderTagList list={learningList1} name="Learning" />
-                    <RenderTagList list={learnedList1} name="Learned" />
+                    <RenderTagList list={learningList} name="Learning" />
+                    <RenderTagList list={learnedList} name="Learned" />
                 </div>
             </div>
             <Footer />
@@ -143,5 +119,34 @@ function usePost(handlePostResponse = () => {}) {
         data,
     ]
 }
+
+export function useRequestUserWordLists(cancelRequest) {
+    const dispatch = useDispatch();
+    const learningList = useSelector((state) => state.user.user?.words?.filter(item => !item.learned))
+    const learnedList = useSelector((state) => state.user.user?.words?.filter(item => item.learned))
+
+    const getUserWords = async () => {
+        try {
+            const userProps = await api().get('/get-user?allProps=1')
+            console.log('userProps', userProps)
+            dispatch(updateUser(userProps?.data))
+        } catch (err) {
+            if (err.message === "Request failed with status code 403") {
+                localStorage.removeItem('token');
+                redirect('/')
+            }
+            console.log('err', err)
+        }
+    }
+
+    useEffect(() => {
+        if (!cancelRequest) {
+            getUserWords()
+        }
+    }, [])
+
+    return { learnedList, learningList }
+}
+
 
 export default MyList;

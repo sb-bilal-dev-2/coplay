@@ -6,7 +6,7 @@ export default function MovieWordCards({ title, userId }) {
     const [lemmas, setLemmas] = useState([])
     console.log('userId', userId)
     const fetchLemmas = async () => {
-        const fetchedLemmas = await api().get('/movie_words/kung-fu-panda-3?without_user_words=true');
+        const fetchedLemmas = await api().get('/movie_words/kung_fu_panda_3?without_user_words=true');
         setLemmas(fetchedLemmas.data)
     }
     const handleSwipeBottom = () => {

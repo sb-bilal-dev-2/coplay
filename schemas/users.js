@@ -1,9 +1,11 @@
+const { ObjectId } = require('mongodb');
 const { default: mongoose } = require('mongoose');
 
 const Schema = require('mongoose').Schema;
 
 var usersWords = new Schema({
     isPhrase: Boolean,
+    wordId: ObjectId,
     note: String,
     rehearsedTimes: Number,
     learned: Boolean,

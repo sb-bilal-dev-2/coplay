@@ -12,6 +12,7 @@ const schema = new Schema({
   description: {
     type: String,
   },
+  mediaCharacters: [String],
   level: {
     type: String,
   },

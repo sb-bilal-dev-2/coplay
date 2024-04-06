@@ -202,8 +202,10 @@ createCRUDEndpoints('movies');
 // createCRUDEndpoints('subtitles');
 createCRUDEndpoints('clips');
 createCRUDEndpoints('quizzes');
-createCRUDEndpoints('words');
+// createCRUDEndpoints('words');
 createCRUDEndpoints('wordCollections');
+createCRUDEndpoints('wordInfos');
+createCRUDEndpoints('occurances');
 
 
 // createCRUDEndpoints('favorites', {

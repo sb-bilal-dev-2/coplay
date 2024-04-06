@@ -1,6 +1,7 @@
 
 .QuizMain video {
     height: 40vh;
+    object-fit: cover;
 }
 
 .QuizMain h1 {

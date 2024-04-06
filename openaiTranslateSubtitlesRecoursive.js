@@ -15,7 +15,7 @@ const moviesModel = require('./schemas/movies').model;
 
 // const promptres = JSON.parse(fs.readFileSync('./openaisubtitlepromptprocess.json', 'utf-8'))
 // console.log(promptres.processedTranslations.length);
-// const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${'kung-fu-panda-3'}.${'en'}.vtt`);
+// const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${'kung_fu_panda_3'}.${'en'}.vtt`);
 // const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
 // const subtitles = fromVtt(subtitlesVtt, 'ms');
 // console.log(subtitles.length);
@@ -23,7 +23,7 @@ const moviesModel = require('./schemas/movies').model;
 // fs.writeFileSync('./openaisubtitlepromptprocess.json', JSON.stringify(newpromptres))
 
 const NEW_ITEM = {
-  forTitle: 'kung-fu-panda-3',
+  forTitle: 'kung_fu_panda_3',
   for: 'movie',
 }
 // createItems()
@@ -105,7 +105,7 @@ REAL INPUT JSON
 `;
 prepareSubtitles();
 
-async function prepareSubtitles(title = 'kung-fu-panda-3', locale = 'en', translateLang = 'ru') {
+async function prepareSubtitles(title = 'kung_fu_panda_3', locale = 'en', translateLang = 'ru') {
   console.log('STARTING...')
   try {
     const subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${title}.${locale || 'en'}.vtt`);
