@@ -12,6 +12,7 @@ const schema = Schema({
   context: [String],
   lemmaOccuranceCount: Number,
   lemmaOccuranceCountOnContext: Number,
+  occuranceIndex: Number,
   contextSubtitles: [Schema({
     usedWords: [String],
     usedLemmas: [String],
@@ -24,6 +25,7 @@ const schema = Schema({
   genres: [String],
   series: String, // e.g. S1, E12
   lemma: String,
+  inflection: String,
   isPhrase: Boolean,
   usedWords: String,
 }).add({

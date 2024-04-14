@@ -1,9 +1,50 @@
 
 .QuizMain video {
-    height: 40vh;
+    margin-top: 160px;
+    height: 50vh;
     object-fit: cover;
 }
 
 .QuizMain h1 {
     font-size: 3em;
+}
+
+.QuizMain .Subtitles {
+    position: absolute;
+    top: 60vh;
+    width: 100vw;
+    text-shadow: '0 0 2px black, 0 0 2px black';
+    text-align: center;
+}
+
+.Empty-videoFiller {
+    margin-top: 160px;
+    height: 50vh;
+    width: 100vw;
+    background: black;
+}
+
+.PlayButton {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: large;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    position: absolute;
+    top: 40vh;
+    left: 50%;
+    transform: translate(-50%) scale(1);
+    z-index: 10;
+    transition: none;
+}
+
+.animatePause {
+    transform: translate(-50%) scale(2);
+    transition: 0.725s ease;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0) !important;
 }

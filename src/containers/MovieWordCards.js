@@ -2,12 +2,19 @@ import React, { useEffect, useState } from 'react'
 import AdvancedSwipe from '../components/AdvancedSwipe'
 import api from '../api'
 
-export default function MovieWordCards({ title, userId }) {
+export default function MovieWordCards({ title = '', userId }) {
     const [lemmas, setLemmas] = useState([])
+    const [error, set_error] = useState('')
     console.log('userId', userId)
     const fetchLemmas = async () => {
-        const fetchedLemmas = await api().get('/movie_words/kung_fu_panda_3?without_user_words=true');
-        setLemmas(fetchedLemmas.data)
+        set_error('')
+        let fetchedLemmas
+        try {
+            fetchedLemmas = await api().get(`/movie_words/${title}?without_user_words=true`);
+        } catch (err) {
+            set_error(err.message)
+        }
+        setLemmas(fetchedLemmas?.data || [])
     }
     const handleSwipeBottom = () => {
 
@@ -36,6 +43,8 @@ export default function MovieWordCards({ title, userId }) {
                 onSwipeLeft={handleSwipeLeft}
                 onSwipeRight={handleSwipeRight}
             />
-        )}</div>
+        )}
+        {error?.length && error}
+        </div>
     )
 }

@@ -8,6 +8,7 @@ const movieName = process.argv.slice(2)[0] || '';
 const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${movieName}.${'en'}.vtt`);
 const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
 const subtitles = fromVtt(subtitlesVtt, 'ms');
+const splitUsedWords = require('./splitUsedWords');
 console.log(subtitles.length);
 const ultimateLemmaInfoMap = require('./en50kLemmaInfoMapped.json')
 const { initCRUDAndDatabase } = require('./serverCRUD');
@@ -18,35 +19,7 @@ const usedWords = []
 const englishWordsMap = mapItems(englishWordsFull, 'the_word')
 
 let subtitlesWithUsedWords = subtitles.map((sbt) => {
-    const usedWordsPerLine = sbt.text.toLowerCase()
-    .replaceAll('\n', ' ')
-    .replaceAll('[', ' ')
-    .replaceAll(']', ' ')
-    .replaceAll('{', ' ')
-    .replaceAll('}', ' ')
-    .replaceAll('...', ' ')
-    .replaceAll('..', ' ')
-    .replaceAll('.', ' ')
-    .replaceAll('---', ' ')
-    .replaceAll('--', ' ')
-    .replaceAll('(', ' ')
-    .replaceAll(')', ' ')
-    .replaceAll('"', ' ')
-    .replaceAll('<', ' ')
-    .replaceAll('>', ' ')
-    .replaceAll('!', ' ')
-    .replaceAll('?', ' ')
-    .replaceAll('#', ' ')
-    .replaceAll('&', ' ')
-    .replaceAll('$', ' ')
-    .replaceAll(',', ' ')
-    .replaceAll("'", ' ')
-    .split(' ')
-    .map(wrd => wrd[0] === "-" ? wrd.slice(1) : wrd) // case "-word"
-    .map(wrd => wrd[wrd.length - 1] === "-" ? wrd.slice(0, wrd.length -1) : wrd) // case "word-"
-    .map(wrd => wrd.trimEnd().trimStart())
-    .filter(wrd => wrd)
-    .filter(wrd => englishWordsMap[wrd]);
+    const usedWordsPerLine = splitUsedWords(sbt.text);
 
     return {
         ...sbt,
@@ -90,36 +63,8 @@ subtitlesWithUsedWords = (async function getUsedLemmasByUsedWords(list) {
     }    
 })(subtitlesWithUsedWords)
 
-const words = subtitles.map(sbt => sbt.text)
-  .join('\n')
-  .toLowerCase()
-  .replaceAll('\n', ' ')
-  .replaceAll('[', ' ')
-  .replaceAll(']', ' ')
-  .replaceAll('{', ' ')
-  .replaceAll('}', ' ')
-  .replaceAll('...', ' ')
-  .replaceAll('..', ' ')
-  .replaceAll('.', ' ')
-  .replaceAll('---', ' ')
-  .replaceAll('--', ' ')
-  .replaceAll('(', ' ')
-  .replaceAll(')', ' ')
-  .replaceAll('"', ' ')
-  .replaceAll('<', ' ')
-  .replaceAll('>', ' ')
-  .replaceAll('!', ' ')
-  .replaceAll('?', ' ')
-  .replaceAll('#', ' ')
-  .replaceAll('&', ' ')
-  .replaceAll('$', ' ')
-  .replaceAll(',', ' ')
-  .replaceAll("'", ' ')
-  .split(' ')
-  .filter(wrd => wrd)
-  .map(wrd => wrd[0] === "-" ? wrd.slice(1) : wrd) // case "-word"
-  .map(wrd => wrd[wrd.length - 1] === "-" ? wrd.slice(0, wrd.length -1) : wrd) // case "word-"
-  .map(wrd => wrd.trimEnd().trimStart())
+const words = splitUsedWords(subtitles.map(sbt => sbt.text).join('\n'))
+
 usedWords.push(...words)
 const en50kMap = mapItems(englishWords50k, 'the_word')
 const usedWords50k = {}
@@ -219,4 +164,4 @@ fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50kInfosList.json`, 
 //     return mapped
 // }
 
-module.exports = { mapItems }
+module.exports = { mapItems, splitUsedWords }

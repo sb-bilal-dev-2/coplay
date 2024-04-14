@@ -1,0 +1,16 @@
+img,
+video,
+button {
+  display: block;
+}
+
+.WebcamCapture {
+  position: absolute;
+  top: 10vh;
+  left: 0;
+}
+
+.WebcamCapture video {
+  width: 260px;
+  transform: scaleX(-1);
+}

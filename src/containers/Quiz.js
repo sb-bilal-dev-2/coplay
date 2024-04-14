@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import StickyHeader from '../components/StickyHeader'
+import WebcamCapture from '../components/WebcamCapture'
 import Footer from '../components/Footer'
 import { useParams } from 'react-router'
 import api from '../api'
@@ -10,144 +10,19 @@ import classNames from 'classnames'
 
 const Quiz = ({ }) => {
     const { title } = useParams()
-    const [isShowingTranslation, set_isShowingTranslation] = useState();
-    const [practicingWords, set_practicingWords] = useState()
-    const [currentLemma, set_currentLemma] = useState()
-    const [lemmaData, set_lemmaData] = useState()
-    const [lemmaVideos, set_lemmaVideos] = useState([{
-        "_id": "660f1932191d91234890399d",
-        "mediaType": "movie",
-        "startTime": 192722,
-        "endTime": 196732,
-        "mediaTitle": "kung_fu_panda_3",
-        "mediaTitleBase": "kung_fu_panda",
-        "context": [
-            "With your chi, I will finally be able\nto return to the mortal world.",
-            "And this time,\nyou won't be there to stop me.",
-            "It was never my destiny to stop you."
-        ],
-        "lemmaOccuranceCount": 1,
-        "lemmaOccuranceCountOnContext": 1,
-        "contextSubtitles": [
-            {
-                "usedWords": [
-                    "with",
-                    "your",
-                    "chi",
-                    "i",
-                    "will",
-                    "finally",
-                    "be",
-                    "able",
-                    "to",
-                    "return",
-                    "to",
-                    "the",
-                    "mortal",
-                    "world"
-                ],
-                "usedLemmas": [
-                    "with",
-                    "your",
-                    null,
-                    "i",
-                    "will",
-                    "finally",
-                    "be",
-                    "able",
-                    "to",
-                    "return",
-                    "to",
-                    "the",
-                    "mortal",
-                    "world"
-                ],
-                "usedPhrases": [],
-                "startTime": 187717,
-                "endTime": 192677,
-                "_id": "660f1932191d91234890399e"
-            },
-            {
-                "usedWords": [
-                    "and",
-                    "this",
-                    "time",
-                    "you",
-                    "won",
-                    "t",
-                    "be",
-                    "there",
-                    "to",
-                    "stop",
-                    "me"
-                ],
-                "usedLemmas": [
-                    "and",
-                    "this",
-                    "time",
-                    "you",
-                    "win",
-                    "t",
-                    "be",
-                    "there",
-                    "to",
-                    "stop",
-                    "me"
-                ],
-                "usedPhrases": [],
-                "startTime": 192722,
-                "endTime": 196732,
-                "_id": "660f1932191d91234890399f"
-            },
-            {
-                "usedWords": [
-                    "it",
-                    "was",
-                    "never",
-                    "my",
-                    "destiny",
-                    "to",
-                    "stop",
-                    "you"
-                ],
-                "usedLemmas": [
-                    "it",
-                    "be",
-                    "never",
-                    "my",
-                    "destiny",
-                    "to",
-                    "stop",
-                    "you"
-                ],
-                "usedPhrases": [],
-                "startTime": 197727,
-                "endTime": 200687,
-                "_id": "660f1932191d9123489039a0"
-            }
-        ],
-        "hashtags": [
-            "kung_fu_panda",
-            "martial_arts"
-        ],
-        "genres": [
-            "cartoon",
-            "animals",
-            "action",
-            "comedy"
-        ],
-        "series": "3rd",
-        "lemma": "time",
-        "createdTime": "2024-04-04T21:18:42.503Z",
-        "updatedTime": "2024-04-04T21:18:42.503Z",
-        "__v": 0
-    }])
+    const [isShowingDefinitions, set_isShowingDefinitions] = useState();
+    const [practicingWords, set_practicingWords] = useState([])
+    const [practicingWordIndex, set_practicingWordIndex] = useState(0)
+    const [currentLemmaInfo, set_currentLemmaInfo] = useState()
+    const [occurances, set_occurances] = useState([])
+    const [animatePause, set_animatePause] = useState(false)
+
     const requestLemmaOccurances = async (lemma) => {
         try {
             const wordData = (await api().get(`/occurances?lemma=${lemma}`)).data.results
             console.log('wordData', wordData)
             if (wordData.length) {
-                set_lemmaVideos(wordData)
+                set_occurances(wordData)
                 const firstOccurance = wordData[0]
                 const firstOccuranceSrc = BASE_SERVER_URL + '/' + firstOccurance.mediaType + '?name=' + firstOccurance.mediaTitle
                 set_currentVideoSrc(firstOccuranceSrc)
@@ -157,164 +32,207 @@ const Quiz = ({ }) => {
         }
     }
 
-    const [error, set_error] = useState()
-    const [currentVideoSrc, set_currentVideoSrc] = useState(BASE_SERVER_URL + '/' + lemmaVideos[0].mediaType + '?name=' + lemmaVideos[0].mediaTitle)
-    const [playingSrcIndex, set_playingSrcIndex] = useState(0);
-    const word = 'go'
-    const videoRef = useRef()
-    const wordTranslation = 'vuy, shkalat'
-
-    const waitAndPlayNext = () => {
-
+    const requestNextWord = async () => {
+        const nextPracticingWord = practicingWords[practicingWordIndex + 1]
+        set_occurances([])
+        set_practicingWordIndex(practicingWordIndex + 1)
+        console.log('nextPracticingWord?.lemma', nextPracticingWord?.lemma)
+        requestLemmaOccurances(nextPracticingWord?.lemma)
+        // videoRef.current.currentTime = occurances[playingOccuranceIndex].startTime / 1000
+        // videoRef.current.play()
     }
+
+    const [error, set_error] = useState()
+    const [currentVideoSrc, set_currentVideoSrc] = useState('')
+    const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
+    const videoRef = useRef()
+    const inflections = 'Go, Goes, Going, Went'
 
     const requestListAndGetCurrentLemma = async () => {
         let list = []
-        // if (title === 'learning') {
-        //     console.log('requesting initials')
-        //     try {
-        //         const userWords = (await api().get('/get-user?allProps=1'))?.data?.words
-        //         list = userWords.filter((item) => !item.learned);
-        //     } catch (err) {
-        //         set_error(err)
-        //         console.log('err: ', err)
-        //     }
-        // } else {
-        //     // try {
-        //     //     list = (await api().get('/get-list'))?.data?.[0]
-        //     // } catch (err) {
-        //     //     set_error(err)
-        //     //     console.log("err: ", err)
-        //     // }
-        // }
+        if (title === 'learning') {
+            console.log('requesting initials')
+            try {
+                const userWords = (await api().get('/get-user?allProps=1'))?.data?.words
+                list = userWords.filter((item) => !item.learned);
+            } catch (err) {
+                set_error(err)
+                console.log('err: ', err)
+            }
+        } else {
+            // try {
+            //     list = (await api().get('/get-list'))?.data?.[0]
+            // } catch (err) {
+            //     set_error(err)
+            //     console.log("err: ", err)
+            // }
+        }
         console.log('list', list)
+        list = [{ lemma: "time" }, { lemma: 'go' }]
         const newCurrentLemma = list[0]?.lemma;
         let newCurrentLemmaInfo;
         try {
-            const response = await api().get(`/wordInfos?lemma=${'time'}`)
+            const response = await api().get(`/wordInfos?lemma=${newCurrentLemma}`)
             console.log('response', response)
 
             newCurrentLemmaInfo = response?.data?.results[0]
 
             console.log('newCurrentLemmaInfo', newCurrentLemmaInfo)
+
+            requestLemmaOccurances(newCurrentLemma)
         } catch (err) {
             set_error(err)
             console.log('err: ', err)
         }
-        set_currentLemma(newCurrentLemmaInfo)
+        set_currentLemmaInfo(newCurrentLemmaInfo)
         set_practicingWords(list)
     }
 
+    const playNextOccurance = async () => {
+        if (!videoRef.current.paused) {
+            // videoRef.current.pause();
+        }
+        const next_playingOccuranceIndex = playingOccuranceIndex + 1;
+        const nextOccurance = occurances[next_playingOccuranceIndex]
+        if (!nextOccurance) return
+        set_currentVideoSrc(`${BASE_SERVER_URL}/${nextOccurance.mediaType}?name=${nextOccurance.mediaTitle}`)
+        videoRef.current.currentTime = nextOccurance.startTime / 1000;
+        videoRef.current.play()
+        set_playingOccuranceIndex(next_playingOccuranceIndex)
+    }
+
+    const waitAndPlayNext = async () => {
+        await new Promise((resolve) => setTimeout(() => resolve(), 2000))
+        playNextOccurance()
+    }
+
     useEffect(() => {
-        // requestLemmaOccurances('time')
         requestListAndGetCurrentLemma()
     }, [])
 
     useEffect(() => {
-        if (lemmaVideos.length) {
+        if (occurances.length) {
             console.log('currentVideoSrc', currentVideoSrc)
             videoRef.current.load()
             videoRef.current.play()
         }
-    }, [currentVideoSrc, lemmaVideos.length])
+    }, [currentVideoSrc, occurances.length])
 
+    // const occuranceSubtitles = occurances[playingOccuranceIndex]?.context[1]
+    const currentOccurance = occurances[playingOccuranceIndex]
+    const currentLemma = currentOccurance?.lemma
+    const currentInflection = currentOccurance?.inflection || currentLemma
+    const pattern = new RegExp(currentInflection, "i")
+    const occuranceMainSubtitle = currentOccurance?.context[1]
+    const matches = occuranceMainSubtitle?.match(pattern)
+    console.log('matches', matches)
+    const inflectionIndex = matches?.index
+    // const inflectionIndex = currentOccurance?.inflectionIndex
+
+    const occuranceMainSubtitleArray = []
+    for (var i = 0; i < occuranceMainSubtitle?.length; i++) {
+        occuranceMainSubtitleArray.push(occuranceMainSubtitle[i])
+    }
+
+    const audioRef = useRef()
+    useEffect(() => {
+        audioRef.current.volume = 0.1
+    }, [])
+
+    const pauseClick = async () => {
+        set_animatePause(true)
+        await new Promise(resolve => setTimeout(resolve, 725))
+        set_animatePause(false)
+    }
+    const isVideoPaused = videoRef?.current && !videoRef?.current?.paused;
     return (
         <>
             {/* <StickyHeader /> */}
-            <div className='QuizMain flex-grow bg-secondary-2 text-gray text-gray-100'>
-                {lemmaVideos.length && 
+            <button className={classNames('PlayButton', { animatePause, invisible: !animatePause })} onClick={pauseClick}>
+                <i class={`fa-solid fa-${isVideoPaused ? 'pause': 'play'}`}></i>
+                {/* <i class="fa-solid fa-rotate-left"></i> */}
+                {/* <i class="fa-solid fa-forward"></i> */}
+            </button>
+            <audio ref={audioRef} src="/tap-notification.mp3" />
+            <WebcamCapture />
+            <div className='QuizMain flex-grow bg-video text-gray text-gray-100'>
+                {occurances.length &&
                     <video
-                        className={classNames('w-full')}
+                        className={classNames('w-full', { hidden: !isVideoPaused })}
                         // src={currentVideoSrc}
                         ref={videoRef}
                         // autoPlay
                         onLoadedMetadata={() => {
-                            console.log('lemmaVideos[playingSrcIndex].startTime', lemmaVideos[playingSrcIndex].startTime)
-                            videoRef.current.currentTime = lemmaVideos[playingSrcIndex].startTime
+                            console.log('occurances[playingOccuranceIndex].startTime', occurances[playingOccuranceIndex].startTime)
+                            videoRef.current.currentTime = occurances[playingOccuranceIndex].startTime / 1000
                         }}
-                        onTimeUpdate={() => {
-                            console.log('videoRef.current.currentTime', videoRef.current.currentTime)
-                            if (videoRef.current.currentTime >= lemmaVideos[playingSrcIndex].endTime) {
+                        onTimeUpdate={async () => {
+                            // console.log('videoRef.current.currentTime', videoRef.current.currentTime)
+                            if (videoRef.current.currentTime - 0.1 >= occurances[playingOccuranceIndex].endTime / 1000) {
+                                audioRef.current.play();
+                                pauseClick()
+                                await new Promise((resolve) => setTimeout(resolve, 100))
                                 videoRef.current.pause();
-                                waitAndPlayNext();
+                                // waitAndPlayNext();
                                 // videoRef.current.currentTime = startOfScene
                             }
                         }}
                     >
-                        <source src={currentVideoSrc} />
+                        <source src={currentVideoSrc + '&quality=1080.ultra'} />
                     </video>
                 }
+                <div className={classNames("Empty-videoFiller", { hidden: isVideoPaused })}></div>
 
-                {/* {lemmaVideos.map((item, index) => {
-                    // if (index < playingSrcIndex + 2) {
-                    return (<video
-                        key={item.src}
-                        className={classNames('w-full absolute', { invisible: playingSrcIndex !== index })}
-                        src={BASE_SERVER_URL + item.src}
-                        ref={el => videoRef.current[index] = el}
-                        autoPlay={playingSrcIndex === 0}
-                        onLoadedMetadata={() => {
-                            videoRef.current[index].currentTime = item.startTime
-                            if (playingSrcIndex !== index) {
-                                videoRef.current[index].pause()
-                            }
-                        }}
-                        onTimeUpdate={() => {
-                            console.log('videoRef.current.currentTime', videoRef.current[index])
-                            if (videoRef.current[index].currentTime >= item.endTime) {
-                                videoRef.current[index].pause();
-                                waitAndPlayNext();
-                                // videoRef.current.currentTime = startOfScene
-                            }
-                        }}
-                    />)
-                    // }
-                })} */}
-                <button
-                    className='float-right pr-4'
-                    onClick={() => {
-                        videoRef.current.currentTime = lemmaVideos[playingSrcIndex].startTime
-                        videoRef.current.play()
-                    }}
-                ><b>Replay</b></button>
-                <button
-                    className='float-right pr-4'
-                    onClick={() => {
-                        videoRef.current.currentTime = lemmaVideos[playingSrcIndex].startTime
-                        videoRef.current.play()
-                    }}
-                ><b>Next Word</b></button>
-                {playingSrcIndex + 1 !== lemmaVideos.length &&
+                <div
+                    className='Subtitles text-center text-white px-8 text-lg'
+                >
+                    {/* <b>{occuranceMainSubtitle}</b> */}
+                    <b>{occuranceMainSubtitleArray.map((occChar, occCharIndex) => {
+                        const className = occCharIndex >= inflectionIndex && occCharIndex <= inflectionIndex + currentInflection.length - 1 ? 'text-primary' : '';
+                        return (<span className={className}>{occChar}</span>)
+                    })}</b>
+                </div>
+                {/* <b className="p-4 text-xs">
+                    Practicing List: {title.charAt(0).toUpperCase() + title.slice(1)}
+                </b> */}
+                <h1
+                    className='headline-1 cursor-default text-yellowishorange'
+                    onClick={() => set_isShowingDefinitions(!isShowingDefinitions)}
+                >{(isShowingDefinitions ? inflections : currentLemma)?.toUpperCase()}</h1>
+                <div className='opacity'>
                     <button
                         className='float-right pr-4'
-                        onClick={async () => {
-                            if (!videoRef.current.paused) {
-                                // videoRef.current.pause();
-                            }
-                            const next_playingSrcIndex = playingSrcIndex + 1;
-                            set_currentVideoSrc(BASE_SERVER_URL + lemmaVideos[next_playingSrcIndex].src)
-                            videoRef.current.currentTime = lemmaVideos[next_playingSrcIndex].startTime
-                            set_playingSrcIndex(next_playingSrcIndex)
+                        onClick={() => {
+                            videoRef.current.currentTime = occurances[playingOccuranceIndex].startTime / 1000
+                            videoRef.current.play()
                         }}
-                    ><b>Next</b></button>
-                }
-                <b className="p-4 text-xs">
-                    Practicing List: {title.charAt(0).toUpperCase() + title.slice(1)}
-                </b>
-                <h1
-                    className='headline-1 cursor-default'
-                    onClick={() => set_isShowingTranslation(!isShowingTranslation)}
-                >{isShowingTranslation ? wordTranslation : currentLemma?.lemma}</h1>
-                <div className='m-4 p-4 paper'>
-                    <p>Other forms (en): {(["went", " going", " gone", " goes"]).map((item) => (
+                    ><b>Replay</b></button>
+                    {practicingWordIndex < practicingWords.length - 1 &&
+                        <button
+                            className='float-right pr-4'
+                            onClick={requestNextWord}
+                        ><b>Next Word</b></button>
+                    }
+                    {playingOccuranceIndex + 1 < occurances.length &&
+                        <button
+                            className='float-right pr-4'
+                            onClick={playNextOccurance}
+                        ><b>Next</b></button>
+                    }
+
+                </div>
+                <div className='m-2 p-4 paper text-center'>
+                    <h3 className='text-lg text-dark-yellowishorange'>
+                        Vaqt | Safar | Martta
+                    </h3>
+                    {/* <p>Other forms (en): {(["went", " going", " gone", " goes"]).map((item) => (
                         <button className='cursor-pointer px-1 mx-1 border-2 border-orange-200'>{item}</button>
-                    ))}</p>
+                    ))}</p> */}
                     {/* <p>Definition: Change location</p> */}
                     {/* <p>Other forms (uz): </p> */}
                     {/* <button className='text-xs'>See all definitions ...</button> */}
                 </div>
             </div>
-            <Footer />
         </>
     )
 }

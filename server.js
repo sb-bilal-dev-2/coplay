@@ -119,7 +119,12 @@ app.get('/movie_words/:title', async (req, res) => {
     }
     console.log('user', user)
     const userWords = user?.words || []
-    const movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
+    let movieWords
+    try {
+      movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
+    } catch (err) {
+      return res.status(404).send(err.message)
+    }
     const userWordsMap = {}; userWords.forEach(item => { userWordsMap[item.lemma] = item });
     const movieWordsWithoutUserWords = movieWords.filter(item => item && !userWordsMap[item.lemma])
 

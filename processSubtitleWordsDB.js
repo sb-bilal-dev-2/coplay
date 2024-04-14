@@ -7,7 +7,17 @@ const WordsModel = require('./schemas/wordInfos').model;
 const OccurancesModel = require('./schemas/occurances').model;
 const Subtitles = require('./schemas/subtitles').model;
 // insertWords()
-calculateUsedWordsAndUpdateWordsAccordingly(JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')))
+calculateUsedWordsAndUpdateWordsAccordingly(
+    JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')),
+    {
+        genras: ['cartoon', 'animals', 'action', 'comedy'],
+        hashtags: ['kung_fu_panda', 'martial_arts'],
+        series: '3rd',
+        mediaTitle: 'kung_fu_panda_3',
+        mediaTitleBase: 'kung_fu_panda',
+        mediaType: 'movie'
+    }
+)
 
 // getAllLemmas()
 // also insert items en_full which are not in the database 
@@ -64,26 +74,27 @@ function insertAllSubtitles() {
 }
 async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsedWords, mediaInfo) {
     const lemmasByInflection = await getAllLemmasMappedByInflection()
-    const genres = mediaInfo?.genres || ['cartoon', 'animals', 'action', 'comedy']
-    const hashtags = mediaInfo?.hashtags || ['kung_fu_panda', 'martial_arts']
+    const genres = mediaInfo?.genres
+    const hashtags = mediaInfo?.hashtags
     const usedWords = getUsedWordsBySubtitleLines(subtitleLinesWithUsedWords)
-    const occurances = usedWords.map(({ word: inflection, startTime, endTime, context, contextSubtitles }) => {
-        const lemma = lemmasByInflection[inflection]
+    const occurances = usedWords.map(({ word: inflection, startTime, endTime, context, contextSubtitles }, index) => {
+        const lemma = lemmasByInflection[inflection] || inflection
         const lemmaOccuranceCount = contextSubtitles[1]?.usedLemmas?.filter(usedLemma => usedLemma === lemma).length
         const lemmaOccuranceCountOnContext = contextSubtitles[1]?.usedLemmas?.concat(contextSubtitles[0]?.usedLemmas).concat(contextSubtitles[2]?.usedLemmas).filter(usedLemma => usedLemma === lemma).length
+
         const occurance = {
             context,
             contextSubtitles,
             lemmaOccuranceCount,
             lemmaOccuranceCountOnContext,
-            mediaTitle: 'kung_fu_panda_3',
-            mediaType: 'movie',
-            mediaTitleBase: 'kung_fu_panda',
+            mediaTitle: mediaInfo.mediaTitle,
+            mediaType: mediaInfo.mediaType,
+            mediaTitleBase: mediaInfo.mediaTitleBase,
             startTime,
             endTime,
             genres,
             hashtags,
-            series: '3rd',
+            series: mediaInfo.series,
             inflection,
             lemma
         }
@@ -94,7 +105,7 @@ async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsed
     })
 
     try {
-        await OccurancesModel.insertMany(occurances);
+        // await OccurancesModel.insertMany(occurances);
         // const bulkWrite = occurances.map((occ) => ({
         //     updateOne: {
         //         filter: {

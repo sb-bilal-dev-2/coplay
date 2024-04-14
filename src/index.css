@@ -136,6 +136,10 @@ input:-webkit-autofill:active{
   background: linear-gradient(#f1eee3, #ecede9);
 }
 
+.bg-video {
+  background: linear-gradient(#171717, #242424);
+}
+
 .bg-green {
   background: linear-gradient(#dff5df, #f6feea);
 }
@@ -167,6 +171,17 @@ input:-webkit-autofill:active{
 
 .h1-primary {
   color: #f48e4e;
+}
+
+.text-yellowishorange {
+  color: #ffa75e;
+}
+
+.text-dark-yellowishorange {
+  color: #fce3cd;
+  font-size: 2em;
+  text-shadow: 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black, 0px 0px 1.5px black;
+  /* text-shadow: 0px 0px 2px black, 0px 0px 4px black; */
 }
 
 .h1-secondary {
