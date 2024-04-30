@@ -46,13 +46,13 @@ const WebcamDeviceCapture = () => {
     },
     [handleDevices]
   );
-
+    console.log('device.label', devices)
   return (
     <>
       {devices.map((device, key) => (
           <div>
             <Webcam audio={false} videoConstraints={{ deviceId: device.deviceId }} />
-            {device.label || `Device ${key + 1}`}
+            <p className='text-white'>{device.label || `Device ${key + 1}`}</p>
           </div>
 
         ))}

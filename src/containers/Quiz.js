@@ -37,7 +37,8 @@ const Quiz = ({ }) => {
         set_occurances([])
         set_practicingWordIndex(practicingWordIndex + 1)
         console.log('nextPracticingWord?.lemma', nextPracticingWord?.lemma)
-        requestLemmaOccurances(nextPracticingWord?.lemma)
+        await requestCurrentLemmaInfo(nextPracticingWord?.lemma)
+        // requestLemmaOccurances(nextPracticingWord?.lemma)
         // videoRef.current.currentTime = occurances[playingOccuranceIndex].startTime / 1000
         // videoRef.current.play()
     }
@@ -46,9 +47,25 @@ const Quiz = ({ }) => {
     const [currentVideoSrc, set_currentVideoSrc] = useState('')
     const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
     const videoRef = useRef()
-    const inflections = 'Go, Goes, Going, Went'
+    const inflections = currentLemmaInfo?.inflections.join(', ') || ''
+    const requestCurrentLemmaInfo = async (newCurrentLemma) => {
+        let newCurrentLemmaInfo;
+        try {
+            requestLemmaOccurances(newCurrentLemma)
+            const response = await api().get(`/wordInfos?lemma=${newCurrentLemma}`)
+            console.log('response', response)
 
-    const requestListAndGetCurrentLemma = async () => {
+            newCurrentLemmaInfo = response?.data?.results[0]
+
+            console.log('newCurrentLemmaInfo', newCurrentLemmaInfo)
+            set_currentLemmaInfo(newCurrentLemmaInfo)
+        } catch (err) {
+            set_error(err)
+            console.log('err: ', err)
+        }
+        set_currentLemmaInfo(newCurrentLemmaInfo)
+    }
+    const requestListAndGetCurrentLemmaInfo = async () => {
         let list = []
         if (title === 'learning') {
             console.log('requesting initials')
@@ -68,24 +85,10 @@ const Quiz = ({ }) => {
             // }
         }
         console.log('list', list)
-        list = [{ lemma: "time" }, { lemma: 'go' }]
+        // list = [{ lemma: "time" }, { lemma: 'go' }]
         const newCurrentLemma = list[0]?.lemma;
-        let newCurrentLemmaInfo;
-        try {
-            const response = await api().get(`/wordInfos?lemma=${newCurrentLemma}`)
-            console.log('response', response)
-
-            newCurrentLemmaInfo = response?.data?.results[0]
-
-            console.log('newCurrentLemmaInfo', newCurrentLemmaInfo)
-
-            requestLemmaOccurances(newCurrentLemma)
-        } catch (err) {
-            set_error(err)
-            console.log('err: ', err)
-        }
-        set_currentLemmaInfo(newCurrentLemmaInfo)
         set_practicingWords(list)
+        await requestCurrentLemmaInfo(newCurrentLemma)
     }
 
     const playNextOccurance = async () => {
@@ -107,7 +110,7 @@ const Quiz = ({ }) => {
     }
 
     useEffect(() => {
-        requestListAndGetCurrentLemma()
+        requestListAndGetCurrentLemmaInfo()
     }, [])
 
     useEffect(() => {
@@ -140,6 +143,8 @@ const Quiz = ({ }) => {
     }, [])
 
     const pauseClick = async () => {
+        set_animatePause(false)
+        await new Promise(resolve => setTimeout(resolve, 0))
         set_animatePause(true)
         await new Promise(resolve => setTimeout(resolve, 725))
         set_animatePause(false)
@@ -149,16 +154,16 @@ const Quiz = ({ }) => {
         <>
             {/* <StickyHeader /> */}
             <button className={classNames('PlayButton', { animatePause, invisible: !animatePause })} onClick={pauseClick}>
-                <i class={`fa-solid fa-${isVideoPaused ? 'pause': 'play'}`}></i>
+                <i class={`fa-solid fa-${isVideoPaused ? 'play': 'pause'}`}></i>
                 {/* <i class="fa-solid fa-rotate-left"></i> */}
                 {/* <i class="fa-solid fa-forward"></i> */}
             </button>
             <audio ref={audioRef} src="/tap-notification.mp3" />
-            <WebcamCapture />
+            {/* <WebcamCapture /> */}
             <div className='QuizMain flex-grow bg-video text-gray text-gray-100'>
                 {occurances.length &&
                     <video
-                        className={classNames('w-full', { hidden: !isVideoPaused })}
+                        className={classNames('w-full')}
                         // src={currentVideoSrc}
                         ref={videoRef}
                         // autoPlay
@@ -181,7 +186,7 @@ const Quiz = ({ }) => {
                         <source src={currentVideoSrc + '&quality=1080.ultra'} />
                     </video>
                 }
-                <div className={classNames("Empty-videoFiller", { hidden: isVideoPaused })}></div>
+                {/* <div className={classNames("Empty-videoFiller", { hidden: isVideoPaused })}></div> */}
 
                 <div
                     className='Subtitles text-center text-white px-8 text-lg'

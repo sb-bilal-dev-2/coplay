@@ -67,6 +67,45 @@ const initAuth = (ownApp) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   });
+
+  app.post('/resend-code', async (req, res) => {
+    const { email } = req.body;
+    console.log('email', req.body)
+    try {
+      // Check if the email already exists
+      const existingUser = await User.findOne({ email });
+      if (!existingUser) {
+        await res.status(400).json({ message: 'No user with given email', name: "email" });
+      } else if (existingUser && existingUser.verifiedEmail) {
+        console.log('EMAIL ALREADY VERIFIED')
+        return res.status(400).json({ message: 'User with this email already exists', name: "email" });
+      }
+  
+      // Generate a verification code and set the timestamp
+      const verificationCode = Math.floor(100000 + Math.random() * 900000);
+      const verificationCodeTimestamp = new Date();
+      const mailOptions = {
+        from: MAILER_MAIL,
+        to: email,
+        subject: 'Account Verification Code',
+        text: `Your verification code: ${verificationCode}`,
+      };
+      try {
+        console.log('Sent verification code to email: ', email)
+        await transporter.sendMail(mailOptions);
+      } catch (err) {
+        console.log('SEND_VERIFICATION_ERROR: ', err)
+      }
+  
+      // Create a new user (without saving to the database for now)
+
+      await User.findOneAndUpdate({ email }, { verificationCode, verificationCodeTimestamp });
+      res.json({ message: 'Verification code sent successfully. Check your email.' });
+    } catch (error) {
+      console.error('RESEND CODE ERROR: ', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
   
   // Confirm Verification Code and Save User
   app.post('/confirm-signup', async (req, res) => {
@@ -76,7 +115,7 @@ const initAuth = (ownApp) => {
       // Find the user by email and verification code
       const user = await User.findOne({ email });
       if (user) {
-        if (user.verificationCode !== code) {
+        if (user.verificationCode !== Number(code)) {
           console.log('user.email', user.email)
           console.log('user.verificationCode', user.verificationCode)
           console.log('code', code)

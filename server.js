@@ -40,14 +40,14 @@ app.get('/hello_world', (req, res) => {
 app.get('/movie', (req, res) => {
   const videoPath = getHighestExistingQualityPathForTitle(req.query.name, req.query.quality)
   console.log(req.query.name)
-
+  console.log('videoPath', videoPath)
   const videoStat = fs.statSync(videoPath);
   const fileSize = videoStat.size;
   const rangeRequest = req.headers.range;
 
   if (rangeRequest) {
     const ranges = range(fileSize, rangeRequest);
-
+    console.log('ranges', ranges)
     if (ranges === -1) {
       // 416 Range Not Satisfiable
       res.status(416).send('Requested range not satisfiable');
@@ -258,7 +258,7 @@ function createFileRoute(app, folder) {
   });  
 }
 
-const QUALITY_OPTIONS = ['hd', 'hd.ultra', '760', '480', '360', '240'];
+const QUALITY_OPTIONS = ['1080.ultra', '1080', '760', '480', '360', '240'];
 
 function getHighestExistingQualityPathForTitle(title, chosenQuality) {
   if (chosenQuality) {

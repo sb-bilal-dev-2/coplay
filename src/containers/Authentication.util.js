@@ -62,7 +62,33 @@ const useAuthentication = () => {
     }
   };
 
-  const confirmSignUp = async (email, code) => {
+  const resendCode = async () => {
+    try {
+      setIsLoading(true);
+      const confirmEmail = (new URLSearchParams(document.location.search)).get('login')
+      console.log('confirmEmail', confirmEmail)
+      const response = await fetch(`${API_URL}/resend-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: confirmEmail }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Resend code failed with server error');
+      } 
+      setError('')
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setError('Confirmation failed. Please check your verification code.');
+      setIsLoading(false);
+    }
+  };
+
+  const confirmSignUp = async (email, code, callback) => {
     try {
       setIsLoading(true);
 
@@ -80,7 +106,8 @@ const useAuthentication = () => {
         const data = await response.json();
 
         setToken(data.token);
-        localStorage.setItem('token', data.token);  
+        localStorage.setItem('token', data.token);
+        callback()
       }
 
       setIsLoading(false);
@@ -226,6 +253,7 @@ const useAuthentication = () => {
     updateFormDataValue,
     resetFormData,
     signUp,
+    resendCode,
     confirmSignUp,
     login,
     forgotPassword,

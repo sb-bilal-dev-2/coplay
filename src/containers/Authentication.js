@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 
 const Authentication = () => {
   const { screen } = useParams()
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const {
     signUp,
     confirmSignUp,
@@ -17,6 +17,7 @@ const Authentication = () => {
     formData,
     updateFormDataValue,
     resetFormData,
+    resendCode,
     isLoading,
     error,
   } = useAuthentication();
@@ -36,7 +37,8 @@ const Authentication = () => {
 
   const handleConfirmSignUp = (e) => {
     e.preventDefault();
-    confirmSignUp(formData.email, formData.code, () => navigate('/'));
+    const confirmEmail = (new URLSearchParams(document.location.search)).get('login')
+    confirmSignUp(confirmEmail, formData.code, () => navigate('/'));
   };
 
   const handleLogin = (e) => {
@@ -77,13 +79,15 @@ const Authentication = () => {
 
   const renderConfirmSignUpForm = () => (
     <form className='flex flex-col items-center' onSubmit={handleConfirmSignUp}>
-      <label>
+      {/* <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email" type="email" name="email" value={formData.email || ''} onChange={handleInputChange} />
-      </label>
+      </label> */}
       <label>
-        
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "code") && 'input-error'} input mb-2`} placeholder="Verification Code" type="text" name="code" value={formData.code || ''} onChange={handleInputChange} />
       </label>
+      <button type="submit" disabled={isLoading} onClick={resendCode}>
+        Resend code
+      </button>
       <button type="submit" disabled={isLoading}>
         Confirm Sign Up
       </button>
