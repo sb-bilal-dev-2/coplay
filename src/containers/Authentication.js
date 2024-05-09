@@ -96,6 +96,7 @@ const Authentication = () => {
 
   const renderLoginForm = () => (
     <form className='flex flex-col items-center' onSubmit={handleLogin}>
+      <p className='mt-2 text-center'>Don't have an account? <Link to="/auth/signup">Sign up</Link></p>
       <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Username or Email" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
       </label>
@@ -103,7 +104,7 @@ const Authentication = () => {
         
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "password") && 'input-error'} input mb-2`} placeholder="Password" type="password" name="password" value={formData.password || ''} onChange={handleInputChange} />
       </label>
-      <p className='mt-2 text-center'>Don't have an account? <Link to="/auth/signup">Sign Up</Link>. Forgot the password? <Link to="/auth/forgot">Reset</Link></p>
+      <p className='mt-2 text-center'>Forgot the password? <Link to="/auth/forgot">Reset</Link></p>
       <button type="submit" disabled={isLoading}>
         Login
       </button>

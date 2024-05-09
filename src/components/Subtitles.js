@@ -41,7 +41,6 @@ const Subtitles = ({
             // Parse WebVTT using vtt.js
             const newSubtitles = fromVtt(subtitleText, "ms")
             const withTagsMapped = newSubtitles.map(mapForTags);
-            console.log('withTagsMapped', withTagsMapped)
             // const newVtt = toVtt(newSubtitles)
             // console.log("newVtt", newVtt)
             setSubtitles(withTagsMapped)

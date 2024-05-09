@@ -44,7 +44,7 @@ export default function MovieWordCards({ title = '', userId }) {
                 onSwipeRight={handleSwipeRight}
             />
         )}
-        {error?.length && error}
+        {!!error?.length && error}
         </div>
     )
 }

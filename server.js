@@ -117,7 +117,6 @@ app.get('/movie_words/:title', async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(user_id)) {
       user = await models.users.findById(user_id)
     }
-    console.log('user', user)
     const userWords = user?.words || []
     let movieWords
     try {
@@ -138,11 +137,11 @@ app.post('/self_words', requireAuth, async (req, res) => {
   try {
     const { language } = req.query;
     const User = models.users;
-    const _id = req.user.userId;
+    const _id = req.userId;
     const updatedWords = req.body
-    console.log('updatedWords', updatedWords)
-    const userWords = (await User.findById(_id)).words || []
-    console.log('userWords', userWords)
+    // console.log('updatedWords', updatedWords)
+    const user = await User.findById(_id)
+    const userWords = user?.words || []
     const userWordsMap = {};
     userWords.forEach(item => { userWordsMap[item.lemma] = item })
     console.log('userWordsMap', userWordsMap)
@@ -156,18 +155,20 @@ app.post('/self_words', requireAuth, async (req, res) => {
       }
     })
     const words = Object.keys(userWordsMap).map(key => userWordsMap[key]);
-    console.log('words', words)
+    // console.log('words', words)
     const update = {
       _id,
       updatedTime: Date.now()
     }
     const key = language ? `${language}_words` : 'words';
     update[key] = words;
-    console.log('update', update)
+    // console.log('update', update)
+    console.log('_id', _id)
     await User.findByIdAndUpdate(_id, update)
     
     res.status(200).send(update)
   } catch (err) {
+    console.log('ERRORED: ', err)
     res.status(500).send(err.message)
   }
 })
@@ -179,14 +180,14 @@ app.get('/subtitlesv2', async (req, res) => {
 app.get('/subtitles', async (req, res) => {
   try {
     const { locale, name, version } = req.query;
-    const subtitlesVttPath = path.join(__dirname, 'public', 'movies', `${name}/${locale || 'en'}.vtt`)
-
+    const subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || 'en'}.vtt`)
     if (!fs.existsSync(subtitlesVttPath) && version === 'translate') {
       await translateVtt(locale, name)
     }
     let subtitlesVtt;
     try {
       subtitlesVtt = await readFile(subtitlesVttPath);
+      console.log('subtitle',subtitlesVtt)
     } catch (err) {
       res.status(404).send('')
     }

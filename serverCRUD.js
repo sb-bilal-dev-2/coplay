@@ -115,9 +115,6 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
     // Retrieve a single object by ID
     try {      
       const id = req.params.id;
-      console.log('Model', Model)
-      console.log('Model.findById', Model.findById)
-
       const data = await Model.findById(id);
 
       if (!data) {

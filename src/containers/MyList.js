@@ -73,7 +73,7 @@ function RenderTagList({ list = ['', '', '', '', '', '', ''], name }) {
                         <button onClick={() => setEditing(!isEditing)}><i className="fas fa-pen pl-1"></i></button>
                         <button onClick={() => {}}><i className="fa fa-layer-group pl-1"></i></button>
                         {name !== 'Learned' &&
-                            <Link to={"/quiz/" + name.toLowerCase()}><i className="fa fa-hat-wizard pl-1"></i></Link>
+                            <Link to={"/quiz/" + name.toLowerCase()}><i className="fa fa-play pl-1"></i></Link>
                         }
                     </>
                     }

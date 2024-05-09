@@ -71,6 +71,7 @@ const Quiz = ({ }) => {
             console.log('requesting initials')
             try {
                 const userWords = (await api().get('/get-user?allProps=1'))?.data?.words
+                console.log('userWords', userWords)
                 list = userWords.filter((item) => !item.learned);
             } catch (err) {
                 set_error(err)

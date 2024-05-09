@@ -158,6 +158,7 @@ const initAuth = (ownApp) => {
     try {
       // Find the user by email
       const user = await User.findOne({ email });
+      console.log('user logined: ', user)
       if (!user) {
         return res.status(401).json({ message: 'Invalid email or password' });
       }
@@ -175,6 +176,7 @@ const initAuth = (ownApp) => {
   
       // Generate JWT and send it in the response
       const token = generateToken(user);
+      console.log('token generated: ', token)
       res.json({ token });
     } catch (error) {
       console.error(error);
@@ -184,9 +186,10 @@ const initAuth = (ownApp) => {
 
   app.get('/get-user', requireAuth, async (req, res) => {
     try {
+      console.log('REQUEST With User: ', req.userId)
       // Here, req.user will contain the user information extracted from the token.
       // You can use this information to retrieve the user from your database.
-      const user = await User.findOne({ id: req.user.id })
+      const user = await User.findOne({ _id: req.userId })
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
@@ -300,16 +303,17 @@ async function requireAuth(req, res, next) {
   if (!token) {
     return res.status(401).json({ message: 'Access denied. Token is missing.' });
   }
-  console.log('req', req)
+  // console.log('REQ: ', req)
   token = token?.split('Bearer ')[1]
-  console.log('TOKEN', token)
+  // console.log('TOKEN', token)
 
   jwt.verify(token, SECRET, (err, user) => {
     if (err) {
       console.log('TOKEN VERIFICATION ERROR: ', err)
       return res.status(403).json({ message: err });
     }
-    req.user = user;
+    // console.log('user from token', user)
+    req.userId = user.userId;
     next();
   });
 };
