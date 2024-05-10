@@ -64,8 +64,6 @@ function AdvancedSwipe ({ list, onSwipeLeft, onSwipeRight, onSwipeTop, onSwipeBo
     updateCurrentIndex(newIndex)
 
     await childRefs[newIndex].current.restoreCard()
-
-    // handleUndoLast();
   }
 
   return (

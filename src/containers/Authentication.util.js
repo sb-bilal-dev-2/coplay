@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import api from '../api';
 
 const API_URL = 'http://localhost:3001'; // Replace with your backend API URL
 
@@ -221,7 +220,6 @@ const useAuthentication = () => {
           });
         console.log('user response', response)
         if (!response.ok) {
-          // localStorage.removeItem('token')
           throw new Error((await response.json()).message || 'Failed to fetch user');
         }
 
@@ -239,9 +237,7 @@ const useAuthentication = () => {
 
   useEffect(() => {
     console.log("useAuthentication")
-    // if (fetchUserOnMount) {
-      fetchUser();
-    // }
+    fetchUser();
   }, [token]);
 
   return {

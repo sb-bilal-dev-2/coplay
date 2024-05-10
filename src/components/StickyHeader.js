@@ -45,15 +45,6 @@ const StickyHeader = ({ type = 'primary', authPage }) => {
     <header className={`sticky-header ${isSticky ? 'nav-menu-visible' : ''} ${type}`}>
       <Link to="/"><img class="h-8" src="https://placehold.co/92x32.png?text=C%20PLAY&bg=0b0b0b" alt="C Play logo placeholder" /></Link>
       <div class="flex items-center">
-        {/* <a href="#" class="text-sm font-semibold text-gray-150 hover:text-white transition-colors mr-4">TV Shows</a>
-        <a href="#" class="text-sm font-semibold text-gray-150 hover:text-white transition-colors mr-4">Movies</a>
-        <a href="#" class="text-sm font-semibold text-gray-150 hover:text-white transition-colors">Latest</a>
-        <a href="#" class="text-sm font-semibold text-gray-150 hover:text-white transition-colors ml-6">My List</a>
-        <a href="#" class="text-sm font-semibold text-gray-150 hover:text-white transition-colors ml-6">Browse by Languages</a> */}
-        {/*
-        <div class="text-gray-150 ml-4">
-          <i class="fas fa-bell"></i>
-        </div> */}
         {!authPage &&
         <>
           {searching ?

@@ -1,31 +1,17 @@
 import React, { useRef } from 'react';
 import './Tooltip.css';
-import axios from 'axios';
 import classNames from 'classnames';
 
 function Tooltip(props) {
   const { text, selectionText, className } = props;
-
-  const subtitlePartRef = useRef(null)
   const tooltipRef = useRef(null)
 
-  const handleMouseEnter = async (event) => {
+  const handleMouseEnter = async () => {
       requestPhrase(text)
   }
-
-  const requestPhrase = async (text) => {
-    // const gResult = await axios.get(`https://www.googleapis.com/customsearch/v1?key=AIzaSyB4ZBrVYfmrK7b4p9Grl3PNPl-Ll-dL0WA&cx=017576662512468239146:omuauf_lfve&q=define+${text}`)
-    // console.log(gResult)
-    // return gResult
-  }
-
-  const handleHeartClick = () => {
-
-  }
-
-  const handleInfoClick = () => {
-
-  }
+  const requestPhrase = async () => {}
+  const handleHeartClick = () => {}
+  const handleInfoClick = () => {}
 
   return (
     <div className="tooltip">

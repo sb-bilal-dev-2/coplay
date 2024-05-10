@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import StickyHeader from '../components/StickyHeader'
 import Footer from '../components/Footer'
 import { useParams } from 'react-router'
 import api from '../api'
@@ -8,12 +7,11 @@ import { BASE_SERVER_URL } from '../useRequests'
 import classNames from 'classnames'
 
 
-const Quiz = ({ }) => {
+const Quiz = () => {
     const { title } = useParams()
     const [isShowingTranslation, set_isShowingTranslation] = useState();
-    const [practicingWords, set_practicingWords] = useState()
+    const [set_practicingWords] = useState()
     const [currentLemma, set_currentLemma] = useState()
-    const [lemmaData, set_lemmaData] = useState()
     const [lemmaVideos, set_lemmaVideos] = useState([])
     const requestLemmaOccurances = async (lemma) => {
         try {
@@ -21,8 +19,6 @@ const Quiz = ({ }) => {
             console.log('wordData', wordData)
             if (wordData.length) {
                 set_lemmaVideos(wordData)
-                const firstOccurance = wordData[0]
-                const firstOccuranceSrc = BASE_SERVER_URL + '/' + firstOccurance.mediaType
                 set_currentVideoSrc()
             }
         } catch (err) {
@@ -33,7 +29,6 @@ const Quiz = ({ }) => {
     const [error, set_error] = useState()
     const [currentVideoSrc, set_currentVideoSrc] = useState('')
     const [playingSrcIndex, set_playingSrcIndex] = useState(0);
-    const word = 'go'
     const videoRef = useRef()
     const wordTranslation = 'vuy, shkalat'
 
@@ -43,25 +38,8 @@ const Quiz = ({ }) => {
 
     const requestListAndGetCurrentLemma = async () => {
         let list = []
-        // if (title === 'learning') {
-        //     console.log('requesting initials')
-        //     try {
-        //         const userWords = (await api().get('/get-user?allProps=1'))?.data?.words
-        //         list = userWords.filter((item) => !item.learned);
-        //     } catch (err) {
-        //         set_error(err)
-        //         console.log('err: ', err)
-        //     }
-        // } else {
-        //     // try {
-        //     //     list = (await api().get('/get-list'))?.data?.[0]
-        //     // } catch (err) {
-        //     //     set_error(err)
-        //     //     console.log("err: ", err)
-        //     // }
-        // }
+      
         console.log('list', list)
-        const newCurrentLemma = list[0]?.lemma;
         let newCurrentLemmaInfo;
         try {
             const response = await api().get(`/wordInfos?lemma=${'time'}`)
@@ -98,9 +76,7 @@ const Quiz = ({ }) => {
                 {lemmaVideos.length && 
                     <video
                         className={classNames('w-full')}
-                        // src={currentVideoSrc}
                         ref={videoRef}
-                        // autoPlay
                         onLoadedMetadata={() => {
                             videoRef.current.currentTime = lemmaVideos[playingSrcIndex].startTime
                         }}
@@ -109,7 +85,6 @@ const Quiz = ({ }) => {
                             if (videoRef.current.currentTime >= lemmaVideos[playingSrcIndex].endTime) {
                                 videoRef.current.pause();
                                 waitAndPlayNext();
-                                // videoRef.current.currentTime = startOfScene
                             }
                         }}
                     >
@@ -160,9 +135,6 @@ const Quiz = ({ }) => {
                     <button
                         className='float-right pr-4'
                         onClick={async () => {
-                            if (!videoRef.current.paused) {
-                                // videoRef.current.pause();
-                            }
                             const next_playingSrcIndex = playingSrcIndex + 1;
                             set_currentVideoSrc(BASE_SERVER_URL + lemmaVideos[next_playingSrcIndex].src)
                             videoRef.current.currentTime = lemmaVideos[next_playingSrcIndex].startTime
@@ -181,9 +153,6 @@ const Quiz = ({ }) => {
                     <p>Other forms (en): {(["went", " going", " gone", " goes"]).map((item) => (
                         <button className='cursor-pointer px-1 mx-1 border-2 border-orange-200'>{item}</button>
                     ))}</p>
-                    {/* <p>Definition: Change location</p> */}
-                    {/* <p>Other forms (uz): </p> */}
-                    {/* <button className='text-xs'>See all definitions ...</button> */}
                 </div>
             </div>
             <Footer />

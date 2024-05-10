@@ -31,7 +31,7 @@ function RenderTagList({ list = ['', '', '', '', '', '', ''], name }) {
     const dispatch = useDispatch()
     const [isEditing, setEditing] = useState(false)
     const [selectedItems, setSelectecItems] = useState([])
-    const [postUserWords, postUserWordsError, postUserWordsLoading] = usePost((data) => dispatch(updateGivenUserValues(data)))
+    const [postUserWords] = usePost((data) => dispatch(updateGivenUserValues(data)))
     const handleTagClick = (item) => {
         if (selectedItems.includes(item)) {
             setSelectecItems(selectedItems.filter((crt) => item !== crt))

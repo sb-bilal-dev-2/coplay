@@ -1,10 +1,9 @@
-import axios from 'axios';
 import React, { createElement, useCallback, useEffect, useState } from 'react';
-import { fromVtt, toVtt } from 'subtitles-parser-vtt';
+import { fromVtt} from 'subtitles-parser-vtt';
 import './Subtitles.css'
 import Tooltip from "./Tooltip";
 import { mapForTags } from '../mapForTags';
-import { createDebouncedFunction, debounce } from '../debounce';
+import { createDebouncedFunction } from '../debounce';
 import classNames from 'classnames';
 import api from '../api';
 
@@ -38,11 +37,9 @@ const Subtitles = ({
         try {
             const response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
             const subtitleText = await response.data;
-            // Parse WebVTT using vtt.js
             const newSubtitles = fromVtt(subtitleText, "ms")
             const withTagsMapped = newSubtitles.map(mapForTags);
-            // const newVtt = toVtt(newSubtitles)
-            // console.log("newVtt", newVtt)
+    
             setSubtitles(withTagsMapped)
         } catch (error) {
             console.error('Error fetching subtitles:', error);
@@ -54,14 +51,12 @@ const Subtitles = ({
     }, [])
 
     const handleTimeUpdate = useCallback(() => {
-        // // Find the subtitle that matches the current time
+        //Find the subtitle that matches the current time
         const subtitle = subtitles.find((cue) => {
-            // console.log('cue', cue)
             return currentTime >= cue.startTime / 1000 && currentTime <= cue.endTime / 1000;
         });
 
         if (subtitle) {
-            // console.log('subtitle', mapForTags(subtitle))
             setCurrentSubtitle(subtitle);
         } else {
             setCurrentSubtitle({});

@@ -7,7 +7,6 @@ const Account = () => {
     return (
         <div>
             <StickyHeader />
-            Hi
             <Footer />
         </div>
     )
