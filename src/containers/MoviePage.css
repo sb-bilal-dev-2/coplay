@@ -12,6 +12,7 @@
 }
 
 .videoItem video {
+  background: #333;
   position: absolute;
   /* max-height: 300px; */
   top: 50%;

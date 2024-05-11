@@ -4,6 +4,7 @@ import api from "../api";
 import "./Quiz.css";
 import { BASE_SERVER_URL } from "../useRequests";
 import classNames from "classnames";
+import { Link } from "react-router-dom";
 
 const Quiz = () => {
   const { title } = useParams();
@@ -154,8 +155,13 @@ const Quiz = () => {
       </button>
       <audio ref={audioRef} src="/tap-notification.mp3" />
       {/* <WebcamCapture /> */}
-      <div className="QuizMain flex-grow bg-video text-gray text-gray-100">
-        {occurances.length && (
+      <div className="QuizMain flex-grow bg-video text-gray text-gray-100 relative">
+        <Link
+            to="/"
+            className="absolute z-10 top-4 left-4 text-white cursor-pointer"
+        >
+            <i className="fa fa-arrow-left" aria-hidden="true"></i>
+        </Link>
           <video
             className={classNames("w-full")}
             ref={videoRef}
@@ -181,7 +187,6 @@ const Quiz = () => {
           >
             <source src={currentVideoSrc + "&quality=1080.ultra"} />
           </video>
-        )}
         <div className="Subtitles text-center text-white px-8 text-lg">
           <b>
             {occuranceMainSubtitleArray.map((occChar, occCharIndex) => {

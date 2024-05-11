@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const API_URL = 'http://localhost:3001'; // Replace with your backend API URL
 
-const useAuthentication = () => {
+const useAuthentication = (missUserRequest) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [isLoading, setIsLoading] = useState(false);
@@ -237,7 +237,9 @@ const useAuthentication = () => {
 
   useEffect(() => {
     console.log("useAuthentication")
-    fetchUser();
+    if (!missUserRequest) {
+      fetchUser();
+    }
   }, [token]);
 
   return {

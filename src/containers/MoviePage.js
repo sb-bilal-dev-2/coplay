@@ -9,6 +9,7 @@ import { BASE_SERVER_URL } from "../useRequests";
 import axios from "axios";
 import MovieWordCards from "./MovieWordCards";
 import useAuthentication from "./Authentication.util";
+import { useOutsideAlerter } from "../components/useOutsideAlerter";
 
 const TAP_TIMEOUT = 160;
 const REWIND_TIME = 5;
@@ -153,14 +154,65 @@ const MoviePage = () => {
       <h2 className="absolute z-10 top-3 left-16 text-gray-100">
         {currentItem?.label || title}
       </h2>
+      <RenderDropMenu />
       {renderVideo()}
       <div className="section bg-secondary">
         <div className="section-container">
           <MovieWordCards title={title} userId={userId} />
+          <Link
+            to={`/quiz/${title}`}
+            className="text-white"
+          ><b>
+              Watch Unnkown Words of {currentItem?.label || title} <i className="fa fa-arrow-right" aria-hidden="true"></i>
+            </b></Link>
+          <br />
+          <Link
+            to="/quiz/learning"
+            className="text-white cursor-pointer"
+          ><b>
+              Watch my Rehearse List <i className="fa fa-arrow-right" aria-hidden="true"></i>
+            </b></Link>
         </div>
       </div>
     </div>
   );
+
+  function RenderDropMenu() {
+    const [isDropOpen, setDropOpen] = useState(false)
+    const outsideNavClickWrapperRef = useRef(null);
+    useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setDropOpen(!isDropOpen)}
+          className="absolute z-10 top-4 right-4 text-white cursor-pointer"
+        >
+          {/* <i className="fa fa-arrow-left" aria-hidden="true"></i> */}
+          CC/Transl.
+        </button>
+        {isDropOpen &&
+          <ul className="z-20 Drop absolute bg-white top-8 right-4">
+            <li>Subtitle: En/cc, on</li>
+            <li>Translation 1: Uz/transl., off</li>
+            <div className="InnerDrop">
+              <div>
+                <button
+                  onClick={() => {}}
+                  className="absolute z-10 top-4 right-4 text-white cursor-pointer"
+                >
+
+                  <i className="fa fa-arrow-left" aria-hidden="true"></i>
+                  Subtitles
+                </button>
+                <span className="float-right font-small">Options</span>
+              </div>
+            </div>
+          </ul>
+        }
+      </div>
+    )
+  }
 
   function renderVideo() {
     const subtitleScale = 2;
@@ -246,6 +298,7 @@ const MoviePage = () => {
     );
   }
 };
+
 
 function useKeyDown({
   videoRef,
