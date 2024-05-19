@@ -177,7 +177,7 @@ function RenderTagList({ list = [], name }) {
                         <button
                             key={item.lemma}
                             onClick={() => (isEditing && handleTagClick(item.lemma))}
-                            className={classNames("TagItem text-gray-50", { "selected": selectedItems.includes(item.lemma) })}
+                            className={classNames(`TagItem text-gray-50 repeat${item.repeatCount || 0}`, { "selected": selectedItems.includes(item.lemma) })}
                         >{item.lemma}</button>
                     )
                 })}
