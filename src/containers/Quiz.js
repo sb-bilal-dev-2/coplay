@@ -5,6 +5,8 @@ import "./Quiz.css";
 import { BASE_SERVER_URL } from "../useRequests";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
+import { usePost } from './usePost';
+import { sortByLearningState } from "./MyList";
 
 const Quiz = () => {
   const { title } = useParams();
@@ -14,7 +16,6 @@ const Quiz = () => {
   const [currentLemmaInfo, set_currentLemmaInfo] = useState();
   const [occurances, set_occurances] = useState([]);
   const [animatePause, set_animatePause] = useState(false);
-
   const requestLemmaOccurances = async (lemma) => {
     try {
       const wordData = (await api().get(`/occurances?lemma=${lemma}`)).data
@@ -37,6 +38,7 @@ const Quiz = () => {
   };
 
   const requestNextWord = async () => {
+    updateRepeatCount(practicingWords[practicingWordIndex])
     const nextPracticingWord = practicingWords[practicingWordIndex + 1];
     set_occurances([]);
     set_practicingWordIndex(practicingWordIndex + 1);
@@ -67,26 +69,30 @@ const Quiz = () => {
     set_currentLemmaInfo(newCurrentLemmaInfo);
   };
   const requestListAndGetCurrentLemmaInfo = async () => {
-    let list = [];
+    let userWords = [];
+    console.log("requesting initials");
+    try {
+      userWords = (await api().get("/get-user?allProps=1"))?.data
+        ?.words;
+      const { repeatingList, learningList } = sortByLearningState(userWords);
+
+    if (title === "repeating") {
+      userWords = repeatingList;
+    }
     if (title === "learning") {
-      console.log("requesting initials");
-      try {
-        const userWords = (await api().get("/get-user?allProps=1"))?.data
-          ?.words;
-        console.log("userWords", userWords);
-        list = userWords.filter((item) => !item.learned);
-      } catch (err) {
-        set_error(err);
-        console.log("err: ", err);
-      }
+      userWords = learningList;
+    }
+      console.log('repeatingList', repeatingList)
+    } catch (err) {
+      set_error(err);
+      console.log("err: ", err);
     }
 
-    console.log("list", list);
-    const newCurrentLemma = list[0]?.lemma;
-    set_practicingWords(list);
+    const newCurrentLemma = userWords[0]?.lemma;
+    set_practicingWords(userWords);
     await requestCurrentLemmaInfo(newCurrentLemma);
   };
-
+  console.log('practicingWords', practicingWords)
   const playNextOccurance = async () => {
     if (!videoRef.current.paused) {
       // videoRef.current.pause();
@@ -113,14 +119,14 @@ const Quiz = () => {
       videoRef.current.play();
     }
   }, [currentVideoSrc, occurances.length]);
-
+  console.log('occurances', occurances)
   const currentOccurance = occurances[playingOccuranceIndex];
   const currentLemma = currentOccurance?.lemma;
   const currentInflection = currentOccurance?.inflection || currentLemma;
   const pattern = new RegExp(currentInflection, "i");
   const occuranceMainSubtitle = currentOccurance?.context[1];
   const matches = occuranceMainSubtitle?.match(pattern);
-  console.log("matches", matches);
+  //   console.log("matches", matches);
   const inflectionIndex = matches?.index;
 
   const occuranceMainSubtitleArray = [];
@@ -141,6 +147,35 @@ const Quiz = () => {
     set_animatePause(false);
   };
   const isVideoPaused = videoRef?.current && !videoRef?.current?.paused;
+
+  const [postUserWords] = usePost()
+  const updateRepeatCount = async (pWord) => {
+    const usersPracticingWord = pWord || practicingWords[practicingWordIndex]
+    if (!usersPracticingWord?.repeatCount) {
+      usersPracticingWord.repeatCount = 0
+    }
+    usersPracticingWord.repeatCount += 1;
+    usersPracticingWord.repeatTime = Date.now();
+    postUserWords('/self_words', [usersPracticingWord])
+  }
+
+  const handleTimeUpdate = async () => {
+    if (
+      videoRef.current.currentTime - 0.1 >=
+      (currentOccurance?.endTime || 0) / 1000
+    ) {
+      audioRef.current.play();
+      pauseClick();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      videoRef.current.pause();
+      if (playingOccuranceIndex + 1 === occurances.length) {
+        if (practicingWordIndex + 1 === practicingWords.length) {
+          updateRepeatCount()
+        }
+      }
+    }
+  }
+
   return (
     <>
       {/* <StickyHeader /> */}
@@ -157,42 +192,32 @@ const Quiz = () => {
       {/* <WebcamCapture /> */}
       <div className="QuizMain flex-grow bg-video text-gray text-gray-100 relative">
         <Link
-            to="/"
-            className="absolute z-10 top-4 left-4 text-white cursor-pointer"
+          to="/"
+          className="absolute z-10 top-4 left-4 text-white cursor-pointer"
         >
-            <i className="fa fa-arrow-left" aria-hidden="true"></i>
+          <i className="fa fa-arrow-left" aria-hidden="true"></i>
         </Link>
-          <video
-            className={classNames("w-full")}
-            ref={videoRef}
-            onLoadedMetadata={() => {
-              console.log(
-                "occurances[playingOccuranceIndex].startTime",
-                occurances[playingOccuranceIndex].startTime
-              );
-              videoRef.current.currentTime =
-                occurances[playingOccuranceIndex].startTime / 1000;
-            }}
-            onTimeUpdate={async () => {
-              if (
-                videoRef.current.currentTime - 0.1 >=
-                occurances[playingOccuranceIndex].endTime / 1000
-              ) {
-                audioRef.current.play();
-                pauseClick();
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                videoRef.current.pause();
-              }
-            }}
-          >
-            <source src={currentVideoSrc + "&quality=1080.ultra"} />
-          </video>
+        <video
+          className={classNames("w-full")}
+          ref={videoRef}
+          onLoadedMetadata={() => {
+            console.log(
+              "occurances[playingOccuranceIndex].startTime",
+              occurances[playingOccuranceIndex].startTime
+            );
+            videoRef.current.currentTime =
+              occurances[playingOccuranceIndex].startTime / 1000;
+          }}
+          onTimeUpdate={handleTimeUpdate}
+        >
+          <source src={currentVideoSrc + "&quality=1080.ultra"} />
+        </video>
         <div className="Subtitles text-center text-white px-8 text-lg">
           <b>
             {occuranceMainSubtitleArray.map((occChar, occCharIndex) => {
               const className =
                 occCharIndex >= inflectionIndex &&
-                occCharIndex <= inflectionIndex + currentInflection.length - 1
+                  occCharIndex <= inflectionIndex + currentInflection.length - 1
                   ? "text-primary"
                   : "";
               return <span className={className}>{occChar}</span>;

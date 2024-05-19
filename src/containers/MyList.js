@@ -8,18 +8,62 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUser, updateGivenUserValues } from '../store'
 import { Link } from 'react-router-dom';
 import { redirect } from 'react-router';
+import { usePost } from './usePost';
 
+const HOUR = 1000 * 60 * 60;
+const WEEK = HOUR * 24 * 7;
+export const REPEAT_COUNT_TO_POSTPONE_TIME_DIFFERENCE = {
+    '1': HOUR,
+    '2': HOUR * 2,
+    '3': HOUR * 3,
+    '4': HOUR * 4,
+    '5': HOUR * 24,
+    '6': WEEK,
+    '7': WEEK * 2,
+}
+
+export const sortByLearningState = (items = []) => {
+    const repeatingList = []
+    const learningList = []
+    const learnedList = []
+
+    items.forEach((item) => {
+        const repeatCount = item.repeatCount || 0;
+        const REPEAT_POSTPONE_TIME_DIFFERENCE = REPEAT_COUNT_TO_POSTPONE_TIME_DIFFERENCE[repeatCount] || Infinity;
+        const currentTime = Date.now();
+        console.log('currentTime', currentTime, item.repeatTime)
+        const repeatTime = item.repeatTime || currentTime;
+        const timeDifference = currentTime - repeatTime;
+        console.log('timeDifference', timeDifference)
+        if (repeatCount < 7) {
+            if (!item.repeatCount || timeDifference > REPEAT_POSTPONE_TIME_DIFFERENCE) {
+                repeatingList.push(item)
+            } else {
+                learningList.push(item)
+            }
+        } else {
+            learnedList.push(item)
+        }
+    })
+
+    return {
+        repeatingList,
+        learningList,
+        learnedList
+    }
+}
 
 const MyList = () => {
-    const { learningList, learnedList } = useRequestUserWordLists()
-
+    const { learningList, learnedList, repeatingList } = useRequestUserWordLists()
+    console.log('learningList',)
     return (
         <>
             <StickyHeader />
             <div className='section MyListMain bg-secondary text-gray-100'>
                 <div className="p-4">
-                    <RenderTagList list={learningList} name="Learning" />
-                    <RenderTagList list={learnedList} name="Learned" />
+                    <RenderTagList list={repeatingList} name="repeating" />
+                    <RenderTagList list={learningList} name="learning" />
+                    <RenderTagList list={learnedList} name="learned" />
                 </div>
             </div>
             <Footer />
@@ -27,7 +71,13 @@ const MyList = () => {
     )
 }
 
-function RenderTagList({ list = ['', '', '', '', '', '', ''], name }) {
+const LEARN_STATE_NAMES = {
+    'learning': 'Learning Words List',
+    'learned': 'Learned Words List',
+    'repeating': 'Repeating Words List',
+}
+
+function RenderTagList({ list = [], name }) {
     const dispatch = useDispatch()
     const [isEditing, setEditing] = useState(false)
     const [selectedItems, setSelectecItems] = useState([])
@@ -39,45 +89,87 @@ function RenderTagList({ list = ['', '', '', '', '', '', ''], name }) {
             setSelectecItems([...selectedItems, item])
         }
     }
-
+    console.log('list', list)
     const learnFullList = () => {
-        const words = list.map(item => ({ lemma: item.lemma, learned: false }))
+        const words = list.map(item => ({ lemma: item.lemma, repeatCount: 7, repeatTime: Date.now() }))
         postUserWords('/self_words', words)
+        setEditing(false)
+        setSelectecItems([])
+    }
+
+    const repeatSelected = () => {
+        // const repeatCountByLemma = {}
+        // list.forEach(item => {
+        //     if (item) {
+        //         if (!item?.repeatCount) {
+        //             repeatCountByLemma[item?.name] = 0
+        //         } else {
+        //             repeatCountByLemma[item?.name] = item?.repeatCount
+        //         }
+        //     }
+        // })
+        const repeatCountsByLemma = {}
+        list.forEach(item => {
+            repeatCountsByLemma[item.lemma] = item.repeatCount || 0
+        })
+        const words = selectedItems.map(lemma => ({ lemma, repeatCount: repeatCountsByLemma[lemma] + 1, repeatTime: Date.now() }))
+        postUserWords('/self_words', words)
+        setEditing(false)
+        setSelectecItems([])
     }
 
     const learnSelected = () => {
-        const words = selectedItems.map(item => ({ lemma: item, learned: false }))
+        const words = selectedItems.map(lemma => ({ lemma, repeatCount: 7, repeatTime: Date.now() }))
         postUserWords('/self_words', words)
+        setEditing(false)
+        setSelectecItems([])
     }
 
-    const learnedSelected = () => {
-        const words = selectedItems.map(item => ({ lemma: item, learned: true }))
+    const unlearnSelected = () => {
+        const words = selectedItems.map(lemma => ({ lemma, repeatCount: 0, repeatTime: Date.now() }))
         postUserWords('/self_words', words)
+        setEditing(false)
+        setSelectecItems([])
     }
 
     return (
         <div className="TagList">
             <div className='flex justify-between py-4'>
-                <h2 className=''>{name}</h2>
-                <div className='TagListButtons'>
-                    {isEditing ? <>
-                        <span className='pl-2 text-xs'>Selected: <code>{selectedItems.length}</code></span>  
-                        <button onClick={() => (setEditing(!isEditing), setSelectecItems([]))}><i className="fas fa-times pl-1"></i></button>
-                        {name === 'Learned' ?
-                            <button onClick={learnSelected}><i className="fas fa-circle-left pl-1"></i></button>
-                        :
-                            <button onClick={learnedSelected}><i className="fa fa-check pl-1"></i></button>
+                <h2 className=''>{LEARN_STATE_NAMES[name]}</h2>
+                {list && !!list?.length &&
+                    <div className='TagListButtons'>
+                        {isEditing ? <>
+                            <span className='pl-2 text-xs'>Selected: <code>{selectedItems.length}</code></span>
+                            <button onClick={() => (setEditing(!isEditing), setSelectecItems([]))}><i className="fas fa-times pl-1"></i></button>
+                            {name === 'repeating' &&
+                                <button onClick={repeatSelected}><i className="fa fa-check pl-1"></i></button>
+                            }
+                            {name === 'repeating' &&
+                                <button onClick={learnSelected}><i className="fa fa-check-double pl-1"></i></button>
+                            }
+                            {name === 'learning' &&
+                                <button onClick={unlearnSelected}><i className="fas fa-circle-left pl-1"></i></button>
+                            }
+                            {name === 'learning' &&
+                                <button onClick={learnSelected}><i className="fa fa-check pl-1"></i></button>
+                            }
+                            {name === 'learned' &&
+                                <button onClick={unlearnSelected}><i className="fas fa-circle-left pl-1"></i></button>
+                            }
+                        </> :
+                            <>
+                                <button onClick={() => setEditing(!isEditing)}><i className="fas fa-pen pl-1"></i></button>
+                                <button onClick={() => { }}><i className="fa fa-layer-group pl-1"></i></button>
+                                {name === 'learning' &&
+                                    <Link to={"/quiz/" + name.toLowerCase()}><i className="fa fa-play pl-1"></i></Link>
+                                }
+                                {name === 'repeating' &&
+                                    <Link to={"/quiz/" + name.toLowerCase()}><i className="fa fa-play pl-1"></i></Link>
+                                }
+                            </>
                         }
-                    </> :
-                    <>
-                        <button onClick={() => setEditing(!isEditing)}><i className="fas fa-pen pl-1"></i></button>
-                        <button onClick={() => {}}><i className="fa fa-layer-group pl-1"></i></button>
-                        {name !== 'Learned' &&
-                            <Link to={"/quiz/" + name.toLowerCase()}><i className="fa fa-play pl-1"></i></Link>
-                        }
-                    </>
-                    }
-                </div>
+                    </div>
+                }
             </div>
             <ul className="TagListItems p-2">
                 {list.map(item => {
@@ -89,41 +181,15 @@ function RenderTagList({ list = ['', '', '', '', '', '', ''], name }) {
                         >{item.lemma}</button>
                     )
                 })}
+                {!list.length && <h4 className="py-2">No Item/Words</h4>}
             </ul>
         </div>
     )
 }
 
-function usePost(handlePostResponse = () => {}) {
-    const [data, set_data] = useState()
-    const [error, set_error] = useState()
-    const [isLoading, set_isLoading] = useState()
-
-    async function post(...args) {
-        set_isLoading(true)
-        try {
-            const new_data = (await api().post(...args)).data
-            handlePostResponse(new_data)
-            set_data(new_data)
-            return new_data
-        } catch(error) {
-            set_error(error)
-        }
-        set_isLoading(false)
-    }
-
-    return [
-        post,
-        error,
-        isLoading,
-        data,
-    ]
-}
-
 export function useRequestUserWordLists(cancelRequest) {
     const dispatch = useDispatch();
-    const learningList = useSelector((state) => state.user.user?.words?.filter(item => !item.learned))
-    const learnedList = useSelector((state) => state.user.user?.words?.filter(item => item.learned))
+    const { repeatingList, learningList, learnedList } = useSelector((state) => sortByLearningState(state.user.user?.words))
 
     const getUserWords = async () => {
         try {
@@ -145,7 +211,7 @@ export function useRequestUserWordLists(cancelRequest) {
         }
     }, [])
 
-    return { learnedList, learningList }
+    return { learnedList, learningList, repeatingList }
 }
 
 

@@ -44,7 +44,7 @@ const initAuth = (ownApp) => {
   
       // Generate a verification code and set the timestamp
       const verificationCode = Math.floor(100000 + Math.random() * 900000);
-      const verificationCodeTimestamp = new Date();
+      const verificationCodeTimestamp = Date.now();
       const mailOptions = {
         from: MAILER_MAIL,
         to: email,
@@ -83,7 +83,7 @@ const initAuth = (ownApp) => {
   
       // Generate a verification code and set the timestamp
       const verificationCode = Math.floor(100000 + Math.random() * 900000);
-      const verificationCodeTimestamp = new Date();
+      const verificationCodeTimestamp = Date.now();
       const mailOptions = {
         from: MAILER_MAIL,
         to: email,
@@ -128,7 +128,7 @@ const initAuth = (ownApp) => {
   
       // Check if the verification code is still valid (e.g., within 15 minutes)
       const validDurationInMinutes = 15;
-      const currentTime = new Date();
+      const currentTime = Date.now();
       const codeTimestamp = user.verificationCodeTimestamp;
       const timeDifferenceInMinutes = (currentTime - codeTimestamp) / (1000 * 60);
   

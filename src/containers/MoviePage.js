@@ -274,7 +274,7 @@ const MoviePage = () => {
           title={title}
           subtitleScale={isFullScreen() ? subtitleScale : subtitleScale / 2}
           positionY={isFullScreen() ? subtitlePosition : subtitlePosition + 0.2}
-          hideSubtitles={!justRewinded}
+          // hideSubtitles={!justRewinded}
           tooltip
         />
         <Subtitles

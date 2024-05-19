@@ -3,15 +3,15 @@ const { default: mongoose } = require('mongoose');
 
 const Schema = require('mongoose').Schema;
 
-var usersWords = new Schema({
+var usersWord = new Schema({
     isPhrase: Boolean,
     wordId: ObjectId,
     note: String,
-    rehearsedTimes: Number,
+    repeatCount: Number,
+    repeatTime: { type: Date },
     learned: Boolean,
     lemma: String,
     archived: Boolean,
-    postponedTill: Date,
     contextType: String,
     contextMoment: String, // HH:MM:SS or chapter-1
     contextUrl: String,
@@ -24,7 +24,7 @@ const schema = new Schema({
     verificationCode: { type: Number },
     verifiedEmail: { type: Boolean, default: false },
     verificationCodeTimestamp: { type: Date },
-    words: [usersWords],
+    words: [usersWord],
     createdTime: { type: Date, default: Date.now },
     updatedTime: { type: Date, default: Date.now },
     note: String,

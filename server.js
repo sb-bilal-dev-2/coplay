@@ -180,7 +180,10 @@ app.get('/subtitlesv2', async (req, res) => {
 app.get('/subtitles', async (req, res) => {
   try {
     const { locale, name, version } = req.query;
-    const subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || 'en'}.vtt`)
+    let subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || 'en'}.vtt`)
+    if (locale !== 'en') {
+      // subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || 'ru'}.subtitles.json`)
+    }
     if (!fs.existsSync(subtitlesVttPath) && version === 'translate') {
       await translateVtt(locale, name)
     }
