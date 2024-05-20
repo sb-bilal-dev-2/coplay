@@ -23,6 +23,8 @@ const MoviePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const { user: userIdAndEmail } = useAuthentication();
   const { title } = useParams();
+  const [forceStateBoolean, forceStateUpdate] = useState(false);
+
 
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
@@ -234,6 +236,7 @@ const MoviePage = () => {
       volumeInfoShowTimeout.current = setTimeout(() => {
         clearTimeout(volumeInfoShowTimeout.current);
         volumeInfoShowTimeout.current = null;
+        forceStateUpdate(!forceStateBoolean);
       }, VOLUME_SHOW_TIMEOUT);
     };
 
