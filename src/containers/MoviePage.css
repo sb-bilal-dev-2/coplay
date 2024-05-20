@@ -14,7 +14,6 @@
 .videoItem video {
   background: #333;
   position: absolute;
-  /* max-height: 300px; */
   top: 50%;
   width: 100%;
   transform: translateY(-50%);
@@ -45,11 +44,7 @@
   height: auto;
   max-height: initial;
 }
-/* @media screen and (min-width: 800px) {
-  .videoItem video, .videoItem {
-    width: 80vw;
-  }
-} */
+
 .timeLeft {
   color: #fff;
   font-size: small;
@@ -107,6 +102,7 @@
   visibility: hidden;
 }
 
-/* .secondarySubtitle {
-  opacity: 0.5;
-} */
+.volume {
+  width: 90px;
+  height: 3px;
+}

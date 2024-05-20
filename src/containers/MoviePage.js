@@ -10,11 +10,13 @@ import axios from "axios";
 import MovieWordCards from "./MovieWordCards";
 import useAuthentication from "./Authentication.util";
 import { useOutsideAlerter } from "../components/useOutsideAlerter";
+import {
+  Settings,
+  useKeyDown,
+  isFullScreen,
+  secondsToDisplayTime,
+} from "../helper/moviePage";
 
-const TAP_TIMEOUT = 160;
-const REWIND_TIME = 5;
-const VOLUE_STEP = 0.05;
-const REWIND_SUBTITLE_TIMEOUT = 5000;
 const VOLUME_SHOW_TIMEOUT = 500;
 
 const MoviePage = () => {
@@ -28,6 +30,8 @@ const MoviePage = () => {
     Number(localStorage.getItem("currentTime" + title))
   );
   const videoRef = useRef(null);
+  const [volume, setVolume] = useState(localStorage.getItem("volume"));
+
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null);
   const fullScreenContainer = useRef(null);
@@ -118,7 +122,7 @@ const MoviePage = () => {
 
         // Reset tap count after a delay
         tapCount = 0;
-      }, TAP_TIMEOUT); // Adjust the delay as needed
+      }, Settings.TAP_TIMEOUT); // Adjust the delay as needed
     } else if (tapCount === 2) {
       clearTimeout(tapTimer);
       // Double tap logic here
@@ -159,26 +163,26 @@ const MoviePage = () => {
       <div className="section bg-secondary">
         <div className="section-container">
           <MovieWordCards title={title} userId={userId} />
-          <Link
-            to={`/quiz/${title}`}
-            className="text-white"
-          ><b>
-              Watch Unnkown Words of {currentItem?.label || title} <i className="fa fa-arrow-right" aria-hidden="true"></i>
-            </b></Link>
+          <Link to={`/quiz/${title}`} className="text-white">
+            <b>
+              Watch Unnkown Words of {currentItem?.label || title}{" "}
+              <i className="fa fa-arrow-right" aria-hidden="true"></i>
+            </b>
+          </Link>
           <br />
-          <Link
-            to="/quiz/learning"
-            className="text-white cursor-pointer"
-          ><b>
-              Watch my Rehearse List <i className="fa fa-arrow-right" aria-hidden="true"></i>
-            </b></Link>
+          <Link to="/quiz/learning" className="text-white cursor-pointer">
+            <b>
+              Watch my Rehearse List{" "}
+              <i className="fa fa-arrow-right" aria-hidden="true"></i>
+            </b>
+          </Link>
         </div>
       </div>
     </div>
   );
 
   function RenderDropMenu() {
-    const [isDropOpen, setDropOpen] = useState(false)
+    const [isDropOpen, setDropOpen] = useState(false);
     const outsideNavClickWrapperRef = useRef(null);
     useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
@@ -191,7 +195,7 @@ const MoviePage = () => {
           {/* <i className="fa fa-arrow-left" aria-hidden="true"></i> */}
           CC/Transl.
         </button>
-        {isDropOpen &&
+        {isDropOpen && (
           <ul className="z-20 Drop absolute bg-white top-8 right-4">
             <li>Subtitle: En/cc, on</li>
             <li>Translation 1: Uz/transl., off</li>
@@ -201,7 +205,6 @@ const MoviePage = () => {
                   onClick={() => {}}
                   className="absolute z-10 top-4 right-4 text-white cursor-pointer"
                 >
-
                   <i className="fa fa-arrow-left" aria-hidden="true"></i>
                   Subtitles
                 </button>
@@ -209,9 +212,9 @@ const MoviePage = () => {
               </div>
             </div>
           </ul>
-        }
+        )}
       </div>
-    )
+    );
   }
 
   function renderVideo() {
@@ -220,6 +223,19 @@ const MoviePage = () => {
     const localSubtitleLocale = "uz";
     const localSubtitleScale = 1.6;
     const localSubtitlePosition = 0.3;
+    const handleVolumeRange = (event) => {
+      videoRef.current.volume = event.target.value;
+      setVolume(event.target.value);
+      localStorage.setItem("volume", event.target.value);
+      console.log("vol", event.target.value);
+
+      clearTimeout(volumeInfoShowTimeout.current);
+      volumeInfoShowTimeout.current = null;
+      volumeInfoShowTimeout.current = setTimeout(() => {
+        clearTimeout(volumeInfoShowTimeout.current);
+        volumeInfoShowTimeout.current = null;
+      }, VOLUME_SHOW_TIMEOUT);
+    };
 
     return (
       <div
@@ -267,6 +283,24 @@ const MoviePage = () => {
               }}
             />
           </div>
+          <div className="flex justify-center">
+            <div className="flex justify-center align-middle items-center">
+              <i
+                className="fas fa-volume-up text-white px-1"
+                aria-hidden="true"
+              />
+              <input
+                className="volume cursor-pointer"
+                type="range"
+                min={0.0}
+                max={1}
+                step={Settings.VOLUME_STEP}
+                value={volume}
+                defaultValue={Number(localStorage.getItem("volume")) || 0.5}
+                onChange={handleVolumeRange}
+              />
+            </div>
+          </div>
         </div>
         <Subtitles
           videoRef={videoRef}
@@ -298,143 +332,5 @@ const MoviePage = () => {
     );
   }
 };
-
-
-function useKeyDown({
-  videoRef,
-  justRewindedTimeout,
-  fullScreenContainer,
-  volumeInfoShowTimeout,
-}) {
-  const handleKeyDown = (event) => {
-    switch (event.key) {
-      case "ArrowLeft":
-        // Rewind
-        videoRef.current.currentTime -= REWIND_TIME;
-        const rewindSubtitleTimeout = justRewindedTimeout.current
-          ? REWIND_SUBTITLE_TIMEOUT * 2
-          : REWIND_SUBTITLE_TIMEOUT;
-
-        justRewindedTimeout.current = setTimeout(() => {
-          clearTimeout(justRewindedTimeout.current);
-          justRewindedTimeout.current = null;
-        }, rewindSubtitleTimeout);
-
-        break;
-      case "ArrowRight":
-        // Skip forward
-        videoRef.current.currentTime += REWIND_TIME;
-        break;
-      case "ArrowUp":
-        event.preventDefault();
-        // Increase volume
-        if (videoRef.current.volume <= 1 - VOLUE_STEP) {
-          const newVolume = round(
-            videoRef.current.volume + VOLUE_STEP,
-            VOLUE_STEP
-          );
-          videoRef.current.volume = newVolume;
-          localStorage.setItem("volume", newVolume);
-        }
-        clearTimeout(volumeInfoShowTimeout.current);
-        volumeInfoShowTimeout.current = null;
-        volumeInfoShowTimeout.current = setTimeout(() => {
-          clearTimeout(volumeInfoShowTimeout.current);
-          volumeInfoShowTimeout.current = null;
-        }, VOLUME_SHOW_TIMEOUT);
-        break;
-      case "ArrowDown":
-        event.preventDefault();
-        // Decrease volume
-        if (videoRef.current.volume >= VOLUE_STEP) {
-          const newVolume = round(
-            videoRef.current.volume - VOLUE_STEP,
-            VOLUE_STEP
-          );
-          localStorage.setItem("volume", newVolume);
-          videoRef.current.volume = newVolume;
-        } else {
-          videoRef.current.volume = 0;
-        }
-        clearTimeout(volumeInfoShowTimeout.current);
-        volumeInfoShowTimeout.current = null;
-        volumeInfoShowTimeout.current = setTimeout(() => {
-          clearTimeout(volumeInfoShowTimeout.current);
-          volumeInfoShowTimeout.current = null;
-        }, VOLUME_SHOW_TIMEOUT);
-        break;
-
-      case "Enter":
-        // Pause control
-
-        fullScreenContainer.current.webkitRequestFullScreen();
-
-      default:
-        break;
-    }
-    switch (event.which) {
-      case 32: // Space
-        event.preventDefault();
-        if (videoRef?.current?.paused) {
-          videoRef.current.play();
-        } else {
-          videoRef.current.pause();
-        }
-    }
-  };
-
-  const handleKeyDownRef = useRef(handleKeyDown);
-
-  useEffect(() => {
-    // Listen for keydown events
-    // document.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup function
-    return () => {
-      // Remove the event listener when the component is unmounted
-      document.removeEventListener("keydown", handleKeyDownRef.current);
-    };
-  }, []);
-
-  const addKeyDownListener = () => {
-    document.addEventListener("keydown", handleKeyDownRef.current);
-  };
-
-  const removeKeyDownListener = () => {
-    document.removeEventListener("keydown", handleKeyDownRef.current);
-  };
-
-  return [addKeyDownListener, removeKeyDownListener];
-}
-
-function isFullScreen() {
-  return window.innerHeight === window.screen.height;
-}
-
-function secondsToDisplayTime(seconds = 0) {
-  const d = Number(seconds);
-  const h = Math.floor(d / 3600);
-  const m = Math.floor((d % 3600) / 60);
-  const s = Math.floor(d % 60);
-  let displayItem = "";
-  if (h) {
-    displayItem += h + ":";
-  }
-  if (m < 10 && displayItem.length) {
-    displayItem += 0;
-  }
-  displayItem += m + ":";
-  if (s < 10) {
-    displayItem += 0;
-  }
-  displayItem += s;
-  return displayItem;
-}
-
-function round(value, step) {
-  step || (step = 1.0);
-  var inv = 1.0 / step;
-  return Math.round(value * inv) / inv;
-}
 
 export default MoviePage;
