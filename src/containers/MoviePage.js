@@ -15,6 +15,7 @@ import {
   useKeyDown,
   isFullScreen,
   secondsToDisplayTime,
+  round,
 } from "../helper/moviePage";
 
 const VOLUME_SHOW_TIMEOUT = 500;
@@ -24,7 +25,6 @@ const MoviePage = () => {
   const { user: userIdAndEmail } = useAuthentication();
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
-
 
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
@@ -141,7 +141,6 @@ const MoviePage = () => {
     }
   }, [tapCount, tapTimer]);
   const justRewinded = justRewindedTimeout.current;
-  console.log("userInfo", userInfo);
   const handleSliderChange = (event) => {
     setCurrentTime(event.target.value);
     videoRef.current.currentTime = event.target.value;
@@ -225,11 +224,12 @@ const MoviePage = () => {
     const localSubtitleLocale = "uz";
     const localSubtitleScale = 1.6;
     const localSubtitlePosition = 0.3;
+    const volumePercent = videoRef.current.volume * 100;
+
     const handleVolumeRange = (event) => {
       videoRef.current.volume = event.target.value;
       setVolume(event.target.value);
       localStorage.setItem("volume", event.target.value);
-      console.log("vol", event.target.value);
 
       clearTimeout(volumeInfoShowTimeout.current);
       volumeInfoShowTimeout.current = null;
@@ -293,7 +293,10 @@ const MoviePage = () => {
                 aria-hidden="true"
               />
               <input
-                className="volume cursor-pointer"
+                className="volume slider cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #f98787 0%, #f98787 ${volumePercent}%, silver ${volumePercent}%, silver 100%)`,
+                }}
                 type="range"
                 min={0.0}
                 max={1}
