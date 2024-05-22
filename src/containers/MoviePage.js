@@ -25,6 +25,7 @@ const MoviePage = () => {
   const { user: userIdAndEmail } = useAuthentication();
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
@@ -50,8 +51,6 @@ const MoviePage = () => {
     volumeInfoShowTimeout,
   });
   const [currentItem, setCurrentItem] = useState({});
-  // console.log('item', item)
-  // console.log('currentItem', currentItem)
   const userId = userIdAndEmail?.id;
   console.log("userId", userId);
   const requestUserInfo = async () => {
@@ -159,7 +158,6 @@ const MoviePage = () => {
       <h2 className="absolute z-10 top-3 left-16 text-gray-100">
         {currentItem?.label || title}
       </h2>
-      <RenderDropMenu />
       {renderVideo()}
       <div className="section bg-secondary">
         <div className="section-container">
@@ -183,35 +181,29 @@ const MoviePage = () => {
   );
 
   function RenderDropMenu() {
-    const [isDropOpen, setDropOpen] = useState(false);
+    const [isDropOpen, setDropOpen] = useState(true);
     const outsideNavClickWrapperRef = useRef(null);
     useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
     return (
       <div className="relative">
-        <button
+        <i
+          class="fa-regular fa-closed-captioning text-white font-medium cursor-pointer"
           onClick={() => setDropOpen(!isDropOpen)}
-          className="absolute z-10 top-4 right-4 text-white cursor-pointer"
-        >
-          {/* <i className="fa fa-arrow-left" aria-hidden="true"></i> */}
-          CC/Transl.
-        </button>
+        />
         {isDropOpen && (
-          <ul className="z-20 Drop absolute bg-white top-8 right-4">
-            <li>Subtitle: En/cc, on</li>
-            <li>Translation 1: Uz/transl., off</li>
-            <div className="InnerDrop">
-              <div>
-                <button
-                  onClick={() => {}}
-                  className="absolute z-10 top-4 right-4 text-white cursor-pointer"
-                >
-                  <i className="fa fa-arrow-left" aria-hidden="true"></i>
-                  Subtitles
-                </button>
-                <span className="float-right font-small">Options</span>
-              </div>
-            </div>
+          <ul className="z-20 Drop absolute bg-black bottom-10  w-auto rounded p-4 flex ">
+            <li className="text-white font-bold pl-6">
+              <h1 className="pb-2">Subtitle</h1>
+              <p className="cursor-pointer py-1">On</p>
+              <p className="cursor-pointer py-1">Off</p>
+              <p className="cursor-pointer py-1">5 Sec</p>
+            </li>
+            <li className="text-white font-bold pl-6">
+              <h1 className="pb-2">Translation</h1>
+              <p className="cursor-pointer py-1">Uz/transl</p>
+              <p className="cursor-pointer py-1">Off</p>
+            </li>
           </ul>
         )}
       </div>
@@ -224,7 +216,23 @@ const MoviePage = () => {
     const localSubtitleLocale = "uz";
     const localSubtitleScale = 1.6;
     const localSubtitlePosition = 0.3;
-    const volumePercent = videoRef.current.volume * 100;
+    const volumePercent = videoRef.current?.volume * 100;
+
+    const toggleFullscreen = () => {
+      if (!document.fullscreenElement) {
+        if (videoRef.current.requestFullscreen) {
+          videoRef.current.requestFullscreen();
+        }
+
+        setIsFullscreen(true);
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+
+        setIsFullscreen(false);
+      }
+    };
 
     const handleVolumeRange = (event) => {
       videoRef.current.volume = event.target.value;
@@ -305,6 +313,11 @@ const MoviePage = () => {
                 defaultValue={Number(localStorage.getItem("volume")) || 0.5}
                 onChange={handleVolumeRange}
               />
+              <i
+                class="fas fa-tv text-white cursor-pointer px-4"
+                onClick={toggleFullscreen}
+              />
+              <RenderDropMenu />
             </div>
           </div>
         </div>
