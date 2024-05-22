@@ -12,13 +12,51 @@
 }
 
 .TagItem {
-    float: left;
     border: 1px solid whitesmoke;
     padding: 2px 4px;
     margin: 2px;
     font-weight: bolder;
     border-radius: 2px;
 }
+
+.TagItem::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: rgba(172, 255, 47, 0.299);
+}
+
+.TagItem.repeat1::after {
+    width: 14%;
+}
+
+.TagItem.repeat2::after {
+    width: 28%;
+}
+
+.TagItem.repeat3::after {
+    width: 42%;
+}
+
+.TagItem.repeat4::after {
+    width: 56%;
+}
+
+.TagItem.repeat5::after {
+    width: 70%;
+}
+
+.TagItem.repeat6::after {
+    width: 84%;
+}
+
+.TagItem.repeat7::after {
+    width: 100%;
+}
+
 
 .TagListButtons {
     display: flex;
