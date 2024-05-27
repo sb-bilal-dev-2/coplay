@@ -186,7 +186,7 @@ const MoviePage = () => {
     useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
     return (
-      <div className="relative">
+      <div className="relative px-4">
         <i
           class="fa-regular fa-closed-captioning text-white font-medium cursor-pointer"
           onClick={() => setDropOpen(!isDropOpen)}
@@ -219,19 +219,12 @@ const MoviePage = () => {
     const volumePercent = videoRef.current?.volume * 100;
 
     const toggleFullscreen = () => {
-      if (!document.fullscreenElement) {
-        if (videoRef.current.requestFullscreen) {
-          videoRef.current.requestFullscreen();
-        }
-
-        setIsFullscreen(true);
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-
-        setIsFullscreen(false);
-      }
+       if (!isFullScreen()) {
+         fullScreenContainer.current.webkitRequestFullScreen();
+         //   videoRef.current.currentTime += 10; // Seek forward by 10 seconds
+       } else if (isFullScreen) {
+         document.exitFullscreen();
+       }
     };
 
     const handleVolumeRange = (event) => {
@@ -313,11 +306,11 @@ const MoviePage = () => {
                 defaultValue={Number(localStorage.getItem("volume")) || 0.5}
                 onChange={handleVolumeRange}
               />
+              <RenderDropMenu />
               <i
-                class="fas fa-tv text-white cursor-pointer px-4"
+                class="fas fa-expand text-white cursor-pointer"
                 onClick={toggleFullscreen}
               />
-              <RenderDropMenu />
             </div>
           </div>
         </div>
