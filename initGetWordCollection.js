@@ -11,7 +11,7 @@ const { callPredict } = require('./callPredict');
 // e.g "nicer" gets response "nice"
 
 // given word: me`);
-let en50k = JSON.parse(fs.readFileSync('./en50kAndLemmasReviewed.json', 'utf8'));
+let en50k = JSON.parse(fs.readFileSync('./wordsResearchData/en50kAndLemmasReviewed.json', 'utf8'));
 // const storedFile = fs.readFileSync('./initGetWordIndex.txt', 'utf-8');
 // const savedStartIndex = +String(storedFile).split('__')
 
@@ -77,7 +77,7 @@ let en50k = JSON.parse(fs.readFileSync('./en50kAndLemmasReviewed.json', 'utf8'))
     if (abort) {
         return;
     }
-    fs.writeFileSync('./en50kAndLemmasReviewed.json', JSON.stringify(mapped, undefined, 2))
+    fs.writeFileSync('./wordsResearchData/en50kAndLemmasReviewed.json', JSON.stringify(mapped, undefined, 2))
     en50k = mapped;
     // fs.writeFileSync('./initGetWordIndex.txt', "" + nextIndex + "__" + en50k[nextIndex]?.the_word,)
 
