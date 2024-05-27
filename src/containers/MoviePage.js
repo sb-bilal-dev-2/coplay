@@ -34,6 +34,8 @@ const MoviePage = () => {
   );
   const videoRef = useRef(null);
   const [volume, setVolume] = useState(localStorage.getItem("volume"));
+  const [translateType, setTranslateType] = useState("off");
+  const [subtitleType, setSubtitleType] = useState("off");
 
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null);
@@ -181,9 +183,22 @@ const MoviePage = () => {
   );
 
   function RenderDropMenu() {
-    const [isDropOpen, setDropOpen] = useState(true);
+    const [isDropOpen, setDropOpen] = useState(false);
     const outsideNavClickWrapperRef = useRef(null);
+
     useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
+
+    const handleType = (event) => {
+      const { name, value } = event.target;
+
+      if (name === "subtitle") {
+        setSubtitleType(value);
+      }
+
+      if (name === "translation") {
+        setTranslateType(value);
+      }
+    };
 
     return (
       <div className="relative px-4">
@@ -192,22 +207,106 @@ const MoviePage = () => {
           onClick={() => setDropOpen(!isDropOpen)}
         />
         {isDropOpen && (
-          <ul className="z-20 Drop absolute bg-black bottom-10  w-auto rounded p-4 flex ">
-            <li className="text-white font-bold pl-6">
-              <h1 className="pb-2">Subtitle</h1>
-              <p className="cursor-pointer py-1">On</p>
-              <p className="cursor-pointer py-1">Off</p>
-              <p className="cursor-pointer py-1">5 Sec</p>
-            </li>
-            <li className="text-white font-bold pl-6">
-              <h1 className="pb-2">Translation</h1>
-              <p className="cursor-pointer py-1">Uz/transl</p>
-              <p className="cursor-pointer py-1">Off</p>
-            </li>
-          </ul>
+          <div className="z-80 Drop absolute bg-black bottom-8 p-6 rounded drop-shadow-lg">
+            <ul className="w-80 flex justify-around">
+              <li className="text-white font-bold w-40">
+                <p className="pb-2">Subtitle</p>
+                <label className="radio-container">
+                  <input
+                    type="radio"
+                    name="subtitle"
+                    value="on"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">On</p>
+                  <span className={subtitleType === "on" ? "" : "checkmark"}>
+                    &#10003;
+                  </span>
+                </label>
+                <label className="radio-container">
+                  <input
+                    type="radio"
+                    name="subtitle"
+                    value="off"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">Off</p>
+                  <span className={subtitleType === "off" ? "" : "checkmark"}>
+                    &#10003;
+                  </span>
+                </label>
+                <label class="radio-container">
+                  <input
+                    type="radio"
+                    name="subtitle"
+                    value="rewind"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">Rewind 0.5s</p>
+                  <span
+                    className={subtitleType === "rewind" ? "" : "checkmark"}
+                  >
+                    &#10003;
+                  </span>
+                </label>
+              </li>
+              <li className="text-white font-bold pl-6 w-40">
+                <p className="pb-2">Translation</p>
+                <label class="radio-container">
+                  <input
+                    type="radio"
+                    name="translation"
+                    value="on"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">On</p>
+                  <span className={translateType === "on" ? "" : "checkmark"}>
+                    &#10003;
+                  </span>
+                </label>
+                <label class="radio-container">
+                  <input
+                    type="radio"
+                    name="translation"
+                    value="uz"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">Uz</p>
+                  <span className={translateType === "uz" ? "" : "checkmark"}>
+                    &#10003;
+                  </span>
+                </label>
+                <label class="radio-container">
+                  <input
+                    type="radio"
+                    name="translation"
+                    value="off"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">Off</p>
+                  <span className={translateType === "off" ? "" : "checkmark"}>
+                    &#10003;
+                  </span>
+                </label>
+              </li>
+            </ul>
+          </div>
         )}
       </div>
     );
+  }
+
+  function translateState() {
+    if (subtitleType === "on") return false;
+    if (subtitleType === "rewind") return !justRewinded;
+    if (translateType === "uz" || translateType === "on") return false;
+    if (translateType === "off" || subtitleType === "off") return true;
   }
 
   function renderVideo() {
@@ -337,7 +436,7 @@ const MoviePage = () => {
           locale="en"
           subtitleScale={isFullScreen() ? subtitleScale : subtitleScale / 2}
           positionY={isFullScreen() ? subtitlePosition : subtitlePosition + 0.2}
-          // hideSubtitles={!justRewinded}
+          hideSubtitles={translateState()}
           tooltip
         />
         <Subtitles
@@ -353,7 +452,7 @@ const MoviePage = () => {
           currentTime={currentTime}
           title={title}
           isEditable
-          hideSubtitles={!justRewinded}
+          hideSubtitles={translateState()}
           addKeyDownListener={addKeyDownListener}
           removeKeyDownListener={removeKeyDownListener}
         />

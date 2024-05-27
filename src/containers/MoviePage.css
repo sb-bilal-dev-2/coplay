@@ -106,3 +106,35 @@
   width: 90px;
   height: 3px;
 }
+
+.hidden {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.radio-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.radio-container .checkmark {
+    display: none;
+    color: silver;
+    margin-left: 8px;
+}
+
+.radio-container input:checked + p + .checkmark {
+    display: inline;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
