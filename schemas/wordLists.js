@@ -15,5 +15,5 @@ const schema = new Schema({
 
 module.exports = {
     schema,
-    model: mongoose.model('wordLists', schema)
+    wordLists_model: mongoose.model('wordLists', schema)
 }

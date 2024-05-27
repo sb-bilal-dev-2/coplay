@@ -92,9 +92,9 @@ function AdvancedSwipe ({ list, onSwipeLeft, onSwipeRight, onSwipeTop, onSwipeBo
       })}
       </div>
       <div className='buttons'>
-        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('left')}><i className="fa fa-hat-wizard"></i></button>
-        <button style={{ backgroundColor: !canGoBack && '#c3c4d3' }} onClick={() => goBack()}><i className="fa fa-undo"></i></button>
-        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('right')}><i className="fa fa-check"></i></button>
+        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('left')}><i className="fa fa-check-double"></i><code className='text-xs text-center'>know</code></button>
+        <button style={{ backgroundColor: !canGoBack && '#c3c4d3' }} onClick={() => goBack()}><i className="fa fa-undo"></i><code className='text-xs text-center'>back</code></button>
+        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('right')}><i className="fa fa-plus"></i><code className='text-xs text-center'>repeat</code></button>
       </div>
     </div>
   )

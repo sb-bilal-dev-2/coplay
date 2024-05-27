@@ -17,5 +17,5 @@ const schema = new Schema({
 
 module.exports = {
     schema,
-    model: mongoose.model('subtitles', schema)
+    subtitles_model: mongoose.model('subtitles', schema)
 }

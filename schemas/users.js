@@ -36,5 +36,5 @@ const schema = new Schema({
 
 module.exports = {
     schema,
-    model: mongoose.model('users', schema)
+    users_model: mongoose.model('users', schema)
 }

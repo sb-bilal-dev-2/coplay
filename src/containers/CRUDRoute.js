@@ -28,21 +28,31 @@ const CRUDRoute = () => {
         })
     }
 
+    const handleSubmitEdit = (ev) => {
+        ev.preventDefault();
+        putItems(JSON.parse(editingItemRef?.current?.value), () => setEditingItem(''))
+    }
+
     return (
         <div className='p-4'>
             <p className='text-red-500'>{requestError}</p>
-            <form className='pb-2'>
-                <input onChange={(ev) => setSearch(ev.target.value)} placeholder='Search' />
+            <form className='pb-2 float-right'>
+                <input className="border-b" onChange={(ev) => setSearch(ev.target.value)} placeholder='Search' />
             </form>
             <form>
-                <textarea placeholder='New Item JSON' ref={newItemTextarea} />
-                <button onClick={() => putItems(newItemTextarea?.current?.value && JSON.parse(newItemTextarea?.current?.value))} type="submit" disabled={requestLoading}><b>POST</b></button>
+                <textarea className="border-b w-80 h-40"  placeholder='New Item JSON' ref={newItemTextarea} />
+                <button
+                    className="p-2"
+                    onClick={() => putItems(newItemTextarea?.current?.value && JSON.parse(newItemTextarea?.current?.value, () => setEditingItem('')))}
+                    type="submit"
+                    disabled={requestLoading}
+                ><b>POST NEW <i className="fa fa-plus"></i></b></button>
             </form>
             {filteredItems?.map((item) => {
                 if (item._id === editingItem) {
                     return (
-                        <form key={item._id} onSubmit={(ev) => { ev.preventDefault(); putItems(JSON.parse(editingItemRef?.current?.value))}}>
-                            <textarea ref={editingItemRef} defaultValue={JSON.stringify(item, undefined, 2)} />
+                        <form className="flex" key={item._id} onSubmit={handleSubmitEdit}>
+                            <textarea disabled={requestLoading} className="border w-full h-96" ref={editingItemRef} defaultValue={JSON.stringify(item, undefined, 2)} />
                             <div>
                                 <button
                                     onClick={() => {
@@ -51,14 +61,14 @@ const CRUDRoute = () => {
                                     }}
                                     disabled={requestLoading}
                                 ><code>CANCEL</code></button><br />
-                                <button onClick={() => deleteItem(item._id)} disabled={requestLoading}><code>DELETE</code></button><br />
-                                <button type='submit' disabled={requestLoading}><b>SUBMIT</b></button><br />
+                                <button className="text-red-500" onClick={() => deleteItem(item._id)} disabled={requestLoading}><code>DELETE</code></button><br />
+                                <button className="text-green-500" type='submit' disabled={requestLoading}><b>SUBMIT</b></button><br />
                             </div>
                         </form>
                     )
                 }
                 return (
-                    <><div key={item._id} onClick={() => setEditingItem(item._id)}>{JSON.stringify(item, undefined, 2)}</div><hr /></>
+                    <><div className="border p-2 m-2" key={item._id} onClick={() => setEditingItem(item._id)}>{JSON.stringify(item, undefined, 2)}</div><hr /></>
                 )
             })}
         </div>

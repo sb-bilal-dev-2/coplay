@@ -24,5 +24,5 @@ const schema = new Schema({
 
 module.exports = {
   schema,
-  model: mongoose.model('words', schema)
+  words_model: mongoose.model('words', schema)
 }
