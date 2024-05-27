@@ -36,7 +36,7 @@ const schema = Schema({
   note: String,
 });
 
-yourSchema.index({ mediaId: 1, startTime: 1 }, { unique: true });
+schema.index({ mediaId: 1, startTime: 1 }, { unique: true });
 // error.code === 11000 // duplicate key error
 
 module.exports = {

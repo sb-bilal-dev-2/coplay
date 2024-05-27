@@ -2,8 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 // const TelegramBot = require('node-telegram-bot-api');
-const UserSchema = require('./schemas/users.js'); // Update the path accordingly
-const User = UserSchema.model;
+const User = require('./schemas/users.js').users_model; // Update the path accordingly
 
 const SECRET = "BILALS_COSMO_SECRET_KEY"
 // Function to generate JWT
