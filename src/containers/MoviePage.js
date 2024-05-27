@@ -25,7 +25,7 @@ const MoviePage = () => {
   const { user: userIdAndEmail } = useAuthentication();
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMute, setMute] = useState(false);
 
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
@@ -219,12 +219,12 @@ const MoviePage = () => {
     const volumePercent = videoRef.current?.volume * 100;
 
     const toggleFullscreen = () => {
-       if (!isFullScreen()) {
-         fullScreenContainer.current.webkitRequestFullScreen();
-         //   videoRef.current.currentTime += 10; // Seek forward by 10 seconds
-       } else if (isFullScreen) {
-         document.exitFullscreen();
-       }
+      if (!isFullScreen()) {
+        fullScreenContainer.current.webkitRequestFullScreen();
+        //   videoRef.current.currentTime += 10; // Seek forward by 10 seconds
+      } else if (isFullScreen) {
+        document.exitFullscreen();
+      }
     };
 
     const handleVolumeRange = (event) => {
@@ -241,6 +241,15 @@ const MoviePage = () => {
       }, VOLUME_SHOW_TIMEOUT);
     };
 
+    const toggleVolume = () => {
+      setMute(true);
+
+      if (isMute) {
+        videoRef.current.volume = localStorage.getItem("volume");
+        setMute(false);
+      }
+    };
+
     return (
       <div
         className={classNames("videoItem", {
@@ -254,6 +263,7 @@ const MoviePage = () => {
           onPointerDown={handleTap}
           onTouchStart={handleTap}
           onEnded={handleEnd}
+          muted={isMute}
         >
           <source
             src={BASE_SERVER_URL + `/movie?name=${title}`}
@@ -290,19 +300,24 @@ const MoviePage = () => {
           <div className="flex justify-center">
             <div className="flex justify-center align-middle items-center">
               <i
-                className="fas fa-volume-up text-white px-1"
+                className={`fas ${
+                  !isMute ? "fa-volume-up" : "fa-volume-mute"
+                } text-white px-1 cursor-pointer`}
                 aria-hidden="true"
+                onClick={toggleVolume}
               />
               <input
                 className="volume slider cursor-pointer"
                 style={{
-                  background: `linear-gradient(to right, #f98787 0%, #f98787 ${volumePercent}%, silver ${volumePercent}%, silver 100%)`,
+                  background: isMute
+                    ? "silver"
+                    : `linear-gradient(to right, #f98787 0%, #f98787 ${volumePercent}%, silver ${volumePercent}%, silver 100%)`,
                 }}
                 type="range"
                 min={0.0}
                 max={1}
                 step={Settings.VOLUME_STEP}
-                value={volume}
+                value={isMute ? 0.0 : volume}
                 defaultValue={Number(localStorage.getItem("volume")) || 0.5}
                 onChange={handleVolumeRange}
               />
