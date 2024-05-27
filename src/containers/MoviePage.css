@@ -124,6 +124,7 @@
     display: none;
     color: silver;
     margin-left: 8px;
+    font-size: 10px;
 }
 
 .radio-container input:checked + p + .checkmark {

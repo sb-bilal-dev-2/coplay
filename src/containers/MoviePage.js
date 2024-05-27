@@ -245,7 +245,7 @@ const MoviePage = () => {
                     className="hidden"
                     onChange={handleType}
                   />
-                  <p className="cursor-pointer pr-2">Rewind 0.5s</p>
+                  <p className="cursor-pointer pr-2">On rewind (5s)</p>
                   <span
                     className={subtitleType === "rewind" ? "" : "checkmark"}
                   >
@@ -255,7 +255,7 @@ const MoviePage = () => {
               </li>
               <li className="text-white font-bold pl-6 w-40">
                 <p className="pb-2">Translation</p>
-                <label class="radio-container">
+                <label className="radio-container">
                   <input
                     type="radio"
                     name="translation"
@@ -272,12 +272,40 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="translation"
-                    value="uz"
+                    value="off"
                     className="hidden"
                     onChange={handleType}
                   />
-                  <p className="cursor-pointer pr-2">Uz</p>
-                  <span className={translateType === "uz" ? "" : "checkmark"}>
+                  <p className="cursor-pointer pr-2 pb-2">Off</p>
+                  <span className={translateType === "off" ? "" : "checkmark"}>
+                    &#10003;
+                  </span>
+                </label>
+                <label className="radio-container divide-y divide-solid">
+                  <input
+                    type="radio"
+                    name="translation"
+                    value="rewind"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">On rewind (5s)</p>
+                  <span
+                    className={translateType === "rewind" ? "" : "checkmark"}
+                  >
+                    &#10003;
+                  </span>
+                </label>
+                <label className="radio-container">
+                  <input
+                    type="radio"
+                    name="translation"
+                    value="en"
+                    className="hidden"
+                    onChange={handleType}
+                  />
+                  <p className="cursor-pointer pr-2">En</p>
+                  <span className={translateType === "en" ? "" : "checkmark"}>
                     &#10003;
                   </span>
                 </label>
@@ -285,12 +313,12 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="translation"
-                    value="off"
+                    value="uz"
                     className="hidden"
                     onChange={handleType}
                   />
-                  <p className="cursor-pointer pr-2">Off</p>
-                  <span className={translateType === "off" ? "" : "checkmark"}>
+                  <p className="cursor-pointer pr-2">Uz</p>
+                  <span className={translateType === "uz" ? "" : "checkmark"}>
                     &#10003;
                   </span>
                 </label>
@@ -303,9 +331,10 @@ const MoviePage = () => {
   }
 
   function translateState() {
-    if (subtitleType === "on") return false;
-    if (subtitleType === "rewind") return !justRewinded;
-    if (translateType === "uz" || translateType === "on") return false;
+    if (subtitleType === "on" || translateType === "on") return false;
+    if (subtitleType === "rewind" || translateType === "rewind")
+      return !justRewinded;
+    if (translateType === "uz") return false;
     if (translateType === "off" || subtitleType === "off") return true;
   }
 
