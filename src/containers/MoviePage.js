@@ -316,6 +316,7 @@ const MoviePage = () => {
                 type="range"
                 min={0.0}
                 max={1}
+                disabled={isMute}
                 step={Settings.VOLUME_STEP}
                 value={isMute ? 0.0 : volume}
                 defaultValue={Number(localStorage.getItem("volume")) || 0.5}
