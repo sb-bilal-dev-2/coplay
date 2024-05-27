@@ -18,5 +18,5 @@ const schema = new Schema({
 
 module.exports = {
     schema,
-    model: mongoose.model('quizzes', schema)
+    quizzes_model: mongoose.model('quizzes', schema)
 }

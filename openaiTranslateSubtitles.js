@@ -8,10 +8,10 @@ const openai = new OpenAI({ key: process.env.OPENAI_API_KEY });
 require('dotenv').config();
 initCRUDAndDatabase();
 
-const subtitlesModel = require('./schemas/subtitles').model;
-const wordListModel = require('./schemas/wordLists').model;
-const phraseListModel = require('./schemas/phraseLists').model;
-const moviesModel = require('./schemas/movies').model;
+// const subtitlesModel = require('./schemas/subtitles').subtitles_model;
+// const wordListModel = require('./schemas/wordLists').wordLists_model;
+// const phraseListModel = require('./schemas/phraseLists').phraseLists_model;
+// const moviesModel = require('./schemas/movies').movies_model;
 
 const promptres = JSON.parse(fs.readFileSync('./openaisubtitlepromptprocess.json', 'utf-8'))
 console.log(promptres.processedTranslations.length);

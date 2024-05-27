@@ -213,7 +213,7 @@ const MoviePage = () => {
   function renderVideo() {
     const subtitleScale = 2;
     const subtitlePosition = 0.35;
-    const localSubtitleLocale = "uz";
+    const localSubtitleLocale = "ru";
     const localSubtitleScale = 1.6;
     const localSubtitlePosition = 0.3;
     const volumePercent = videoRef.current?.volume * 100;
@@ -325,6 +325,7 @@ const MoviePage = () => {
           videoRef={videoRef}
           currentTime={currentTime}
           title={title}
+          locale="en"
           subtitleScale={isFullScreen() ? subtitleScale : subtitleScale / 2}
           positionY={isFullScreen() ? subtitlePosition : subtitlePosition + 0.2}
           // hideSubtitles={!justRewinded}

@@ -52,7 +52,7 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
     // });
   
     // Create a Mongoose model
-    Model = require(`${SCHEMAS_PATH}/${uri}.js`).model;
+    Model = require(`${SCHEMAS_PATH}/${uri}.js`)[uri + '_model'];
   }
   models[uri] = Model;
 
@@ -126,41 +126,42 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
       res.status(500).send(error.message);
     }
   });
-  app.post(`/${uri}/:id`, async (req, res) => {
-    // Update a single object or multiple objects by ID
-    try {
-      if (!req.params._id) { // if no id provided then update bulk
-        const bulkUpdateOps = req.body.map(update => ({
-          updateOne: {
-            filter: { _id: update._id },
-            update: { $set: update },
-          },
-        }));
-
-        const result = await Model.bulkWrite(bulkUpdateOps);
-        res.json(result);
-      } else { // update single item
-        const id = req.params.id;
-        const updatedData = await Model.findByIdAndUpdate(id, req.body, { new: true });
-        res.json(updatedData);  
-      }
-    } catch (error) {
-      res.status(500).send(error.message);
-    }
-  });
   app.put(`/${uri}`, async (req, res) => {
     // Create a new document or multiple documents
+    const data = req.body; // incoming data
+
+    // Helper function to handle single item
+    const processItem = async (item) => {
+        if (item._id) {
+            // Update existing item
+            return Model.findByIdAndUpdate(item._id, item, { new: true, upsert: true });
+        } else {
+            // Create new item
+            const newItem = new Item(item);
+            return newItem.save();
+        }
+    };
+
+
     try {
-
-      console.log('post', req.body)
+      console.log('put', req.body)
       if (Array.isArray(req.body)) {
-
-        const newData = await Model.insertMany(req.body);
-        res.json(newData);
+        let results;
+        if (Array.isArray(data)) {
+            // If data is an array, process each item
+            const operations = data.map(item => processItem(item));
+            results = await Promise.all(operations);
+        } else {
+            // If data is a single item, process it directly
+            results = await processItem(data);
+        }
+        res.status(200).send(results);
       } else {
-        const newData = new Model(req.body);
-        const savedData = await newData.save();
-        res.json(savedData);
+        console.log('req.body', req.body)
+
+        // const id = req.params.id;
+        const updatedData = await Model.findByIdAndUpdate(req.body, { new: true });
+        res.json(updatedData);  
       }
     } catch (error) {
       console.log('code', error.code)

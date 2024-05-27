@@ -23,11 +23,12 @@ export default function MovieWordCards({ title = '', userId }) {
 
     }
     const handleSwipeLeft = async (lemma) => {
-        const newWord = { lemma, repeatCount: 0, repeatTime: Date.now() }
+        const newWord = { lemma, repeatCount: 7, repeatTime: Date.now() }
         await api().post('/self_words', [newWord])
+
     }
     const handleSwipeRight = async (lemma) => {
-        const newWord = { lemma, repeatCount: 7, repeatTime: Date.now() }
+        const newWord = { lemma, repeatCount: 0, repeatTime: Date.now() }
         await api().post('/self_words', [newWord])
     }
     useEffect(() => {

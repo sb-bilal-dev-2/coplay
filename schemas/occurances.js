@@ -8,6 +8,7 @@ const schema = Schema({
   startTime: Number,
   endTime: Number,
   mediaTitle: String,
+  mediaId: String,
   mediaTitleBase: String,
   context: [String],
   lemmaOccuranceCount: Number,
@@ -28,13 +29,17 @@ const schema = Schema({
   inflection: String,
   isPhrase: Boolean,
   usedWords: String,
+  mediaLang: String,
 }).add({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },
   note: String,
 });
 
+yourSchema.index({ mediaId: 1, startTime: 1 }, { unique: true });
+// error.code === 11000 // duplicate key error
+
 module.exports = {
   schema,
-  model: mongoose.model('occurances', schema)
+  occurance_model: mongoose.model('occurances', schema)
 }

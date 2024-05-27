@@ -1,128 +1,128 @@
 const path = require('path')
 const fs = require('fs')
 const fromVtt = require('subtitles-parser-vtt').fromVtt
-const englishWords50k = require('./en50kAndLemmasReviewed.json')
+const englishWords50k = require('./wordsResearchData/en50kAndLemmasReviewed.json')
 const englishWordsFull = require('./files/en_full.json')
-const en_5kLemmas = require('./en_5kLemmas.json')
-const movieName = process.argv.slice(2)[0] || '';
-const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${movieName}.${'en'}.vtt`);
-const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
-const subtitles = fromVtt(subtitlesVtt, 'ms');
+const en_5kLemmas = require('./wordsResearchData/en_5kLemmas.json')
 const splitUsedWords = require('./splitUsedWords');
-console.log(subtitles.length);
-const ultimateLemmaInfoMap = require('./en50kLemmaInfoMapped.json')
+const ultimateLemmaInfoMap = require('./wordsResearchData/en50kLemmaInfoMapped.json')
 const { initCRUDAndDatabase } = require('./serverCRUD');
-initCRUDAndDatabase()
-const WordsModel = require('./schemas/wordInfos').model;
+const { calculateUsedWordsAndUpdateWordsAccordingly } = require('./processSubtitleWordsDB')
+const WordsModel = require('./schemas/wordInfos').words_model;
+// parseUsedWords()
+initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
-const usedWords = []
-const englishWordsMap = mapItems(englishWordsFull, 'the_word')
+function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
+    let movieTitle = process.argv.slice(2)[0] || mediaInfo.movieTitle;
+    const mediaLang = mediaInfo.mediaLang
+    const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${movieTitle}.${mediaLang}.vtt`);
+    const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
+    const subtitles = fromVtt(subtitlesVtt, 'ms');
+    console.log(subtitles.length);
 
-let subtitlesWithUsedWords = subtitles.map((sbt) => {
-    const usedWordsPerLine = splitUsedWords(sbt.text);
 
-    return {
-        ...sbt,
-        usedWords: usedWordsPerLine
-    }
-})
+    const usedWords = []
+    const englishWordsMap = mapItems(englishWordsFull, 'the_word')
 
-console.log('subtitles', subtitlesWithUsedWords)
+    let subtitlesWithUsedWords = subtitles.map((sbt) => {
+        const usedWordsPerLine = splitUsedWords(sbt.text);
 
-subtitlesWithUsedWords = (async function getUsedLemmasByUsedWords(list) {
-    lemmasByInflection = await getAllLemmasMappedByInflection()
-    console.log('lemmasByInflection', lemmasByInflection)
-    const listWithUsedLemmas = list.map((subtitleLine) => {
         return {
-            ...subtitleLine,
-            usedLemmas: subtitleLine.usedWords.map(inflection => lemmasByInflection[inflection])
+            ...sbt,
+            usedWords: usedWordsPerLine
         }
     })
-    console.log('listWithUsedLemmas', listWithUsedLemmas);
-    fs.writeFileSync(`./files/movieFiles/${movieName}.subtitles.usedWords.json`, JSON.stringify(listWithUsedLemmas))
 
-    return listWithUsedLemmas
-    async function getAllLemmasMappedByInflection() {
-        const lemma = await WordsModel.find();
-        const mappedByInflection = {}
-    
-        lemma.forEach((lemma) => {
-            if (!mappedByInflection[lemma.lemma]) {
-                mappedByInflection[lemma.lemma] = lemma.lemma
-            }
-            if (!lemma.inflections) {
-                mappedByInflection[lemma.lemma] = lemma.lemma
-            } else {
-                lemma.inflections.forEach((infl) => {
-                    mappedByInflection[infl] = lemma.lemma
-                })
+    console.log('subtitles', subtitlesWithUsedWords)
+
+    subtitlesWithUsedWords = (async function getUsedLemmasByUsedWords(list) {
+        lemmasByInflection = await getAllLemmasMappedByInflection()
+        console.log('lemmasByInflection', lemmasByInflection)
+        const listWithUsedLemmas = list.map((subtitleLine) => {
+            return {
+                ...subtitleLine,
+                usedLemmas: subtitleLine.usedWords.map(inflection => lemmasByInflection[inflection])
             }
         })
-    
-        return mappedByInflection
-    }    
-})(subtitlesWithUsedWords)
+        console.log('listWithUsedLemmas', listWithUsedLemmas);
+        await calculateUsedWordsAndUpdateWordsAccordingly(
+            listWithUsedLemmas,
+            mediaInfo
+        )
+        fs.writeFileSync(`${contentFolder}/${movieTitle}.subtitles.usedWords.json`, JSON.stringify(listWithUsedLemmas))
 
-const words = splitUsedWords(subtitles.map(sbt => sbt.text).join('\n'))
+        return listWithUsedLemmas
+        async function getAllLemmasMappedByInflection() {
+            const lemma = await WordsModel.find();
+            const mappedByInflection = {}
 
-usedWords.push(...words)
-const en50kMap = mapItems(englishWords50k, 'the_word')
-const usedWords50k = {}
-const usedWordsPost50k = {}
-const usedLemmas50k = {}
-const en_5kMappedByWords = {}
+            lemma.forEach((lemma) => {
+                if (!mappedByInflection[lemma.lemma]) {
+                    mappedByInflection[lemma.lemma] = lemma.lemma
+                }
+                if (!lemma.inflections) {
+                    mappedByInflection[lemma.lemma] = lemma.lemma
+                } else {
+                    lemma.inflections.forEach((infl) => {
+                        mappedByInflection[infl] = lemma.lemma
+                    })
+                }
+            })
 
-en_5kLemmas.forEach(item => {
-    item.inflections.forEach(({ text }) => {
-        en_5kMappedByWords[text] = item.lemma;
+            return mappedByInflection
+        }
+    })(subtitlesWithUsedWords)
+
+    const words = splitUsedWords(subtitles.map(sbt => sbt.text).join('\n'))
+
+    usedWords.push(...words)
+    const en50kMap = mapItems(englishWords50k, 'the_word')
+    const usedWords50k = {}
+    const usedWordsPost50k = {}
+    const usedLemmas50k = {}
+    const en_5kMappedByWords = {}
+
+    en_5kLemmas.forEach(item => {
+        item.inflections.forEach(({ text }) => {
+            en_5kMappedByWords[text] = item.lemma;
+        })
     })
-})
 
-usedWords.forEach(wrd => {
-    if (en50kMap[wrd]) {
-        if (usedWords50k[wrd]) {
-            usedWords50k[wrd] += 1
-        } else {
-            usedWords50k[wrd] = 1
-        }
-        let lemma = en_5kMappedByWords[wrd]
+    usedWords.forEach(wrd => {
+        if (en50kMap[wrd]) {
+            if (usedWords50k[wrd]) {
+                usedWords50k[wrd] += 1
+            } else {
+                usedWords50k[wrd] = 1
+            }
+            let lemma = en_5kMappedByWords[wrd]
 
-        if (!lemma) {
-            lemma = en50kMap[wrd]
-        }
+            if (!lemma) {
+                lemma = en50kMap[wrd]
+            }
 
-        if (usedLemmas50k[lemma]) {
-            usedLemmas50k[lemma] += 1
-        } else {
-            usedLemmas50k[lemma] = 1
+            if (usedLemmas50k[lemma]) {
+                usedLemmas50k[lemma] += 1
+            } else {
+                usedLemmas50k[lemma] = 1
+            }
+        } else if (!en50kMap[wrd] && englishWordsMap[wrd]) {
+            if (usedWordsPost50k[wrd]) {
+                usedWordsPost50k[wrd] += 1
+            } else {
+                usedWordsPost50k[wrd] = 1
+            }
         }
-    } else if (!en50kMap[wrd] && englishWordsMap[wrd]) {
-        if (usedWordsPost50k[wrd]) {
-            usedWordsPost50k[wrd] += 1
-        } else {
-            usedWordsPost50k[wrd] = 1
-        }
-    }
-})
-
-function mapItems(array, key) {
-    const mappedOccurance = {}
-    array.forEach((item) => {
-        mappedOccurance[item[key]] = item.lemma || item[key];
     })
-    return mappedOccurance
+
+    let usedLemmas50kInfosList = Object.keys(usedLemmas50k).map(lemma => ultimateLemmaInfoMap[lemma])
+
+
+    // fs.writeFileSync(`${contentFolder}/${movieTitle}.usedWords50k.json`, JSON.stringify(usedWords50k))
+    // fs.writeFileSync(`${contentFolder}/${movieTitle}.usedWordsPost50k.json`, JSON.stringify(usedWordsPost50k))
+    fs.writeFileSync(`${contentFolder}/${movieTitle}.usedLemmas50k.json`, JSON.stringify(usedLemmas50k))
+    fs.writeFileSync(`${contentFolder}/${movieTitle}.usedLemmas50kInfosList.json`, JSON.stringify(usedLemmas50kInfosList))
 }
-
-let usedLemmas50kInfosList = Object.keys(usedLemmas50k).map(lemma => ultimateLemmaInfoMap[lemma])
-
-
-// fs.writeFileSync(`./files/movieFiles/${movieName}.usedWords50k.json`, JSON.stringify(usedWords50k))
-// fs.writeFileSync(`./files/movieFiles/${movieName}.usedWordsPost50k.json`, JSON.stringify(usedWordsPost50k))
-fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50k.json`, JSON.stringify(usedLemmas50k))
-fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50kInfosList.json`, JSON.stringify(usedLemmas50kInfosList))
-
-
-
 
 
 // function getUltimateLemmaInfoMap() {
@@ -164,4 +164,12 @@ fs.writeFileSync(`./files/movieFiles/${movieName}.usedLemmas50kInfosList.json`, 
 //     return mapped
 // }
 
-module.exports = { mapItems, splitUsedWords }
+function mapItems(array, key) {
+    const mappedOccurance = {}
+    array.forEach((item) => {
+        mappedOccurance[item[key]] = item.lemma || item[key];
+    })
+    return mappedOccurance
+}
+
+module.exports = { mapItems, parseUsedWords }

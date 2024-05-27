@@ -1,5 +1,5 @@
 import React, { createElement, useCallback, useEffect, useState } from 'react';
-import { fromVtt} from 'subtitles-parser-vtt';
+import { fromVtt } from 'subtitles-parser-vtt';
 import './Subtitles.css'
 import Tooltip from "./Tooltip";
 import { mapForTags } from '../mapForTags';
@@ -36,10 +36,20 @@ const Subtitles = ({
 
         try {
             const response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
-            const subtitleText = await response.data;
-            const newSubtitles = fromVtt(subtitleText, "ms")
-            const withTagsMapped = newSubtitles.map(mapForTags);
-    
+            console.log("RESPONSE SUBB", response.data)
+            let subtitleText = response.data;
+            // const newSubtitles = fromVtt(subtitleText, "ms")
+            if (locale !== 'en') {
+                subtitleText = subtitleText.map((item) => {
+                    return {
+                        ...item,
+                        text: item.promptRes.translation
+                    }
+                })
+            }
+            const withTagsMapped = subtitleText.map(mapForTags);
+            console.log("RESPONSE withTagsMapped", withTagsMapped)
+
             setSubtitles(withTagsMapped)
         } catch (error) {
             console.error('Error fetching subtitles:', error);
@@ -55,7 +65,7 @@ const Subtitles = ({
         const subtitle = subtitles.find((cue) => {
             return currentTime >= cue.startTime / 1000 && currentTime <= cue.endTime / 1000;
         });
-
+        console.log('subtitle ' + locale, subtitle)
         if (subtitle) {
             setCurrentSubtitle(subtitle);
         } else {

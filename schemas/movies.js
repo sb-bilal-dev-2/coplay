@@ -8,6 +8,7 @@ const schema = new Schema({
     required: true,
     unique: true,
   },
+  mediaTitleBase: String,
   label: { type: String },
   description: {
     type: String,
@@ -16,9 +17,7 @@ const schema = new Schema({
   level: {
     type: String,
   },
-  genre: {
-    type: String,
-  },
+  genre: [String],
   mediaUrl: {
     type: String,
   },
@@ -31,7 +30,10 @@ const schema = new Schema({
   subtitleUrl: {
     type: String,
   },
-  mediaLanguage: {
+  hashtags: [String],
+  mediaType: String,
+  series: String,
+  mediaLang: {
     type: String,
   },
   subtitleLabels: [Schema({ id: String, label: String })]
@@ -43,5 +45,5 @@ const schema = new Schema({
 
 module.exports = {
   schema,
-  model: mongoose.model('movies', schema)
+  movies_model: mongoose.model('movies', schema)
 }

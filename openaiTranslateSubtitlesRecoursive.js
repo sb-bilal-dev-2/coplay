@@ -2,16 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const { fromVtt } = require('subtitles-parser-vtt');
 const OpenAI = require('openai');
-const { initCRUDAndDatabase } = require('./serverCRUD');
+require('dotenv').config();
 const openai = new OpenAI({ key: process.env.OPENAI_API_KEY });
 
-require('dotenv').config();
-initCRUDAndDatabase();
 
-const subtitlesModel = require('./schemas/subtitles').model;
-const wordListModel = require('./schemas/wordLists').model;
-const phraseListModel = require('./schemas/phraseLists').model;
-const moviesModel = require('./schemas/movies').model;
+// const subtitlesModel = require('./schemas/subtitles').model;
+// const moviesModel = require('./schemas/movies').model;
 
 // const promptres = JSON.parse(fs.readFileSync('./openaisubtitlepromptprocess.json', 'utf-8'))
 // console.log(promptres.processedTranslations.length);
@@ -54,9 +50,9 @@ Number of tranlated items should be same as number of subtitleLines in the given
 Hightlight no more than 2 words/phrases per subtitle. Prefer highlighting less common words/phrases within the subtitle rather than common ones.
 Do not highlight single word subtitles.
 
-Language: RU.
+Media Language: en.
+Translating Language: ru.
 Movie Context: name Frozen, genre: musical, medieval, fairytale, fantasy.
-Known characters: 
 
 e.g.SAMPLE INPUT JSON
 
@@ -67,7 +63,8 @@ e.g.SAMPLE INPUT JSON
     "Let it go, let it go, can't hold it back anymore.",
     "Nope.",
   ],
-  "language": "RU",
+  "mediaLang": "en"
+  "translateLanguage": "ru",
   "movieContext": "Frozen",
   "genre": ["musical", "medieval", "fairytale", "fantasy"],
   "knownCharacters": []
@@ -103,22 +100,23 @@ e.g. SAMPLE OUTPUT JSON
 }
 REAL INPUT JSON
 `;
-prepareSubtitles();
+// prepareSubtitles();
 
-async function prepareSubtitles(title = 'kung_fu_panda_3', locale = 'en', translateLang = 'ru') {
+async function prepareSubtitles(
+  contentFolder = './files/movieFiles',
+  contentInfo,
+  translateLanguage = ''
+) {
+  if (!contentInfo) {
+    console.error('contentInfo missing at prepareSubtitles')
+  }
   console.log('STARTING...')
   try {
-    const subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${title}.${locale || 'en'}.vtt`);
+    const subtitlesVttPath = path.join(contentFolder, `${contentInfo.mediaTitle}.${mediaLang || 'en'}.vtt`);
     const subtitlesVtt = fs.readFileSync(subtitlesVttPath, 'utf-8');
     const subtitles = fromVtt(subtitlesVtt, 'ms');
 
-    const inputPrompt = {
-      subtitleLines: [],
-      language: translateLang,
-      movieContext: title,
-      genre: ['animation', 'action', 'family', 'comedy', 'adventure'],
-      knownCharacters: [],
-    };
+    const inputPrompt = { ...contentInfo, translateLanguage };
     let processedTranslations = []
     let itemsToProcess = []
 
@@ -142,13 +140,14 @@ async function prepareSubtitles(title = 'kung_fu_panda_3', locale = 'en', transl
             newProcessedSubtitles.translations.shift() // remove first item, as it just served as a context for translation
           }
           processedTranslations.push(...newProcessedSubtitles.translations)
-          // await subtitlesModel.findOneAndUpdate(NEW_ITEM, { subtitles: processedTranslations });
-          // await wordListModel.findOneAndUpdate(NEW_ITEM, { list: usedWords });
-          // await phraseListModel.findOneAndUpdate(NEW_ITEM, { list: usedPhrases });
 
           fs.writeFileSync('./openaisubtitlepromptprocess.json', JSON.stringify(processedTranslations))
           console.log('processedTranslations.length:', processedTranslations.length + ` of ${subtitles.length}`)
           // }
+
+          if (index === subtitles.length - 1) {
+            fs.copyFileSync('./openaisubtitlepromptprocess.json', `${contentFolder}/${contentInfo.mediaTitle}.${contentInfo.translateLang}.subtitles.json`)
+          }
         } catch (err) {
           console.log('ERRORED AT PROMPT: ', err)
           console.log('processedTranslations.length:', processedTranslations.length)
@@ -206,4 +205,8 @@ async function wait(ms) {
   return new Promise((res) => {
     setTimeout(() => res(), ms || 3000)
   })
+}
+
+module.exports = {
+  prepareSubtitles
 }

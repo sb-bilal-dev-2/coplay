@@ -31,7 +31,7 @@ const schema = new Schema({
   subtitleUrl: {
     type: String,
   },
-  mediaLanguage: {
+  mediaLang: {
     type: String,
   },
   subtitleLabels: [Schema({ id: String, label: String })]
@@ -43,5 +43,5 @@ const schema = new Schema({
 
 module.exports = {
     schema,
-    model: mongoose.model('clips', schema)
+    clips_model: mongoose.model('clips', schema)
 }

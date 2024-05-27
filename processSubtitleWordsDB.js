@@ -1,23 +1,23 @@
-const en50kMapped = require('./en50kLemmaInfoMapped.json')
+const en50kMapped = require('./wordsResearchData/en50kLemmaInfoMapped.json')
 const fs = require('fs');
 const { initCRUDAndDatabase } = require('./serverCRUD');
 initCRUDAndDatabase()
 
-const WordsModel = require('./schemas/wordInfos').model;
-const OccurancesModel = require('./schemas/occurances').model;
-const Subtitles = require('./schemas/subtitles').model;
+const WordsModel = require('./schemas/wordInfos').words_model;
+const OccurancesModel = require('./schemas/occurances').occurances_model;
+// const Subtitles = require('./schemas/subtitles').subtitles_model;
 // insertWords()
-calculateUsedWordsAndUpdateWordsAccordingly(
-    JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')),
-    {
-        genras: ['cartoon', 'animals', 'action', 'comedy'],
-        hashtags: ['kung_fu_panda', 'martial_arts'],
-        series: '3rd',
-        mediaTitle: 'kung_fu_panda_3',
-        mediaTitleBase: 'kung_fu_panda',
-        mediaType: 'movie'
-    }
-)
+// calculateUsedWordsAndUpdateWordsAccordingly(
+//     JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')),
+//     {
+//         genras: ['cartoon', 'animals', 'action', 'comedy'],
+//         hashtags: ['kung_fu_panda', 'martial_arts'],
+//         series: '3rd',
+//         mediaTitle: 'kung_fu_panda_3',
+//         mediaTitleBase: 'kung_fu_panda',
+//         mediaType: 'movie'
+//     }
+// )
 
 // getAllLemmas()
 // also insert items en_full which are not in the database 
@@ -33,7 +33,7 @@ async function insertWords() {
     })
     // console.log('lemmas: ', lemmas)
     try {
-        await WordsModel.insertMany(lemmas)
+        // await WordsModel.insertMany(lemmas)
         console.log('done inserting words')
         // calculateUsedWordsAndUpdateWordsAccordingly(JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')))
         // await WordsModel.bulkWrite(words.map(ll => ({ ...ll, occurances: [] })).map(ll => ({
@@ -88,6 +88,7 @@ async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsed
             lemmaOccuranceCount,
             lemmaOccuranceCountOnContext,
             mediaTitle: mediaInfo.mediaTitle,
+            mediaId: mediaInfo.id || mediaInfo._id,
             mediaType: mediaInfo.mediaType,
             mediaTitleBase: mediaInfo.mediaTitleBase,
             startTime,
@@ -105,7 +106,7 @@ async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsed
     })
 
     try {
-        // await OccurancesModel.insertMany(occurances);
+        await OccurancesModel.insertMany(occurances);
         // const bulkWrite = occurances.map((occ) => ({
         //     updateOne: {
         //         filter: {
@@ -190,4 +191,8 @@ async function getAllLemmasMappedByInflection() {
     })
 
     return mappedByInflection
+}
+
+module.exports = {
+    calculateUsedWordsAndUpdateWordsAccordingly
 }

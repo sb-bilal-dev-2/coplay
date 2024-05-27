@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors')
 const range = require('range-parser');
 const bodyParser = require('body-parser');
+const fromVtt = require('subtitles-parser-vtt').fromVtt
 const { initAuth, getUserIdByRequestToken } = require('./serverAuth');
 const { translateVtt } = require('./translateVtt');
 const initCRUDAndDatabase = require('./serverCRUD').initCRUDAndDatabase;
@@ -178,19 +179,35 @@ app.get('/subtitlesv2', async (req, res) => {
 })
 
 app.get('/subtitles', async (req, res) => {
+  const mediaLang = 'en';
+  const defaultTranslateLanguage = 'ru'
   try {
-    const { locale, name, version } = req.query;
-    let subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || 'en'}.vtt`)
-    if (locale !== 'en') {
-      // subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || 'ru'}.subtitles.json`)
+    let { locale, name, version } = req.query;
+    if (!locale) {
+      locale = mediaLang
     }
-    if (!fs.existsSync(subtitlesVttPath) && version === 'translate') {
-      await translateVtt(locale, name)
+    let subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || mediaLang}.vtt`)
+    if (locale !== mediaLang) {
+      subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || defaultTranslateLanguage}.subtitles.json`)
     }
+    console.log('subtitlesVttPath', subtitlesVttPath)
+    // if (!fs.existsSync(subtitlesVttPath) && version === 'translate') {
+    //   await translateVtt(locale, name)
+    // }
     let subtitlesVtt;
     try {
-      subtitlesVtt = await readFile(subtitlesVttPath);
-      console.log('subtitle',subtitlesVtt)
+      if (subtitlesVttPath.indexOf('.vtt') !== -1) {
+        console.log('HEY')
+        subtitlesVtt = await readFile(subtitlesVttPath, 'utf8');
+        console.log('SBT VTT: ', subtitlesVtt)
+
+        subtitlesVtt = fromVtt(subtitlesVtt, 'ms')
+        console.log('SBT VTT: ', subtitlesVtt)
+      } else {
+        console.log('HEY 2')
+
+        subtitlesVtt = await readFile(subtitlesVttPath);
+      }
     } catch (err) {
       res.status(404).send('')
     }
