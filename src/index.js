@@ -27,7 +27,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route exact path="/" element={<HomePage />} />
-      <Route exact path="my_account" element={<Account />} />
+      <Route exact path="/account" element={<Account />} />
       <Route exact path="my_list" element={<MyList />} loader={authenticatedRoute} />
       <Route path="words" element={<WordsPage />} />
       <Route path="movie/:title" element={<MoviePage />}/>

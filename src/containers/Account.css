@@ -1,0 +1,15 @@
+p , h1, span{
+  color: silver;
+}
+
+.account_page {
+  padding-top: 12rem;
+}
+
+.info span, .info i {
+  font-size: 12rm;
+}
+
+.info p {
+  font-size: 14rm;
+}
