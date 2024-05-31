@@ -6,7 +6,7 @@ import { BASE_SERVER_URL } from "../useRequests";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
 import { usePost } from './usePost';
-import { sortByLearningState } from "./MyList";
+import { sortByLearningState } from "../helper/useUserWords";
 
 const Quiz = () => {
   const { title } = useParams();

@@ -13,7 +13,7 @@ import {
 import { store } from './store'
 import { Provider } from 'react-redux'
 
-import WordsPage from './WordsPage';
+import WordsPage from './containers/WordsPage';
 import HomePage from './HomePage';
 import Authentication from './containers/Authentication';
 import CRUDRoute from './containers/CRUDRoute';
