@@ -2,12 +2,12 @@ import React, { useState, useRef, useMemo } from "react";
 import TinderCard from "react-tinder-card";
 import { useRequestUserWordLists } from "../helper/useUserWords";
 import { Link } from "react-router-dom";
+import "./WordsPage.css";
 
 const WordsPage = () => {
   const { learningList, learnedList, repeatingList } =
     useRequestUserWordLists();
 
-  console.log("first", learningList);
   return (
     <div className="flex items-center justify-center flex-col bg-gray-900 h-screen">
       <h1 className="font-bold text-2xl m-10">My words</h1>
@@ -33,6 +33,7 @@ const WordsPage = () => {
   }) {
     const [currentIndex, setCurrentIndex] = useState(list.length - 1);
     const [lastDirection, setLastDirection] = useState();
+    const [fliped, setFliped] = useState(false);
     // used for outOfFrame closure
     const currentIndexRef = useRef(currentIndex);
 
@@ -66,7 +67,7 @@ const WordsPage = () => {
       } else if ((direction = "bottom")) {
         onSwipeBottom(lemma);
       }
-      console.log("swiped")
+      console.log("swiped");
     };
 
     const outOfFrame = (word, idx) => {
@@ -94,12 +95,12 @@ const WordsPage = () => {
     };
 
     const handleDoubleClick = () => {
-      console.log("click");
+      setFliped(!fliped);
     };
 
     return (
       <div className="cardMainContainer">
-        <div className="cardContainer" onClick={handleDoubleClick}>
+        <div className="cardContainer">
           {list.map((character, index) => {
             if (index > currentIndex - 5 && index < currentIndex + 5) {
               return (
@@ -115,41 +116,51 @@ const WordsPage = () => {
                       backgroundImage: "url(" + character?.imageDescUrl + ")",
                     }}
                     className="card"
+                    onDoubleClick={handleDoubleClick}
                   >
-                    <div
-                      className="w-18 h-18 absolute rounded-full z-50 bottom-64 left-8 border-4 border-green-300 shadow"
-                      style={{ background: "rgb(22 163 74)" }}
-                    >
-                      <p className="font-bold text-white text-l m-4">
-                        {list.length - currentIndex}/{list.length}
-                      </p>
-                    </div>
-                    <div
-                      className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-36 border-4 border-red-200 shadow"
-                      style={{ background: "#f98787" }}
-                    >
-                      <p className="font-bold text-white text-l m-4">
-                        {getPercentage(character?.repeatCount)}%
-                      </p>
-                    </div>
-                    <div
-                      className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
-                      style={{ background: "rgb(6 182 212)" }}
-                    >
-                      <Link to={"/quiz/" + character?.lemma.toLowerCase()}>
-                        <i
-                          class="fa fa-play text-white text-l m-4 text-center "
-                          aria-hidden="true"
-                        ></i>
-                      </Link>
-                    </div>
-                    <div className="bg-green-100 w-full">
-                      <h3
-                        style={{ color: "darkgrey" }}
-                        className="text-center relative w-full m-auto"
+                    <div className={`face ${fliped ? "face-front" : ""} `}>
+                      <div
+                        className="w-18 h-18 absolute rounded-full z-50 bottom-64 left-8 border-4 border-green-300 shadow"
+                        style={{ background: "rgb(22 163 74)" }}
                       >
-                        {character?.lemma}
-                      </h3>
+                        <p className="font-bold text-white text-l m-4">
+                          {list.length - currentIndex}/{list.length}
+                        </p>
+                      </div>
+                      <div
+                        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-36 border-4 border-red-200 shadow"
+                        style={{ background: "#f98787" }}
+                      >
+                        <p className="font-bold text-white text-l m-4">
+                          {getPercentage(character?.repeatCount)}%
+                        </p>
+                      </div>
+                      <div
+                        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
+                        style={{ background: "rgb(6 182 212)" }}
+                      >
+                        <Link to={"/quiz/" + character?.lemma.toLowerCase()}>
+                          <i
+                            class="fa fa-play text-white text-l m-4 text-center "
+                            aria-hidden="true"
+                          ></i>
+                        </Link>
+                      </div>
+                      <div className="bg-green-100 w-full">
+                        <h3
+                          style={{ color: "darkgrey" }}
+                          className="text-center relative w-full m-auto"
+                        >
+                          {character?.lemma}
+                        </h3>
+                      </div>{" "}
+                    </div>
+                    <div
+                      className={`face text-gray-950  ${
+                        !fliped ? "face-back" : ""
+                      } `}
+                    >
+                      description description description
                     </div>
                   </div>
                 </TinderCard>
