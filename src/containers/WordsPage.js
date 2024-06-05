@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import TinderCard from "react-tinder-card";
 import { useRequestUserWordLists } from "../helper/useUserWords";
 import { Link } from "react-router-dom";
@@ -57,6 +57,7 @@ const WordsPage = () => {
     // set last direction and decrease current index
     const swiped = (direction, lemma, index) => {
       setLastDirection(direction);
+      setFliped(false);
       updateCurrentIndex(index - 1);
       if (direction === "right") {
         onSwipeRight(lemma);
@@ -158,9 +159,13 @@ const WordsPage = () => {
                     <div
                       className={`face text-gray-950  ${
                         !fliped ? "face-back" : ""
-                      } `}
+                      } border p-2`}
                     >
-                      description description description
+                      <div class="border-2 border-sky-300 rounded-md h-full p-4">
+                        <p className="text-center text-gray-500 font-bold">
+                          description description description
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </TinderCard>
