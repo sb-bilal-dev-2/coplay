@@ -26,7 +26,7 @@ const MoviePage = () => {
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
   const [isMute, setMute] = useState(false);
-
+  const [isFullscreen, setIsFullscreen] = useState(false);
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
   const [currentTime, setCurrentTime] = useState(
@@ -163,7 +163,7 @@ const MoviePage = () => {
       {renderVideo()}
       <div className="section bg-secondary">
         <div className="section-container">
-          <MovieWordCards title={title} userId={userId} />
+          <MovieWordCards title={title} parsedSubtitleId={currentItem.parsedSubtitleId} userId={userId} />
           <Link to={`/quiz/${title}`} className="text-white">
             <b>
               Watch Unnkown Words of {currentItem?.label || title}{" "}
@@ -459,6 +459,7 @@ const MoviePage = () => {
           </div>
         </div>
         <Subtitles
+          subtitleId={currentItem?.parsedSubtitleId}
           videoRef={videoRef}
           currentTime={currentTime}
           title={title}

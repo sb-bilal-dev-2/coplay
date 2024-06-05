@@ -8,6 +8,7 @@ const schema = new Schema({
     required: true,
     unique: true,
   },
+  parsedSubtitleId: String,
   mediaTitleBase: String,
   label: { type: String },
   description: {
@@ -27,7 +28,7 @@ const schema = new Schema({
   heroUrl: {
     type: String
   },
-  subtitleUrl: {
+  originalSubtitleUrl: {
     type: String,
   },
   hashtags: [String],
@@ -35,8 +36,9 @@ const schema = new Schema({
   series: String,
   mediaLang: {
     type: String,
+    required: true,
   },
-  subtitleLabels: [Schema({ id: String, label: String })]
+  subtitleInfos: [Schema({ id: String, title: String, translateLang: String })]
 }).add({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },

@@ -37,10 +37,10 @@ const HomePage = () => {
                 <h2>Word Collections</h2>
                 <HorizontalScrollMenu items={wordCollections} />
             </div>
-            <div className='section bg-gray-900'>
+            {/* <div className='section bg-gray-900'>
                 <h2>Learn by Quiz</h2>
                 <HorizontalScrollMenu items={wordCollections} />
-            </div>
+            </div> */}
             <Footer />
         </div>
     )

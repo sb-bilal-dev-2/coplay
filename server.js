@@ -13,6 +13,7 @@ const initCRUDAndDatabase = require('./serverCRUD').initCRUDAndDatabase;
 const fsPromises = require('fs/promises')
 const ip = require('ip');
 const { default: mongoose } = require('mongoose');
+const { subtitles_model } = require('./schemas/subtitles');
 
 // console.log(ip.address())
 const IPJS = `
@@ -108,11 +109,11 @@ function getContentType(extension) {
 
 //   }
 // })
-app.get('/movie_words/:title', async (req, res) => {
+app.get('/movie_words/:parsedSubtitleId', async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req)
-    console.log('fetching movie words for user_id: ' + user_id)
-    const { title } = req.params;
+    const { parsedSubtitleId } = req.params;
+    console.log('fetching movie words for user_id: ' + user_id, 'parsedSubtitleId: ' + parsedSubtitleId)
     let user;
 
     if (mongoose.Types.ObjectId.isValid(user_id)) {
@@ -121,7 +122,9 @@ app.get('/movie_words/:title', async (req, res) => {
     const userWords = user?.words || []
     let movieWords
     try {
-      movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
+      movieWords = (await subtitles_model.findById(parsedSubtitleId).select({ usedLemmas: 1 })).usedLemmas
+      console.log('movieWords', movieWords)
+      // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
       return res.status(404).send(err.message)
     }
@@ -174,8 +177,21 @@ app.post('/self_words', requireAuth, async (req, res) => {
   }
 })
 
-app.get('/subtitlesv2', async (req, res) => {
+app.get('/subtitles_v2:id', async (req, res) => {
+  const { id: subtitleId } = req.params
+  let { mediaLang = 'en', translateLang, mediaId, name } = req.query;
 
+  let subtitleInfo;
+  try {
+    if (subtitleId) {
+      subtitleInfo = await subtitles_model.findById(subtitleId)
+    } else {
+      subtitleInfo = await subtitles_model.findOne({ mediaTitle: name, mediaLang, translateLang })
+    }
+  } catch(err) {
+    res.status(500).send(err.message)
+  }
+  res.send(subtitleInfo.subtitles)
 })
 
 app.get('/subtitles', async (req, res) => {
@@ -199,10 +215,10 @@ app.get('/subtitles', async (req, res) => {
       if (subtitlesVttPath.indexOf('.vtt') !== -1) {
         console.log('HEY')
         subtitlesVtt = await readFile(subtitlesVttPath, 'utf8');
-        console.log('SBT VTT: ', subtitlesVtt)
+        // console.log('SBT VTT: ', subtitlesVtt)
 
         subtitlesVtt = fromVtt(subtitlesVtt, 'ms')
-        console.log('SBT VTT: ', subtitlesVtt)
+        // console.log('SBT VTT: ', subtitlesVtt)
       } else {
         console.log('HEY 2')
 

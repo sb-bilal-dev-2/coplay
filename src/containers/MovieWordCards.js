@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react'
 import AdvancedSwipe from '../components/AdvancedSwipe'
 import api from '../api'
 
-export default function MovieWordCards({ title = '', userId }) {
+export default function MovieWordCards({ parsedSubtitleId, userId }) {
     const [lemmas, setLemmas] = useState([])
     const [error, set_error] = useState('')
     console.log('userId', userId)
     const fetchLemmas = async () => {
         set_error('')
+        if (!parsedSubtitleId) {
+            return;
+        }
         let fetchedLemmas
         try {
-            fetchedLemmas = await api().get(`/movie_words/${title}?without_user_words=true`);
+            fetchedLemmas = await api().get(`/movie_words/${parsedSubtitleId}?without_user_words=true`);
         } catch (err) {
             set_error(err.message)
         }
@@ -33,7 +36,7 @@ export default function MovieWordCards({ title = '', userId }) {
     }
     useEffect(() => {
         fetchLemmas()
-    }, [userId])
+    }, [userId, parsedSubtitleId])
     console.log('lemmas', lemmas)
     return (
         <div>{!!lemmas.length && (

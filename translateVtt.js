@@ -4,10 +4,7 @@ const gTranslate = require('./gTranslate').gTranslate;
 const mapForTags = require('./src/mapForTags').mapForTags;
 const { readFile } = require('fs/promises');
 
-const MOVIE_TITLE = 'lion-king';
-const TARGET_LANG = 'uz';
-
-// const translateVtt = toVtt(translateVtt(TARGET_LANG, MOVIE_TITLE))
+// const translateVtt = toVtt(translateVtt("ru", "lion-king"))
 // await writeFileSync(MOVIE_DIR + '/' + targetLang + '.vtt', translateVtt)
 
 async function translateVtt(targetLang = "uz", movieTitle) {
@@ -16,7 +13,7 @@ async function translateVtt(targetLang = "uz", movieTitle) {
     // console.log('vttFileContent', vttFileContent)
     const subtitles = fromVtt(vttFileContent, "ms");
     const subtitlesWithTranslations = await Promise.all(subtitles.map(mapForTags).map(async (subtitle) => {
-        let translation = await gTranslate(subtitle.subtitleLines.join(' '), targetLang);
+        let translation = await gTranslate(subtitle.subtitleLines.join(' '), { to: targetLang, from: 'en' });
         if (subtitle.tag) {
             translation = `<${subtitle.tag}>${translation}</${subtitle.tag}>`;
         }

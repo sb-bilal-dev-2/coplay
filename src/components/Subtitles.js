@@ -9,6 +9,7 @@ import api from '../api';
 
 
 const Subtitles = ({
+    subtitleId,
     currentTime,
     title,
     hideSubtitles,
@@ -35,7 +36,12 @@ const Subtitles = ({
         }
 
         try {
-            const response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
+            let response
+            if (subtitleId) {
+                response = await api().get(`/subtitles_v2/${subtitleId}`)
+            } else {
+                response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
+            }
             console.log("RESPONSE SUBB", response.data)
             let subtitleText = response.data;
             // const newSubtitles = fromVtt(subtitleText, "ms")
@@ -43,7 +49,7 @@ const Subtitles = ({
                 subtitleText = subtitleText.map((item) => {
                     return {
                         ...item,
-                        text: item.promptRes.translation
+                        text: item.translation
                     }
                 })
             }
