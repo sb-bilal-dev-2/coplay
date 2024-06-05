@@ -22,6 +22,7 @@ import Account from "./containers/Account";
 import MyList from "./containers/MyList";
 import Quiz from "./containers/Quiz";
 import ErrorBoundary from "./containers/ErrorBoundary";
+import NotFound from "./containers/NotFound";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -41,14 +42,10 @@ const router = createBrowserRouter(
       <Route path="auth/:screen" element={<Authentication />} />
       <Route path="crud/:model" element={<CRUDRoute />} />
       <Route path="quiz/:list" element={<Quiz />} />
+      <Route path="*" element={<NotFound />} />
     </>
   )
 );
-
-function BuggyComponent() {
-  throw new Error("I crashed!");
-  return <div>Buggy Component</div>;
-}
 
 root.render(
   <ErrorBoundary>
