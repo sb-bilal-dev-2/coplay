@@ -55,7 +55,6 @@ root.render(
     <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
       <Provider store={store}>
         <RouterProvider router={router} />
-        <BuggyComponent />
       </Provider>
     </GoogleOAuthProvider>
   </ErrorBoundary>
