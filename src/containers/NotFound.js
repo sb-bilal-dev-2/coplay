@@ -4,35 +4,35 @@ import "./ErrorBoundary.scss";
 export function NotFound() {
   return (
     <div className="error_page">
-      <p class="text">
+      <p className="text">
         Oops..
         <br />
         Something went wrong
       </p>
-      <div class="container">
-        <div class="bg">
-          <div class="light"></div>
+      <div className="container">
+        <div className="bg">
+          <div className="light"></div>
         </div>
-        <div class="ufo">
-          <div class="ufo-bottom"></div>
-          <div class="ufo-top"></div>
-          <div class="ufo-glass">
-            <div class="alien">
-              <div class="alien-eye"></div>
+        <div className="ufo">
+          <div className="ufo-bottom"></div>
+          <div className="ufo-top"></div>
+          <div className="ufo-glass">
+            <div className="alien">
+              <div className="alien-eye"></div>
             </div>
           </div>
         </div>
-        <div class="bed">
-          <div class="mattress"></div>
+        <div className="bed">
+          <div className="mattress"></div>
         </div>
-        <div class="man">
-          <div class="foot"></div>
-          <div class="head">
-            <div class="face"></div>
-            <div class="hair"></div>
+        <div className="man">
+          <div className="foot"></div>
+          <div className="head">
+            <div className="face"></div>
+            <div className="hair"></div>
           </div>
-          <div class="man-body"></div>
-          <div class="arm"></div>
+          <div className="man-body"></div>
+          <div className="arm"></div>
         </div>
       </div>
     </div>

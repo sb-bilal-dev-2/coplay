@@ -47,6 +47,7 @@ const router = createBrowserRouter(
   )
 );
 
+
 root.render(
   <ErrorBoundary>
     <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
