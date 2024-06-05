@@ -4,6 +4,8 @@ import { redirect, useNavigate, useParams } from 'react-router';
 import './Authentication.css'
 import StickyHeader from '../components/StickyHeader';
 import { Link } from 'react-router-dom';
+import { GoogleAuth } from '../components/GoogleAuth';
+
 
 const Authentication = () => {
   const { screen } = useParams()
@@ -58,6 +60,7 @@ const Authentication = () => {
 
   const renderSignUpForm = () => (
     <form className="flex flex-col items-center" onSubmit={handleSignUp}>
+      <GoogleAuth />
       {/* <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "username") && 'input-error'} input mb-2`} placeholder="Username" type="text" name="username" value={formData.username || ''} onChange={handleInputChange} />
       </label> */}

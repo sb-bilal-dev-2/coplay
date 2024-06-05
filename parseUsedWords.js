@@ -7,25 +7,32 @@ const en_5kLemmas = require('./wordsResearchData/en_5kLemmas.json')
 const splitUsedWords = require('./splitUsedWords');
 const ultimateLemmaInfoMap = require('./wordsResearchData/en50kLemmaInfoMapped.json')
 const { initCRUDAndDatabase } = require('./serverCRUD');
-const { calculateUsedWordsAndUpdateWordsAccordingly } = require('./processSubtitleWordsDB')
-const WordsModel = require('./schemas/wordInfos').words_model;
+const { processSubtitleOccurancesDB } = require('./processSubtitleWordsDB')
+const { subtitles_model } = require('./schemas/subtitles')
+const { movies_model } = require('./schemas/movies')
+const { mapForTags } = require('./src/mapForTags')
+const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 // parseUsedWords()
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
-
-function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
-    let movieTitle = process.argv.slice(2)[0] || mediaInfo.movieTitle;
-    const mediaLang = mediaInfo.mediaLang
-    const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${movieTitle}.${mediaLang}.vtt`);
+const DEFAULT_MEDIA_LANG = 'en'
+async function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
+    let mediaTitle = process.argv.slice(2)[0] || mediaInfo.title;
+    const mediaLang = mediaInfo.mediaLang || DEFAULT_MEDIA_LANG;
+    const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${mediaTitle}.${mediaLang}.vtt`);
+    if (!fs.existsSync(subtitlePath)) {
+        console.error('SUBTITLE_PARSER: no vtt for - ' + subtitlePath);
+        return;
+    }
     const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
     const subtitles = fromVtt(subtitlesVtt, 'ms');
-    console.log(subtitles.length);
-
-
+    console.log("subtitles.length", subtitles);
+    if (!subtitles) return;
     const usedWords = []
     const englishWordsMap = mapItems(englishWordsFull, 'the_word')
 
     let subtitlesWithUsedWords = subtitles.map((sbt) => {
-        const usedWordsPerLine = splitUsedWords(sbt.text);
+        const taglessText = mapForTags(sbt).taglessText || mapForTags(sbt).text
+        const usedWordsPerLine = splitUsedWords(taglessText);
 
         return {
             ...sbt,
@@ -33,27 +40,32 @@ function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
         }
     })
 
-    console.log('subtitles', subtitlesWithUsedWords)
+    // console.log('subtitles', subtitlesWithUsedWords)
 
-    subtitlesWithUsedWords = (async function getUsedLemmasByUsedWords(list) {
+    subtitlesWithUsedWords = await (async function getUsedLemmasByUsedWords(list) {
         lemmasByInflection = await getAllLemmasMappedByInflection()
-        console.log('lemmasByInflection', lemmasByInflection)
-        const listWithUsedLemmas = list.map((subtitleLine) => {
+        // console.log('lemmasByInflection', lemmasByInflection)
+        const subtitlesWithUsedLemmas = list.map((subtitleLine) => {
+
             return {
                 ...subtitleLine,
                 usedLemmas: subtitleLine.usedWords.map(inflection => lemmasByInflection[inflection])
             }
         })
-        console.log('listWithUsedLemmas', listWithUsedLemmas);
-        await calculateUsedWordsAndUpdateWordsAccordingly(
-            listWithUsedLemmas,
-            mediaInfo
-        )
-        fs.writeFileSync(`${contentFolder}/${movieTitle}.subtitles.usedWords.json`, JSON.stringify(listWithUsedLemmas))
+        // console.log('subtitlesWithUsedLemmas', subtitlesWithUsedLemmas);
+        try {
+            await processSubtitleOccurancesDB(
+                subtitlesWithUsedLemmas,
+                mediaInfo
+            )
+            // fs.writeFileSync(`${contentFolder}/${mediaTitle}.subtitles.usedWords.json`, JSON.stringify(subtitlesWithUsedLemmas))            
+        } catch (err) {
+            console.log('OCCURANCE: unhandled error ', err)
+        }
 
-        return listWithUsedLemmas
+        return subtitlesWithUsedLemmas
         async function getAllLemmasMappedByInflection() {
-            const lemma = await WordsModel.find();
+            const lemma = await WordInfosModel.find();
             const mappedByInflection = {}
 
             lemma.forEach((lemma) => {
@@ -79,7 +91,7 @@ function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
     const en50kMap = mapItems(englishWords50k, 'the_word')
     const usedWords50k = {}
     const usedWordsPost50k = {}
-    const usedLemmas50k = {}
+    const lemmaOccuranceCount = {}
     const en_5kMappedByWords = {}
 
     en_5kLemmas.forEach(item => {
@@ -101,10 +113,10 @@ function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
                 lemma = en50kMap[wrd]
             }
 
-            if (usedLemmas50k[lemma]) {
-                usedLemmas50k[lemma] += 1
+            if (lemmaOccuranceCount[lemma]) {
+                lemmaOccuranceCount[lemma] += 1
             } else {
-                usedLemmas50k[lemma] = 1
+                lemmaOccuranceCount[lemma] = 1
             }
         } else if (!en50kMap[wrd] && englishWordsMap[wrd]) {
             if (usedWordsPost50k[wrd]) {
@@ -115,15 +127,30 @@ function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
         }
     })
 
-    let usedLemmas50kInfosList = Object.keys(usedLemmas50k).map(lemma => ultimateLemmaInfoMap[lemma])
+    let usedLemmas50kInfosList = Object.keys(lemmaOccuranceCount).map(lemma => ultimateLemmaInfoMap[lemma])
 
-
-    // fs.writeFileSync(`${contentFolder}/${movieTitle}.usedWords50k.json`, JSON.stringify(usedWords50k))
-    // fs.writeFileSync(`${contentFolder}/${movieTitle}.usedWordsPost50k.json`, JSON.stringify(usedWordsPost50k))
-    fs.writeFileSync(`${contentFolder}/${movieTitle}.usedLemmas50k.json`, JSON.stringify(usedLemmas50k))
-    fs.writeFileSync(`${contentFolder}/${movieTitle}.usedLemmas50kInfosList.json`, JSON.stringify(usedLemmas50kInfosList))
+    // fs.writeFileSync(`${contentFolder}/${mediaTitle}.usedWords50k.json`, JSON.stringify(usedWords50k))
+    // fs.writeFileSync(`${contentFolder}/${mediaTitle}.usedWordsPost50k.json`, JSON.stringify(usedWordsPost50k))
+    // fs.writeFileSync(`${contentFolder}/${mediaTitle}.lemmaOccuranceCount.json`, JSON.stringify(lemmaOccuranceCount))
+    // fs.writeFileSync(`${contentFolder}/${mediaTitle}.usedLemmas50kInfosList.json`, JSON.stringify(usedLemmas50kInfosList))
+    const newParsedSubtitle = {
+        mediaLang,
+        title: mediaLang,
+        mediaId: mediaInfo._id,
+        mediaTitle,
+        usedLemmas: usedLemmas50kInfosList,
+        subtitles: subtitlesWithUsedWords
+    }
+    let parsedSubtitle;
+    try {
+        parsedSubtitle = (await subtitles_model.create(newParsedSubtitle))
+    } catch(err) {
+        console.error('PARSER ERROR at' + mediaLang, err)
+    }
+    console.log('parsedSubtitle id', parsedSubtitle?._id)
+    await movies_model.findByIdAndUpdate(mediaInfo._id, { parsedSubtitleId: parsedSubtitle._id })
+    return parsedSubtitle?._id
 }
-
 
 // function getUltimateLemmaInfoMap() {
 //     const mapped = {}

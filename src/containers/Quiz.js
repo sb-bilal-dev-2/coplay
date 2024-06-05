@@ -9,7 +9,7 @@ import { usePost } from './usePost';
 import { sortByLearningState } from "../helper/useUserWords";
 
 const Quiz = () => {
-  const { title } = useParams();
+  const { list } = useParams();
   const [isShowingDefinitions, set_isShowingDefinitions] = useState();
   const [practicingWords, set_practicingWords] = useState([]);
   const [practicingWordIndex, set_practicingWordIndex] = useState(0);
@@ -24,12 +24,14 @@ const Quiz = () => {
       if (wordData.length) {
         set_occurances(wordData);
         const firstOccurance = wordData[0];
+        console.log('firstOccurance', firstOccurance)
         const firstOccuranceSrc =
           BASE_SERVER_URL +
           "/" +
-          firstOccurance.mediaType +
+          (firstOccurance.mediaType || 'movie') +
           "?name=" +
           firstOccurance.mediaTitle;
+        console.log('firstOccuranceSrc', firstOccuranceSrc)
         set_currentVideoSrc(firstOccuranceSrc);
       }
     } catch (err) {
@@ -41,6 +43,9 @@ const Quiz = () => {
     updateRepeatCount(practicingWords[practicingWordIndex])
     const nextPracticingWord = practicingWords[practicingWordIndex + 1];
     set_occurances([]);
+    if (!videoRef.current.paused) {
+      videoRef.current.pause()
+    }
     set_practicingWordIndex(practicingWordIndex + 1);
     console.log("nextPracticingWord?.lemma", nextPracticingWord?.lemma);
     await requestCurrentLemmaInfo(nextPracticingWord?.lemma);
@@ -74,12 +79,15 @@ const Quiz = () => {
     try {
       userWords = (await api().get("/get-user?allProps=1"))?.data
         ?.words;
-      const { repeatingList, learningList } = sortByLearningState(userWords);
+      const { repeatingList, learningList, learnedList } = sortByLearningState(userWords);
+    console.log('learnedList', learnedList)
+    console.log('repeatingList', repeatingList)
+    console.log('learningList', learningList)
 
-    if (title === "repeating") {
+    if (list === "repeating") {
       userWords = repeatingList;
     }
-    if (title === "learning") {
+    if (list === "learning") {
       userWords = learningList;
     }
       console.log('repeatingList', repeatingList)
@@ -89,6 +97,7 @@ const Quiz = () => {
     }
 
     const newCurrentLemma = userWords[0]?.lemma;
+    console.log('newCurrentLemma', newCurrentLemma)
     set_practicingWords(userWords);
     await requestCurrentLemmaInfo(newCurrentLemma);
   };
@@ -104,7 +113,9 @@ const Quiz = () => {
       `${BASE_SERVER_URL}/${nextOccurance.mediaType}?name=${nextOccurance.mediaTitle}`
     );
     videoRef.current.currentTime = nextOccurance.startTime / 1000;
-    videoRef.current.play();
+    if (videoRef.current && videoRef.current.paused) {
+      videoRef.current.play();
+    }
     set_playingOccuranceIndex(next_playingOccuranceIndex);
   };
 
@@ -116,7 +127,9 @@ const Quiz = () => {
     if (occurances.length) {
       console.log("currentVideoSrc", currentVideoSrc);
       videoRef.current.load();
-      videoRef.current.play();
+      if (videoRef.current && videoRef.current.paused) {
+        videoRef.current.play();
+      }
     }
   }, [currentVideoSrc, occurances.length]);
   console.log('occurances', occurances)
@@ -159,6 +172,7 @@ const Quiz = () => {
     postUserWords('/self_words', [usersPracticingWord])
   }
 
+  // const pauseTimeoutRef = useRef()
   const handleTimeUpdate = async () => {
     if (
       videoRef.current.currentTime - 0.1 >=
@@ -167,7 +181,9 @@ const Quiz = () => {
       audioRef.current.play();
       pauseClick();
       await new Promise((resolve) => setTimeout(resolve, 100));
-      videoRef.current.pause();
+      if (!videoRef.current.paused) {
+        videoRef.current.pause();
+      }
       if (playingOccuranceIndex + 1 === occurances.length) {
         if (practicingWordIndex + 1 === practicingWords.length) {
           updateRepeatCount()
@@ -210,7 +226,7 @@ const Quiz = () => {
           }}
           onTimeUpdate={handleTimeUpdate}
         >
-          <source src={currentVideoSrc + "&quality=1080.ultra"} />
+          <source src={currentVideoSrc} />
         </video>
         <div className="Subtitles text-center text-white px-8 text-lg">
           <b>
@@ -236,7 +252,9 @@ const Quiz = () => {
             onClick={() => {
               videoRef.current.currentTime =
                 occurances[playingOccuranceIndex].startTime / 1000;
-              videoRef.current.play();
+              if (videoRef.current && videoRef.current.paused) {
+                videoRef.current.play();
+              }
             }}
           >
             <b>Replay</b>

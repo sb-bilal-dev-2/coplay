@@ -1,7 +1,8 @@
 const fs = require('fs')
 const { MAIN_LANGUAGES } = require('./mainProcessors/newLanguages.js')
 const { prepareSubtitles } = require('./openaiTranslateSubtitlesRecoursive.js')
-const { parseUsedWords } = require('./parseUsedWords.js')
+const { parseUsedWords } = require('./parseUsedWords.js');
+const { subtitles_model } = require('./schemas/subtitles.js');
 // Runs for all new content if those don't have processed files
 const movies_model = require('./schemas/movies').movies_model;
 
@@ -14,74 +15,65 @@ const movies_model = require('./schemas/movies').movies_model;
 processNewContent()
 
 async function processNewContent(contentFolder = './files/movieFiles', mediaLang = 'en') {
-    let { missingMediaTranslations, missingMediaParsedWords, mediaInfoMap } = await getNewContentTitles(contentFolder, mediaLang)
-
-    // missingMediaParsedWords.forEach(mediaTitle => {
-    //     const mediaInfo = mediaInfoMap[mediaTitle]
-    //     parseUsedWords(contentFolder, mediaInfo)
-    // })
-    // missingMediaTranslations.forEach(([mediaTitle, translateLang]) => {
-    //     const mediaInfo = mediaInfoMap[mediaTitle]
-    //     // prepareSubtitles(contentFolder, mediaInfo, translateLang)
-    // })
+    let { missingMediaTranslations, missingMediaParsedWords } = await getNewContentTitles(contentFolder, mediaLang)
+    const newParsedSubtitlesMap = {}
+    await Promise.all(missingMediaParsedWords.map(async mediaInfo => {
+        const mediaTitle = mediaInfo.title
+        // console.log('mediaTitle: ', mediaTitle)
+        // newParsedSubtitlesMap[mediaInfo.title] = await parseUsedWords(contentFolder, mediaInfo)
+    }))
+    missingMediaTranslations = [[{
+        mediaCharacters: [],
+        genre: [],
+        hashtags: [],
+        _id: '65e820068e299f802746f28c',
+        title: 'kung_fu_panda_3',
+        label: 'Kung Fu Panda 3',
+        subtitleLabels: [],
+        __v: 0,
+        parsedSubtitleId: '6658ea6d910945dd12a26715',
+        subtitleInfos: []
+    }, 'uz']]
+    await Promise.all(missingMediaTranslations.map(async ([mediaInfo, translateLang]) => {
+        const mediaTitle = mediaInfo.title
+        console.log('mediaTitle: ', mediaTitle)
+        const newSubtitleId = await prepareSubtitles(contentFolder, mediaInfo, translateLang, newParsedSubtitlesMap[mediaInfo.title])
+        console.log('newSubtitleId', newSubtitleId)
+        return newSubtitleId
+    }))
 }
 
 async function getNewContentTitles(contentFolder, mediaLang = 'en') {
-    const allContents = fs.readdirSync(contentFolder)
-    let allMedia = allContents.filter((directory) => directory.includes('.mp4'))
-    const missingMediaSubtitles = []
-    const missingMediaTranslationsMap = {}
-    const mediaInfoMap = {}
+    // const allContents = fs.readdirSync(contentFolder)
+    // let allMedia = allContents.filter((directory) => directory.includes('.mp4'))
+
+    const allMedia = await movies_model.find({})
     const missingMediaTranslations = []
     const missingMediaParsedWords = []
 
-    const allMediaMap = {}
-    allMedia.forEach(directory => {
-        console.log('directory', directory)
-
-        const mediaName = directory.split('.')[0]
-        allMediaMap[mediaName] = true
-    })
-    allMedia = Object.keys(allMediaMap)
     console.log("allMedia ", allMedia)
-    const movieInfos = await movies_model.find().where('title').in(allMedia).exec();
 
-    movieInfos.forEach(movieInfo => {
-        mediaInfoMap[movieInfo.title] = movieInfo; 
-    })
-
-    allMedia.forEach((mediaName) => {
-        if (!fs.existsSync(`${contentFolder}/${mediaName}.${mediaLang}.vtt`)) {
-            missingMediaSubtitles.push(mediaName)
+    allMedia.forEach((mediaInfo) => {
+        if (!mediaInfo.parsedSubtitleId) {
+            missingMediaParsedWords.push(mediaInfo)
         }
-
-        if (!fs.existsSync(`${contentFolder}/${mediaName}.subtitles.usedWords.json`)) {
-            missingMediaParsedWords.push(mediaName)
-        }
-
+        const subtitleTranslationsMap = {}
+        mediaInfo?.translations?.forEach(translationTitle => { subtitleTranslationsMap[translationTitle] })
         MAIN_LANGUAGES.forEach((language) => {
             if (language !== mediaLang) {
-                console.log('M L: ', mediaName, language)
-                if (!fs.existsSync(`${contentFolder}/${mediaName}.${language}.subtitles.json`)) {
-                    if (!missingMediaTranslationsMap[mediaName]) {
-                        missingMediaTranslationsMap[mediaName] = {}
-                    }
-                    missingMediaTranslations.push([mediaName, language])
-                    missingMediaTranslationsMap[mediaName][language] = true
+                console.log('M L: ', mediaInfo.title, language)
+                if (!subtitleTranslationsMap[language]) {
+                    missingMediaTranslations.push([mediaInfo, language])
                 }
             }
         })
     })
 
-    console.log('movieInfos length: ', movieInfos.map(i => i.title))
-    console.log('No Subtitles for', missingMediaSubtitles)
-    console.log('No Translations and highlights for', missingMediaTranslations)
+    console.log('No Translations and highlights for', missingMediaTranslations.map(item => item[0]?.title + ', ' + item[1]))
     console.log('No Parsed Words for', missingMediaParsedWords)
 
     return {
-        missingMediaSubtitles,
         missingMediaTranslations,
         missingMediaParsedWords,
-        mediaInfoMap
     }
 }

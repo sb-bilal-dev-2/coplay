@@ -8,18 +8,15 @@
 const MAIN_LANGUAGES = ['uz', 'ru', 'en', 'tr']
 const LEARNING_LANGUAGES = ['kr', 'ru', 'en', 'tr', 'cn']
 
-function processNewLanguages() {
-    TRANSLATING_LANGUAGES.forEach((langCode) => {
-        console.log('langCode', langCode)
-    })
+async function processNewLearningLanguage(langCode) {
+    await createWordInfoCollection()
+    await insertWords()
+    await processNewWords()
+    await newContent()
 }
 
-function processNewLearningLanguage() {
-
-}
-
-function processNewMainLanguage() {
-
+async function processNewMainLanguage(langCode) {
+    await newContent()
 }
 
 module.exports = { MAIN_LANGUAGES, LEARNING_LANGUAGES }

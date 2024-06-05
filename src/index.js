@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css';
 import MoviePage from './containers/MoviePage';
 import reportWebVitals from './reportWebVitals';
@@ -30,19 +31,21 @@ const router = createBrowserRouter(
       <Route exact path="/account" element={<Account />} />
       <Route exact path="my_list" element={<MyList />} loader={authenticatedRoute} />
       <Route path="words" element={<WordsPage />} />
-      <Route path="movie/:title" element={<MoviePage />}/>
+      <Route path="movie/:title" element={<MoviePage />} />
       <Route path='auth/:screen' element={<Authentication />} />
       <Route path='crud/:model' element={<CRUDRoute />} />
-      <Route path='quiz/:title' element={<Quiz />} />
+      <Route path='quiz/:list' element={<Quiz />} />
     </>
   )
 )
 
 
 root.render(
-  <Provider store={store}>
-    <RouterProvider router={router} />
-  </Provider>
+  <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  </GoogleOAuthProvider>
 );
 
 function authenticatedRoute() {

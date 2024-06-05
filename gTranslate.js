@@ -1,7 +1,13 @@
-// Imports the Google Cloud client library
+/**
+ * Imports the Google Cloud client library
+ * Trnslt Docs @see https://cloud.google.com/nodejs/docs/reference/translate/latest/translate/v2.translate
+ * API KEY DOC @see https://cloud.google.com/api-keys/docs/overview
+ * Console @see https://console.cloud.google.com/apis
+*/
+
 const { Translate } = require('@google-cloud/translate').v2;
+
 require('dotenv').config()
-// Creates a client
 const translate = new Translate({ key: process.env.GOOGLE_API_KEY });
 
 async function gTranslate(text, target) {

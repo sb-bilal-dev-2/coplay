@@ -3,11 +3,11 @@ const fs = require('fs');
 const { initCRUDAndDatabase } = require('./serverCRUD');
 initCRUDAndDatabase()
 
-const WordsModel = require('./schemas/wordInfos').words_model;
+const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 const OccurancesModel = require('./schemas/occurances').occurances_model;
 // const Subtitles = require('./schemas/subtitles').subtitles_model;
 // insertWords()
-// calculateUsedWordsAndUpdateWordsAccordingly(
+// processSubtitleOccurancesDB(
 //     JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')),
 //     {
 //         genras: ['cartoon', 'animals', 'action', 'comedy'],
@@ -33,10 +33,10 @@ async function insertWords() {
     })
     // console.log('lemmas: ', lemmas)
     try {
-        // await WordsModel.insertMany(lemmas)
+        // await WordInfosModel.insertMany(lemmas)
         console.log('done inserting words')
-        // calculateUsedWordsAndUpdateWordsAccordingly(JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')))
-        // await WordsModel.bulkWrite(words.map(ll => ({ ...ll, occurances: [] })).map(ll => ({
+        // processSubtitleOccurancesDB(JSON.parse(fs.readFileSync(`./files/movieFiles/${'kung_fu_panda_3'}.subtitles.usedWords.json`, 'utf-8')))
+        // await WordInfosModel.bulkWrite(words.map(ll => ({ ...ll, occurances: [] })).map(ll => ({
         //     updateOne: {
         //         filter: {
         //             lemma: ll.lemma
@@ -67,30 +67,32 @@ function insertAllSubtitles() {
         }
 
         // console.log('Subtitles Model', Subtitles)
-        // console.log('Words Model', WordsModel)
+        // console.log('Words Model', WordInfosModel)
 
         // SubtitlesModel.insert(subtitleObject)
     })
 }
-async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsedWords, mediaInfo) {
+async function processSubtitleOccurancesDB(subtitleLinesWithUsedWords, mediaInfo) {
+    console.log('subtitleLinesWithUsedWords: ', mediaInfo, subtitleLinesWithUsedWords.length)
     const lemmasByInflection = await getAllLemmasMappedByInflection()
     const genres = mediaInfo?.genres
     const hashtags = mediaInfo?.hashtags
     const usedWords = getUsedWordsBySubtitleLines(subtitleLinesWithUsedWords)
-    const occurances = usedWords.map(({ word: inflection, startTime, endTime, context, contextSubtitles }, index) => {
+    let occurancesMap = {}
+    usedWords.forEach(({ word: inflection, startTime, endTime, context, contextSubtitles }) => {
         const lemma = lemmasByInflection[inflection] || inflection
         const lemmaOccuranceCount = contextSubtitles[1]?.usedLemmas?.filter(usedLemma => usedLemma === lemma).length
         const lemmaOccuranceCountOnContext = contextSubtitles[1]?.usedLemmas?.concat(contextSubtitles[0]?.usedLemmas).concat(contextSubtitles[2]?.usedLemmas).filter(usedLemma => usedLemma === lemma).length
-
+        const mediaId = mediaInfo.id || mediaInfo._id;
         const occurance = {
             context,
             contextSubtitles,
             lemmaOccuranceCount,
             lemmaOccuranceCountOnContext,
-            mediaTitle: mediaInfo.mediaTitle,
-            mediaId: mediaInfo.id || mediaInfo._id,
+            mediaTitle: mediaInfo.title,
+            mediaId,
             mediaType: mediaInfo.mediaType,
-            mediaTitleBase: mediaInfo.mediaTitleBase,
+            mediaTitleBase: mediaInfo.titleBase,
             startTime,
             endTime,
             genres,
@@ -100,11 +102,14 @@ async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsed
             lemma
         }
 
-        console.log('occurance: ', inflection, occurance)
-        return occurance;
-        // return 
+        // console.log('occurance: ', inflection, occurance)
+        const occKey = lemma + startTime + mediaId
+        if (!occurancesMap[occKey]) {
+            occurancesMap[occKey] = occurance
+        }
     })
-
+    const occurances = Object.values(occurancesMap); occurancesMap = {};
+    console.log('occurances.length', occurances.length)
     try {
         await OccurancesModel.insertMany(occurances);
         // const bulkWrite = occurances.map((occ) => ({
@@ -120,9 +125,10 @@ async function calculateUsedWordsAndUpdateWordsAccordingly(subtitleLinesWithUsed
         //     }
         // }))
         // await OccurancesModel.bulkWrite(bulkWrite);
-        console.log('bulk update successful')
+        console.log('OCCURANCES: success at bulk insert for - ' + mediaInfo?.title)
     } catch (err) {
-        console.log('errored at bulk: ', err)
+        console.log('OCCURANCES: error at bulk insert for - ' + mediaInfo?.title, err)
+        throw new Error(err)
     }
 }
 
@@ -136,7 +142,7 @@ function getUsedWordsBySubtitleLines(subtitleLines) {
         // console.log('context', context)
         sLine.usedWords.forEach(usedWord => {
             usedWords.push({
-                context: contextSubtitles.map(ctx => ctx?.text),
+                context: contextSubtitles.map(ctx => ctx?.taglessText || ctx?.text),
                 contextSubtitles,
                 startTime: sLine.startTime,
                 endTime: sLine.endTime,
@@ -165,15 +171,14 @@ function getContextSubtitles(previousCurrentNextSubtitleLines) {
 }
 
 async function getAllLemmas() {
-    const lemmas = await WordsModel.find();
+    const lemmas = await WordInfosModel.find();
     console.log('lemmas', lemmas)
 
     return lemmas
 }
 
 async function getAllLemmasMappedByInflection() {
-    const lemma = await WordsModel.find();
-    console.log('lemma', lemma)
+    const lemma = await WordInfosModel.find();
     const mappedByInflection = {}
 
     lemma.forEach((lemma) => {
@@ -194,5 +199,5 @@ async function getAllLemmasMappedByInflection() {
 }
 
 module.exports = {
-    calculateUsedWordsAndUpdateWordsAccordingly
+    processSubtitleOccurancesDB
 }

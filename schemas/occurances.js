@@ -36,10 +36,10 @@ const schema = Schema({
   note: String,
 });
 
-schema.index({ mediaId: 1, startTime: 1 }, { unique: true });
+schema.index({ mediaId: 1, startTime: 1, lemma: 1 }, { unique: true });
 // error.code === 11000 // duplicate key error
 
 module.exports = {
   schema,
-  occurance_model: mongoose.model('occurances', schema)
+  occurances_model: mongoose.model('occurances', schema)
 }
