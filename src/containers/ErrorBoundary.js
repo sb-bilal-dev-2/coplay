@@ -20,7 +20,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <>
+        <div className="error_page">
           <NetworkAlert />
           <p class="text">
             Oops..
@@ -53,7 +53,7 @@ class ErrorBoundary extends React.Component {
               <div class="arm"></div>
             </div>
           </div>
-        </>
+        </div>
       );
     }
 
