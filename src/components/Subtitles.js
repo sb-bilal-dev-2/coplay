@@ -27,7 +27,7 @@ const Subtitles = ({
     const [currentSubtitle, setCurrentSubtitle] = useState({});
     const [selectionText, setSelectionText] = useState("")
     const [editingValue, setEditingValue] = useState();
-
+    console.log('subtitles id ' + locale, subtitles)
     const fetchSubtitles = async () => {
         const subtitleFromLocalStorage = localStorage.getItem(['updatedSubtitle', title, locale].join('.'))
         if (subtitleFromLocalStorage) {
@@ -37,26 +37,25 @@ const Subtitles = ({
 
         try {
             let response
-            if (subtitleId) {
-                response = await api().get(`/subtitles_v2/${subtitleId}`)
-            } else {
-                response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
+            if (!subtitleId) {
+                return;
             }
-            console.log("RESPONSE SUBB", response.data)
+            response = await api().get(`/subtitles_v2?subtitleId=${subtitleId}`)
+            // response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
             let subtitleText = response.data;
             // const newSubtitles = fromVtt(subtitleText, "ms")
             if (locale !== 'en') {
                 subtitleText = subtitleText.map((item) => {
                     return {
                         ...item,
-                        text: item.translation
+                        text: item.translation,
+                        subtitleLines: item.translation?.split('\n')
                     }
                 })
             }
-            const withTagsMapped = subtitleText.map(mapForTags);
-            console.log("RESPONSE withTagsMapped", withTagsMapped)
+            console.log("RESPONSE SUBB " + locale, subtitleText)
 
-            setSubtitles(withTagsMapped)
+            setSubtitles(subtitleText)
         } catch (error) {
             console.error('Error fetching subtitles:', error);
         }
@@ -64,7 +63,7 @@ const Subtitles = ({
 
     useEffect(() => {
         fetchSubtitles();
-    }, [])
+    }, [subtitleId])
 
     const handleTimeUpdate = useCallback(() => {
         //Find the subtitle that matches the current time
@@ -152,7 +151,7 @@ const Subtitles = ({
                     <textarea
                         className='editingText'
                         defaultValue={editingValue}
-                        onChange={handleEditareaChange}j
+                        onChange={handleEditareaChange} j
                     />
                     <br />
                     <button onClick={handleEndEditing}>Cancel</button>

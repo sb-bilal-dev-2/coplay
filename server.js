@@ -123,7 +123,7 @@ app.get('/movie_words/:parsedSubtitleId', async (req, res) => {
     let movieWords
     try {
       movieWords = (await subtitles_model.findById(parsedSubtitleId).select({ usedLemmas: 1 })).usedLemmas
-      console.log('movieWords', movieWords)
+      console.log('movieWords?.length', movieWords?.length)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
       return res.status(404).send(err.message)
@@ -177,14 +177,15 @@ app.post('/self_words', requireAuth, async (req, res) => {
   }
 })
 
-app.get('/subtitles_v2:id', async (req, res) => {
-  const { id: subtitleId } = req.params
+app.get('/subtitles_v2', async (req, res) => {
+  const { subtitleId } = req.query
+  console.log('SUBTITLES requested id', subtitleId)
   let { mediaLang = 'en', translateLang, mediaId, name } = req.query;
-
   let subtitleInfo;
   try {
     if (subtitleId) {
       subtitleInfo = await subtitles_model.findById(subtitleId)
+      console.log('subtitleInfo', subtitleInfo)
     } else {
       subtitleInfo = await subtitles_model.findOne({ mediaTitle: name, mediaLang, translateLang })
     }

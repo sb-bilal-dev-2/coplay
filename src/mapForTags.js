@@ -4,16 +4,17 @@ const mapForTags = (subtitleItem) => {
     let text = subtitleItem.text;
     text = text.replaceAll('...<i>', '<i>...')
     const match = text.match(regex);
-    subtitleItem.subtitleLines = subtitleItem.text.split('\n');
+    const subtitleLines = subtitleItem.text.split('\n')
+
     if (match) { // tag match e.g. <i>Cool\n let me check</i> add tag, taglessText
         subtitleItem.tag = match[0].slice(0, match[0].length - 1).slice(1); // extract element name e.g. <i> -> i
         const tagRemovedFromTheEnd = text.slice(0, text.length - match[0].length - 1);
         subtitleItem.taglessText = tagRemovedFromTheEnd.replaceAll(match[0], "").replaceAll('</' + subtitleItem.tag + '>', "");
         subtitleItem.subtitleLines = subtitleItem.taglessText.split('\n');
     }
+    console.log('subtitleItem', subtitleLines)
 
-
-    return subtitleItem;
+    return { ...subtitleItem, subtitleLines };
     /**
      * for the text: <i>Cool\n let me check </i>
      * {

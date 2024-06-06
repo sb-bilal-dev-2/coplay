@@ -4,6 +4,7 @@ const { fromVtt } = require('subtitles-parser-vtt');
 const OpenAI = require('openai');
 const { subtitles_model } = require('./schemas/subtitles');
 const { gTranslate } = require('./gTranslate');
+const { movies_model } = require('./schemas/movies');
 require('dotenv').config();
 const openai = new OpenAI({ key: process.env.OPENAI_API_KEY });
 
@@ -112,14 +113,17 @@ async function prepareSubtitles(
       // subtitles = fromVtt(subtitlesVtt, 'ms');
       console.log('NO SUBTITLES at', mediaInfo?.mediaTitle)
     }
-
+    const temp_file_save_path = `${contentFolder}/${mediaInfo?.title}.${translateLanguage}.temp.subtitles.json`
     const inputPrompt = {
       mediaLang: mediaInfo?.mediaLang || 'en',
       translateLanguage
     };
     let processedTranslations = []
     let itemsToProcess = []
-
+    const existingProcessedSubtitles = require(temp_file_save_path)
+    console.log("existingProcessedSubtitles.length", existingProcessedSubtitles.length)
+    const existingProcessedSubtitlesMap = {}
+    existingProcessedSubtitles?.forEach(item => { existingProcessedSubtitlesMap[item.id] = item })
     let count = 0
     console.log('subtitles - ' + mediaInfo?.mediaTitle, subtitles?.length);
     let index = -1
@@ -136,9 +140,9 @@ async function prepareSubtitles(
           inputPrompt.subtitleLines = itemsToProcess.map(item => item.text);
           let newProcessedSubtitles
           if (isPromptingOpenAI) {
-            newProcessedSubtitles = await promptSubtitlesOpenAi(inputPrompt, itemsToProcess);
+            newProcessedSubtitles = await promptSubtitlesOpenAi(inputPrompt, itemsToProcess, existingProcessedSubtitlesMap);
           } else {
-            newProcessedSubtitles = await processGoogleTranslations(inputPrompt, itemsToProcess)
+            newProcessedSubtitles = await processGoogleTranslations(inputPrompt, itemsToProcess, existingProcessedSubtitlesMap)
           }
           // const newProcessedSubtitles =  itemsToProcess.map(item => ({ translation: item.text, highlighted: [], highlightedTranslation: [] }))
           itemsToProcess = [item]
@@ -148,62 +152,89 @@ async function prepareSubtitles(
           }
           processedTranslations.push(...newProcessedSubtitles)
           // fs.writeFileSync('./openaisubtitlepromptprocess.json', JSON.stringify(processedTranslations))
-          const temp_file_save_path = `${contentFolder}/${mediaInfo?.title}.${translateLanguage}.temp.subtitles.json`
           fs.writeFileSync(temp_file_save_path, JSON.stringify(processedTranslations))
           console.log('processedTranslations.length:', processedTranslations.length + ` of ${subtitles.length}`)
           // }
           if (isLastItem) {
+            console.log('LAST_ITEM', isLastItem, index)
             const newSubtitle = await subtitles_model.create({
-              mediaTitle,
+              mediaTitle: mediaInfo?.mediaTitle,
               title: translateLanguage,
-              mediaLang: mediaInfo.mediaLang,
+              mediaLang: mediaInfo.mediaLang || 'en',
               translateLang: translateLanguage,
-              mediaId: mediaInfo.mediaId,
+              mediaId: mediaInfo._id,
               subtitles: processedTranslations
             })
+            console.log(`INSERTED TRANSLATION @ID: ${newSubtitle._id}`)
             await movies_model.findByIdAndUpdate(mediaInfo._id, { $push: { subtitleInfos: newSubtitle } })
             return newSubtitle?._id;
           }
         } catch (err) {
+          if (err.message.includes("E11000 duplicate key error collection: test.subtitles index: mediaId_1_translateLang_1_title_1 dup key")) {
+            console.log(`FOUND INSERTED TRANSLATION for mediaId ${mediaInfo._id} and lang: ${translateLanguage}`)
+            const existingSubtitle = await subtitles_model.findOne({ mediaId: mediaInfo._id, translateLang: translateLanguage, title: translateLanguage })
+            console.log('existingSubtitle._id', existingSubtitle?._id)
+            mediaInfo = await movies_model.findById(mediaInfo._id);
+            if (!mediaInfo.subtitleInfos.find(item => item.title === existingSubtitle.title)) {
+              await movies_model.findByIdAndUpdate(mediaInfo._id, { $push: { subtitleInfos: existingSubtitle } })
+              return existingSubtitle?._id
+            }
+          }
           console.log('ERRORED AT PROMPT: ', err)
           console.log('processedTranslations.length:', processedTranslations.length)
         }
       }
     };
-
-    return processedTranslations;
   } catch (error) {
     console.error('Error UNCAUGHT:', error.message);
   }
 }
 
-async function processGoogleTranslations(prompt, itemsToProcess) {
-  const promptText = itemsToProcess.map(item => {
-    const currentText = item.taglessText || item.text
-    return currentText
-  }).join(' + ')
+async function processGoogleTranslations(prompt, itemsToProcess, existingProcessedSubtitlesMap, tryCount = 0) {
+  let skipRequest = false
+  try {
+    const promptText = itemsToProcess.map((item, index) => {
+      if (index === 1 && existingProcessedSubtitlesMap[item.id]) {
+        skipRequest = true;
+      }
+      const currentText = item.taglessText || item.text
+      return currentText
+    }).join(' + ')
 
-  const response = await gTranslate(
-    promptText,
-    { to: prompt.translateLanguage, from: prompt.mediaLang })
-  const resArr = response.split(' + ')
+    if (skipRequest) {
+      return itemsToProcess.map(item => existingProcessedSubtitlesMap[item.id])
+    }
+    const response = await gTranslate(
+      promptText,
+      { to: prompt.translateLanguage, from: prompt.mediaLang })
+    const resArr = response.split(' + ')
 
-  if (resArr.length !== itemsToProcess.length) {
-    throw Error(`TRANSLATE: item count did not match, requested: ${itemsToProcess.length} and response: ${resArr.length}`)
-  }
-  return resArr.map((translation, index) => {
-    const requestedItem = itemsToProcess[index];
-    return ({
-      translation,
-      text: requestedItem.text,
-      id: requestedItem.id,
-      startTime: requestedItem.startTime,
-      endTime: requestedItem.endTime
+    if (resArr.length !== itemsToProcess.length) {
+      throw Error(`TRANSLATE: item count did not match, requested: ${itemsToProcess.length} and response: ${resArr.length}`)
+    }
+    return resArr.map((translation, index) => {
+      const requestedItem = itemsToProcess[index];
+      return ({
+        translation,
+        text: requestedItem.text,
+        id: requestedItem.id,
+        startTime: requestedItem.startTime,
+        endTime: requestedItem.endTime
+      })
     })
-  })
+  } catch (error) {
+    if (tryCount > 4) {
+      console.error(`TRANSLATION FAILED AT ${itemsToProcess[1]?.id}`, error)
+      return itemsToProcess
+    }
+    console.error('PROMPT ERROR retrying after 3 seconds ...', error)
+    await wait()
+
+    return processGoogleTranslations(prompt, itemsToProcess, existingProcessedSubtitlesMap, tryCount + 1)
+  }
 }
 
-async function promptSubtitlesOpenAi(prompt, itemsToProcess) {
+async function promptSubtitlesOpenAi(prompt, itemsToProcess, existingProcessedSubtitlesMap, tryCount = 0) {
   try {
     console.log('prompt', JSON.stringify(prompt, undefined, 2))
     const chatCompletion = await openai.chat.completions.create({
@@ -247,9 +278,14 @@ async function promptSubtitlesOpenAi(prompt, itemsToProcess) {
 
     return newProcessedSubtitles;
   } catch (error) {
+    if (tryCount > 4) {
+      console.error(`TRANSLATION FAILED AT ${itemsToProcess[1]?.id}`, error)
+      return itemsToProcess
+    }
     console.error('PROMPT ERROR retrying after 3 seconds ...', error)
     await wait()
-    return promptSubtitlesOpenAi(prompt, itemsToProcess)
+
+    return promptSubtitlesOpenAi(prompt, itemsToProcess, existingProcessedSubtitlesMap, tryCount + 1)
   }
 }
 

@@ -38,7 +38,7 @@ const schema = new Schema({
     type: String,
     required: true,
   },
-  subtitleInfos: [Schema({ id: String, title: String, translateLang: String })]
+  subtitleInfos: [Schema({ _id: String, title: { type: String, unique: true }, translateLang: String })]
 }).add({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },

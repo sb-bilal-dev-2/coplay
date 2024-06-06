@@ -34,8 +34,8 @@ const MoviePage = () => {
   );
   const videoRef = useRef(null);
   const [volume, setVolume] = useState(localStorage.getItem("volume"));
-  const [translateType, setTranslateType] = useState("off");
-  const [subtitleType, setSubtitleType] = useState("off");
+  const [translateType, setTranslateType] = useState("on");
+  const [subtitleType, setSubtitleType] = useState("on");
 
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null);
@@ -341,7 +341,7 @@ const MoviePage = () => {
   function renderVideo() {
     const subtitleScale = 2;
     const subtitlePosition = 0.35;
-    const localSubtitleLocale = "ru";
+    const localSubtitleLocale = "uz";
     const localSubtitleScale = 1.6;
     const localSubtitlePosition = 0.3;
     const volumePercent = videoRef.current?.volume * 100;
@@ -377,7 +377,7 @@ const MoviePage = () => {
         setMute(false);
       }
     };
-
+    const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(item => item.title === localSubtitleLocale)
     return (
       <div
         className={classNames("videoItem", {
@@ -470,6 +470,7 @@ const MoviePage = () => {
           tooltip
         />
         <Subtitles
+          subtitleId={translatedSubtitleInfo?._id}
           subtitleScale={
             isFullScreen() ? localSubtitleScale : localSubtitleScale / 2
           }
@@ -482,7 +483,7 @@ const MoviePage = () => {
           currentTime={currentTime}
           title={title}
           isEditable
-          hideSubtitles={translateState()}
+          // hideSubtitles={translateState()}
           addKeyDownListener={addKeyDownListener}
           removeKeyDownListener={removeKeyDownListener}
         />
