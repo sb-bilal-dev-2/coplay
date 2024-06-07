@@ -3,7 +3,7 @@ import Footer from '../components/Footer'
 import { useParams } from 'react-router'
 import api from '../api'
 import './Quiz.css'
-import { BASE_SERVER_URL } from '../useRequests'
+import { BASE_SERVER_URL } from '../api'
 import classNames from 'classnames'
 
 

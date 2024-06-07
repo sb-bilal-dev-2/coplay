@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './HorizontalScrollMenu.css';
 import { createDebouncedFunction } from '../debounce';
 import { Link } from 'react-router-dom';
+import { BASE_SERVER_URL } from '../api';
 
 
 const HorizontalScrollMenu = ({ items, baseRoute }) => {
@@ -43,7 +44,7 @@ const HorizontalScrollMenu = ({ items, baseRoute }) => {
             <ul className="menu-list" ref={scrollRef} onScroll={handleScrolled}>
                 {items?.map(({ _id, label, title }) => (
                     <Link className='list-card' to={[baseRoute, title].join('/')} style={{
-                        backgroundImage: `url('http://localhost:3001/${baseRoute}Files/${title}.jpg')`
+                        backgroundImage: `url('${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg')`
                     }} >
                         <li key={_id}>
                             {label}

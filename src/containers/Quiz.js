@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import api from "../api";
 import "./Quiz.css";
-import { BASE_SERVER_URL } from "../useRequests";
+import { BASE_SERVER_URL } from "../api";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
 import { usePost } from './usePost';

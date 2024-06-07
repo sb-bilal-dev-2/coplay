@@ -50,7 +50,7 @@ const router = createBrowserRouter(
 
 root.render(
   <ErrorBoundary>
-    <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={process.env.REACT_GOOGLE_CLIENT_ID}>
       <Provider store={store}>
         <RouterProvider router={router} />
       </Provider>

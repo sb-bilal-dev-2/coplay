@@ -1,10 +1,11 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './HomePage.css';
 import HorizontalScrollMenu from './components/HorizontalScrollMenu';
 import StickyHeader from './components/StickyHeader';
 import Footer from './components/Footer';
-import useRequests, { BASE_SERVER_URL } from './useRequests';
-import { Link } from 'react-router-dom';
+import useRequests from './useRequests';
+import { BASE_SERVER_URL } from './api';
 
 const HomePage = () => {
     const {

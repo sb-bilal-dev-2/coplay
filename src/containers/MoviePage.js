@@ -5,7 +5,7 @@ import "./MoviePage.css";
 import throttle from "../throttle";
 import classNames from "classnames";
 import { Link, useParams } from "react-router-dom";
-import { BASE_SERVER_URL } from "../useRequests";
+import { BASE_SERVER_URL } from "../api";
 import axios from "axios";
 import MovieWordCards from "./MovieWordCards";
 import useAuthentication from "./Authentication.util";
@@ -57,7 +57,7 @@ const MoviePage = () => {
   console.log("userId", userId);
   const requestUserInfo = async () => {
     try {
-      const response = await axios(`http://localhost:3001/users/${userId}`);
+      const response = await axios(`${BASE_SERVER_URL}/users/${userId}`);
       const newUserInfo = response.data;
       console.log("newUserInfo", newUserInfo);
       setUserInfo(newUserInfo);
@@ -76,7 +76,7 @@ const MoviePage = () => {
     const requestMovieInfo = async () => {
       try {
         const response = await axios(
-          `http://localhost:3001/movies?title=${title}`
+          `${BASE_SERVER_URL}/movies?title=${title}`
         );
         const newMovieInfo = response.data?.results[0];
         console.log("newMovieInfo", newMovieInfo);

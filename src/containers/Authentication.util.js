@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-
-const API_URL = 'http://localhost:3001'; // Replace with your backend API URL
+import { BASE_SERVER_URL } from '../api';
 
 const useAuthentication = (missUserRequest) => {
   const [user, setUser] = useState(null);
@@ -29,7 +28,7 @@ const useAuthentication = (missUserRequest) => {
   
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/signup`, {
+      const response = await fetch(`${BASE_SERVER_URL}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +65,7 @@ const useAuthentication = (missUserRequest) => {
       setIsLoading(true);
       const confirmEmail = (new URLSearchParams(document.location.search)).get('login')
       console.log('confirmEmail', confirmEmail)
-      const response = await fetch(`${API_URL}/resend-code`, {
+      const response = await fetch(`${BASE_SERVER_URL}/resend-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +90,7 @@ const useAuthentication = (missUserRequest) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/confirm-signup`, {
+      const response = await fetch(`${BASE_SERVER_URL}/confirm-signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +120,7 @@ const useAuthentication = (missUserRequest) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${BASE_SERVER_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +158,7 @@ const useAuthentication = (missUserRequest) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/forgot-password`, {
+      const response = await fetch(`${BASE_SERVER_URL}/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +182,7 @@ const useAuthentication = (missUserRequest) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}/reset-password`, {
+      const response = await fetch(`${BASE_SERVER_URL}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +212,7 @@ const useAuthentication = (missUserRequest) => {
         console.log('fetchUser...')
         setIsLoading(true);
 
-          const response = await fetch(`${API_URL}/get-user`, {
+          const response = await fetch(`${BASE_SERVER_URL}/get-user`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

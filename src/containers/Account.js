@@ -4,6 +4,8 @@ import Footer from "../components/Footer";
 import useAuthentication from "./Authentication.util";
 import axios from "axios";
 import "./Account.css";
+import { BASE_SERVER_URL } from "../api";
+
 
 const Account = () => {
   const { user: userIdAndEmail } = useAuthentication();
@@ -11,7 +13,7 @@ const Account = () => {
 
   const requestUserInfo = async () => {
     try {
-      const response = await axios(`http://localhost:3001/users/${userId}`);
+      const response = await axios(`${BASE_SERVER_URL}/users/${userId}`);
       const newUserInfo = response.data;
       console.log("newUserInfo", newUserInfo);
       setUserInfo(newUserInfo);

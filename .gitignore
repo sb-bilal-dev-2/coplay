@@ -10,6 +10,7 @@ elevated-apex-389717-c9d682bc1fd2.json
 public/movies
 
 /src/ip.js
+/src/ip.local.js
 # dependencies
 /node_modules
 /.pnp

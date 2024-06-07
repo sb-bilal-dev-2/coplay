@@ -1,8 +1,5 @@
 import { useReducer, useEffect } from 'react';
-import axios from 'axios';
-import { IP_ADDRESS } from './ip';
-
-export const BASE_SERVER_URL = 'http://' + IP_ADDRESS + ':3001'; // Replace with your actual base URL
+import api from './api';
 
 const initialState = {
     loading: false,
@@ -59,7 +56,7 @@ const useRequests = (uri) => {
     const request = async (method, url, data = null) => {
         try {
             dispatchGet({ type: `${uri}_${method}_REQUEST` });
-            const response = await axios[method.toLowerCase()](url, data);
+            const response = await api()[method.toLowerCase()](url, data);
             console.log('response', response)
             dispatchGet({ type: `${uri}_${method}_SUCCESS`, payload: response });
         } catch (error) {
@@ -71,7 +68,7 @@ const useRequests = (uri) => {
     };
 
     const getItems = async () => {
-        await request("GET", `${BASE_SERVER_URL}/${uri}`);
+        await request("GET", `/${uri}`);
     };
 
     const putItems = async (data, callback) => {
@@ -79,14 +76,14 @@ const useRequests = (uri) => {
             data = [data]
         }
         console.log('data', data)
-        await request("PUT", `${BASE_SERVER_URL}/${uri}`, data);
+        await request("PUT", `/${uri}`, data);
         if (callback) {
             callback()
         }
     };
 
     const deleteItem = async (id) => { // completely deletes from database
-        await request("DELETE", `${BASE_SERVER_URL}/${uri}/${id}`);
+        await request("DELETE", `/${uri}/${id}`);
     };
 
     useEffect(() => {
