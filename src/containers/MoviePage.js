@@ -15,10 +15,15 @@ import {
   useKeyDown,
   isFullScreen,
   secondsToDisplayTime,
-  round,
 } from "../helper/moviePage";
 
 const VOLUME_SHOW_TIMEOUT = 500;
+
+const SETTING_LANG = {
+  ON: "ON",
+  OFF: "OFF",
+  ON_REWIND: "ON_REWIND",
+};
 
 const MoviePage = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -34,8 +39,9 @@ const MoviePage = () => {
   );
   const videoRef = useRef(null);
   const [volume, setVolume] = useState(localStorage.getItem("volume"));
-  const [translateType, setTranslateType] = useState("on");
-  const [subtitleType, setSubtitleType] = useState("on");
+  // const [translateSetting, setTranslateType] = useState();
+  const [subtitleSetting, setSubtitleSetting] = useState(false);
+  const [subtitleType, setSubtitleType] = useState(undefined);
 
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null);
@@ -54,7 +60,7 @@ const MoviePage = () => {
   });
   const [currentItem, setCurrentItem] = useState({});
   const userId = userIdAndEmail?.id;
-  console.log("userId", userId);
+  // console.log("userId", userId);
   const requestUserInfo = async () => {
     try {
       const response = await axios(`${BASE_SERVER_URL}/users/${userId}`);
@@ -163,7 +169,11 @@ const MoviePage = () => {
       {renderVideo()}
       <div className="section bg-secondary">
         <div className="section-container">
-          <MovieWordCards title={title} parsedSubtitleId={currentItem.parsedSubtitleId} userId={userId} />
+          <MovieWordCards
+            title={title}
+            parsedSubtitleId={currentItem.parsedSubtitleId}
+            userId={userId}
+          />
           <Link to={`/quiz/${title}`} className="text-white">
             <b>
               Watch Unnkown Words of {currentItem?.label || title}{" "}
@@ -185,19 +195,47 @@ const MoviePage = () => {
   function RenderDropMenu() {
     const [isDropOpen, setDropOpen] = useState(false);
     const outsideNavClickWrapperRef = useRef(null);
-
     useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
-    const handleType = (event) => {
-      const { name, value } = event.target;
-
-      if (name === "subtitle") {
-        setSubtitleType(value);
+    const findSettingValue = (value) => {
+      if (typeof subtitleLocalstorage === "undefined") {
+        localStorage.setItem("subtitleSetting", SETTING_LANG.ON);
+        setSubtitleSetting(false);
+        setSubtitleType(SETTING_LANG.ON);
       }
 
-      if (name === "translation") {
-        setTranslateType(value);
+      switch (value) {
+        case SETTING_LANG.ON:
+          setSubtitleSetting(false);
+          setSubtitleType(SETTING_LANG.ON);
+          break;
+
+        case SETTING_LANG.OFF:
+          setSubtitleSetting(true);
+          setSubtitleType(SETTING_LANG.OFF);
+          break;
+
+        case SETTING_LANG.ON_REWIND:
+          setSubtitleSetting(null);
+          setSubtitleType(SETTING_LANG.ON_REWIND);
+          break;
+
+        default:
+          console.warn(`Unexpected value: ${value}`);
+          return; // Exit the function if the value is unexpected
       }
+
+      // Save the new setting to localStorage
+      localStorage.setItem("subtitleSetting", value);
+    };
+
+    useEffect(() => {
+      let subtitleLocalstorage = localStorage.getItem("subtitleSetting");
+      findSettingValue(subtitleLocalstorage);
+    }, []);
+
+    const handleSetting = (event) => {
+      findSettingValue(event.target.value);
     };
 
     return (
@@ -206,8 +244,12 @@ const MoviePage = () => {
           class="fa-regular fa-closed-captioning text-white font-medium cursor-pointer"
           onClick={() => setDropOpen(!isDropOpen)}
         />
-        {isDropOpen && (
-          <div className="z-80 Drop absolute bg-black bottom-8 p-6 rounded drop-shadow-lg">
+        <div
+          className={`${
+            isDropOpen ? "block" : "hidden"
+          } absolute bg-black bottom-8 p-6 rounded drop-shadow-lg`}
+        >
+          {isDropOpen && (
             <ul className="w-80 flex justify-around">
               <li className="text-white font-bold w-40">
                 <p className="pb-2">Subtitle</p>
@@ -215,12 +257,16 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="subtitle"
-                    value="on"
+                    value={SETTING_LANG.ON}
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2">On</p>
-                  <span className={subtitleType === "on" ? "" : "checkmark"}>
+                  <span
+                    className={
+                      subtitleType === SETTING_LANG.ON ? "" : "checkmark"
+                    }
+                  >
                     &#10003;
                   </span>
                 </label>
@@ -228,12 +274,16 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="subtitle"
-                    value="off"
+                    value={SETTING_LANG.OFF}
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2">Off</p>
-                  <span className={subtitleType === "off" ? "" : "checkmark"}>
+                  <span
+                    className={
+                      subtitleType === SETTING_LANG.OFF ? "" : "checkmark"
+                    }
+                  >
                     &#10003;
                   </span>
                 </label>
@@ -241,30 +291,36 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="subtitle"
-                    value="rewind"
+                    value={SETTING_LANG.ON_REWIND}
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2">On rewind (5s)</p>
                   <span
-                    className={subtitleType === "rewind" ? "" : "checkmark"}
+                    className={
+                      subtitleType === SETTING_LANG.ON_REWIND ? "" : "checkmark"
+                    }
                   >
                     &#10003;
                   </span>
                 </label>
               </li>
-              <li className="text-white font-bold pl-6 w-40">
+              {/* <li className="text-white font-bold pl-6 w-40">
                 <p className="pb-2">Translation</p>
                 <label className="radio-container">
                   <input
                     type="radio"
                     name="translation"
-                    value="on"
+                    value={SETTING_LANG.ON}
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2">On</p>
-                  <span className={translateType === "on" ? "" : "checkmark"}>
+                  <span
+                    className={
+                      translateSetting === SETTING_LANG.ON ? "" : "checkmark"
+                    }
+                  >
                     &#10003;
                   </span>
                 </label>
@@ -274,10 +330,10 @@ const MoviePage = () => {
                     name="translation"
                     value="off"
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2 ">Off</p>
-                  <span className={translateType === "off" ? "" : "checkmark"}>
+                  <span className={translateSetting === "off" ? "" : "checkmark"}>
                     &#10003;
                   </span>
                 </label>
@@ -287,11 +343,11 @@ const MoviePage = () => {
                     name="translation"
                     value="rewind"
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2 pb-2">On rewind (5s)</p>
                   <span
-                    className={translateType === "rewind" ? "" : "checkmark"}
+                    className={translateSetting === "rewind" ? "" : "checkmark"}
                   >
                     &#10003;
                   </span>
@@ -303,10 +359,10 @@ const MoviePage = () => {
                     name="translation"
                     value="en"
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2">En</p>
-                  <span className={translateType === "en" ? "" : "checkmark"}>
+                  <span className={translateSetting === "en" ? "" : "checkmark"}>
                     &#10003;
                   </span>
                 </label>
@@ -316,26 +372,19 @@ const MoviePage = () => {
                     name="translation"
                     value="uz"
                     className="hidden"
-                    onChange={handleType}
+                    onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2">Uz</p>
-                  <span className={translateType === "uz" ? "" : "checkmark"}>
+                  <span className={translateSetting === "uz" ? "" : "checkmark"}>
                     &#10003;
                   </span>
                 </label>
-              </li>
+              </li> */}
             </ul>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     );
-  }
-
-  function translateState() {
-    if (subtitleType === "on" || translateType === "on") return false;
-    if (subtitleType === "rewind" || translateType === "rewind")
-      return !justRewinded;
-    if (translateType === "off" || subtitleType === "off") return true;
   }
 
   function renderVideo() {
@@ -377,7 +426,9 @@ const MoviePage = () => {
         setMute(false);
       }
     };
-    const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(item => item.title === localSubtitleLocale)
+    const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(
+      (item) => item.title === localSubtitleLocale
+    );
     return (
       <div
         className={classNames("videoItem", {
@@ -466,7 +517,9 @@ const MoviePage = () => {
           locale="en"
           subtitleScale={isFullScreen() ? subtitleScale : subtitleScale / 2}
           positionY={isFullScreen() ? subtitlePosition : subtitlePosition + 0.2}
-          hideSubtitles={translateState()}
+          hideSubtitles={
+            subtitleSetting !== null ? subtitleSetting : !justRewinded
+          }
           tooltip
         />
         <Subtitles
@@ -483,7 +536,7 @@ const MoviePage = () => {
           currentTime={currentTime}
           title={title}
           isEditable
-          // hideSubtitles={translateState()}
+          // hideSubtitles={settings()}
           addKeyDownListener={addKeyDownListener}
           removeKeyDownListener={removeKeyDownListener}
         />
