@@ -25,13 +25,21 @@ const SETTING_LANG = {
   ON_REWIND: "ON_REWIND",
 };
 
+const TRANSLATE_LANG = {
+  UZ: "uz",
+  RU: "ru",
+};
+
 const MoviePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const { user: userIdAndEmail } = useAuthentication();
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
   const [isMute, setMute] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+    const [isDropOpen, setDropOpen] = useState(false);
+    const outsideNavClickWrapperRef = useRef(null);
+    useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
+
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
   const [currentTime, setCurrentTime] = useState(
@@ -39,9 +47,14 @@ const MoviePage = () => {
   );
   const videoRef = useRef(null);
   const [volume, setVolume] = useState(localStorage.getItem("volume"));
-  // const [translateSetting, setTranslateType] = useState();
+
   const [subtitleSetting, setSubtitleSetting] = useState(false);
   const [subtitleType, setSubtitleType] = useState(undefined);
+
+  const [translateSetting, setTransalteSetting] = useState(false);
+  const [transalteType, setTransalteType] = useState(undefined);
+
+  const [translateLangSubtitle, setTranslateLangSubtitle] = useState(undefined);
 
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null);
@@ -152,6 +165,11 @@ const MoviePage = () => {
     setCurrentTime(event.target.value);
     videoRef.current.currentTime = event.target.value;
   };
+
+  let translateLangSubtitleLocal = localStorage.getItem(
+    "translateLangSubtitle"
+  );
+
   const progressPercent =
     (videoRef?.current?.currentTime / videoRef?.current?.duration) * 100;
 
@@ -193,15 +211,16 @@ const MoviePage = () => {
   );
 
   function RenderDropMenu() {
-    const [isDropOpen, setDropOpen] = useState(false);
-    const outsideNavClickWrapperRef = useRef(null);
-    useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
-    const findSettingValue = (value) => {
+    let subtitleLocalstorage = localStorage.getItem("subtitleSetting");
+    let translationLocalstorage = localStorage.getItem("transaltionSetting");
+
+    const findSubtitleValue = (value) => {
       if (typeof subtitleLocalstorage === "undefined") {
-        localStorage.setItem("subtitleSetting", SETTING_LANG.ON);
         setSubtitleSetting(false);
         setSubtitleType(SETTING_LANG.ON);
+
+        localStorage.setItem("subtitleSetting", SETTING_LANG.ON);
       }
 
       switch (value) {
@@ -229,14 +248,84 @@ const MoviePage = () => {
       localStorage.setItem("subtitleSetting", value);
     };
 
+    const findTranslationValue = (value) => {
+      if (typeof value === "undefined") {
+        setTransalteSetting(false);
+        setTransalteType(SETTING_LANG.ON);
+
+        localStorage.setItem("transaltionSetting", SETTING_LANG.ON);
+      }
+
+      switch (value) {
+        case SETTING_LANG.ON:
+          setTransalteSetting(false);
+          setTransalteType(SETTING_LANG.ON);
+          break;
+
+        case SETTING_LANG.OFF:
+          setTransalteSetting(true);
+          setTransalteType(SETTING_LANG.OFF);
+          break;
+
+        case SETTING_LANG.ON_REWIND:
+          setTransalteSetting(null);
+          setTransalteType(SETTING_LANG.ON_REWIND);
+          break;
+
+        default:
+          console.warn(`Unexpected value: ${value}`);
+          return; // Exit the function if the value is unexpected
+      }
+
+      localStorage.setItem("transaltionSetting", value);
+    };
+
+    const findTranslationSubtitleLang = (value) => {
+      if (typeof translateLangSubtitleLocal === "undefined") {
+        setTranslateLangSubtitle(TRANSLATE_LANG.UZ);
+
+        localStorage.setItem("translateLangSubtitle", TRANSLATE_LANG.UZ);
+      }
+
+      switch (value) {
+        case TRANSLATE_LANG.UZ:
+          setTranslateLangSubtitle(TRANSLATE_LANG.UZ);
+          break;
+
+        default:
+          console.warn(`Unexpected value: ${value}`);
+          return; // Exit the function if the value is unexpected
+      }
+
+      localStorage.setItem("translateLangSubtitle", TRANSLATE_LANG.UZ);
+    };
+
     useEffect(() => {
-      let subtitleLocalstorage = localStorage.getItem("subtitleSetting");
-      findSettingValue(subtitleLocalstorage);
+      findSubtitleValue(subtitleLocalstorage);
+      findTranslationValue(translationLocalstorage);
+      findTranslationSubtitleLang(translateLangSubtitleLocal);
     }, []);
 
     const handleSetting = (event) => {
-      findSettingValue(event.target.value);
+      if (event.target.name === "subtitle") {
+        findSubtitleValue(event.target.value);
+      }
+
+      if (event.target.name === "translation") {
+        findTranslationValue(event.target.value);
+      }
+
+      if (event.target.name === "transaltionSubtitleLang") {
+        findTranslationSubtitleLang(event.target.value);
+      }
     };
+
+    // const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(
+    //   (item) => item.title === translateLangSubtitleLocal
+    // );
+
+
+    console.log("translateLangSubtitle?._id", translateLangSubtitle);
 
     return (
       <div className="relative px-4">
@@ -245,6 +334,7 @@ const MoviePage = () => {
           onClick={() => setDropOpen(!isDropOpen)}
         />
         <div
+          ref={outsideNavClickWrapperRef}
           className={`${
             isDropOpen ? "block" : "hidden"
           } absolute bg-black bottom-8 p-6 rounded drop-shadow-lg`}
@@ -305,7 +395,7 @@ const MoviePage = () => {
                   </span>
                 </label>
               </li>
-              {/* <li className="text-white font-bold pl-6 w-40">
+              <li className="text-white font-bold pl-6 w-40">
                 <p className="pb-2">Translation</p>
                 <label className="radio-container">
                   <input
@@ -318,7 +408,7 @@ const MoviePage = () => {
                   <p className="cursor-pointer pr-2">On</p>
                   <span
                     className={
-                      translateSetting === SETTING_LANG.ON ? "" : "checkmark"
+                      transalteType === SETTING_LANG.ON ? "" : "checkmark"
                     }
                   >
                     &#10003;
@@ -328,12 +418,16 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="translation"
-                    value="off"
+                    value={SETTING_LANG.OFF}
                     className="hidden"
                     onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2 ">Off</p>
-                  <span className={translateSetting === "off" ? "" : "checkmark"}>
+                  <span
+                    className={
+                      transalteType === SETTING_LANG.OFF ? "" : "checkmark"
+                    }
+                  >
                     &#10003;
                   </span>
                 </label>
@@ -341,45 +435,61 @@ const MoviePage = () => {
                   <input
                     type="radio"
                     name="translation"
-                    value="rewind"
+                    value={SETTING_LANG.ON_REWIND}
                     className="hidden"
                     onChange={handleSetting}
                   />
                   <p className="cursor-pointer pr-2 pb-2">On rewind (5s)</p>
                   <span
-                    className={translateSetting === "rewind" ? "" : "checkmark"}
+                    className={
+                      transalteType === SETTING_LANG.ON_REWIND
+                        ? ""
+                        : "checkmark"
+                    }
                   >
                     &#10003;
                   </span>
                 </label>
                 <span className="divide-y divide-solid min-w-80 h-1" />
-                <label className="radio-container ">
+                <label class="radio-container">
                   <input
                     type="radio"
-                    name="translation"
-                    value="en"
+                    name="transaltionSubtitleLang"
+                    value={TRANSLATE_LANG.UZ}
                     className="hidden"
                     onChange={handleSetting}
                   />
-                  <p className="cursor-pointer pr-2">En</p>
-                  <span className={translateSetting === "en" ? "" : "checkmark"}>
+                  <p className="cursor-pointer pr-2">Uz</p>
+                  <span
+                    className={
+                      translateLangSubtitle === TRANSLATE_LANG.UZ
+                        ? ""
+                        : "checkmark"
+                    }
+                  >
                     &#10003;
                   </span>
                 </label>
                 <label class="radio-container">
                   <input
                     type="radio"
-                    name="translation"
-                    value="uz"
+                    name="transaltionSubtitleLang"
+                    value={TRANSLATE_LANG.RU}
                     className="hidden"
                     onChange={handleSetting}
                   />
-                  <p className="cursor-pointer pr-2">Uz</p>
-                  <span className={translateSetting === "uz" ? "" : "checkmark"}>
+                  <p className="cursor-pointer pr-2">Ru</p>
+                  <span
+                    className={
+                      translateLangSubtitle === TRANSLATE_LANG.RU
+                        ? ""
+                        : "checkmark"
+                    }
+                  >
                     &#10003;
                   </span>
                 </label>
-              </li> */}
+              </li>
             </ul>
           )}
         </div>
@@ -390,7 +500,6 @@ const MoviePage = () => {
   function renderVideo() {
     const subtitleScale = 2;
     const subtitlePosition = 0.35;
-    const localSubtitleLocale = "uz";
     const localSubtitleScale = 1.6;
     const localSubtitlePosition = 0.3;
     const volumePercent = videoRef.current?.volume * 100;
@@ -426,9 +535,12 @@ const MoviePage = () => {
         setMute(false);
       }
     };
+
     const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(
-      (item) => item.title === localSubtitleLocale
+      (item) => item.title === translateLangSubtitleLocal
     );
+
+    console.log("translatedSubtitleInfo")
     return (
       <div
         className={classNames("videoItem", {
@@ -527,7 +639,6 @@ const MoviePage = () => {
           subtitleScale={
             isFullScreen() ? localSubtitleScale : localSubtitleScale / 2
           }
-          locale={localSubtitleLocale}
           // label={localSubtitleLocale} TODO: refactor 'locale' to 'label'
           positionY={
             isFullScreen() ? localSubtitlePosition : localSubtitlePosition + 0.1
@@ -536,7 +647,9 @@ const MoviePage = () => {
           currentTime={currentTime}
           title={title}
           isEditable
-          // hideSubtitles={settings()}
+          hideSubtitles={
+            translateSetting !== null ? translateSetting : !justRewinded
+          }
           addKeyDownListener={addKeyDownListener}
           removeKeyDownListener={removeKeyDownListener}
         />
