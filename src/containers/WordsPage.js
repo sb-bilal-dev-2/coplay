@@ -59,6 +59,7 @@ const WordsPage = () => {
       setLastDirection(direction);
       setFliped(false);
       updateCurrentIndex(index - 1);
+
       if (direction === "right") {
         onSwipeRight(lemma);
       } else if ((direction = "left")) {
@@ -68,7 +69,8 @@ const WordsPage = () => {
       } else if ((direction = "bottom")) {
         onSwipeBottom(lemma);
       }
-      console.log("swiped");
+
+      return false;
     };
 
     const outOfFrame = (word, idx) => {
@@ -95,7 +97,7 @@ const WordsPage = () => {
       await childRefs[newIndex].current.restoreCard();
     };
 
-    const handleDoubleClick = () => {
+    const toggleCard = () => {
       setFliped(!fliped);
     };
 
@@ -117,7 +119,6 @@ const WordsPage = () => {
                       backgroundImage: "url(" + character?.imageDescUrl + ")",
                     }}
                     className="card"
-                    onDoubleClick={handleDoubleClick}
                   >
                     <div className={`face ${fliped ? "face-front" : ""} `}>
                       <div
@@ -147,10 +148,13 @@ const WordsPage = () => {
                           ></i>
                         </Link>
                       </div>
-                      <div className="bg-green-100 w-full">
+                      <div
+                        className="bg-green-100 w-full"
+                        onClick={toggleCard}
+                      >
                         <h3
                           style={{ color: "darkgrey" }}
-                          className="text-center relative w-full m-auto"
+                          className="text-center relative w-full m-auto cursor-pointer"
                         >
                           {character?.lemma}
                         </h3>
@@ -160,6 +164,7 @@ const WordsPage = () => {
                       className={`face text-gray-950  ${
                         !fliped ? "face-back" : ""
                       } border p-2`}
+                      onClick={toggleCard}
                     >
                       <div class="border-2 border-sky-300 rounded-md h-full p-4">
                         <p className="text-center text-gray-500 font-bold">

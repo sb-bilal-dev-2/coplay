@@ -3,6 +3,7 @@ import "./StickyHeader.css"; // Make sure to create the corresponding CSS file
 import { Link } from "react-router-dom";
 import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
+const logoPath = `${process.env.PUBLIC_URL}/logo-black.png`;
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const outsideSearchClickWrapperRef = useRef(null);
@@ -19,11 +20,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       className={`sticky-header ${isSticky ? "nav-menu-visible" : ""} ${type}`}
     >
       <Link to="/">
-        <img
-          class="h-8"
-          src="https://placehold.co/92x32.png?text=C%20PLAY&bg=0b0b0b"
-          alt="C Play logo placeholder"
-        />
+        <img class="h-14" src={logoPath} alt="C Play logo placeholder" />
       </Link>
       <div class="flex items-center">
         {!authPage && (
@@ -72,6 +69,25 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   );
 };
 
+function getPlaceholderUrl(firstLetter) {
+    const colors = {
+      A: "cc3333", // Light Red
+      B: "33cc33", // Light Green
+      C: "3333cc", // Light Blue
+      D: "cccc33", // Light Yellow
+      E: "cc33cc", // Light Magenta
+      F: "33cccc", // Light Cyan
+      // Add more mappings for other letters as needed
+    };
+
+    const defaultColor = colors.D; 
+
+    const color = colors[firstLetter.toUpperCase()] || defaultColor;
+
+    return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
+}
+
+
 const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const { user: userIdAndEmail } = useAuthentication();
   const userEmail = userIdAndEmail?.email || "";
@@ -79,7 +95,9 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const firstLetter =
     (!!emailLetters?.length && emailLetters[0]?.toUpperCase()) || "";
   // console.log('emailLetters', emailLetters)
+  const avatarPath = getPlaceholderUrl(firstLetter);
   const outsideNavClickWrapperRef = useRef(null);
+
   useOutsideAlerter(outsideNavClickWrapperRef, () =>
     setIsNavMenuVisible(false)
   );
@@ -90,11 +108,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <>
-      <img
-        class="h-8 ml-4"
-        src={`https://placehold.co/32x32.png?text=${firstLetter}&bg=8b8b8b`}
-        alt="User avatar placeholder"
-      />
+      <img class="h-8 ml-4" src={avatarPath} alt="User avatar placeholder" />
       {isNavMenuVisible && (
         <ul className="nav-menu" ref={outsideNavClickWrapperRef}>
           <li>
