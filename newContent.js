@@ -1,5 +1,4 @@
 const fs = require('fs')
-const { MAIN_LANGUAGES } = require('./mainProcessors/newLanguages.js')
 const { prepareSubtitles } = require('./openaiTranslateSubtitlesRecoursive.js')
 const { parseUsedWords } = require('./parseUsedWords.js');
 const { subtitles_model } = require('./schemas/subtitles.js');
@@ -11,10 +10,12 @@ const movies_model = require('./schemas/movies').movies_model;
  * Should parse/request used words/phrases
  * Stores movie info in the Database.
  */
+const MAIN_LANGUAGES = ['uz', 'ru', 'en', 'tr']
 
-processNewContent()
+// processNewContent(mediaContent = 'en')
 
-async function processNewContent(contentFolder = './files/movieFiles', mediaLang = 'en') {
+async function processNewContent(mediaLang = 'en') {
+    const contentFolder = './files/movieFiles'
     let { missingMediaTranslations, missingMediaParsedWords } = await getNewContentTitles(contentFolder, mediaLang)
     const newParsedSubtitlesMap = {}
     await Promise.all(missingMediaParsedWords.map(async mediaInfo => {
@@ -76,4 +77,9 @@ async function getNewContentTitles(contentFolder, mediaLang = 'en') {
         missingMediaTranslations,
         missingMediaParsedWords,
     }
+}
+
+module.exports = {
+    MAIN_LANGUAGES,
+    processNewContent,
 }

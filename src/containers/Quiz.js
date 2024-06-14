@@ -4,18 +4,39 @@ import api from "../api";
 import "./Quiz.css";
 import { BASE_SERVER_URL } from "../api";
 import classNames from "classnames";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { usePost } from './usePost';
-import { sortByLearningState } from "../helper/useUserWords";
+import { sortByLearningState } from "../helper/sortByLearningState";
+
+const PLAYING_OCCURANCE_LIMIT = 5;
+
+function useTelegramWebApp() {
+  let telegramApp = window.Telegram.WebApp
+
+  return {
+    telegramApp,
+    initData: telegramApp.initData
+    // tg.initDataUnsafe // получаем данные от пользователя в виде объекта (работает только при запуске из меню команд бота). 
+    // tg.isExpanded // возвращает true, если приложение открыто на всю высоту, false - если нет. 
+    // tg.viewportHeight // вернёт ширину окна.
+    // tg.sendData(data) // отправляет данные  боту в строковом виде, после чего закрывает приложение (работает только если приложение запущено с keyboard button). 
+    // tg.ready() // метод позволяет отследить, когда приложение готово к отображению.
+    // tg.expand() // метод позволяет растянуть окно на всю высоту.
+    // tg.close() // метод закрывает приложение.
+  }
+}
 
 const Quiz = () => {
-  const { list } = useParams();
+  const { } = useTelegramWebApp()
+  const { list, word } = useParams();
   const [isShowingDefinitions, set_isShowingDefinitions] = useState();
   const [practicingWords, set_practicingWords] = useState([]);
   const [practicingWordIndex, set_practicingWordIndex] = useState(0);
   const [currentLemmaInfo, set_currentLemmaInfo] = useState();
   const [occurances, set_occurances] = useState([]);
   const [animatePause, set_animatePause] = useState(false);
+  const navigate = useNavigate()
+
   const requestLemmaOccurances = async (lemma) => {
     try {
       const wordData = (await api().get(`/occurances?lemma=${lemma}`)).data
@@ -80,23 +101,27 @@ const Quiz = () => {
       userWords = (await api().get("/get-user?allProps=1"))?.data
         ?.words;
       const { repeatingList, learningList, learnedList } = sortByLearningState(userWords);
-    console.log('learnedList', learnedList)
-    console.log('repeatingList', repeatingList)
-    console.log('learningList', learningList)
+      console.log('learnedList', learnedList)
+      console.log('repeatingList', repeatingList)
+      console.log('learningList', learningList)
 
-    if (list === "repeating") {
-      userWords = repeatingList;
-    }
-    if (list === "learning") {
-      userWords = learningList;
-    }
+      if (list === "repeating") {
+        userWords = repeatingList;
+      }
+      if (list === "learning") {
+        userWords = learningList;
+      }
       console.log('repeatingList', repeatingList)
     } catch (err) {
       set_error(err);
       console.log("err: ", err);
     }
 
-    const newCurrentLemma = userWords[0]?.lemma;
+    let newCurrentLemma = userWords[0]?.lemma;
+
+    if (word) {
+      newCurrentLemma = userWords.find((item) => item.lemma === word)?.lemma
+    }
     console.log('newCurrentLemma', newCurrentLemma)
     set_practicingWords(userWords);
     await requestCurrentLemmaInfo(newCurrentLemma);
@@ -123,14 +148,18 @@ const Quiz = () => {
     requestListAndGetCurrentLemmaInfo();
   }, []);
 
-  useEffect(() => {
+  const loadAndPlay = async () => {
     if (occurances.length) {
+      await videoRef.current.load();
       console.log("currentVideoSrc", currentVideoSrc);
-      videoRef.current.load();
-      if (videoRef.current && videoRef.current.paused) {
+      if (videoRef.current) {
         videoRef.current.play();
       }
     }
+  }
+
+  useEffect(() => {
+    loadAndPlay()
   }, [currentVideoSrc, occurances.length]);
   console.log('occurances', occurances)
   const currentOccurance = occurances[playingOccuranceIndex];
@@ -184,7 +213,7 @@ const Quiz = () => {
       if (!videoRef.current.paused) {
         videoRef.current.pause();
       }
-      if (playingOccuranceIndex + 1 === occurances.length) {
+      if (playingOccuranceIndex + 1 >= occurances.length || playingOccuranceIndex + 1 >= PLAYING_OCCURANCE_LIMIT) {
         if (practicingWordIndex + 1 === practicingWords.length) {
           updateRepeatCount()
         }
@@ -207,12 +236,12 @@ const Quiz = () => {
       <audio ref={audioRef} src="/tap-notification.mp3" />
       {/* <WebcamCapture /> */}
       <div className="QuizMain flex-grow bg-video text-gray text-gray-100 relative">
-        <Link
-          to="/"
+        <button
+          onClick={() => navigate(-1)}
           className="absolute z-10 top-4 left-4 text-white cursor-pointer"
         >
           <i className="fa fa-arrow-left" aria-hidden="true"></i>
-        </Link>
+        </button>
         <video
           className={classNames("w-full")}
           ref={videoRef}

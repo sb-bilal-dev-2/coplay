@@ -5,11 +5,15 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
 });
 
-mainPromptDesign();
+// promptAI();
 // generateImage();
-async function mainPromptDesign() {
+async function promptAI(content, customMessages) {
+  let messages = [{ role: 'user', content }]
+  if (messages) {
+    messages = customMessages
+  }
   const chatCompletion = await openai.chat.completions.create({
-    messages: [{ role: 'user', content: 'Say this is a test' }],
+    messages,
     model: 'gpt-3.5-turbo',
   });
 
@@ -17,15 +21,19 @@ async function mainPromptDesign() {
   console.log('choices[0].message', chatCompletion.choices[0].message)
 }
 
-async function generateImage() {
+async function generateImage(prompt) {
   const response = await openai.images.generate({
     model: "dall-e-3",
-    prompt: "Create poster for 'home alone' movie",
+    prompt,
     n: 1,
     size: "1024x1024",
   });
-  console.log('response.data', response.data)
-  image_url = response.data[0].url;  
-  console.log('image_url', image_url);
+  const image_url = response.data[0].url;  
+  return image_url
+}
+
+module.exports = {
+  generateImage,
+  promptAI,
 }
 

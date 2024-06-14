@@ -1,6 +1,6 @@
 
 .MyListMain {
-    /* background: rgb(255, 145, 0); */
+    background: rgb(255, 145, 0);
     flex-grow: 1;
 }
 
@@ -12,11 +12,12 @@
 }
 
 .TagItem {
-    border: 1px solid whitesmoke;
+    background: #f4feee;
     padding: 2px 4px;
     margin: 2px;
     font-weight: bolder;
     border-radius: 2px;
+    color: rgb(65 181 0 / 86%);
 }
 
 .TagItem::after {
@@ -26,7 +27,7 @@
     left: 0;
     top: 0;
     height: 100%;
-    background-color: rgba(172, 255, 47, 0.299);
+    background-color: rgb(153 255 0 / 56%);
 }
 
 .TagItem.repeat1::after {

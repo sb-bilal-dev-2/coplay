@@ -180,7 +180,7 @@ app.get('/subtitles_v2', async (req, res) => {
   try {
     if (subtitleId) {
       subtitleInfo = await subtitles_model.findById(subtitleId)
-      console.log('subtitleInfo', subtitleInfo)
+      console.log('SUBTITLE RESPINDING: ', subtitleInfo?._id)
     } else {
       subtitleInfo = await subtitles_model.findOne({ mediaTitle: name, mediaLang, translateLang })
     }

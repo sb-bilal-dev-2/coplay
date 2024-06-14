@@ -37,20 +37,20 @@ const router = createBrowserRouter(
         element={<MyList />}
         loader={authenticatedRoute}
       />
-      <Route path="words" element={<WordsPage />} />
+      <Route path="words/:list" element={<WordsPage />} />
       <Route path="movie/:title" element={<MoviePage />} />
       <Route path="auth/:screen" element={<Authentication />} />
       <Route path="crud/:model" element={<CRUDRoute />} />
+      <Route path="quiz/:list/:word" element={<Quiz />} />
       <Route path="quiz/:list" element={<Quiz />} />
       <Route path="*" element={<NotFound />} />
     </>
   )
 );
 
-
 root.render(
   <ErrorBoundary>
-    <GoogleOAuthProvider clientId={process.env.REACT_GOOGLE_CLIENT_ID}>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <Provider store={store}>
         <RouterProvider router={router} />
       </Provider>

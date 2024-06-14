@@ -5,7 +5,7 @@ import "./MyList.css";
 import classNames from "classnames";
 import { useDispatch } from "react-redux";
 import { updateGivenUserValues } from "../store";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { usePost } from "./usePost";
 import { useRequestUserWordLists } from "../helper/useUserWords";
 
@@ -36,6 +36,7 @@ const LEARN_STATE_NAMES = {
 
 function RenderTagList({ list = [], name }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const [isEditing, setEditing] = useState(false);
   const [selectedItems, setSelectecItems] = useState([]);
   const [postUserWords] = usePost((data) =>
@@ -154,16 +155,11 @@ function RenderTagList({ list = [], name }) {
                 <button onClick={() => setEditing(!isEditing)}>
                   <i className="fas fa-pen pl-1"></i>
                 </button>
-                <Link to="/words">
+                <Link to={"/words/" + name?.toLowerCase()}>
                   <i className="fa fa-layer-group pl-1"></i>
                 </Link>
-                {name === "learning" && (
-                  <Link to={"/quiz/" + name.toLowerCase()}>
-                    <i className="fa fa-play pl-1"></i>
-                  </Link>
-                )}
-                {name === "repeating" && (
-                  <Link to={"/quiz/" + name.toLowerCase()}>
+                {name !== "learned" && (
+                  <Link to={"/quiz/" + name?.toLowerCase()}>
                     <i className="fa fa-play pl-1"></i>
                   </Link>
                 )}
@@ -177,7 +173,7 @@ function RenderTagList({ list = [], name }) {
           return (
             <button
               key={item.lemma}
-              onClick={() => isEditing && handleTagClick(item.lemma)}
+              onClick={() => isEditing ? handleTagClick(item.lemma) : navigate(`/quiz/${name}/${item.lemma}`) }
               className={classNames(
                 `TagItem text-gray-50 repeat${item.repeatCount || 0}`,
                 { selected: selectedItems.includes(item.lemma) }

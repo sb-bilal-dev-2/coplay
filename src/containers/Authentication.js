@@ -99,15 +99,14 @@ const Authentication = () => {
 
   const renderLoginForm = () => (
     <form className='flex flex-col items-center' onSubmit={handleLogin}>
-      <p className='mt-2 text-center'>Don't have an account? <Link to="/auth/signup">Sign up</Link></p>
+      <p className='mt-2 text-center text-white'>Don't have an account? <Link to="/auth/signup">Sign up</Link></p>
       <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Username or Email" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
       </label>
       <label>
-        
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "password") && 'input-error'} input mb-2`} placeholder="Password" type="password" name="password" value={formData.password || ''} onChange={handleInputChange} />
       </label>
-      <p className='mt-2 text-center'>Forgot the password? <Link to="/auth/forgot">Reset</Link></p>
+      <p className='mt-2 text-center text-white'>Forgot the password? <Link to="/auth/forgot">Reset</Link></p>
       <button type="submit" disabled={isLoading}>
         Login
       </button>
@@ -120,12 +119,12 @@ const Authentication = () => {
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email or Username" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
       </label>
       <div>
-      <button type="submit" disabled={isLoading}>
-        Send a code
-      </button>
-      <button onClick={() => navigate(`/auth/reset?login=${formData.email}`)}>
-        Enter the code
-      </button>
+        <button type="submit" disabled={isLoading}>
+          Send a code
+        </button>
+        <button onClick={() => navigate(`/auth/reset?login=${formData.email}`)}>
+          Enter the code
+        </button>
       </div>
     </form>
   );
@@ -133,19 +132,19 @@ const Authentication = () => {
   const renderResetPasswordForm = () => (
     <form className='flex flex-col items-center' onSubmit={handleResetPassword}>
       <label>
-        
+
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email or Username" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
       </label>
       <label>
-        
+
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "code") && 'input-error'} input mb-2`} placeholder="Verification Code" type="text" name="code" value={formData.code || ''} onChange={handleInputChange} />
       </label>
       <label>
-        
+
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "password") && 'input-error'} input mb-2`} placeholder="New Password" type="password" name="password" value={formData.password || ''} onChange={handleInputChange} />
       </label>
       <label>
-        
+
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "passwordRepeat") && 'input-error'} input mb-2`} placeholder="New Password" type="password" name="passwordRepeat" value={formData.passwordRepeat || ''} onChange={handleInputChange} />
       </label>
       <button type="submit" disabled={isLoading}>
@@ -155,17 +154,17 @@ const Authentication = () => {
   );
   console.log('error', error)
   const renderMainAuth = () => (
-    <div className='Authentication section bg-secondary min-h-screen'>
+    <div className='Authentication-co section bg-secondary min-h-screen'>
       <div className='section-container pt-20'>
-      {Array.isArray(error) ?
-        error.map((err) => <p key={err.name} className='text-center text-red-500'><b>{err.message}</b></p>)
-        : <p className='text-center text-red-500'><b>{(error && error.message) || error}</b></p>
-      }
-      {screen === 'signup' && renderSignUpForm()}
-      {screen === 'confirm' && renderConfirmSignUpForm()}
-      {screen === 'login' && renderLoginForm()}
-      {screen === 'forgot' && renderForgotPasswordForm()}
-      {screen === 'reset' && renderResetPasswordForm()}
+        {Array.isArray(error) ?
+          error.map((err) => <p key={err.name} className='text-center text-red-500'><b>{err.message}</b></p>)
+          : <p className='text-center text-red-500'><b>{(error && error.message) || error}</b></p>
+        }
+        {/* {screen === 'signup' && renderSignUpForm()}
+        {screen === 'confirm' && renderConfirmSignUpForm()}
+        {screen === 'login' && renderLoginForm()}
+        {screen === 'forgot' && renderForgotPasswordForm()}
+        {screen === 'reset' && renderResetPasswordForm()} */}
       </div>
     </div>
   );
@@ -174,6 +173,7 @@ const Authentication = () => {
     <>
       <StickyHeader type="secondary" authPage />
       {renderMainAuth()}
+      <GoogleAuth />
     </>
   )
 };

@@ -1,18 +1,26 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import TinderCard from "react-tinder-card";
 import { useRequestUserWordLists } from "../helper/useUserWords";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import "./WordsPage.css";
 
 const WordsPage = () => {
-  const { learningList, learnedList, repeatingList } =
-    useRequestUserWordLists();
+  const listsMap = useRequestUserWordLists();
+  const { list: listName } = useParams()
+  // const [wordList, set_wordList] = useState([])
+  // useEffect(() => {
+    
+  //   const newList = lists[listName + 'List']
+
+  //   set_wordList(newList || [])
+  // }, [])
 
   return (
     <div className="flex items-center justify-center flex-col bg-gray-900 h-screen">
       <h1 className="font-bold text-2xl m-10">My words</h1>
       <WordsSlider
-        list={learningList}
+        listName={listName}
+        list={listsMap[listName + 'List'] || []}
         onSwipeLeft={() => {}}
         onSwipeRight={() => {}}
       />
@@ -25,6 +33,7 @@ const WordsPage = () => {
   }
 
   function WordsSlider({
+    listName,
     list,
     onSwipeLeft,
     onSwipeRight,
@@ -141,7 +150,7 @@ const WordsPage = () => {
                         className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
                         style={{ background: "rgb(6 182 212)" }}
                       >
-                        <Link to={"/quiz/" + character?.lemma.toLowerCase()}>
+                        <Link to={`/quiz/${listName}/${character?.lemma.toLowerCase()}`}>
                           <i
                             class="fa fa-play text-white text-l m-4 text-center "
                             aria-hidden="true"
