@@ -17,7 +17,6 @@ import {
   secondsToDisplayTime,
 } from "../helper/moviePage";
 import Modal from "../components/Modal";
-import Modal from "../components/Modal";
 
 const VOLUME_SHOW_TIMEOUT = 500;
 
@@ -38,9 +37,6 @@ const MoviePage = () => {
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
   const [isMute, setMute] = useState(false);
-  const [isDropOpen, setDropOpen] = useState(false);
-  const outsideNavClickWrapperRef = useRef(null);
-  useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
   const [isDropOpen, setDropOpen] = useState(false);
   const outsideNavClickWrapperRef = useRef(null);
   useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
@@ -557,17 +553,6 @@ const MoviePage = () => {
       setShowModal(false);
     };
 
-    const handleError = () => {
-      setErrorMessage(
-        "Failed to load the video. Please check the source or your network connection."
-      );
-      setShowModal(true);
-    };
-
-    const handleCloseModal = () => {
-      setShowModal(false);
-    };
-
     return (
       <div
         className={classNames("videoItem", {
@@ -583,19 +568,12 @@ const MoviePage = () => {
           onEnded={handleEnd}
           muted={isMute}
           onError={handleError}
-          onError={handleError}
         >
           <source
             src={BASE_SERVER_URL + `/movie?name=${title}`}
             type="video/mp4"
           />
         </video>
-        {/* Error Modal */}
-        <Modal
-          show={showModal}
-          message={errorMessage}
-          onClose={handleCloseModal}
-        />
         {/* Error Modal */}
         <Modal
           show={showModal}
