@@ -16,6 +16,7 @@ import {
   isFullScreen,
   secondsToDisplayTime,
 } from "../helper/moviePage";
+import Modal from "../components/Modal";
 
 const VOLUME_SHOW_TIMEOUT = 500;
 
@@ -36,9 +37,9 @@ const MoviePage = () => {
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
   const [isMute, setMute] = useState(false);
-    const [isDropOpen, setDropOpen] = useState(false);
-    const outsideNavClickWrapperRef = useRef(null);
-    useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
+  const [isDropOpen, setDropOpen] = useState(false);
+  const outsideNavClickWrapperRef = useRef(null);
+  useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
   // Fetch movie details based on the title from your data source
   // For simplicity, I'll just display the movie title for now
@@ -55,6 +56,9 @@ const MoviePage = () => {
   const [transalteType, setTransalteType] = useState(undefined);
 
   const [translateLangSubtitle, setTranslateLangSubtitle] = useState(undefined);
+
+  const [showModal, setShowModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // const [showOnRewind, setShowOnRewind] = useState(true)
   const justRewindedTimeout = useRef(null);
@@ -211,7 +215,6 @@ const MoviePage = () => {
   );
 
   function RenderDropMenu() {
-
     let subtitleLocalstorage = localStorage.getItem("subtitleSetting");
     let translationLocalstorage = localStorage.getItem("transaltionSetting");
 
@@ -323,7 +326,6 @@ const MoviePage = () => {
     // const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(
     //   (item) => item.title === translateLangSubtitleLocal
     // );
-
 
     console.log("translateLangSubtitle?._id", translateLangSubtitle);
 
@@ -540,7 +542,17 @@ const MoviePage = () => {
       (item) => item.title === translateLangSubtitleLocal
     );
 
-    console.log("translatedSubtitleInfo")
+    const handleError = () => {
+      setErrorMessage(
+        "Failed to load the video. Please check the source or your network connection."
+      );
+      setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+      setShowModal(false);
+    };
+
     return (
       <div
         className={classNames("videoItem", {
@@ -555,12 +567,19 @@ const MoviePage = () => {
           onTouchStart={handleTap}
           onEnded={handleEnd}
           muted={isMute}
+          onError={handleError}
         >
           <source
             src={BASE_SERVER_URL + `/movie?name=${title}`}
             type="video/mp4"
           />
         </video>
+        {/* Error Modal */}
+        <Modal
+          show={showModal}
+          message={errorMessage}
+          onClose={handleCloseModal}
+        />
         <div
           className={classNames("volumeInfo", {
             hidden: !volumeInfoShowTimeout.current,
