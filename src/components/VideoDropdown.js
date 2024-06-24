@@ -88,8 +88,7 @@ function RenderDropMenu({
         } absolute bg-black bottom-8 p-6 rounded drop-shadow-lg`}
       >
         {isDropOpen && (
-          <ul className="w-80 flex justify-center align-middle">
-            Dropdown
+          <ul className="w-80 flex justify-center align-middle p-4">
             <li className="text-white font-bold w-40">
               <p className="pb-2">Subtitle</p>
               <label className="radio-container">
