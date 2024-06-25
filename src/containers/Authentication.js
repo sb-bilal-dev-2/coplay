@@ -160,11 +160,11 @@ const Authentication = () => {
           error.map((err) => <p key={err.name} className='text-center text-red-500'><b>{err.message}</b></p>)
           : <p className='text-center text-red-500'><b>{(error && error.message) || error}</b></p>
         }
-        {/* {screen === 'signup' && renderSignUpForm()}
+        {screen === 'signup' && renderSignUpForm()}
         {screen === 'confirm' && renderConfirmSignUpForm()}
         {screen === 'login' && renderLoginForm()}
         {screen === 'forgot' && renderForgotPasswordForm()}
-        {screen === 'reset' && renderResetPasswordForm()} */}
+        {screen === 'reset' && renderResetPasswordForm()}
       </div>
     </div>
   );

@@ -134,7 +134,7 @@ const Subtitles = ({
     }
 
     return (
-        <div className="subtitle-container" style={{ top: positionY * 100 + '%', fontSize: (subtitleScale * 16) + "px" }}>
+        <div className="subtitle-container" style={{ top: positionY * 90 + '%', fontSize: (subtitleScale * 16) + "px" }}>
             <div className={classNames(["subtitle", className])} onPointerUp={handleMouseUp}>
                 {currentSubtitle?.subtitleLines?.map((subtitleLine) => {
                     if (tooltip) {

@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Cplay",
+  "name": "Cplay",
+  "orientation": "landscape",
   "icons": [
     {
       "src": "favicon.ico",

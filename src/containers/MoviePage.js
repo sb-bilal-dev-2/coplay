@@ -17,6 +17,8 @@ import {
 } from "../helper/moviePage";
 import Modal from "../components/Modal";
 import VideoDropdown from "../components/VideoDropdown";
+import useMobileDetect from "../helper/useMobileDetect";
+import SecondaryButton from "../components/SecondaryButton";
 
 const VOLUME_SHOW_TIMEOUT = 500;
 
@@ -111,6 +113,9 @@ const MoviePage = () => {
   const handleEnd = useCallback(() => {
     localStorage.removeItem("currentTime" + title);
   });
+
+  const isMobile = useMobileDetect();
+
   let tapCount = 0;
   let tapTimer;
 
@@ -178,19 +183,16 @@ const MoviePage = () => {
             parsedSubtitleId={currentItem.parsedSubtitleId}
             userId={userId}
           />
-          <Link to={`/quiz/${title}`} className="text-white">
-            <b>
-              Watch Unnkown Words of {currentItem?.label || title}{" "}
-              <i className="fa fa-arrow-right" aria-hidden="true"></i>
-            </b>
-          </Link>
-          <br />
-          <Link to="/quiz/learning" className="text-white cursor-pointer">
-            <b>
-              Watch my Rehearse List{" "}
-              <i className="fa fa-arrow-right" aria-hidden="true"></i>
-            </b>
-          </Link>
+          <div className="flex justify-center align-middle">
+            <SecondaryButton
+              path={`/quiz/${title}`}
+              title={`Watch Words of ${currentItem?.label || title}`}
+            />
+            <SecondaryButton
+              path="/quiz/learning"
+              title="Watch My Rehearse List"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -205,10 +207,10 @@ const MoviePage = () => {
 
     const toggleFullscreen = () => {
       if (!isFullScreen()) {
-        fullScreenContainer.current.webkitRequestFullScreen();
+        fullScreenContainer?.current?.webkitRequestFullScreen();
         //   videoRef.current.currentTime += 10; // Seek forward by 10 seconds
-      } else if (isFullScreen) {
-        document.exitFullscreen();
+      } else if (isFullScreen()) {
+        videoRef?.exitFullscreen();
       }
     };
 
@@ -250,11 +252,22 @@ const MoviePage = () => {
       setShowModal(false);
     };
 
+    const handlePusePlay = () => {
+      if (videoRef?.current?.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    };
+
     return (
       <div
-        className={classNames("videoItem", {
-          fullScreen: isFullScreen(),
-        })}
+        className={classNames(
+          `videoItem`,
+          {
+            fullScreen: isFullScreen(),
+          }
+        )}
         ref={fullScreenContainer}
       >
         <video
@@ -285,6 +298,19 @@ const MoviePage = () => {
           {Math.round((videoRef?.current?.volume || 0) * 100)}%
         </div>
         <div className="controls">
+          {isMobile ? (
+            <div
+              className="top-1/2 left-2/4 relative "
+              onClick={handlePusePlay}
+            >
+              {videoRef?.current?.paused ? (
+                <i class="fa fa-play text-2xl text-white"></i>
+              ) : (
+                <i class="fa fa-pause text-2xl text-white"></i>
+              )}{" "}
+            </div>
+          ) : null}
+
           <div className="row1">
             <span className="timeLeft">
               {secondsToDisplayTime(videoRef?.current?.currentTime)} /{" "}
@@ -304,8 +330,17 @@ const MoviePage = () => {
               }}
             />
           </div>
-          <div className="flex justify-center">
-            <div className="flex justify-center align-middle items-center">
+          <div className="flex justify-start">
+            {!isMobile ? (
+              <div className="m-2 cursor-pointer" onClick={handlePusePlay}>
+                {videoRef?.current?.paused ? (
+                  <i class="fa fa-play text-2xl text-white"></i>
+                ) : (
+                  <i class="fa fa-pause text-2xl text-white"></i>
+                )}{" "}
+              </div>
+            ) : null}
+            <div className="flex justify-center align-middle items-center m-auto">
               <i
                 className={`fas ${
                   !isMute ? "fa-volume-up" : "fa-volume-mute"

@@ -37,7 +37,7 @@ function RenderDropMenu({
 }) {
   const [isDropOpen, setDropOpen] = useState(false);
   const outsideNavClickWrapperRef = useRef(null);
-  //   useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
+    useOutsideAlerter(outsideNavClickWrapperRef, () => setDropOpen(false));
 
   const subtitleLocal = localStorage.getItem("subtitle");
   const transalteLocal = localStorage.getItem("translate");
@@ -83,7 +83,7 @@ function RenderDropMenu({
       />
       <div
         ref={outsideNavClickWrapperRef}
-        className={`${
+        className={`subtitle-dropdown ${
           isDropOpen ? "block" : "hidden"
         } absolute bg-black bottom-8 p-6 rounded drop-shadow-lg`}
       >

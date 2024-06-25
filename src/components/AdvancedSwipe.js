@@ -1,12 +1,18 @@
-import React, { useState, useMemo, useRef } from 'react';
-import TinderCard from 'react-tinder-card';
-import './AdvancedSwipe.css';
+import React, { useState, useMemo, useRef } from "react";
+import TinderCard from "react-tinder-card";
+import "./AdvancedSwipe.css";
 
-function AdvancedSwipe ({ list, onSwipeLeft, onSwipeRight, onSwipeTop, onSwipeBottom }) {
-  const [currentIndex, setCurrentIndex] = useState(list.length - 1)
-  const [lastDirection, setLastDirection] = useState()
+function AdvancedSwipe({
+  list,
+  onSwipeLeft,
+  onSwipeRight,
+  onSwipeTop,
+  onSwipeBottom,
+}) {
+  const [currentIndex, setCurrentIndex] = useState(list.length - 1);
+  const [lastDirection, setLastDirection] = useState();
   // used for outOfFrame closure
-  const currentIndexRef = useRef(currentIndex)
+  const currentIndexRef = useRef(currentIndex);
 
   const childRefs = useMemo(
     () =>
@@ -14,90 +20,112 @@ function AdvancedSwipe ({ list, onSwipeLeft, onSwipeRight, onSwipeTop, onSwipeBo
         .fill(0)
         .map((i) => React.createRef()),
     []
-  )
+  );
 
   const updateCurrentIndex = (val) => {
-    setCurrentIndex(val)
-    currentIndexRef.current = val
-  }
+    setCurrentIndex(val);
+    currentIndexRef.current = val;
+  };
 
-  const canGoBack = currentIndex < list.length - 1
+  const canGoBack = currentIndex < list.length - 1;
 
-  const canSwipe = currentIndex >= 0
+  const canSwipe = currentIndex >= 0;
 
   // set last direction and decrease current index
   const swiped = (direction, lemma, index) => {
-    setLastDirection(direction)
-    updateCurrentIndex(index - 1)
-    if (direction === 'right') {
+    setLastDirection(direction);
+    updateCurrentIndex(index - 1);
+    if (direction === "right") {
       onSwipeRight(lemma);
-    } else if (direction = 'left') {
+    } else if ((direction = "left")) {
       onSwipeLeft(lemma);
-    } else if (direction = 'top') {
-      onSwipeTop(lemma)
-    } else if (direction = 'bottom') {
-      onSwipeBottom(lemma);
     }
-  }
 
-  console.log('lastDirection', lastDirection)
+    if (direction === "up" || direction === "down") {
+      console.log("Swipe up or down is disabled");
+      return;
+    }
+    console.log("Swiped: " + direction);
+  };
+
+  console.log("lastDirection", lastDirection);
 
   const outOfFrame = (word, idx) => {
-    console.log(`${word} (${idx}) left the screen!`, currentIndexRef.current)
+    console.log(`${word} (${idx}) left the screen!`, currentIndexRef.current);
     // handle the case in which go back is pressed before card goes outOfFrame
-    currentIndexRef.current >= idx && childRefs[idx].current.restoreCard()
+    currentIndexRef.current >= idx && childRefs[idx].current.restoreCard();
     // TODO: when quickly swipe and restore multiple times the same card,
     // it happens multiple outOfFrame events are queued and the card disappear
     // during latest swipes. Only the last outOfFrame event should be considered valid
-  }
+  };
 
   const swipe = async (dir) => {
     if (canSwipe && currentIndex < list.length) {
-      await childRefs[currentIndex].current.swipe(dir) // Swipe the card!
+      await childRefs[currentIndex].current.swipe(dir); // Swipe the card!
     }
-  }
+  };
 
   // increase current index and show card
   const goBack = async () => {
-    if (!canGoBack) return
-    const newIndex = currentIndex + 1
-    updateCurrentIndex(newIndex)
+    if (!canGoBack) return;
+    const newIndex = currentIndex + 1;
+    updateCurrentIndex(newIndex);
 
-    await childRefs[newIndex].current.restoreCard()
-  }
+    await childRefs[newIndex].current.restoreCard();
+  };
 
   return (
-    <div className='cardMainContainer'>
+    <div className="cardMainContainer">
       <h1>Movie Word List</h1>
-      <div className='cardContainer'>
+      <div className="cardContainer">
         {list.map((character, index) => {
           if (index > currentIndex - 5 && index < currentIndex + 5) {
             return (
               <TinderCard
                 ref={childRefs[index]}
-                className='swipe'
+                className="swipe"
                 key={character?.lemma}
                 onSwipe={(dir) => swiped(dir, character?.lemma, index)}
                 onCardLeftScreen={() => outOfFrame(character?.lemma, index)}
               >
                 <div
-                  style={{ backgroundImage: 'url(' + character?.imageDescUrl + ')' }}
-                  className='card'
+                  style={{
+                    backgroundImage: "url(" + character?.imageDescUrl + ")",
+                  }}
+                  className="card"
                 >
-                  <h3 style={{ color: 'green' }}>{character?.lemma}</h3>
+                  <h3 style={{ color: "green" }}>{character?.lemma}</h3>
                 </div>
               </TinderCard>
             );
           }
-      })}
+        })}
       </div>
-      <div className='buttons'>
-        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('left')}><i className="fa fa-check-double"></i><code className='text-xs text-center'>know</code></button>
-        <button style={{ backgroundColor: !canGoBack && '#c3c4d3' }} onClick={() => goBack()}><i className="fa fa-undo"></i><code className='text-xs text-center'>back</code></button>
-        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('right')}><i className="fa fa-plus"></i><code className='text-xs text-center'>repeat</code></button>
+      <div className="buttons">
+        <button
+          style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
+          onClick={() => swipe("left")}
+        >
+          <i className="fa fa-check-double"></i>
+          <code className="text-xs text-center">know</code>
+        </button>
+        <button
+          style={{ backgroundColor: !canGoBack && "#c3c4d3" }}
+          onClick={() => goBack()}
+        >
+          <i className="fa fa-undo"></i>
+          <code className="text-xs text-center">back</code>
+        </button>
+        <button
+          style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
+          onClick={() => swipe("right")}
+        >
+          <i className="fa fa-plus"></i>
+          <code className="text-xs text-center">repeat</code>
+        </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default AdvancedSwipe
+export default AdvancedSwipe;

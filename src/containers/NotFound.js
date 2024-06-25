@@ -7,7 +7,7 @@ export function NotFound() {
       <p className="text">
         Oops..
         <br />
-        Something went wrong
+        Not found
       </p>
       <div className="container">
         <div className="bg">
