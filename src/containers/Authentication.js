@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
-import useAuthentication from './Authentication.util';
-import { redirect, useNavigate, useParams } from 'react-router';
-import './Authentication.css'
-import StickyHeader from '../components/StickyHeader';
-import { Link } from 'react-router-dom';
-import { GoogleAuth } from '../components/GoogleAuth';
-
+import React, { useEffect } from "react";
+import useAuthentication from "./Authentication.util";
+import { redirect, useNavigate, useParams } from "react-router";
+import "./Authentication.css";
+import StickyHeader from "../components/StickyHeader";
+import { Link } from "react-router-dom";
+import { GoogleAuth } from "../components/GoogleAuth";
+import SecondaryButton from "../components/SecondaryButton";
 
 const Authentication = () => {
-  const { screen } = useParams()
+  const { screen } = useParams();
   const navigate = useNavigate();
   const {
     signUp,
@@ -25,8 +25,8 @@ const Authentication = () => {
   } = useAuthentication();
 
   useEffect(() => {
-    resetFormData()
-  }, [screen])
+    resetFormData();
+  }, [screen]);
 
   const handleInputChange = (e) => {
     updateFormDataValue(e.target.name, e.target.value);
@@ -39,18 +39,22 @@ const Authentication = () => {
 
   const handleConfirmSignUp = (e) => {
     e.preventDefault();
-    const confirmEmail = (new URLSearchParams(document.location.search)).get('login')
-    confirmSignUp(confirmEmail, formData.code, () => navigate('/'));
+    const confirmEmail = new URLSearchParams(document.location.search).get(
+      "login"
+    );
+    confirmSignUp(confirmEmail, formData.code, () => navigate("/"));
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
-    login(() => navigate('/'));
+    login(() => navigate("/"));
   };
 
   const handleForgotPassword = (e) => {
     e.preventDefault();
-    forgotPassword(formData.email, () => redirect(`/auth/reset?login=${formData.email}`));
+    forgotPassword(formData.email, () =>
+      redirect(`/auth/reset?login=${formData.email}`)
+    );
   };
 
   const handleResetPassword = (e) => {
@@ -65,58 +69,143 @@ const Authentication = () => {
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "username") && 'input-error'} input mb-2`} placeholder="Username" type="text" name="username" value={formData.username || ''} onChange={handleInputChange} />
       </label> */}
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email" type="email" name="email" value={formData.email || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "email") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Email"
+          type="email"
+          name="email"
+          value={formData.email || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "password") && 'input-error'} input mb-2`} placeholder="Password" type="password" name="password" value={formData.password || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "password") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Password"
+          type="password"
+          name="password"
+          value={formData.password || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "passwordRepeat") && 'input-error'} input mb-2`} placeholder="Repeat Password" type="password" name="passwordRepeat" value={formData.passwordRepeat || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "passwordRepeat") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Repeat Password"
+          type="password"
+          name="passwordRepeat"
+          value={formData.passwordRepeat || ""}
+          onChange={handleInputChange}
+        />
       </label>
-      <p className='mt-2'>Already have an account? <Link to="/auth/login">Login</Link></p>
-      <button type="submit" disabled={isLoading}>
-        Sign Up
-      </button>
+      <p className="mt-2">
+        Already have an account? <Link to="/auth/login">Login</Link>
+      </p>
+      <SecondaryButton title="Sign Up" type="submit" disabled={isLoading} button />
     </form>
   );
 
   const renderConfirmSignUpForm = () => (
-    <form className='flex flex-col items-center' onSubmit={handleConfirmSignUp}>
+    <form className="flex flex-col items-center" onSubmit={handleConfirmSignUp}>
       {/* <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email" type="email" name="email" value={formData.email || ''} onChange={handleInputChange} />
       </label> */}
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "code") && 'input-error'} input mb-2`} placeholder="Verification Code" type="text" name="code" value={formData.code || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "code") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Verification Code"
+          type="text"
+          name="code"
+          value={formData.code || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <button type="submit" disabled={isLoading} onClick={resendCode}>
         Resend code
       </button>
-      <button type="submit" disabled={isLoading}>
-        Confirm Sign Up
-      </button>
+      <SecondaryButton
+        title="Confirm Sign Up"
+        type="submit"
+        disabled={isLoading}
+        button
+      />
     </form>
   );
 
   const renderLoginForm = () => (
-    <form className='flex flex-col items-center' onSubmit={handleLogin}>
-      <p className='mt-2 text-center text-white'>Don't have an account? <Link to="/auth/signup">Sign up</Link></p>
+    <form className="flex flex-col items-center" onSubmit={handleLogin}>
+      <p className="mt-2 text-center text-white">
+        Don't have an account? <Link to="/auth/signup">Sign up</Link>
+      </p>
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Username or Email" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "email") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Username or Email"
+          type="text"
+          name="email"
+          value={formData.email || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "password") && 'input-error'} input mb-2`} placeholder="Password" type="password" name="password" value={formData.password || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "password") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Password"
+          type="password"
+          name="password"
+          value={formData.password || ""}
+          onChange={handleInputChange}
+        />
       </label>
-      <p className='mt-2 text-center text-white'>Forgot the password? <Link to="/auth/forgot">Reset</Link></p>
-      <button type="submit" disabled={isLoading}>
-        Login
-      </button>
+      <p className="mt-2 text-center text-white">
+        Forgot the password? <Link to="/auth/forgot">Reset</Link>
+      </p>
+      <SecondaryButton title="Login" isLoading={isLoading} type="submit" button/>
     </form>
   );
 
   const renderForgotPasswordForm = () => (
-    <form className='flex flex-col items-center' onSubmit={handleForgotPassword}>
+    <form
+      className="flex flex-col items-center"
+      onSubmit={handleForgotPassword}
+    >
       <label>
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email or Username" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "email") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Email or Username"
+          type="text"
+          name="email"
+          value={formData.email || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <div>
         <button type="submit" disabled={isLoading}>
@@ -130,41 +219,88 @@ const Authentication = () => {
   );
 
   const renderResetPasswordForm = () => (
-    <form className='flex flex-col items-center' onSubmit={handleResetPassword}>
+    <form className="flex flex-col items-center" onSubmit={handleResetPassword}>
       <label>
-
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email or Username" type="text" name="email" value={formData.email || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "email") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Email or Username"
+          type="text"
+          name="email"
+          value={formData.email || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <label>
-
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "code") && 'input-error'} input mb-2`} placeholder="Verification Code" type="text" name="code" value={formData.code || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "code") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="Verification Code"
+          type="text"
+          name="code"
+          value={formData.code || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <label>
-
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "password") && 'input-error'} input mb-2`} placeholder="New Password" type="password" name="password" value={formData.password || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "password") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="New Password"
+          type="password"
+          name="password"
+          value={formData.password || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <label>
-
-        <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "passwordRepeat") && 'input-error'} input mb-2`} placeholder="New Password" type="password" name="passwordRepeat" value={formData.passwordRepeat || ''} onChange={handleInputChange} />
+        <input
+          className={`${
+            Array.isArray(error) &&
+            !!error.find((err) => err.name === "passwordRepeat") &&
+            "input-error"
+          } input mb-2`}
+          placeholder="New Password"
+          type="password"
+          name="passwordRepeat"
+          value={formData.passwordRepeat || ""}
+          onChange={handleInputChange}
+        />
       </label>
       <button type="submit" disabled={isLoading}>
         Reset Password
       </button>
     </form>
   );
-  console.log('error', error)
+  console.log("error", error);
   const renderMainAuth = () => (
-    <div className='Authentication-co section bg-secondary min-h-screen'>
-      <div className='section-container pt-20'>
-        {Array.isArray(error) ?
-          error.map((err) => <p key={err.name} className='text-center text-red-500'><b>{err.message}</b></p>)
-          : <p className='text-center text-red-500'><b>{(error && error.message) || error}</b></p>
-        }
-        {screen === 'signup' && renderSignUpForm()}
-        {screen === 'confirm' && renderConfirmSignUpForm()}
-        {screen === 'login' && renderLoginForm()}
-        {screen === 'forgot' && renderForgotPasswordForm()}
-        {screen === 'reset' && renderResetPasswordForm()}
+    <div className="Authentication-co section bg-secondary min-h-screen">
+      <div className="section-container pt-20">
+        {Array.isArray(error) ? (
+          error.map((err) => (
+            <p key={err.name} className="text-center text-red-500">
+              <b>{err.message}</b>
+            </p>
+          ))
+        ) : (
+          <p className="text-center text-red-500">
+            <b>{(error && error.message) || error}</b>
+          </p>
+        )}
+        {screen === "signup" && renderSignUpForm()}
+        {screen === "confirm" && renderConfirmSignUpForm()}
+        {screen === "login" && renderLoginForm()}
+        {screen === "forgot" && renderForgotPasswordForm()}
+        {screen === "reset" && renderResetPasswordForm()}
       </div>
     </div>
   );
@@ -175,7 +311,7 @@ const Authentication = () => {
       {renderMainAuth()}
       <GoogleAuth />
     </>
-  )
+  );
 };
 
 export default Authentication;
