@@ -30,19 +30,32 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route exact path="/" element={<HomePage />} />
-      <Route exact path="/account" element={<Account />} />
+      <Route
+        exact
+        path="/account"
+        element={<Account />}
+        loader={authenticatedRoute}
+      />
       <Route
         exact
         path="my_list"
         element={<MyList />}
         loader={authenticatedRoute}
       />
-      <Route path="words/:list" element={<WordsPage />} />
+      <Route
+        path="words/:list"
+        element={<WordsPage />}
+        loader={authenticatedRoute}
+      />
       <Route path="movie/:title" element={<MoviePage />} />
       <Route path="auth/:screen" element={<Authentication />} />
       <Route path="crud/:model" element={<CRUDRoute />} />
-      <Route path="quiz/:list/:word" element={<Quiz />} />
-      <Route path="quiz/:list" element={<Quiz />} />
+      <Route
+        path="quiz/:list/:word"
+        element={<Quiz />}
+        loader={authenticatedRoute}
+      />
+      <Route path="quiz/:list" element={<Quiz />} loader={authenticatedRoute} />
       <Route path="*" element={<NotFound />} />
     </>
   )
@@ -61,7 +74,7 @@ root.render(
 function authenticatedRoute() {
   const token = localStorage.getItem("token");
   if (!token) {
-    return redirect("/");
+    return redirect("/login");
   }
 
   return null;
