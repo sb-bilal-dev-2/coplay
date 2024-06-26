@@ -37,18 +37,19 @@ export default function MovieWordCards({ parsedSubtitleId, userId }) {
     useEffect(() => {
         fetchLemmas()
     }, [userId, parsedSubtitleId])
-    console.log('lemmas', lemmas)
+
     return (
-        <div>{!!lemmas.length && (
-            <AdvancedSwipe
-                list={lemmas}
-                onSwipeBottom={handleSwipeBottom}
-                onSwipeTop={handleSwipeTop}
-                onSwipeLeft={handleSwipeLeft}
-                onSwipeRight={handleSwipeRight}
-            />
+      <div>
+        {!!lemmas.length && (
+          <AdvancedSwipe
+            list={lemmas}
+            onSwipeBottom={handleSwipeBottom}
+            onSwipeTop={handleSwipeTop}
+            onSwipeLeft={handleSwipeLeft}
+            onSwipeRight={handleSwipeRight}
+          />
         )}
         {!!error?.length && error}
-        </div>
-    )
+      </div>
+    );
 }

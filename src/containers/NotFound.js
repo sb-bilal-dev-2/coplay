@@ -1,9 +1,12 @@
 import React from "react";
 import "./ErrorBoundary.scss";
+import StickyHeader from "../components/StickyHeader";
 
 export function NotFound() {
   return (
     <div className="error_page">
+      <StickyHeader />
+
       <p className="text">
         Oops..
         <br />

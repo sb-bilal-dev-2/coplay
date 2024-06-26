@@ -1,4 +1,6 @@
-p , h1, span{
+p,
+h1,
+span {
   color: silver;
 }
 
@@ -6,10 +8,22 @@ p , h1, span{
   padding-top: 12rem;
 }
 
-.info span, .info i {
+.info span,
+.info i {
   font-size: 12rm;
 }
 
 .info p {
   font-size: 14rm;
+}
+
+@media (max-width: 600px) {
+  .info {
+    margin: 5px;
+    overflow: hidden;
+  }
+
+  .info i {
+    font-size: 14px;
+  }
 }

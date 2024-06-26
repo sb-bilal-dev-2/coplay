@@ -39,7 +39,7 @@ const Account = () => {
           <div className="w-16 h-16 rounded-full border-2 border-gray-400 border-solid m-auto mb-6">
             <i class="fa-solid fa-user text-gray-400 text-center w-full h-full mt-6" />
           </div>
-          <div className="bg-gray-700 m-auto p-2 rounded-md md:w-8/12 ">
+          <div className="bg-gray-700 m-auto p-2 rounded-md md:w-2/4 ">
             <div className="info m-10 flex">
               <i
                 class="fa fa-envelope text-gray-400 p-4 text-2xl"
@@ -54,7 +54,7 @@ const Account = () => {
               <i class="fa-solid fa-lock text-gray-400 p-4 text-2xl" />
               <div className="flex flex-col">
                 <span className="font-bold">Password</span>
-                <input type="password" value={userInfo?.password} disabled />
+                <input type="password" value={"Password"} disabled />
               </div>
             </div>
             <div className="info m-10 flex">

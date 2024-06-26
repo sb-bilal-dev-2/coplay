@@ -124,12 +124,12 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
               <b>My List</b>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link to="/favourites">
               <i class="fa-solid fa-heart text-gray-400  m-2" />
               <b>Favourites</b>
             </Link>
-          </li>
+          </li> */}
           <li>
             <button onClick={handleLogout}>
               <i class="fa-solid fa-door-open text-gray-400  m-2" />

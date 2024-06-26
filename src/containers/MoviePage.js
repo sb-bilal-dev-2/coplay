@@ -111,10 +111,12 @@ const MoviePage = () => {
   }, []);
 
   const handleEnd = useCallback(() => {
+    setIsLoading(false);
     localStorage.removeItem("currentTime" + title);
   });
 
   const isMobile = useMobileDetect();
+  const [isLoading, setIsLoading] = useState(true);
 
   let tapCount = 0;
   let tapTimer;
@@ -176,7 +178,7 @@ const MoviePage = () => {
         {currentItem?.label || title}
       </h2>
       {renderVideo()}
-      <div className="section bg-secondary">
+      <div className="section bg-secondary card-section">
         <div className="section-container">
           <MovieWordCards
             title={title}
@@ -242,6 +244,8 @@ const MoviePage = () => {
     );
 
     const handleError = () => {
+      setIsLoading(false);
+
       setErrorMessage(
         "Failed to load the video. Please check the source or your network connection."
       );
@@ -260,16 +264,34 @@ const MoviePage = () => {
       }
     };
 
+    const handleWaiting = () => {
+      setIsLoading(true);
+    };
+
+    const handlePlaying = () => {
+      setIsLoading(false);
+    };
+
+    const handleCanPlay = () => {
+      setIsLoading(false);
+    };
+
+    const handleTap = () => {
+      // Handle tap event
+    };
+
     return (
       <div
-        className={classNames(
-          `videoItem`,
-          {
-            fullScreen: isFullScreen(),
-          }
-        )}
+        className={classNames(`videoItem`, {
+          fullScreen: isFullScreen(),
+        })}
         ref={fullScreenContainer}
       >
+        {isLoading && (
+          <div className="spinner">
+            <div className="loader"></div>
+          </div>
+        )}
         <video
           ref={videoRef}
           onTimeUpdate={throttledHandleTimeUpdate}
@@ -278,6 +300,9 @@ const MoviePage = () => {
           onEnded={handleEnd}
           muted={isMute}
           onError={handleError}
+          onWaiting={handleWaiting}
+          onPlaying={handlePlaying}
+          onCanPlay={handleCanPlay}
         >
           <source
             src={BASE_SERVER_URL + `/movie?name=${title}`}

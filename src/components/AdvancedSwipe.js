@@ -87,6 +87,7 @@ function AdvancedSwipe({
                 key={character?.lemma}
                 onSwipe={(dir) => swiped(dir, character?.lemma, index)}
                 onCardLeftScreen={() => outOfFrame(character?.lemma, index)}
+                preventSwipe={["right", "left"]}
               >
                 <div
                   style={{
