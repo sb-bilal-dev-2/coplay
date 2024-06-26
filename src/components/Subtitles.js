@@ -6,7 +6,6 @@ import { createDebouncedFunction } from "../debounce";
 import classNames from "classnames";
 import api from "../api";
 // import ScrollAnimation from "react-animate-on-scroll";
-// import "animate.css/animate.min.css";
 
 const Subtitles = ({
   subtitleId,
