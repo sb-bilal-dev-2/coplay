@@ -231,18 +231,18 @@ app.get('/subtitles', async (req, res) => {
   }
 })
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port} at IP: ${ip.address()}`);
-});
-// const options = {
-//   key: fs.readFileSync('/etc/letsencrypt/live/coplay.live/privkey.pem'),
-//   cert: fs.readFileSync('/etc/letsencrypt/live/coplay.live/fullchain.pem'),
-// };
-
-// const port2 = process.argv[3]
-// https.createServer(options, app).listen(port2, () => {
-//   console.log('HTTPS Server running on port port2');
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port} at IP: ${ip.address()}`);
 // });
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/coplay.live/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/coplay.live/fullchain.pem'),
+};
+
+const port2 = process.argv[3] || 3001
+https.createServer(options, app).listen(port2, () => {
+  console.log('HTTPS Server running on port port2');
+});
 
 
 createFileRoute(app, 'movieFiles')
