@@ -137,7 +137,7 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
             return Model.findByIdAndUpdate(item._id, item, { new: true, upsert: true });
         } else {
             // Create new item
-            const newItem = new Item(item);
+            const newItem = new Model(item);
             return newItem.save();
         }
     };

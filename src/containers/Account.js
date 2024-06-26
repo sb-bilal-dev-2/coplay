@@ -50,13 +50,13 @@ const Account = () => {
                 <p>{userInfo?.email}</p>
               </div>
             </div>
-            <div className="info m-10 flex">
+            {/* <div className="info m-10 flex">
               <i class="fa-solid fa-lock text-gray-400 p-4 text-2xl" />
               <div className="flex flex-col">
                 <span className="font-bold">Password</span>
                 <input type="password" value={"Password"} disabled />
               </div>
-            </div>
+            </div> */}
             <div className="info m-10 flex">
               <i
                 class="fa fa-language  text-gray-400 p-4 text-2xl"
@@ -64,7 +64,7 @@ const Account = () => {
               />
               <div className="flex flex-col">
                 <span className="font-bold">Language</span>
-                <p>En</p>
+                <p>{userInfo?.mainLanguage}</p>
               </div>
             </div>
           </div>
