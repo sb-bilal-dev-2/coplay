@@ -108,7 +108,7 @@ function AdvancedSwipe({
           onClick={() => swipe("left")}
         >
           <i className="fa fa-check-double"></i>
-          <code className="text-xs text-center">know</code>
+          <code className="text-xs text-center p-2">know</code>
         </button>
         <button
           style={{ backgroundColor: !canGoBack && "#c3c4d3" }}

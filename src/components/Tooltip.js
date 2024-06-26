@@ -2,17 +2,32 @@ import React, { useRef } from "react";
 import "./Tooltip.css";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { usePost } from "../containers/usePost";
+import { updateGivenUserValues } from "../store";
 
 function Tooltip(props) {
   const { text, selectionText, className } = props;
   const tooltipRef = useRef(null);
+  const dispatch = useDispatch();
+
+  const [postUserWords] = usePost((data) =>
+    dispatch(updateGivenUserValues(data))
+  );
 
   const handleMouseEnter = async () => {
     requestPhrase(text);
   };
   const requestPhrase = async () => {};
-  const handleHeartClick = () => {};
-  const handleInfoClick = () => {};
+
+  const handleInfoClick = () => {
+    const word = {
+      lemma: text,
+      repeatCount: 7,
+      repeatTime: Date.now(),
+    };
+    postUserWords("/self_words", [word]);
+  };
 
   return (
     <div className="tooltip">
