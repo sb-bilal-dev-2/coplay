@@ -231,9 +231,9 @@ app.get('/subtitles', async (req, res) => {
   }
 })
 
-// app.listen(port, () => {
-//   console.log(`Server is running on port ${port} at IP: ${ip.address()}`);
-// });
+app.listen(port, () => {
+  console.log(`Server is running on port ${port} at IP: ${ip.address()}`);
+});
 const options = {
   key: fs.readFileSync('/etc/letsencrypt/live/coplay.live/privkey.pem'),
   cert: fs.readFileSync('/etc/letsencrypt/live/coplay.live/fullchain.pem'),
