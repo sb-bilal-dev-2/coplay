@@ -224,8 +224,5 @@ input:-webkit-autofill:active {
 } */
 
 .google_login {
-  position: relative;
-  bottom: 248px;
-  display: flex;
-  justify-content: center;
+  padding: 15px;
 }
