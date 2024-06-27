@@ -8,7 +8,7 @@ const fs = require('fs')
 const { default: mongoose } = require('mongoose');
 const wordInfos = require('./schemas/wordInfos');
 const { gTranslate } = require('./gTranslate');
-const { generateImage } = require('./playground/openai');
+const { generateImage, promptAI } = require('./playground/openai');
 const { initCRUDAndDatabase } = require('./serverCRUD');
 
 initCRUDAndDatabase()
@@ -19,8 +19,8 @@ processNewLearningLanguage()
 
 async function processNewLearningLanguage(langCode) {
     await insertWords()
-    await process_unprocessedWords(langCode)
-    await newContent(langCode)
+    await process_translations_and_icons(langCode)
+    // await newContent(langCode)
 
     async function insertWords() {
         const WordInfosModel = mongoose.model(`wordInfos${!!langCode && `_${langCode}`}`, wordInfos.schema)
@@ -29,22 +29,51 @@ async function processNewLearningLanguage(langCode) {
         if (isNotEmpty) return;
 
         const languageWords = get_languageWords()
-        await WordInfosModel.insertMany(languageWords)
+        // await WordInfosModel.insertMany(languageWords)
     }
 
-    async function get_languageWords(lang) {
-        fs.readFileSync(`./wordsResearchData/${lang}_full.txt`)
+    async function get_languageWords() {
+        const words = (fs.readFileSync(`./wordsResearchData/${langCode}_full.txt`, 'utf8')).split('\n').map((item) => item.split(' '))
+        const processPath = `./process/newLanguageWords_${langCode.json}`
+        const processedWords = fs.existsSync(processPath) ? require(processPath) : []
+        let index = -1;
+        const wordsToRequest = []
+
+        for (const wordAndOccurance of words) {
+            index += 1;
+            const word = wordAndOccurance[0]
+            const occurance = Number(wordAndOccurance[1])
+            const lowOccurance = occurance < 2;
+            const isFinish = lowOccurance || index + 1 === words.length
+
+            if (index > processedWords.length && !lowOccurance) {
+                wordsToRequest.push({ word, occurance })
+            }
+
+            const new_processedWords = Promise.all(wordsToRequest.map(wordInfo => ([promptWordInfo(wordInfo.word), word.occurance])))
+            processedWords.push(...new_processedWords)
+
+            fs.writeFileSync(processPath, JSON.stringify(processedWords, undefined, 2))
+
+            if (isFinish) {
+                return processedWords
+            }
+        }
+    }
+
+    async function promptWordInfo(word) {
+        return promptAI(fs.readFileSync(`./prompts/word_lemma_${langCode}.md`, 'utf8') + word)
     }
 }
 
-async function process_unprocessedWords(langCode) {
+async function process_translations_and_icons(langCode) {
     const WordInfosModel = mongoose.model(`wordInfos_${langCode}`, wordInfos.schema)
     const words = WordInfosModel.find({ translation: null })
 
     const translationsMap = {}
     const descriptionsMap = {}
     const imageUrlsMap = {}
-    
+
     words.map(async (word) => {
         if (word.translation) return;
         const { translation, inflectionTranslations } = await requestWordTranslation(word.lemma, word.inflections)
@@ -81,7 +110,7 @@ async function process_unprocessedWords(langCode) {
     }))
 
     async function requestWordTranslation(wordLemma, wordInflections) {
-        const translation =  await gTranslate(wordLemma)
+        const translation = await gTranslate(wordLemma)
         const inflectionTranslations = (await gTranslate(wordInflections.join(', '))).split(', ')
         return { translation, inflectionTranslations }
     }

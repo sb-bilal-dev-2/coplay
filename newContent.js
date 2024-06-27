@@ -23,18 +23,6 @@ async function processNewContent(mediaLang = 'en') {
         // console.log('mediaTitle: ', mediaTitle)
         // newParsedSubtitlesMap[mediaInfo.title] = await parseUsedWords(contentFolder, mediaInfo)
     }))
-    missingMediaTranslations = [[{
-        mediaCharacters: [],
-        genre: [],
-        hashtags: [],
-        _id: '65e820068e299f802746f28c',
-        title: 'kung_fu_panda_3',
-        label: 'Kung Fu Panda 3',
-        subtitleLabels: [],
-        __v: 0,
-        parsedSubtitleId: '6658ea6d910945dd12a26715',
-        subtitleInfos: []
-    }, 'uz']]
     await Promise.all(missingMediaTranslations.map(async ([mediaInfo, translateLang]) => {
         const mediaTitle = mediaInfo.title
         console.log('mediaTitle: ', mediaTitle)
