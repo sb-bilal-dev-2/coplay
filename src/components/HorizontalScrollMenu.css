@@ -1,70 +1,85 @@
 .horizontal-scroll-menu {
-    width: 100%;
-    white-space: nowrap;
-    overflow-x: hidden;
-    position: relative;
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .menu-list {
-    width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-    position: relative;
-    padding: 8px;
-    margin: 0;
-    display: flex;
+  width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  position: relative;
+  padding: 8px;
+  margin: 0;
+  display: flex;
+}
+
+@media (min-width: 468px) {
+  /* Webkit browsers (Chrome, Safari) */
+  .menu-list::-webkit-scrollbar {
+    width: 1px; /* Width of the scrollbar */
+  }
+
+  .menu-list::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Color of the scrollbar thumb */
+  }
+
+  .menu-list::-webkit-scrollbar-track {
+    background-color: transparent; /* Color of the scrollbar track */
+  }
 }
 
 .list-card {
-    float: left;
-    display: block;
-    flex: 1 0 160px;
-    height: 240px;
-    margin: 8px;
-    background-color: silver;
-    padding: 8px 16px;
-    user-select: 'none';
-    cursor: pointer;
-    background-position: center;
-    background-size: cover;
-    filter: brightness(0.95);
-    font-weight: bold;
-    color: white;
-    text-shadow: 1px 1px 1px black;
+  float: left;
+  display: block;
+  flex: 1 0 160px;
+  height: 240px;
+  margin: 8px;
+  background-color: silver;
+  padding: 8px 16px;
+  user-select: "none";
+  cursor: pointer;
+  background-position: center;
+  background-size: cover;
+  filter: brightness(0.95);
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 1px black;
 }
 
 .list-card:hover {
-    filter: brightness(1);
+  filter: brightness(1);
 }
 
 .menu-item:hover {
-    background-color: #dcdcdc;
+  background-color: #dcdcdc;
 }
 
 /* Scroll Buttons Styles */
 .scroll-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    border: none;
-    width: 24px;
-    height: calc(100% - 32px);
-    cursor: pointer;
-    font-size: 18px;
-    z-index: 100;
-    opacity: 0.3;
-    font-weight: bolder;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  border: none;
+  width: 24px;
+  height: calc(100% - 32px);
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 100;
+  opacity: 0.3;
+  font-weight: bolder;
 }
 
 .scroll-button:hover {
-    opacity: 0.8;
+  opacity: 0.8;
 }
 
 .scroll-button:first-child {
-    left: 0;
+  left: 0;
 }
 
 .scroll-button:last-child {
-    right: 0;
+  right: 0;
 }

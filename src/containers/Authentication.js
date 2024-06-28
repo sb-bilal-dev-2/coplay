@@ -196,8 +196,8 @@ const Authentication = () => {
           type="submit"
           button
         />
+        <GoogleAuth />
       </form>
-      <GoogleAuth />
     </>
   );
 

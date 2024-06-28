@@ -1,100 +1,155 @@
 .sticky-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 200;
-    color: white;
-    transition: 0.3s ease-in;
-    height: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  color: white;
+  transition: 0.3s ease-in;
+  height: 48px;
 }
 
 .primary {
-    box-shadow: 1px 1px 5px 5px rgba(17, 17, 17, 0.01);
-    background: linear-gradient(180deg, rgba(0, 0, 0, .7) 16%, transparent);
+  box-shadow: 1px 1px 5px 5px rgba(17, 17, 17, 0.01);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 16%, transparent);
 }
 
 .secondary {
-    background: linear-gradient(180deg, rgba(0, 0, 0, .1) 16%, transparent);
-    box-shadow: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 16%, transparent);
+  box-shadow: none;
 }
 
 .sticky-header::before {
-    content: '';
-    height: 48px;
-    width: 100%;
-    position: absolute;
-    z-index: -10;
-    left: 0px;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-    background: rgb(20, 20, 20);
-    opacity: 0;
-    transition: all 0.6s ease-in;
+  content: "";
+  height: 48px;
+  width: 100%;
+  position: absolute;
+  z-index: -10;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: rgb(20, 20, 20);
+  opacity: 0;
+  transition: all 0.6s ease-in;
 }
 
 .sticky-header.nav-menu-visible::before {
-    transition: 0.3s ease-in;
-    opacity: 1;
+  transition: 0.3s ease-in;
+  opacity: 1;
 }
 
 .netflix-logo {
-    font-size: 2rem;
-    font-weight: bold;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
 .main-nav ul {
-    list-style: none;
-    display: flex;
-    gap: 20px;
+  list-style: none;
+  display: flex;
+  gap: 20px;
 }
 
 .main-nav ul li {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .main-nav ul li:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .user-menu {
-    cursor: pointer;
+  cursor: pointer;
 
-    img {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        margin-right: 10px;
+  img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .nav-menu {
+    position: absolute;
+    top: 45px;
+    right: 30px;
+    background-color: #111;
+    list-style: none;
+    padding: 25px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+
+    li {
+      cursor: pointer;
+      padding: 3px 5px;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
-
-    .nav-menu {
-        position: absolute;
-        top: 45px;
-        right: 30px;
-        background-color: #111;
-        list-style: none;
-        padding: 25px;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-
-        li {
-            cursor: pointer;
-            padding: 3px 5px;
-
-            &:hover {
-                text-decoration: underline;
-            }
-        }
-    }
+  }
 }
 
 .searchInputContainer input {
-    background: transparent;
-    border-bottom: 2px solid silver;
-    outline: none;
+  background: transparent;
+  border-bottom: 2px solid silver;
+  outline: none;
+}
+
+.search-button {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.search-container {
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.932);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: top 0.5s;
+  z-index: 9999;
+  overflow-y: scroll;
+}
+
+.search-container.show {
+  top: 48px;
+}
+
+.close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* Webkit browsers (Chrome, Safari) */
+.search-container::-webkit-scrollbar {
+  width: 1px; /* Width of the scrollbar */
+}
+
+.search-container::-webkit-scrollbar-thumb {
+  background-color: transparent; /* Color of the scrollbar thumb */
+}
+
+.search-container::-webkit-scrollbar-track {
+  background-color: transparent; /* Color of the scrollbar track */
 }

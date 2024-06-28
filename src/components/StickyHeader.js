@@ -3,6 +3,9 @@ import "./StickyHeader.css"; // Make sure to create the corresponding CSS file
 import { Link } from "react-router-dom";
 import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
+import useRequests from "../useRequests";
+import { BASE_SERVER_URL } from "../api";
+
 const logoPath = `${process.env.PUBLIC_URL}/logo-black.png`;
 
 const StickyHeader = ({ type = "primary", authPage }) => {
@@ -12,12 +15,25 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const isSticky = useSticky();
   const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState("");
-  useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
+  // useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
   const handleNavMenuToggle = () => setIsNavMenuVisible(!isNavMenuVisible);
+
+  const { items: movies } = useRequests("movies");
+  const { items: clips } = useRequests("clips");
+  const { items: quizzes } = useRequests("quizzes");
+  const { items: wordCollections } = useRequests("wordCollections");
+
+  const filterByLabel = (items) => {
+    return items?.filter((movie) =>
+      movie?.label.toLowerCase().startsWith(search.toLowerCase())
+    );
+  };
 
   return (
     <header
-      className={`sticky-header ${isSticky ? "nav-menu-visible" : ""} ${type}`}
+      className={`sticky-header ${
+        isSticky || searching ? "nav-menu-visible" : ""
+      } ${type}`}
     >
       <Link to="/">
         <img class="h-14" src={logoPath} alt="C Play logo placeholder" />
@@ -39,6 +55,45 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 >
                   <i className="fas fa-times"></i>
                 </button>
+                <div className={`search-container ${searching ? "show" : ""}`}>
+                  <div className="search-box">
+                    {filterByLabel(clips).length > 0 ? <h1>Movies</h1> : null}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
+                      {filterByLabel(movies).length > 0
+                        ? filterByLabel(movies)?.map(
+                            ({ _id, label, title }) => (
+                              <Link
+                                className="list-card"
+                                to={["movie", title].join("/")}
+                                style={{
+                                  backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
+                                }}
+                              >
+                                <li key={_id}>{label}</li>
+                              </Link>
+                            )
+                          )
+                        : null}
+                    </div>
+                    {filterByLabel(clips).length > 0 ? <h1>Music</h1> : null}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
+                      {filterByLabel(clips).length > 0
+                        ? filterByLabel(clips)?.map(({ _id, label, title }) => (
+                            <Link
+                              className="list-card"
+                              to={["clip", title].join("/")}
+                              style={{
+                                backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
+                              }}
+                            >
+                              <li key={_id}>{label}</li>
+                            </Link>
+                          ))
+                        : null}
+                    </div>
+                    <div>{filterByLabel(movies).length + filterByLabel(clips).length === 0 ? <h1>Nothing found</h1> : null}</div>
+                  </div>
+                </div>
               </div>
             ) : (
               <button
@@ -70,23 +125,22 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 };
 
 function getPlaceholderUrl(firstLetter) {
-    const colors = {
-      A: "cc3333", // Light Red
-      B: "33cc33", // Light Green
-      C: "3333cc", // Light Blue
-      D: "cccc33", // Light Yellow
-      E: "cc33cc", // Light Magenta
-      F: "33cccc", // Light Cyan
-      // Add more mappings for other letters as needed
-    };
+  const colors = {
+    A: "cc3333", // Light Red
+    B: "33cc33", // Light Green
+    C: "3333cc", // Light Blue
+    D: "cccc33", // Light Yellow
+    E: "cc33cc", // Light Magenta
+    F: "33cccc", // Light Cyan
+    // Add more mappings for other letters as needed
+  };
 
-    const defaultColor = colors.D; 
+  const defaultColor = colors.D;
 
-    const color = colors[firstLetter.toUpperCase()] || defaultColor;
+  const color = colors[firstLetter.toUpperCase()] || defaultColor;
 
-    return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
+  return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
 }
-
 
 const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const { user: userIdAndEmail } = useAuthentication();
