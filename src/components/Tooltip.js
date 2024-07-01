@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import "./Tooltip.css";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
@@ -10,6 +10,7 @@ function Tooltip(props) {
   const { text, selectionText, className } = props;
   const tooltipRef = useRef(null);
   const dispatch = useDispatch();
+  const [isAdded, setIsAdded] = useState(false);
 
   const [postUserWords] = usePost((data) =>
     dispatch(updateGivenUserValues(data))
@@ -23,10 +24,21 @@ function Tooltip(props) {
   const handleInfoClick = () => {
     const word = {
       lemma: text,
-      repeatCount: 7,
+      repeatCount: 1,
       repeatTime: Date.now(),
     };
     postUserWords("/self_words", [word]);
+    setIsAdded(true);
+
+    if (isAdded) {
+      const word = {
+        lemma: text,
+        repeatCount: 7,
+        repeatTime: Date.now(),
+      };
+      postUserWords("/self_words", [word]);
+      setIsAdded(false);
+    }
   };
 
   return (
@@ -44,8 +56,13 @@ function Tooltip(props) {
       <div className="tooltipContent" ref={tooltipRef}>
         <div className="tooltipContentButtons">
           <i
-            className="fa-solid fa-circle-plus iconButton"
+            className={
+              isAdded
+                ? "fa-solid fa-bookmark iconButton"
+                : "fa-regular fa-bookmark iconButton"
+            }
             onClick={handleInfoClick}
+            style={{padding: "5px"}}
           ></i>
           <Link to={"/quiz/" + text.toLowerCase()}>
             <i

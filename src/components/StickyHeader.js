@@ -51,7 +51,10 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 />
                 <button
                   className="text-gray-150 float-right mr-4 ml-6 pointer"
-                  onClick={() => setSearching(!searching)}
+                  onClick={() => {
+                    setSearching(!searching);
+                    setSearch("");
+                  }}
                 >
                   <i className="fas fa-times"></i>
                 </button>
@@ -69,7 +72,9 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                                   backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
                                 }}
                               >
-                                <li key={_id}>{label}</li>
+                                <li className="list-none	" key={_id}>
+                                  {label}
+                                </li>
                               </Link>
                             )
                           )
@@ -86,12 +91,20 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                                 backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
                               }}
                             >
-                              <li key={_id}>{label}</li>
+                              <li key={_id} className="list-none	">
+                                {label}
+                              </li>
                             </Link>
                           ))
                         : null}
                     </div>
-                    <div>{filterByLabel(movies).length + filterByLabel(clips).length === 0 ? <h1>Nothing found</h1> : null}</div>
+                    <div>
+                      {filterByLabel(movies).length +
+                        filterByLabel(clips).length ===
+                      0 ? (
+                        <h1>Nothing found</h1>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>

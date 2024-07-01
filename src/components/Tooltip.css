@@ -52,7 +52,7 @@
 .iconButton {
     display: inline-block;
     transition: ease-in 0.125;
-    padding: 2px;
+    /* padding: 2px; */
     user-select: none;
     text-decoration: none;
     cursor: pointer;
