@@ -5,10 +5,12 @@ import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
 import useRequests from "../useRequests";
 import { BASE_SERVER_URL } from "../api";
+import { useTranslation } from "react-i18next";
 
 const logoPath = `${process.env.PUBLIC_URL}/logo-black.png`;
 
 const StickyHeader = ({ type = "primary", authPage }) => {
+  const { t } = useTranslation();
   const outsideSearchClickWrapperRef = useRef(null);
   const loggedIn = localStorage.getItem("token");
   const [isNavMenuVisible, setIsNavMenuVisible] = useState(false);
@@ -60,7 +62,9 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 </button>
                 <div className={`search-container ${searching ? "show" : ""}`}>
                   <div className="search-box">
-                    {filterByLabel(clips).length > 0 ? <h1>Movies</h1> : null}
+                    {filterByLabel(clips).length > 0 ? (
+                      <h1>{t("movies")}</h1>
+                    ) : null}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
                       {filterByLabel(movies).length > 0
                         ? filterByLabel(movies)?.map(
@@ -80,7 +84,9 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                           )
                         : null}
                     </div>
-                    {filterByLabel(clips).length > 0 ? <h1>Music</h1> : null}
+                    {filterByLabel(clips).length > 0 ? (
+                      <h1>{t("music")}</h1>
+                    ) : null}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
                       {filterByLabel(clips).length > 0
                         ? filterByLabel(clips)?.map(({ _id, label, title }) => (
@@ -102,7 +108,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                       {filterByLabel(movies).length +
                         filterByLabel(clips).length ===
                       0 ? (
-                        <h1>Nothing found</h1>
+                        <h1>{t("nothing found")}</h1>
                       ) : null}
                     </div>
                   </div>
@@ -125,7 +131,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               ) : (
                 <button>
                   <Link to="/auth/login">
-                    <b>Login</b>
+                    <b>{t("login")}</b>
                   </Link>
                 </button>
               )}
@@ -156,6 +162,7 @@ function getPlaceholderUrl(firstLetter) {
 }
 
 const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
+  const { t } = useTranslation();
   const { user: userIdAndEmail } = useAuthentication();
   const userEmail = userIdAndEmail?.email || "";
   const emailLetters = userEmail.match(/[A-Z]/gi) || [];
@@ -182,13 +189,13 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
             {" "}
             <Link to="/account">
               <i class="fa-solid fa-user text-gray-400 m-2" />
-              <b>Account</b>
+              <b>{t("account")}</b>
             </Link>
           </li>
           <li>
             <Link to="/my_list">
               <i class="fa-solid fa-book text-gray-400  m-2" />
-              <b>My List</b>
+              <b>{t("my list")}</b>
             </Link>
           </li>
           {/* <li>
@@ -200,7 +207,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
           <li>
             <button onClick={handleLogout}>
               <i class="fa-solid fa-door-open text-gray-400  m-2" />
-              <b>Sign Out</b>
+              <b>{t("sign out")}</b>
             </button>
           </li>
         </ul>
