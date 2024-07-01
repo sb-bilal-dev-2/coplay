@@ -1,8 +1,11 @@
+require('dotenv').configDotenv();
 const TelegramBot = require('node-telegram-bot-api');
 const { initCRUDAndDatabase } = require('./serverCRUD');
 const { sortByLearningState } = require('./src/helper/sortByLearningState');
 const { users_model } = require('./schemas/users');
-const TOKEN = '6547980014:AAGEkQkfl22yuth9ANe9uDpM4Tw9x_SmN6U';
+
+const TOKEN = process.env.TG_BOT_TOKEN;
+// const QUIZ_PAGE = process.env.REACT_APP_BASE_URL + '/quiz'
 
 // replace the value below with the Telegram token you receive from @BotFather
 initCRUDAndDatabase()
@@ -48,29 +51,30 @@ bot.onText(/\/start=(.+)/, (msg, match) => {
 
     const chatId = msg.chat.id;
     const resp = match[1]; // the captured "whatever"
-    const USER_TEMP_TOKEN = 'Math.floor(100000 + Math.random() * 900000)'
-    const TG_LOGIN_LINK = `${BASE_CLIENT_URL}/login?telegram=${USER_TEMP_TOKEN}`
-
+    console.log('resp', resp)
+    const USER_TEMP_TOKEN = Math.floor(100000 + Math.random() * 900000)
+    const TG_LOGIN_LINK = `${process.env.REACT_APP_BASE_URL}/login?telegram=${USER_TEMP_TOKEN}`
     if (resp === 'login') {
-        LOGIN_RESPONSE = `
-            This is your temporary token:
-            ${USER_TEMP_TOKEN}
-            Click following link for Sign-up: ${TG_LOGIN_LINK}
-        `
+        console.log('TG_LOGIN_LINK', TG_LOGIN_LINK)
 
-        bot.sendVideo(chatId,)
+        LOGIN_RESPONSE = `
+            # Thank You For Signing Up!
+            - This is your temporary token: \`${USER_TEMP_TOKEN}\`
+            - [Click here](${TG_LOGIN_LINK}) to login
+        `
+        bot.sendMessage(chatId, LOGIN_RESPONSE, { parse_mode: "Markdown"});
+        // bot.sendVideo(chatId,)
     }
     // send back the matched "whatever" to the chat
-    bot.sendMessage(chatId, resp);
 });
 
 
 
 // Listen for any kind of message. There are different kinds of
 // messages.
-bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
+// bot.on('message', (msg) => {
+//     const chatId = msg.chat.id;
 
-    // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(chatId, 'Recieved');
-});
+//     // send a message to the chat acknowledging receipt of their message
+//     bot.sendMessage(chatId, 'Recieved');
+// });

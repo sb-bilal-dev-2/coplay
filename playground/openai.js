@@ -4,9 +4,17 @@ const OpenAI = require('openai');
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
 });
-
-// promptAI();
 // generateImage();
+// generateImagesForWords([
+//   "Most Common 1000 Words in English",
+//   "Most Common 1500 Phrases in English",
+//   "Most Common 5000 Words in English",
+//   "Common words 1000 to 2000",
+//   "Business Vocabulary 101",
+//   "IT Vocabulary 101",
+//   "Travel Vocabulary 101"
+// ]);
+
 async function promptAI(content, customMessages) {
   let messages = [{ role: 'user', content }]
   if (messages) {
@@ -27,9 +35,18 @@ async function generateImage(prompt) {
     prompt,
     n: 1,
     size: "1024x1024",
+    // size: "512x512",
   });
   const image_url = response.data[0].url;  
   return image_url
+}
+
+async function generateImagesForWords(words = []) {
+  return Promise.all(words.map(async (item) => {
+    res = await generateImage(`Icon style simple, no text allowed. Icon for the given phrase/word: ` + item);  
+    console.log(item, res)
+    return [item, res]
+  }))
 }
 
 module.exports = {

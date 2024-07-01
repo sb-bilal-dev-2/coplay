@@ -1,13 +1,14 @@
 
 # Apache Configs at nodejs
 
-navigate `/etc/apache2/sites-available/`
-edit: `sudo nano /etc/apache2/sites-available/000-default.conf`
-stop apache server `sudo systemctl stop apache2`
 restart: `sudo systemctl restart apache2`
 
-stop nginx server `sudo systemctl stop nginx`
-restart nginx server `sudo systemctl restart nginx`
+# Edit Apache
+
+sites `/etc/apache2/sites-available/`
+edit: `sudo nano /etc/apache2/sites-available/000-default.conf`
+edit https: `sudo nano /etc/apache2/sites-available/000-default-le-ssl.conf`
+stop apache server `sudo systemctl stop apache2`
 
 # PM | Permanent server
 
