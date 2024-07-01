@@ -8,6 +8,7 @@ import { updateGivenUserValues } from "../store";
 import { Link, useNavigate } from "react-router-dom";
 import { usePost } from "./usePost";
 import { useRequestUserWordLists } from "../helper/useUserWords";
+import { useTranslation } from "react-i18next";
 
 const MyList = () => {
   const { learningList, learnedList, repeatingList } =
@@ -28,15 +29,10 @@ const MyList = () => {
   );
 };
 
-const LEARN_STATE_NAMES = {
-  learning: "Learning Words List",
-  learned: "Learned Words List",
-  repeating: "Repeating Words List",
-};
-
 function RenderTagList({ list = [], name }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [isEditing, setEditing] = useState(false);
   const [selectedItems, setSelectecItems] = useState([]);
   const [postUserWords] = usePost((data) =>
@@ -49,7 +45,6 @@ function RenderTagList({ list = [], name }) {
       setSelectecItems([...selectedItems, item]);
     }
   };
-  console.log("list", list);
   const learnFullList = () => {
     const words = list.map((item) => ({
       lemma: item.lemma,
@@ -111,13 +106,13 @@ function RenderTagList({ list = [], name }) {
   return (
     <div className="TagList">
       <div className="flex justify-between py-4">
-        <h2 className="">{LEARN_STATE_NAMES[name]}</h2>
+        <h2 className="">{t(`LEARN_STATE_NAMES.${name}`)}</h2>
         {list && !!list?.length && (
           <div className="TagListButtons">
             {isEditing ? (
               <>
                 <span className="pl-2 text-xs">
-                  Selected: <code>{selectedItems.length}</code>
+                  {t("selected")}: <code>{selectedItems.length}</code>
                 </span>
                 <button
                   onClick={() => (setEditing(!isEditing), setSelectecItems([]))}
@@ -173,7 +168,11 @@ function RenderTagList({ list = [], name }) {
           return (
             <button
               key={item.lemma}
-              onClick={() => isEditing ? handleTagClick(item.lemma) : navigate(`/quiz/${name}/${item.lemma}`) }
+              onClick={() =>
+                isEditing
+                  ? handleTagClick(item.lemma)
+                  : navigate(`/quiz/${name}/${item.lemma}`)
+              }
               className={classNames(
                 `TagItem text-gray-50 repeat${item.repeatCount || 0}`,
                 { selected: selectedItems.includes(item.lemma) }
@@ -183,7 +182,7 @@ function RenderTagList({ list = [], name }) {
             </button>
           );
         })}
-        {!list.length && <h4 className="py-2">No Item/Words</h4>}
+        {!list.length && <h4 className="py-2">{t("no words")}</h4>}
       </ul>
     </div>
   );

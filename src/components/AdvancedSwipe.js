@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import TinderCard from "react-tinder-card";
 import "./AdvancedSwipe.css";
+import { useTranslation } from "react-i18next";
 
 function AdvancedSwipe({
   list,
@@ -9,6 +10,7 @@ function AdvancedSwipe({
   onSwipeTop,
   onSwipeBottom,
 }) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(list.length - 1);
   const [lastDirection, setLastDirection] = useState();
   // used for outOfFrame closure
@@ -76,7 +78,7 @@ function AdvancedSwipe({
 
   return (
     <div className="cardMainContainer">
-      <h1>Movie Word List</h1>
+      <h1>{t("movie word list")}</h1>
       <div className="cardContainer">
         {list.map((character, index) => {
           if (index > currentIndex - 5 && index < currentIndex + 5) {
@@ -108,21 +110,21 @@ function AdvancedSwipe({
           onClick={() => swipe("left")}
         >
           <i className="fa fa-check-double"></i>
-          <code className="text-xs text-center p-2">know</code>
+          <code className="text-xs text-center p-2">{t("know")}</code>
         </button>
         <button
           style={{ backgroundColor: !canGoBack && "#c3c4d3" }}
           onClick={() => goBack()}
         >
           <i className="fa fa-undo"></i>
-          <code className="text-xs text-center">back</code>
+          <code className="text-xs text-center"> {t("back")}</code>
         </button>
         <button
           style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
           onClick={() => swipe("right")}
         >
           <i className="fa fa-plus"></i>
-          <code className="text-xs text-center">repeat</code>
+          <code className="text-xs text-center"> {t("repeat")}</code>
         </button>
       </div>
     </div>

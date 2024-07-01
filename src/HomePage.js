@@ -15,15 +15,10 @@ const HomePage = () => {
   const { items: wordCollections } = useRequests("wordCollections");
   const { t, i18n } = useTranslation();
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-  };
-
   return (
     <div className="page-container home-page">
       <StickyHeader />
       <Hero />
-      <button onClick={() => changeLanguage("uz")}>uz</button>
       <div className="section bg-gray-900">
         <h2>{t("movies")}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} />

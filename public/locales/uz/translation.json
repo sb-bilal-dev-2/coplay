@@ -10,5 +10,21 @@
   "account": "Profil",
   "my list": "Mening so'zlarim",
   "sign out": "Chiqish",
-  "language": "Til"
+  "language": "Til",
+  "email": "Elektron pochta",
+  "LEARN_STATE_NAMES": {
+    "learning": "O'rganiladigan so'zlar ro'yxati",
+    "learned": "O'rganilgan so'zlar ro'yxati",
+    "repeating": "Takrorlash so'zlar ro'yxati"
+  },
+  "no words": "So'zlar yo'q",
+  "selected": "Tanlangan",
+  "audio description": "Audio tavsif",
+  "help center": "Yordam markazi",
+  "gift cards": "Sovg'a kartalari",
+  "movie word list": "Film so'zlar ro'yxati",
+  "know": "bilaman",
+  "back": "orqaga",
+  "repeat": "qo'shish",
+  "watch words of": "{{item}} so'zlarini korish"
 }

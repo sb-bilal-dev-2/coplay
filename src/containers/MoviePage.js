@@ -19,10 +19,13 @@ import Modal from "../components/Modal";
 import VideoDropdown from "../components/VideoDropdown";
 import useMobileDetect from "../helper/useMobileDetect";
 import SecondaryButton from "../components/SecondaryButton";
+import { useTranslation } from "react-i18next";
 
 const VOLUME_SHOW_TIMEOUT = 500;
 
 const MoviePage = () => {
+  const { t } = useTranslation();
+
   const [userInfo, setUserInfo] = useState(null);
   const { user: userIdAndEmail } = useAuthentication();
   const { title } = useParams();
@@ -188,11 +191,7 @@ const MoviePage = () => {
           <div className="flex justify-center align-middle">
             <SecondaryButton
               path={`/quiz/${title}`}
-              title={`Watch Words of ${currentItem?.label || title}`}
-            />
-            <SecondaryButton
-              path="/quiz/learning"
-              title="Watch My Rehearse List"
+              title={t("watch words of", { item: currentItem?.label || title })}
             />
           </div>
         </div>

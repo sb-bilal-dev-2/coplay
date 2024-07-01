@@ -10,5 +10,21 @@
   "account": "Account",
   "my list": "My list",
   "sign out": "Sign out",
-  "language": "Language"
+  "language": "Language",
+  "email": "Email",
+  "LEARN_STATE_NAMES": {
+    "learning": "Learning Words List",
+    "learned": "Learned Words List",
+    "repeating": "Repeating Words List"
+  },
+  "no words": "No Words",
+  "selected": "Selected",
+  "audio description": "Audio Description",
+  "help center": "Help Center",
+  "gift cards": "Gift Cards",
+  "movie word list": "Movie Word List",
+  "know": "know",
+  "back": "back",
+  "repeat": "repeat",
+  "watch words of": "Watch Words of {{item}}"
 }

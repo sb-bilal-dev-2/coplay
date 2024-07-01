@@ -5,11 +5,12 @@ import useAuthentication from "./Authentication.util";
 import axios from "axios";
 import "./Account.css";
 import { BASE_SERVER_URL } from "../api";
-
+import { useTranslation } from "react-i18next";
 
 const Account = () => {
   const { user: userIdAndEmail } = useAuthentication();
   const [userInfo, setUserInfo] = useState(null);
+  const { t, i18n } = useTranslation();
 
   const requestUserInfo = async () => {
     try {
@@ -30,12 +31,16 @@ const Account = () => {
     }
   }, [userId]);
 
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <>
       <StickyHeader />
       <div className="account_page bg-gray-900 h-screen">
         <div className="p-2 w-4/5 m-auto ">
-          <h1 className="p-4 text-2xl">Account</h1>
+          <h1 className="p-4 text-2xl">{t("account")}</h1>
           <div className="w-16 h-16 rounded-full border-2 border-gray-400 border-solid m-auto mb-6">
             <i class="fa-solid fa-user text-gray-400 text-center w-full h-full mt-6" />
           </div>
@@ -46,7 +51,7 @@ const Account = () => {
                 aria-hidden="true"
               />
               <div>
-                <span className="font-bold">Email</span>
+                <span className="font-bold">{t("email")}</span>
                 <p>{userInfo?.email}</p>
               </div>
             </div>
@@ -63,8 +68,10 @@ const Account = () => {
                 aria-hidden="true"
               />
               <div className="flex flex-col">
-                <span className="font-bold">Language</span>
-                <p>{userInfo?.mainLanguage}</p>
+                {/* TODO:Create dropdown */}
+                <span className="font-bold">{t("language")}</span>
+                <button onClick={() => changeLanguage("en")}>English</button>
+                <button onClick={() => changeLanguage("uz")}>Uzbek</button>
               </div>
             </div>
           </div>
