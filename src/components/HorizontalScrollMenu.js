@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { BASE_SERVER_URL } from '../api';
 
 
-const HorizontalScrollMenu = ({ items, baseRoute }) => {
+const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
     const scrollRef = useRef(null);
     const [hasScrolledEnd, setHasScrolledEnd] = useState(false)
     const [hasScrolledStart, setHasScrolledStart] = useState(false)
@@ -42,9 +42,9 @@ const HorizontalScrollMenu = ({ items, baseRoute }) => {
                 </button>
             }
             <ul className="menu-list" ref={scrollRef} onScroll={handleScrolled}>
-                {items?.map(({ _id, label, title }) => (
-                    <Link className='list-card' to={[baseRoute, title].join('/')} style={{
-                        backgroundImage: `url('${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg')`
+                {items?.map(({ _id, label, title, posterUrl, poster }) => (
+                    <Link className={`list-card ${verticalCard ? 'verticalCard' : ''}`} to={[baseRoute, title].join('/')} style={{
+                        backgroundImage: `url('${posterUrl || poster || `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`}')`
                     }} >
                         <li key={_id}>
                             {label}

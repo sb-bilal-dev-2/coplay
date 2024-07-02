@@ -8,6 +8,7 @@ const schema = new Schema({
     title: { type: String, unique: true },
     label: { type: String },
     poster: String,
+    posterUrl: String,
 }).add({
     createdTime: { type: Date, default: Date.now },
     updatedTime: { type: Date, default: Date.now },

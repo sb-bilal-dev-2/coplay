@@ -48,6 +48,10 @@
   text-shadow: 1px 1px 1px black;
 }
 
+.verticalCard {
+  flex: 1 0 360px;
+}
+
 .list-card:hover {
   filter: brightness(1);
 }
