@@ -316,7 +316,8 @@ function getHighestExistingQualityPathForTitle(title, chosenQuality) {
       return videoPath
     }
   }
-  const defaultQuality = path.join(__dirname, 'files', 'movieFiles', `${title}.mp4`)
+  const defaultQuality = `'./files/movieFiles/${title}.mp4'`
+  console.log('defaultQuality', defaultQuality)
   if (fs.existsSync(defaultQuality)) {
     return defaultQuality
   }
