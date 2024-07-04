@@ -15,7 +15,10 @@ const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
 async function parseUsedWords(mediaInfo) {
-    const englishWordsFull = require('./files/en_full.json')
+    const englishWordsFull = fs.readFileSync('./wordsResearchData/en_txt.txt', 'utf-8').split('\n').map(wrdLine => {
+        const wrdLineArr = wrdLine.split(' ')
+        return { the_word: wrdLineArr[0], occuranceCount: wrdLineArr[1] }
+    }).filter(item => item.occuranceCount > 1)
     let mediaTitle = mediaInfo.title;
     const mediaLang = mediaInfo.mediaLang;
     const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${mediaTitle}.${mediaLang}.vtt`);
