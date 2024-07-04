@@ -43,7 +43,7 @@ async function processYoutubeVideo() {
 async function getVideoInfoAndStore(url) {
     try {
         const { videoDetails } = await ytdl.getInfo(url);
-        const title = videoDetails.title + '_' + videoDetails.author.id
+        const title = videoDetails.title + '_' + videoDetails.videoId
         const adjustedInfo = {
             title,
             mediaLang,
@@ -55,13 +55,14 @@ async function getVideoInfoAndStore(url) {
 
         }
         const webpLocation = `"./files/movieFiles/${title}.webp"`
+        console.log('webpLocation', webpLocation)
         if (fs.existsSync(webpLocation)) {
             const renameThumbnailExt_command = `mv ${webpLocation} "./files/movieFiles/${title}.jpg"`
             await executeCli(renameThumbnailExt_command)
         }
 
         console.log('adjustedInfo', adjustedInfo)
-        const newItem = await movies_model.create(adjustedInfo)
+        // const newItem = await movies_model.create(adjustedInfo)
 
         return newItem
     } catch (error) {
@@ -73,12 +74,12 @@ async function getVideoInfoAndStore(url) {
 async function downloadYouTubeVideo(url) {
     // audio download test 
     // const command = `yt-dlp -f 249 --write-sub --no-check-certificate '${url}'`;
-    const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(channel_id)s.%(ext)s' --no-check-certificate '${url}'`;
+    const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(id)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(video_command)
         .then((message) => console.log('Video Download successful:', message))
         .catch((error) => console.error('Video Download failed:', error))
 
-    const audio_command = `yt-dlp -f 249 -o './files/movieFiles/%(title)s_%(channel_id)s.%(ext)s' --no-check-certificate '${url}'`;
+    const audio_command = `yt-dlp -f 249 -o './files/movieFiles/%(title)s_%(id)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(audio_command)
         .then((message) => console.log('Audio Download successful:', message))
         .catch((error) => console.error('Audio Download failed:', error))

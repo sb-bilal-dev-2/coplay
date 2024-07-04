@@ -60,6 +60,10 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
                 posterUrl ||
                 poster ||
                 `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
+              }')` + `, url('${
+                posterUrl ||
+                poster ||
+                `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
               }')`,
             }}
           >
