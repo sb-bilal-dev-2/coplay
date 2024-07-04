@@ -64,7 +64,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
                 posterUrl ||
                 poster ||
                 `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
-              }')`,
+              }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
             }}
           >
             {isPremium ? (
