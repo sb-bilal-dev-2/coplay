@@ -15,7 +15,7 @@ const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
 async function parseUsedWords(mediaInfo) {
-    const englishWordsFull = fs.readFileSync('./wordsResearchData/en_txt.txt', 'utf-8').split('\n').map(wrdLine => {
+    const englishWordsFull = fs.readFileSync('./wordsResearchData/en_full.txt', 'utf-8').split('\n').map(wrdLine => {
         const wrdLineArr = wrdLine.split(' ')
         return { the_word: wrdLineArr[0], occuranceCount: wrdLineArr[1] }
     }).filter(item => item.occuranceCount > 1)
