@@ -2,7 +2,6 @@ const path = require('path')
 const fs = require('fs')
 const fromVtt = require('subtitles-parser-vtt').fromVtt
 const englishWords50k = require('./wordsResearchData/en50kAndLemmasReviewed.json')
-const englishWordsFull = require('./files/en_full.json')
 const en_5kLemmas = require('./wordsResearchData/en_5kLemmas.json')
 const splitUsedWords = require('./splitUsedWords');
 const ultimateLemmaInfoMap = require('./wordsResearchData/en50kLemmaInfoMapped.json')
@@ -16,6 +15,7 @@ const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
 async function parseUsedWords(mediaInfo) {
+    const englishWordsFull = require('./files/en_full.json')
     let mediaTitle = mediaInfo.title;
     const mediaLang = mediaInfo.mediaLang;
     const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${mediaTitle}.${mediaLang}.vtt`);
