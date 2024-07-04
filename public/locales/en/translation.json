@@ -26,5 +26,10 @@
   "know": "know",
   "back": "back",
   "repeat": "repeat",
-  "watch words of": "Watch Words of {{item}}"
+  "watch words of": "Watch Words of {{item}}",
+  "basic": "Basic",
+  "plan": "Plan",
+  "month": "{{item}} Month",
+  "buy": "Buy",
+  "awesome": "Awesome"
 }

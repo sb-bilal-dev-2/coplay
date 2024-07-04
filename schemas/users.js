@@ -18,22 +18,23 @@ var usersWord = new Schema({
     contextTitle: String,
 });
 const schema = new Schema({
-    username: { type: String },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    verificationCode: { type: Number },
-    verifiedEmail: { type: Boolean, default: false },
-    verificationCodeTimestamp: { type: Date },
-    mainLanguage: String,
-    learningLanguages: [String],
-    words: [usersWord],
-    createdTime: { type: Date, default: Date.now },
-    updatedTime: { type: Date, default: Date.now },
-    note: String,
+  username: { type: String },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  verificationCode: { type: Number },
+  verifiedEmail: { type: Boolean, default: false },
+  verificationCodeTimestamp: { type: Date },
+  mainLanguage: String,
+  premiumExpireDate: { type: Date, default: Date.now },
+  learningLanguages: [String],
+  words: [usersWord],
+  createdTime: { type: Date, default: Date.now },
+  updatedTime: { type: Date, default: Date.now },
+  note: String,
 }).add({
-    createdTime: { type: Date, default: Date.now },
-    updatedTime: { type: Date, default: Date.now },
-    note: String,
+  createdTime: { type: Date, default: Date.now },
+  updatedTime: { type: Date, default: Date.now },
+  note: String,
 });
 
 module.exports = {

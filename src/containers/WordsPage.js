@@ -1,25 +1,26 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import TinderCard from "react-tinder-card";
 import { useRequestUserWordLists } from "../helper/useUserWords";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import "./WordsPage.css";
+import StickyHeader from "../components/StickyHeader";
 
 const WordsPage = () => {
   const listsMap = useRequestUserWordLists();
   const { list: listName } = useParams();
-  // const [wordList, set_wordList] = useState([])
-  // useEffect(() => {
+  const location = useLocation();
 
-  //   const newList = lists[listName + 'List']
-
-  //   set_wordList(newList || [])
-  // }, [])
+  const isWordCollectionPage =
+    location.pathname.split("/")[1] === "wordCollection";
 
   const navigate = useNavigate();
 
   return (
     <div className="flex items-center justify-center flex-col bg-gray-900 h-screen">
-      <h1 className="font-bold text-2xl m-10">My words</h1>
+      <StickyHeader />
+      <h1 className="font-bold text-2xl m-10 text-white">
+        {isWordCollectionPage ? "Word collection" : "My words"}
+      </h1>
       <WordsSlider
         listName={listName}
         list={listsMap[listName + "List"] || []}
@@ -115,10 +116,10 @@ const WordsPage = () => {
 
     return (
       <div className="cardMainContainer">
-        <i
+        {/* <i
           class="fa-solid fa-arrow-left text-3xl text-white absolute left-4 top-4 cursor-pointer"
           onClick={() => navigate(-1)}
-        ></i>
+        ></i> */}
         <div className="cardContainer">
           {list.map((character, index) => {
             if (index > currentIndex - 5 && index < currentIndex + 5) {
@@ -145,27 +146,31 @@ const WordsPage = () => {
                           {list.length - currentIndex}/{list.length}
                         </p>
                       </div>
-                      <div
-                        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-36 border-4 border-red-200 shadow"
-                        style={{ background: "#f98787" }}
-                      >
-                        <p className="font-bold text-white text-l mt-4 text-center">
-                          {getPercentage(character?.repeatCount)}
-                        </p>
-                      </div>
-                      <div
-                        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
-                        style={{ background: "rgb(6 182 212)" }}
-                      >
-                        <Link
-                          to={`/quiz/${listName}/${character?.lemma.toLowerCase()}`}
-                        >
-                          <i
-                            class="fa fa-play text-white text-l m-4 text-center "
-                            aria-hidden="true"
-                          ></i>
-                        </Link>
-                      </div>
+                      {!isWordCollectionPage ? (
+                        <>
+                          <div
+                            className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-36 border-4 border-red-200 shadow"
+                            style={{ background: "#f98787" }}
+                          >
+                            <p className="font-bold text-white text-l mt-4 text-center">
+                              {getPercentage(character?.repeatCount)}
+                            </p>
+                          </div>
+                          <div
+                            className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
+                            style={{ background: "rgb(6 182 212)" }}
+                          >
+                            <Link
+                              to={`/quiz/${listName}/${character?.lemma.toLowerCase()}`}
+                            >
+                              <i
+                                class="fa fa-play text-white text-l m-4 text-center "
+                                aria-hidden="true"
+                              ></i>
+                            </Link>
+                          </div>
+                        </>
+                      ) : null}
                       <div className="bg-green-100 w-full" onClick={toggleCard}>
                         <h3
                           style={{ color: "darkgrey" }}

@@ -19,6 +19,7 @@ const schema = new Schema({
     type: String,
   },
   genre: [String],
+  isPremium: Boolean,
   mediaUrl: {
     type: String,
   },

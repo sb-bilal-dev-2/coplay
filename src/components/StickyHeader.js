@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./StickyHeader.css"; // Make sure to create the corresponding CSS file
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
 import useRequests from "../useRequests";
@@ -30,6 +30,10 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       movie?.label.toLowerCase().startsWith(search.toLowerCase())
     );
   };
+
+  const location = useLocation();
+  const isPricePage = location.pathname.includes("price_page");
+  
 
   return (
     <header
@@ -62,11 +66,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 </button>
                 <div className={`search-container ${searching ? "show" : ""}`}>
                   <div className="search-box">
-                    {filterByLabel(clips).length > 0 ? (
+                    {filterByLabel(clips)?.length > 0 ? (
                       <h1>{t("movies")}</h1>
                     ) : null}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
-                      {filterByLabel(movies).length > 0
+                      {filterByLabel(movies)?.length > 0
                         ? filterByLabel(movies)?.map(
                             ({ _id, label, title }) => (
                               <Link
@@ -84,11 +88,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                           )
                         : null}
                     </div>
-                    {filterByLabel(clips).length > 0 ? (
+                    {filterByLabel(clips)?.length > 0 ? (
                       <h1>{t("music")}</h1>
                     ) : null}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
-                      {filterByLabel(clips).length > 0
+                      {filterByLabel(clips)?.length > 0
                         ? filterByLabel(clips)?.map(({ _id, label, title }) => (
                             <Link
                               className="list-card"
@@ -105,8 +109,8 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                         : null}
                     </div>
                     <div>
-                      {filterByLabel(movies).length +
-                        filterByLabel(clips).length ===
+                      {filterByLabel(movies)?.length +
+                        filterByLabel(clips)?.length ===
                       0 ? (
                         <h1>{t("nothing found")}</h1>
                       ) : null}
@@ -122,6 +126,10 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 <i className="fas fa-search"></i>
               </button>
             )}
+            {!isPricePage ?  <Link to="/price_page" className="font-bold p-2">
+              Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
+            </Link> : null }
+           
             <div className="user-menu" onClick={handleNavMenuToggle}>
               {loggedIn ? (
                 <UserNav

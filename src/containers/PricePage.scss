@@ -44,12 +44,12 @@ $mainFont: "Open Sans", sans-serif;
 
     // SPECIFIC STYLING FOR THE FIRST TABLE
     &:nth-child(1) {
-         background: #ff416c;
+      background: #ff416c;
       background: linear-gradient(to right, #ff4b2b, #ff416c);
 
       .price {
         &::before {
-          content: "$2";
+          content: "$4.99";
         }
       }
     }
@@ -59,13 +59,13 @@ $mainFont: "Open Sans", sans-serif;
       margin: 0 30px;
       z-index: 2;
       width: 330px;
-      height: 530px;
+      height: 560px;
       background: #fff12bc2;
       background: linear-gradient(to right, #f5e82ad3, #ecff41c7);
 
       .price {
         &::before {
-          content: "$5";
+          content: "$9.99";
         }
       }
     }
@@ -86,7 +86,7 @@ $mainFont: "Open Sans", sans-serif;
     &:nth-child(1),
     &:nth-child(3) {
       .price {
-        font-size: 6rem;
+        font-size: 4rem;
       }
 
       .buy-button {
@@ -102,7 +102,7 @@ $mainFont: "Open Sans", sans-serif;
 
     // TYPE OF SUBSCRIPTION
     .type {
-      margin-top: 30px;
+      // margin-top: 30px;
       letter-spacing: 0.1rem;
     }
 
@@ -137,7 +137,7 @@ $mainFont: "Open Sans", sans-serif;
     .plan {
       font-size: 1.3rem;
       position: relative;
-      margin-bottom: 10px;
+      // margin-bottom: 10px;
 
       &::before,
       &::after {
@@ -159,12 +159,19 @@ $mainFont: "Open Sans", sans-serif;
         transform: translate(-0%, -50%);
       }
     }
+  }
+  .price_card {
+    &:nth-child(3) .plan {
+      &::after {
+        right: -55%;
+      }
+    }
 
     // DETAILS OF THE PLAN
     .details {
       text-transform: capitalize;
       li {
-        margin: 15px 0px;
+        margin: 5px 0px;
       }
     }
 
@@ -200,20 +207,20 @@ $mainFont: "Open Sans", sans-serif;
 
       // PRICE
       .price {
-        &::before {
-          animation: text-hover 1s ease-in-out infinite normal;
-        }
+        // &::before {
+        //   animation: text-hover 1s ease-in-out infinite normal;
+        // }
       }
 
       // PLAN
-      .plan {
-        &::before {
-          right: 90%;
-        }
-        &::after {
-          right: -90%;
-        }
-      }
+      // .plan {
+      //   &::before {
+      //     right: 90%;
+      //   }
+      //   &::after {
+      //     right: -90%;
+      //   }
+      // }
 
       // HOVER BUTTON
       .buy-button {
@@ -230,14 +237,37 @@ $mainFont: "Open Sans", sans-serif;
 }
 
 // KEYFRAMES
-@keyframes text-hover {
-  0% {
-    right: -30%;
+// @keyframes text-hover {
+//   0% {
+//     right: -30%;
+//   }
+//   50% {
+//     right: -37%;
+//   }
+//   100% {
+//     right: -30%;
+//   }
+// }
+
+@media (min-width: 300px) and (max-width: 970px) {
+  /* Your CSS rules for tablets */
+  .pricing-table {
+    flex-direction: column;
+    position: relative;
+    top: 0%;
+    left: 0%;
+    transform: none;
+    justify-content: center;
   }
-  50% {
-    right: -37%;
+
+  .price_page {
+    height: auto;
+    display: flex;
+    justify-content: center;
+    padding: 150px 0px;
   }
-  100% {
-    right: -30%;
+
+  .pricing-table .price_card {
+        margin: 43px;
   }
 }

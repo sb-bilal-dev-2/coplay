@@ -20,6 +20,7 @@ import VideoDropdown from "../components/VideoDropdown";
 import useMobileDetect from "../helper/useMobileDetect";
 import SecondaryButton from "../components/SecondaryButton";
 import { useTranslation } from "react-i18next";
+import { usePremiumStatus } from "../helper/usePremiumStatus";
 
 const VOLUME_SHOW_TIMEOUT = 500;
 
@@ -168,6 +169,16 @@ const MoviePage = () => {
 
   const progressPercent =
     (videoRef?.current?.currentTime / videoRef?.current?.duration) * 100;
+
+  const { user: premiumExpireDate } = useAuthentication();
+  const isPremium = usePremiumStatus(premiumExpireDate);
+
+  useEffect(() => {
+      if (!isPremium) {
+
+
+      }
+  }, []);
 
   return (
     <div className="page-container relative">

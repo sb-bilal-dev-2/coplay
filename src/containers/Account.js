@@ -70,7 +70,9 @@ const Account = () => {
               <div className="flex flex-col">
                 {/* TODO:Create dropdown */}
                 <span className="font-bold">{t("language")}</span>
-                <button onClick={() => changeLanguage("en")}>English</button>
+                <button onClick={() => changeLanguage("en")}>
+                  English
+                </button>
                 <button onClick={() => changeLanguage("uz")}>Uzbek</button>
               </div>
             </div>

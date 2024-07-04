@@ -50,6 +50,11 @@ const router = createBrowserRouter(
         element={<WordsPage />}
         loader={authenticatedRoute}
       />
+      <Route
+        path="wordCollection/:list"
+        element={<WordsPage />}
+        loader={authenticatedRoute}
+      />
       <Route path="movie/:title" element={<MoviePage />} />
       <Route path="auth/:screen" element={<Authentication />} />
       <Route path="crud/:model" element={<CRUDRoute />} />
@@ -83,8 +88,9 @@ root.render(
 
 function authenticatedRoute() {
   const token = localStorage.getItem("token");
+
   if (!token) {
-    return redirect("/login");
+    return redirect("/auth/login");
   }
 
   return null;

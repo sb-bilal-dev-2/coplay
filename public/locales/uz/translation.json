@@ -26,5 +26,10 @@
   "know": "bilaman",
   "back": "orqaga",
   "repeat": "qo'shish",
-  "watch words of": "{{item}} so'zlarini korish"
+  "watch words of": "{{item}} so'zlarini korish",
+  "basic": "asosiy",
+  "plan": "reja",
+  "month": "{{item}} Oy",
+  "buy": "sotib olish",
+  "awesome": "Ajoyib"
 }
