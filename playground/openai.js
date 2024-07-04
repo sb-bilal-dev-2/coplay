@@ -15,6 +15,15 @@ const openai = new OpenAI({
 //   "Travel Vocabulary 101"
 // ]);
 
+async function getTranscriptionOfAudio() {
+  const transcription = await openai.audio.transcriptions.create({
+    file: fs.createReadStream("/path/to/file/temp_audio.mp3"),
+    model: "whisper-1",
+  });
+
+  console.log(transcription.text);
+}
+
 async function promptAI(content, customMessages) {
   let messages = [{ role: 'user', content }]
   if (messages) {

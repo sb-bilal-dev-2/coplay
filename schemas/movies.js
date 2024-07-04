@@ -8,6 +8,7 @@ const schema = new Schema({
     required: true,
     unique: true,
   },
+  category: String,
   parsedSubtitleId: String,
   mediaTitleBase: String,
   label: { type: String },
@@ -39,6 +40,8 @@ const schema = new Schema({
     type: String,
     required: true,
   },
+  youtubeDetails: Schema.Types.Mixed,
+  youtubeUrl: String,
   subtitleInfos: [Schema({ _id: String, title: { type: String, unique: true }, translateLang: String })]
 }).add({
   createdTime: { type: Date, default: Date.now },

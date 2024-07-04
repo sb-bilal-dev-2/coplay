@@ -1,0 +1,108 @@
+
+
+
+// Captions
+videoDetails {
+    title, // label
+    description,
+    url,
+    lengthSeconds, // String
+    isFamilySafe,
+    category, // Music
+    videoId,
+    keywords,
+    viewCount,
+    publishDate, // publishDate: '2011-06-23T17:30:00-07:00'
+    ownerProfileUrl, // http://www.youtube.com/@SelenaGomezVEVO
+}
+
+
+{
+    videoDetails: {
+        embed: {
+          iframeUrl: 'https://www.youtube.com/embed/EgT_us6AsDg',
+          width: 1280,
+          height: 720
+        },
+        title: 'Selena Gomez & The Scene - Love You Like A Love Song',
+        description: "Take a walk down memory lane today with some of Selena Gomez's biggest videos on the SELENA GOMEZ COMPLETE playlist! Watch here: http://hollywoodrecs.co/SelenaGomez/Vevo?IQid=sgVEVO\n" +
+          '\n' +
+          'A YEAR WITHOUT RAIN https://smarturl.it/sgtsa2\n' +
+          'WHEN THE SUN GOES DOWN https://smarturl.it/sgtsa1\n' +
+          'STARS DANCE https://smarturl.it/sgiTunesa2\n' +
+          'FOR YOU https://smarturl.it/sga1\n' +
+          'REVIVAL http://smarturl.it/sgrevival\n' +
+          '\n' +
+          'Facebook http://facebook.com/SelenaGomez\n' +
+          'Twitter http://twitter.com/SelenaGomez\n' +
+          'Instagram http://instagram.com/SelenaGomez\n' +
+          'Official Site http://selenagomez.com',
+        lengthSeconds: '221',
+        ownerProfileUrl: 'http://www.youtube.com/@SelenaGomezVEVO',
+        externalChannelId: 'UCjK8ORC71kwyj1DWFwril_A',
+        isFamilySafe: true,
+        availableCountries: [
+          'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR',
+          'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE',
+          'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ',
+          'BR', 'BS', 'BT', 'BV', 'BW', 'BZ', 'CA', 'CC', 'CD', 'CF',
+          'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU',
+          'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO',
+          'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ',
+          'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG',
+          'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT',
+          'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID',
+          ... 147 more items
+        ],
+        isUnlisted: false,
+        hasYpcMetadata: false,
+        viewCount: '753419691',
+        category: 'Music',
+        publishDate: '2011-06-23T17:30:00-07:00',
+        ownerChannelName: 'SelenaGomezVEVO',
+        uploadDate: '2011-06-23T17:30:00-07:00',
+        isShortsEligible: false,
+        videoId: 'EgT_us6AsDg',
+        keywords: [
+          'selena gomez',
+          'selena gomez love you like love song',
+          'love you like love song selena gomez',
+          'songs',
+          'selena gomez songs',
+          'love you like love song',
+          'love you like love song baby',
+          'song',
+          'love song',
+          'love songs'
+        ],
+        channelId: 'UCjK8ORC71kwyj1DWFwril_A',
+        isOwnerViewing: false,
+        isCrawlable: true,
+        allowRatings: true,
+        author: {
+          id: 'UCPNxhDvTcytIdvwXWAm43cA',
+          name: 'SelenaGomezVEVO',
+          user: '@SelenaGomezVEVO',
+          channel_url: 'https://www.youtube.com/channel/UCPNxhDvTcytIdvwXWAm43cA',
+          external_channel_url: 'https://www.youtube.com/channel/UCjK8ORC71kwyj1DWFwril_A',
+          user_url: 'http://www.youtube.com/@SelenaGomezVEVO',
+          thumbnails: [Array],
+          verified: false,
+          subscriber_count: 34600000
+        },
+        isPrivate: false,
+        isUnpluggedCorpus: false,
+        isLiveContent: false,
+        media: {},
+        likes: null,
+        dislikes: null,
+        age_restricted: false,
+        video_url: 'https://www.youtube.com/watch?v=EgT_us6AsDg',
+        storyboards: [ [Object], [Object], [Object], [Object] ],
+        chapters: [],
+        thumbnails: [ [Object], [Object], [Object], [Object], [Object] ]
+      },
+      full: true
+    }
+    Captions: undefined
+}

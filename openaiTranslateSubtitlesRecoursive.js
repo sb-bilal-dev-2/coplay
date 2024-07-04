@@ -88,10 +88,10 @@ e.g. SAMPLE OUTPUT JSON
 }
 REAL INPUT JSON
 `;
-// prepareSubtitles();
+
 const ELIGIBLE_CHAT_GPT_TRANSLATIONS = ['ru', 'tr', 'kr', 'cn']
 
-async function prepareSubtitles(
+async function prepareSubtitleTranslations(
   contentFolder = './files/movieFiles',
   mediaInfo,
   translateLanguage = '',
@@ -99,19 +99,18 @@ async function prepareSubtitles(
 ) {
   const isPromptingOpenAI = ELIGIBLE_CHAT_GPT_TRANSLATIONS.includes(translateLanguage)
   if (!mediaInfo) {
-    console.error('mediaInfo missing at prepareSubtitles')
+    console.error('mediaInfo missing at prepareSubtitleTranslations')
   }
   console.log('STARTING...')
   try {
-    const subtitlesVttPath = path.join(contentFolder, `${mediaInfo?.mediaTitle}.${mediaInfo?.mediaLang || 'en'}.vtt`);
-
+    const subtitlesVttPath = path.join(contentFolder, `${mediaInfo?.title}.${mediaInfo?.mediaLang || 'en'}.vtt`);
 
     if (!subtitles) {
       console.log('mediaInfo.parsedSubtitleId', mediaInfo.parsedSubtitleId)
       subtitles = (await subtitles_model.findById(mediaInfo.parsedSubtitleId)).subtitles
-      // let subtitlesVtt = fs.readFileSync(subtitlesVttPath, 'utf-8');
-      // subtitles = fromVtt(subtitlesVtt, 'ms');
-      console.log('NO SUBTITLES at', mediaInfo?.mediaTitle)
+      let subtitlesVtt = fs.readFileSync(subtitlesVttPath, 'utf-8');
+      subtitles = fromVtt(subtitlesVtt, 'ms');
+      console.log('NO SUBTITLES at', mediaInfo?.title)
     }
     const temp_file_save_path = `${contentFolder}/${mediaInfo?.title}.${translateLanguage}.temp.subtitles.json`
     const inputPrompt = {
@@ -120,12 +119,12 @@ async function prepareSubtitles(
     };
     let processedTranslations = []
     let itemsToProcess = []
-    const existingProcessedSubtitles = require(temp_file_save_path)
+    const existingProcessedSubtitles = fs.existsSync(temp_file_save_path) ? require(temp_file_save_path) : []
     console.log("existingProcessedSubtitles.length", existingProcessedSubtitles.length)
     const existingProcessedSubtitlesMap = {}
     existingProcessedSubtitles?.forEach(item => { existingProcessedSubtitlesMap[item.id] = item })
     let count = 0
-    console.log('subtitles - ' + mediaInfo?.mediaTitle, subtitles?.length);
+    console.log('subtitles - ' + mediaInfo?.title, subtitles?.length);
     let index = -1
     for (const item of subtitles) {
       index++;
@@ -158,7 +157,7 @@ async function prepareSubtitles(
           if (isLastItem) {
             console.log('LAST_ITEM', isLastItem, index)
             const newSubtitle = await subtitles_model.create({
-              mediaTitle: mediaInfo?.mediaTitle,
+              mediaTitle: mediaInfo?.title,
               title: translateLanguage,
               mediaLang: mediaInfo.mediaLang || 'en',
               translateLang: translateLanguage,
@@ -296,5 +295,5 @@ async function wait(ms) {
 }
 
 module.exports = {
-  prepareSubtitles
+  prepareSubtitleTranslations
 }

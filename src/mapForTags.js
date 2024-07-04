@@ -3,6 +3,8 @@ const mapForTags = (subtitleItem) => {
     const regex = /^<\w+>/;
     let text = subtitleItem.text;
     text = text.replaceAll('...<i>', '<i>...')
+    text = text.replaceAll('- <i>', '<i> -')
+
     const match = text.match(regex);
     const subtitleLines = subtitleItem.text.split('\n')
 
@@ -12,7 +14,7 @@ const mapForTags = (subtitleItem) => {
         subtitleItem.taglessText = tagRemovedFromTheEnd.replaceAll(match[0], "").replaceAll('</' + subtitleItem.tag + '>', "");
         subtitleItem.subtitleLines = subtitleItem.taglessText.split('\n');
     }
-    console.log('subtitleItem', subtitleLines)
+    console.log('subtitleItem', subtitleItem)
 
     return { ...subtitleItem, subtitleLines };
     /**

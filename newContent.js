@@ -1,7 +1,5 @@
-const fs = require('fs')
-const { prepareSubtitles } = require('./openaiTranslateSubtitlesRecoursive.js')
+const { prepareSubtitleTranslations } = require('./openaiTranslateSubtitlesRecoursive.js')
 const { parseUsedWords } = require('./parseUsedWords.js');
-const { subtitles_model } = require('./schemas/subtitles.js');
 // Runs for all new content if those don't have processed files
 const movies_model = require('./schemas/movies').movies_model;
 
@@ -12,46 +10,58 @@ const movies_model = require('./schemas/movies').movies_model;
  */
 const MAIN_LANGUAGES = ['uz', 'ru', 'en', 'tr']
 
-// processNewContent(mediaContent = 'en')
+if (process.argv[1].includes('newContent.js')) {
+    newContent(process.argv[2])
+}
 
-async function processNewContent(mediaLang = 'en') {
+async function newContent_single(mediaInfo) {
+    const parsedWords = await parseUsedWords(mediaInfo)
+    const translatedMap = {}
+    mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[subtitleTrans.translateLang] = true })
+    await Promise.all(translateLanguages.filter(item => translatedMap[item]).map(translateLang => {
+        return prepareSubtitleTranslations(contentFolder = './files/movieFiles', mediaInfo, translateLang, parsedWords)
+    }))
+}
+
+async function newContent(mediaLang = 'en') {
     const contentFolder = './files/movieFiles'
     let { missingMediaTranslations, missingMediaParsedWords } = await getNewContentTitles(contentFolder, mediaLang)
     const newParsedSubtitlesMap = {}
     await Promise.all(missingMediaParsedWords.map(async mediaInfo => {
         const mediaTitle = mediaInfo.title
-        // console.log('mediaTitle: ', mediaTitle)
-        // newParsedSubtitlesMap[mediaInfo.title] = await parseUsedWords(contentFolder, mediaInfo)
+        console.log('mediaTitle: ', mediaTitle)
+
+        newParsedSubtitlesMap[mediaTitle] = await parseUsedWords(mediaInfo)
     }))
     await Promise.all(missingMediaTranslations.map(async ([mediaInfo, translateLang]) => {
         const mediaTitle = mediaInfo.title
-        console.log('mediaTitle: ', mediaTitle)
-        const newSubtitleId = await prepareSubtitles(contentFolder, mediaInfo, translateLang, newParsedSubtitlesMap[mediaInfo.title])
+        console.log('mediaTitle: ', mediaTitle, translateLang)
+
+        const newSubtitleId = await prepareSubtitleTranslations(contentFolder, mediaInfo, translateLang, newParsedSubtitlesMap[mediaInfo.title])
         console.log('newSubtitleId', newSubtitleId)
         return newSubtitleId
     }))
 }
 
 async function getNewContentTitles(contentFolder, mediaLang = 'en') {
-    // const allContents = fs.readdirSync(contentFolder)
-    // let allMedia = allContents.filter((directory) => directory.includes('.mp4'))
-
     const allMedia = await movies_model.find({})
     const missingMediaTranslations = []
     const missingMediaParsedWords = []
 
-    console.log("allMedia ", allMedia)
-
     allMedia.forEach((mediaInfo) => {
+        if (mediaInfo.title === 'The Black Eyed Peas - Boom Boom Pow (Official Music Video)_BlackEyedPeasVEVO') {
+            missingMediaParsedWords.push(mediaInfo)
+        }
         if (!mediaInfo.parsedSubtitleId) {
             missingMediaParsedWords.push(mediaInfo)
         }
-        const subtitleTranslationsMap = {}
-        mediaInfo?.translations?.forEach(translationTitle => { subtitleTranslationsMap[translationTitle] })
+
+        const existingSubtitleTranslationsMap = {}
+        mediaInfo?.subtitleInfos?.forEach(subtitleTrans => { existingSubtitleTranslationsMap[subtitleTrans.translateLang] = true })
+        console.log('mediaInfo', mediaInfo)
         MAIN_LANGUAGES.forEach((language) => {
             if (language !== mediaLang) {
-                console.log('M L: ', mediaInfo.title, language)
-                if (!subtitleTranslationsMap[language]) {
+                if (!existingSubtitleTranslationsMap[language]) {
                     missingMediaTranslations.push([mediaInfo, language])
                 }
             }
@@ -69,5 +79,6 @@ async function getNewContentTitles(contentFolder, mediaLang = 'en') {
 
 module.exports = {
     MAIN_LANGUAGES,
-    processNewContent,
+    newContent,
+    newContent_single
 }

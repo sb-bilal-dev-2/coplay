@@ -12,12 +12,12 @@ const { subtitles_model } = require('./schemas/subtitles')
 const { movies_model } = require('./schemas/movies')
 const { mapForTags } = require('./src/mapForTags')
 const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
-// parseUsedWords()
+
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
-const DEFAULT_MEDIA_LANG = 'en'
-async function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
-    let mediaTitle = process.argv.slice(2)[0] || mediaInfo.title;
-    const mediaLang = mediaInfo.mediaLang || DEFAULT_MEDIA_LANG;
+
+async function parseUsedWords(mediaInfo) {
+    let mediaTitle = mediaInfo.title;
+    const mediaLang = mediaInfo.mediaLang;
     const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${mediaTitle}.${mediaLang}.vtt`);
     if (!fs.existsSync(subtitlePath)) {
         console.error('SUBTITLE_PARSER: no vtt for - ' + subtitlePath);
@@ -25,17 +25,19 @@ async function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
     }
     const subtitlesVtt = fs.readFileSync(subtitlePath, 'utf-8');
     const subtitles = fromVtt(subtitlesVtt, 'ms');
-    console.log("subtitles.length", subtitles);
+
     if (!subtitles) return;
     const usedWords = []
     const englishWordsMap = mapItems(englishWordsFull, 'the_word')
 
     let subtitlesWithUsedWords = subtitles.map((sbt) => {
-        const taglessText = mapForTags(sbt).taglessText || mapForTags(sbt).text
+        const tagsMap = mapForTags(sbt)
+        const taglessText = tagsMap.taglessText || tagsMap.text
         const usedWordsPerLine = splitUsedWords(taglessText);
 
         return {
             ...sbt,
+            taglessText,
             usedWords: usedWordsPerLine
         }
     })
@@ -141,6 +143,7 @@ async function parseUsedWords(contentFolder = './files/movieFiles', mediaInfo) {
         usedLemmas: usedLemmas50kInfosList,
         subtitles: subtitlesWithUsedWords
     }
+    console.log('newParsedSubtitle', newParsedSubtitle)
     let parsedSubtitle;
     try {
         parsedSubtitle = (await subtitles_model.create(newParsedSubtitle))
