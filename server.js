@@ -316,6 +316,10 @@ function getHighestExistingQualityPathForTitle(title, chosenQuality) {
       return videoPath
     }
   }
+  const defaultQuality = path.join(__dirname, 'files', 'movieFiles', `${title}.mp4`)
+  if (fs.existsSync(defaultQuality)) {
+    return defaultQuality
+  }
 }
 
 function writeDevelopmentIPAddress() {
