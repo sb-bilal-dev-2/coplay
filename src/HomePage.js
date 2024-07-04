@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import HorizontalScrollMenu from "./components/HorizontalScrollMenu";
@@ -10,12 +10,15 @@ import { useTranslation } from "react-i18next";
 import BuyPremiumModal from "./components/BuyPremiumModal";
 import { usePremiumStatus } from "./helper/usePremiumStatus";
 import useAuthentication from "./containers/Authentication.util";
+import { useSelector } from "react-redux";
 
 const HomePage = () => {
-  const { items: movies } = useRequests("movies");
-  const { items: clips } = useRequests("clips");
+  const { items } = useRequests("movies");
   const { items: quizzes } = useRequests("quizzes");
   const { items: wordCollections } = useRequests("wordCollections");
+
+  const movies = items?.filter(item => item.category !== 'Music');
+  const clips = items?.filter(item => item.category === 'Music');
 
   const { t } = useTranslation();
 

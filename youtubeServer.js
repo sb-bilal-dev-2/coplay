@@ -13,10 +13,10 @@ const { newContent_single } = require('./newContent')
 
 // For CLI Download https://ytdl-org.github.io/youtube-dl/download.html
 /**
-$ git clone https://github.com/ytdl-org/youtube-dl.git youtube-dl
-$ cd youtube-dl/
-$ make youtube-dl
-$ sudo cp youtube-dl /usr/local/bin/
+git clone https://github.com/ytdl-org/youtube-dl.git youtube-dl
+cd youtube-dl/
+make youtube-dl
+sudo cp youtube-dl /usr/local/bin/
  */
 // Sample Request
 // youtube-dl -f 251 'https://youtu.be/EgT_us6AsDg?si=uyyHR0YYTm3JyIZ7' --no-check-certificate
