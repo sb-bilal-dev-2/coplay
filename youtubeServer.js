@@ -8,23 +8,17 @@ const { newContent_single } = require('./newContent')
 /**
  * Example CLI
  * 
- * node youtubeServer.js 'https://www.youtube.com/watch?v=BtAm8DITKyI' en
+ * node youtubeServer.js 'https://www.youtube.com/watch?v=4m48GqaOz90' en
  */
-
-// For CLI Download https://ytdl-org.github.io/youtube-dl/download.html
-// For make error -> 
-// sudo cp youtube-dl/youtube_dl/__main__.py /usr/local/bin/youtube-dl
-// sudo chmod a+x /usr/local/bin/youtube-dl
 /**
-git clone https://github.com/ytdl-org/youtube-dl.git youtube-dl
-cd youtube-dl/
-make youtube-dl
-sudo cp youtube-dl /usr/local/bin/
+ * Install CLI
+ * sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+ * sudo chmod a+rx /usr/local/bin/yt-dlp
  */
 // Sample Request
-// youtube-dl -f 251 'https://youtu.be/EgT_us6AsDg?si=uyyHR0YYTm3JyIZ7' --no-check-certificate
+// yt-dlp -f 251 'https://youtu.be/EgT_us6AsDg?si=uyyHR0YYTm3JyIZ7' --no-check-certificate
 // Request Formats
-// youtube-dl -F 'https://youtu.be/EgT_us6AsDg?si=uyyHR0YYTm3JyIZ7' --no-check-certificate
+// yt-dlp -F 'https://youtu.be/EgT_us6AsDg?si=uyyHR0YYTm3JyIZ7' --no-check-certificate
 // [
 //     "https://youtu.be/EgT_us6AsDg?si=uyyHR0YYTm3JyIZ7",
 //     "https://youtu.be/WXwgZL4zx9o?si=FNVX_HRjLZsF_Or8",
@@ -78,13 +72,13 @@ async function getVideoInfoAndStore(url) {
 
 async function downloadYouTubeVideo(url) {
     // audio download test 
-    // const command = `youtube-dl -f 249 --write-sub --no-check-certificate '${url}'`;
-    const video_command = `youtube-dl -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(uploader)s.%(ext)s' --no-check-certificate '${url}'`;
+    // const command = `yt-dlp -f 249 --write-sub --no-check-certificate '${url}'`;
+    const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(uploader)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(video_command)
         .then((message) => console.log('Video Download successful:', message))
         .catch((error) => console.error('Video Download failed:', error))
 
-    const audio_command = `youtube-dl -f 249 -o './files/movieFiles/%(title)s_%(uploader)s.%(ext)s' --no-check-certificate '${url}'`;
+    const audio_command = `yt-dlp -f 249 -o './files/movieFiles/%(title)s_%(uploader)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(audio_command)
         .then((message) => console.log('Audio Download successful:', message))
         .catch((error) => console.error('Audio Download failed:', error))

@@ -17,8 +17,8 @@ if (process.argv[1].includes('newContent.js')) {
 async function newContent_single(mediaInfo) {
     const parsedWords = await parseUsedWords(mediaInfo)
     const translatedMap = {}
-    mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[subtitleTrans.translateLang] = true })
-    await Promise.all(translateLanguages.filter(item => translatedMap[item]).map(translateLang => {
+    mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[item.translateLang] = true })
+    await Promise.all(MAIN_LANGUAGES.filter(item => translatedMap[item]).map(translateLang => {
         return prepareSubtitleTranslations(contentFolder = './files/movieFiles', mediaInfo, translateLang, parsedWords)
     }))
 }
@@ -49,9 +49,6 @@ async function getNewContentTitles(contentFolder, mediaLang = 'en') {
     const missingMediaParsedWords = []
 
     allMedia.forEach((mediaInfo) => {
-        if (mediaInfo.title === 'The Black Eyed Peas - Boom Boom Pow (Official Music Video)_BlackEyedPeasVEVO') {
-            missingMediaParsedWords.push(mediaInfo)
-        }
         if (!mediaInfo.parsedSubtitleId) {
             missingMediaParsedWords.push(mediaInfo)
         }
