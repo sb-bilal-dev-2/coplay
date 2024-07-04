@@ -52,7 +52,7 @@ const HomePage = () => {
       </div>
       <div className="section bg-gray-900">
         <h2>{t("music")}</h2>
-        <HorizontalScrollMenu items={clips} baseRoute="clip" />
+        <HorizontalScrollMenu items={clips} baseRoute={"movie"} />
       </div>
       <div className="section bg-gray-900">
         <h2>{t("words collections")}</h2>
