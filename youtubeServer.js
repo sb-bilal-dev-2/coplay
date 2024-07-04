@@ -62,7 +62,7 @@ async function getVideoInfoAndStore(url) {
         }
 
         console.log('adjustedInfo', adjustedInfo)
-        // const newItem = await movies_model.create(adjustedInfo)
+        const newItem = await movies_model.create(adjustedInfo)
 
         return newItem
     } catch (error) {
