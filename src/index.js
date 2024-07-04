@@ -5,6 +5,7 @@ import "./index.css";
 import MoviePage from "./containers/MoviePage";
 import reportWebVitals from "./reportWebVitals";
 import {
+  createHashRouter,
   createBrowserRouter,
   createRoutesFromElements,
   Route,
@@ -29,7 +30,7 @@ import PricePage from "./containers/PricePage";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const router = createBrowserRouter(
+const router = createHashRouter(
   createRoutesFromElements(
     <>
       <Route exact path="/" element={<HomePage />} />
