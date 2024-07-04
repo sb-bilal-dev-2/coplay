@@ -12,6 +12,9 @@ const { newContent_single } = require('./newContent')
  */
 
 // For CLI Download https://ytdl-org.github.io/youtube-dl/download.html
+// For make error -> 
+// sudo cp youtube-dl/youtube_dl/__main__.py /usr/local/bin/youtube-dl
+// sudo chmod a+x /usr/local/bin/youtube-dl
 /**
 git clone https://github.com/ytdl-org/youtube-dl.git youtube-dl
 cd youtube-dl/
@@ -76,12 +79,12 @@ async function getVideoInfoAndStore(url) {
 async function downloadYouTubeVideo(url) {
     // audio download test 
     // const command = `youtube-dl -f 249 --write-sub --no-check-certificate '${url}'`;
-    const video_command = `youtube-dl -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(uploader)s.%(ext)s' --no-check-certificate '${url}'`;
+    const video_command = `youtube-dl -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(channel)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(video_command)
         .then((message) => console.log('Video Download successful:', message))
         .catch((error) => console.error('Video Download failed:', error))
 
-    const audio_command = `youtube-dl -f 249 -o './files/movieFiles/%(title)s_%(uploader)s.%(ext)s' --no-check-certificate '${url}'`;
+    const audio_command = `youtube-dl -f 249 -o './files/movieFiles/%(title)s_%(channel)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(audio_command)
         .then((message) => console.log('Audio Download successful:', message))
         .catch((error) => console.error('Audio Download failed:', error))
