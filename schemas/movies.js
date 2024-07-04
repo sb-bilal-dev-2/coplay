@@ -11,6 +11,7 @@ const schema = new Schema({
   category: String,
   parsedSubtitleId: String,
   mediaTitleBase: String,
+  keywords: [String],
   label: { type: String },
   description: {
     type: String,

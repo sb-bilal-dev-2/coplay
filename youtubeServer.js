@@ -49,6 +49,7 @@ async function getVideoInfoAndStore(url) {
             mediaLang,
             label: videoDetails.title,
             category: videoDetails.category,
+            keywords: videoDetails.keywords,
             isShortsEligible: videoDetails.isShortsEligible,
             youtubeUrl: url,
             // youtubeDetails: videoDetails,
@@ -63,7 +64,7 @@ async function getVideoInfoAndStore(url) {
 
         console.log('adjustedInfo', adjustedInfo)
         const newItem = await movies_model.create(adjustedInfo)
-
+        console.log('newItem', newItem)
         return newItem
     } catch (error) {
         console.error('Error getting video information:', error);
