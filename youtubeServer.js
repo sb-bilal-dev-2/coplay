@@ -36,7 +36,7 @@ async function processYoutubeVideo() {
     console.log('processing video: ' + videoURL)
     await downloadYouTubeVideo(videoURL)
     const mediaInfo = await getVideoInfoAndStore(videoURL)
-    await newContent_single(mediaLang, mediaInfo)
+    await newContent_single(mediaInfo)
 }
 
 // Function to get video information
