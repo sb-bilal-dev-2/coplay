@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import HorizontalScrollMenu from "./components/HorizontalScrollMenu";
@@ -7,14 +7,9 @@ import Footer from "./components/Footer";
 import useRequests from "./useRequests";
 import { BASE_SERVER_URL } from "./api";
 import { useTranslation } from "react-i18next";
-import BuyPremiumModal from "./components/BuyPremiumModal";
-import { usePremiumStatus } from "./helper/usePremiumStatus";
-import useAuthentication from "./containers/Authentication.util";
-import { useSelector } from "react-redux";
 
 const HomePage = () => {
   const { items } = useRequests("movies");
-  const { items: quizzes } = useRequests("quizzes");
   const { items: wordCollections } = useRequests("wordCollections");
 
   const movies = items?.filter(item => item.category !== 'Music');
@@ -22,28 +17,8 @@ const HomePage = () => {
 
   const { t } = useTranslation();
 
-  const [showModal, setShowModal] = useState(false);
-
-  const { user: premiumExpireDate } = useAuthentication();
-  const isPremium = usePremiumStatus(premiumExpireDate);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!isPremium) {
-        setShowModal(true);
-      }
-    }, 1); // 1 minute = 60,000 milliseconds
-
-    return () => clearTimeout(timeout); // Cleanup function to clear timeout on component unmount
-  }, []);
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
-
   return (
     <div className="page-container home-page">
-      <BuyPremiumModal show={showModal} handleClose={handleCloseModal} />
       <StickyHeader />
       <Hero />
       <div className="section bg-gray-900">
@@ -62,10 +37,6 @@ const HomePage = () => {
           verticalCard
         />
       </div>
-      {/* <div className='section bg-gray-900'>
-                <h2>Learn by Quiz</h2>
-                <HorizontalScrollMenu items={wordCollections} />
-            </div> */}
       <Footer />
     </div>
   );

@@ -33,7 +33,6 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
-  
 
   return (
     <header
@@ -126,10 +125,12 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 <i className="fas fa-search"></i>
               </button>
             )}
-            {!isPricePage ?  <Link to="/price_page" className="font-bold p-2">
-              Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
-            </Link> : null }
-           
+            {!isPricePage ? (
+              <Link to="/price_page" className="font-bold p-2">
+                Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
+              </Link>
+            ) : null}
+
             <div className="user-menu" onClick={handleNavMenuToggle}>
               {loggedIn ? (
                 <UserNav

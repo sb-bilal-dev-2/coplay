@@ -4,7 +4,7 @@ import Subtitles from "../components/Subtitles";
 import "./MoviePage.css";
 import throttle from "../throttle";
 import classNames from "classnames";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
 import axios from "axios";
 import MovieWordCards from "./MovieWordCards";
@@ -28,7 +28,9 @@ const MoviePage = () => {
   const { t } = useTranslation();
 
   const [userInfo, setUserInfo] = useState(null);
-  const { user: userIdAndEmail } = useAuthentication();
+  const { user } = useAuthentication();
+  const { userIdAndEmail = null, premiumExpireDate = null } = user || {};
+
   const { title } = useParams();
   const [forceStateBoolean, forceStateUpdate] = useState(false);
   const [isMute, setMute] = useState(false);
@@ -52,6 +54,8 @@ const MoviePage = () => {
   const fullScreenContainer = useRef(null);
   const volumeInfoShowTimeout = useRef(null);
 
+  const isPremiumUser = usePremiumStatus(premiumExpireDate);
+
   const handleTimeUpdate = useCallback(() => {
     setCurrentTime(videoRef.current.currentTime);
     localStorage.setItem("currentTime" + title, videoRef.current.currentTime);
@@ -66,6 +70,7 @@ const MoviePage = () => {
   });
   const [currentItem, setCurrentItem] = useState({});
   const userId = userIdAndEmail?.id;
+
   const requestUserInfo = async () => {
     try {
       const response = await axios(`${BASE_SERVER_URL}/users/${userId}`);
@@ -170,14 +175,14 @@ const MoviePage = () => {
   const progressPercent =
     (videoRef?.current?.currentTime / videoRef?.current?.duration) * 100;
 
-  const { user: premiumExpireDate } = useAuthentication();
-  const isPremium = usePremiumStatus(premiumExpireDate);
+  const navigate = useNavigate();
 
   useEffect(() => {
-      if (!isPremium) {
-
-
+    if (currentItem?.isPremium) {
+      if (isPremiumUser === undefined) {
+        navigate("/price_page");
       }
+    }
   }, []);
 
   return (
