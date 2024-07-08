@@ -62,6 +62,7 @@
     "smtp": "^0.1.4",
     "subtitles-parser-vtt": "^0.1.0",
     "tailwindcss": "^3.4.0",
+    "video.js": "^8.12.0",
     "web-vitals": "^2.1.4",
     "ytdl-core": "^4.11.5"
   },

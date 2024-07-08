@@ -21,6 +21,7 @@ export const useKeyDown = ({
   volumeInfoShowTimeout,
 }) => {
   const handleKeyDown = (event) => {
+    console.log('handleKeyDown', event)
     switch (event.key) {
       case "ArrowLeft":
         // Rewind

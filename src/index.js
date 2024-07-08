@@ -2,7 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./index.css";
-import MoviePage from "./containers/MoviePage";
+// import MoviePage from "./containers/MoviePage";
+import MoviePage from "./containers/MoviePage/MoviePage";
 import reportWebVitals from "./reportWebVitals";
 import {
   createHashRouter,

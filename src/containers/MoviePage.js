@@ -1,22 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Subtitles from "../components/Subtitles";
 // This imports the functional component from the previous sample.
-import "./MoviePage.css";
+import "./MoviePage/MoviePage.css";
 import throttle from "../throttle";
 import classNames from "classnames";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
 import axios from "axios";
-import MovieWordCards from "./MovieWordCards";
+import MovieWordCards from "./MoviePage/MovieWordCards";
 import useAuthentication from "./Authentication.util";
 import {
   Settings,
   useKeyDown,
   isFullScreen,
   secondsToDisplayTime,
-} from "../helper/moviePage";
+} from "./MoviePage/useKeyDown";
 import Modal from "../components/Modal";
-import VideoDropdown from "../components/VideoDropdown";
+import VideoDropdown from "./MoviePage/VideoDropdown";
 import useMobileDetect from "../helper/useMobileDetect";
 import SecondaryButton from "../components/SecondaryButton";
 import { useTranslation } from "react-i18next";

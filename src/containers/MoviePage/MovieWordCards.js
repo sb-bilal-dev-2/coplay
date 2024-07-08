@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import AdvancedSwipe from '../components/AdvancedSwipe'
-import api from '../api'
+import AdvancedSwipe from '../../components/AdvancedSwipe'
+import api from '../../api'
 
 export default function MovieWordCards({ parsedSubtitleId, userId }) {
     const [lemmas, setLemmas] = useState([])
