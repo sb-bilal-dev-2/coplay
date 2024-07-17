@@ -11,10 +11,19 @@ const movies_model = require('./schemas/movies').movies_model;
 const MAIN_LANGUAGES = ['uz', 'ru', 'en', 'tr']
 
 if (process.argv[1].includes('newContent.js')) {
-    newContent(process.argv[2])
+    const single = process.argv.includes('--single')
+    if (single) {
+        const title = process.argv[3]?.replaceAll('"', ' ')?.replaceAll("'", ' ')
+        newContent_single(title)
+    } else {
+        newContent(process.argv[2])
+    }
 }
 
 async function newContent_single(mediaInfo) {
+    if (typeof mediaInfo === 'string') {
+        mediaInfo = await movies_model.find({ title: mediaInfo })
+    }
     const parsedWords = await parseUsedWords(mediaInfo)
     const translatedMap = {}
     mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[item.translateLang] = true })

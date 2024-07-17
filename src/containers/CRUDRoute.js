@@ -33,6 +33,10 @@ const CRUDRoute = () => {
         putItems(JSON.parse(editingItemRef?.current?.value), () => setEditingItem(''))
     }
 
+    const handlePutNewItem = () => {
+        putItems(newItemTextarea?.current?.value && JSON.parse(newItemTextarea?.current?.value), () => setEditingItem(''))
+    }
+
     return (
         <div className='p-4'>
             <p className='text-red-500'>{requestError}</p>
@@ -40,10 +44,10 @@ const CRUDRoute = () => {
                 <input className="border-b" onChange={(ev) => setSearch(ev.target.value)} placeholder='Search' />
             </form>
             <form>
-                <textarea className="border-b w-80 h-40"  placeholder='New Item JSON' ref={newItemTextarea} />
+                <textarea className="border-b w-80 h-40" placeholder='New Item JSON' ref={newItemTextarea} />
                 <button
                     className="p-2"
-                    onClick={() => putItems(newItemTextarea?.current?.value && JSON.parse(newItemTextarea?.current?.value, () => setEditingItem('')))}
+                    onClick={handlePutNewItem}
                     type="submit"
                     disabled={requestLoading}
                 ><b>POST NEW <i className="fa fa-plus"></i></b></button>

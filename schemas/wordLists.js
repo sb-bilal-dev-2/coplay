@@ -4,7 +4,7 @@ const Schema = require('mongoose').Schema;
 
 const schema = new Schema({
     lang: String,
-    for: String, // movie | wordCollection | clip
+    wordCollectionId: String,
     forTitle: String,
     list: [String]
 }).add({

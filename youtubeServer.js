@@ -25,7 +25,7 @@ const { newContent_single } = require('./newContent')
 //     "https://youtu.be/PwQmPLjnSPo?si=3llYzPm3JXlzTjor"
 // ]
 // Example usage
-const videoURL = process.argv[2]?.replaceAll(`'`).replaceAll(`"`);
+const videoURL = process.argv[2]?.replaceAll(`'`, ' ').replaceAll(`"`, ' ');
 const mediaLang = process.argv[3];
 if (!videoURL) { throw Error('Pass Url as in Example CLI ') }
 if (!mediaLang) { throw Error('Pass media language as in Example CLI ') }

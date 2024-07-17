@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const https = require('https');
 const fs = require('fs');
 const { readFile } = require('fs/promises');
 const path = require('path');
@@ -15,6 +14,8 @@ const fsPromises = require('fs/promises')
 const ip = require('ip');
 const { default: mongoose } = require('mongoose');
 const { subtitles_model } = require('./schemas/subtitles');
+const { promptAI } = require('./playground/openai');
+const wordInfos = require('./schemas/wordInfos');
 
 // console.log(ip.address())
 writeDevelopmentIPAddress()
@@ -36,6 +37,58 @@ app.get('/hello_world', (req, res) => {
 
   res.send('Welcome!')
 })
+
+app.get('/wordInfoLemmas', async (req, res) => {
+  let { the_word, langCode, mainLang, generateIcon } = req.query;
+  let WordInfosModel = mongoose.model(`wordInfos__${langCode}__s`, wordInfos.schema);
+  const wordInfo = WordInfosModel.find({ the_word });
+  const { lemma, translations, romanization } = wordInfo;
+  // if (langCode === 'en') {
+  //   WordInfosModel = wordInfos.wordInfos_model
+  // } else {
+    // WordInfosModel = mongoose.model(`wordInfos__${langCode}__s`, wordInfos.schema)
+  // }
+
+  const update_wordInfo = {}
+  const homonyms = []
+  if (!lemma) {
+    const promptInfos = JSON.parse(await promptAI(lemma))
+
+    if (Array.isArray(promptInfos)) {
+      update_wordInfo = { ...update_wordInfo, ...promptInfos }
+    } else {
+      update_wordInfo = { ...update_wordInfo, ...promptInfos }
+    }
+  }
+  if (!translations) {
+    update_wordInfo.translations = {}
+  }
+  if (!translations[mainLang]) {
+    update_wordInfo.translations[mainLang] = requestTranslation(the_word)
+  }  
+
+  if (shouldRomanize && !romanization) {
+    update_wordInfo.romanization = await requestRomanization(the_word)
+  }
+  
+  if (!images.length && generateIcon === '1') {
+    await generateImages(the_word)
+  }
+
+  // const updated_wordInfo = await WordInfosModel.findOneAndUpdate(update_word)
+  const updated_wordInfo = update_wordInfo
+
+  // await Promise.all(homonyms.map(item => ({ ...item, romanization: requestRomanization(item.the_word)})).map(homonym => WordInfosModel.create(homonym)))
+  let lemmaInfo = null;
+  if (updated_wordInfo.isLemma) {
+    lemmaInfo = updated_wordInfo
+  } else {
+    lemmaInfo = WordInfosModel.findOneAndUpdate({ lemma: updated_wordInfo.lemma }, { push$: { inflictions: updated_wordInfo._id } })
+  }
+  res.status(200).send(lemmaInfo)
+  // should respond with lemma word
+})
+
 app.get('/movie', (req, res) => {
   const videoPath = getHighestExistingQualityPathForTitle(req.query.name, req.query.quality)
   console.log(req.query.name)
@@ -254,6 +307,7 @@ createCRUDEndpoints('clips');
 createCRUDEndpoints('quizzes');
 // createCRUDEndpoints('words');
 createCRUDEndpoints('wordCollections');
+createCRUDEndpoints('wordLists');
 createCRUDEndpoints('wordInfos');
 createCRUDEndpoints('occurances');
 

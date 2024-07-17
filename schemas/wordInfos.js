@@ -3,13 +3,23 @@ const { default: mongoose } = require('mongoose');
 const Schema = require('mongoose').Schema;
 
 const schema = new Schema({
-  lemma: {
-    type: String,
-    required: true,
-  },
+  lemma: String,
   occuranceCount: Number,
   lemmaIndex: Number,
-  inflections: [String],
+  the_word: String,
+  pronounciation: String,
+  romanization: String,
+  function: String,
+  isLemma: Boolean,
+  inflections: [String], // other wordInfo IDs
+  translations: [Schema({
+    lang: String,
+    text: String,
+  })],
+  isHomonym: Boolean,
+  homonyms: [String],
+  homograms: [String],
+  homophones: [String],
   inflectionInfos: [Schema({
     text: String,
     pronounciation: String,

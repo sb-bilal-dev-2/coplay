@@ -5,6 +5,9 @@ const { sortByLearningState } = require("./src/helper/sortByLearningState");
 const { users_model } = require("./schemas/users");
 const cron = require("node-cron");
 
+/**
+ * @see https://core.telegram.org/bots/webapps#initializing-mini-apps
+ */
 const TOKEN = process.env.TG_BOT_TOKEN;
 const TG_LOGIN_LINK = process.env.REACT_APP_BASE_URL;
 const TG_LOGIN = process.env.TG_LOGIN;

@@ -7,7 +7,6 @@ import MoviePage from "./containers/MoviePage/MoviePage";
 import reportWebVitals from "./reportWebVitals";
 import {
   createHashRouter,
-  createBrowserRouter,
   createRoutesFromElements,
   Route,
   redirect,
@@ -28,6 +27,8 @@ import Quiz from "./containers/Quiz";
 import ErrorBoundary from "./containers/ErrorBoundary";
 import NotFound from "./containers/NotFound";
 import PricePage from "./containers/PricePage";
+import useAuthentication from "./containers/Authentication.util";
+import api from "./api";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -59,7 +60,7 @@ const router = createHashRouter(
       />
       <Route path="movie/:title" element={<MoviePage />} />
       <Route path="auth/:screen" element={<Authentication />} />
-      <Route path="crud/:model" element={<CRUDRoute />} />
+      <Route path="crud/:model" element={<CRUDRoute />} loader={authenticatedRoute_moderator} />
       <Route
         path="quiz/:list/:word"
         element={<Quiz />}
@@ -93,6 +94,26 @@ function authenticatedRoute() {
 
   if (!token) {
     return redirect("/auth/login");
+  }
+
+  return null;
+}
+
+async function authenticatedRoute_moderator() {
+  const MODERATOR_EMAIL_LIST = { "saidbilol18@gmail.com": true, "nilufar4703@gmail.com": true, "00bilal.io@gmail.com": true }
+  const token = localStorage.getItem("token");
+  
+  if (token) {
+    const response = await api().get(`/get-user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!MODERATOR_EMAIL_LIST[response?.data?.email]) {
+      return redirect("/")
+    }
+  } else {
+    return redirect("/");
   }
 
   return null;

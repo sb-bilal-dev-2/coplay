@@ -1,0 +1,57 @@
+[
+    {
+        "lemma": "Банка",
+        "inflictions": [
+            {
+                "word": "Банка",
+                "isHomonym": true
+            },
+            {
+                "word": "Банек"
+            }
+        ]
+    },
+    {
+        "lemma": "Банк",
+        "inflictions": [
+            {
+                "word": "Банк",
+                "isHomonym": true,
+                "lemmas": [],
+                "definitions": []
+            },
+            {
+                "word": "Банках",
+            }
+        ]
+    },
+    {
+        "lemma": "Душ",
+        "inflictions": [
+            {
+                "word": "Душ"
+            },
+            {
+                "word": "Душа",
+                "isHomonym": true,
+                "lemmas": ["Душ", "Душа"],
+                "definitions": []
+            }
+        ]
+    },
+    {
+        "lemma": "Душа",
+        "inflictions": [
+            {
+                "word": "Душ",
+                "isHomonym": true,
+                "definitions": [],
+                "lemmas": []
+            },
+            {
+                "word": "Душей",
+                "definitions": []
+            }
+        ]
+    }
+]

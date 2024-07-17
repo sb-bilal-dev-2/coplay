@@ -26,7 +26,7 @@ async function getTranscriptionOfAudio() {
 
 async function promptAI(content, customMessages) {
   let messages = [{ role: 'user', content }]
-  if (messages) {
+  if (!content) {
     messages = customMessages
   }
   const chatCompletion = await openai.chat.completions.create({

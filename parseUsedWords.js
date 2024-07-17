@@ -10,17 +10,15 @@ const { processSubtitleOccurancesDB } = require('./processSubtitleWordsDB')
 const { subtitles_model } = require('./schemas/subtitles')
 const { movies_model } = require('./schemas/movies')
 const { mapForTags } = require('./src/mapForTags')
+const { get_languageWords } = require('./newLanguages')
 const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
 async function parseUsedWords(mediaInfo) {
-    const englishWordsFull = fs.readFileSync('./wordsResearchData/en_full.txt', 'utf-8').split('\n').map(wrdLine => {
-        const wrdLineArr = wrdLine.split(' ')
-        return { the_word: wrdLineArr[0], occuranceCount: wrdLineArr[1] }
-    }).filter(item => item.occuranceCount > 1)
-    let mediaTitle = mediaInfo.title;
     const mediaLang = mediaInfo.mediaLang;
+    const englishWordsFull = await get_languageWords(mediaLang)
+    let mediaTitle = mediaInfo.title;
     const subtitlePath = path.join(__dirname, 'files', 'movieFiles', `${mediaTitle}.${mediaLang}.vtt`);
     if (!fs.existsSync(subtitlePath)) {
         console.error('SUBTITLE_PARSER: no vtt for - ' + subtitlePath);

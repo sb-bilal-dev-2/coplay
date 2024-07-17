@@ -4,15 +4,32 @@ import { useRequestUserWordLists } from "../helper/useUserWords";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import "./WordsPage.css";
 import StickyHeader from "../components/StickyHeader";
+import api from "../api";
+
+const useRequestWordCollectionWordList = (listName) => {
+  const location = useLocation();
+  const [wordCollection, set_wordCollection] = useState();
+  const requestWordCollection = async () => {
+    const response = await api().get(`/wordLists?forTitle=${listName}`)
+
+    set_wordCollection(response?.data?.results[0]?.list)
+  }
+
+  useEffect(() => {
+    requestWordCollection()
+  }, [location.pathname])
+
+  return wordCollection
+}
 
 const WordsPage = () => {
   const listsMap = useRequestUserWordLists();
   const { list: listName } = useParams();
   const location = useLocation();
-
   const isWordCollectionPage =
     location.pathname.split("/")[1] === "wordCollection";
-
+  const wordCollectionWordList = useRequestWordCollectionWordList(listName)
+  console.log('wordCollectionWordList', wordCollectionWordList)
   const navigate = useNavigate();
 
   return (
@@ -23,7 +40,7 @@ const WordsPage = () => {
       </h1>
       <WordsSlider
         listName={listName}
-        list={listsMap[listName + "List"] || []}
+        list={isWordCollectionPage ? wordCollectionWordList : listsMap[listName + "List"]}
         onSwipeLeft={() => {}}
         onSwipeRight={() => {}}
       />
@@ -38,7 +55,7 @@ const WordsPage = () => {
 
   function WordsSlider({
     listName,
-    list,
+    list = [],
     onSwipeLeft,
     onSwipeRight,
     onSwipeTop,
@@ -121,19 +138,20 @@ const WordsPage = () => {
           onClick={() => navigate(-1)}
         ></i> */}
         <div className="cardContainer">
-          {list.map((character, index) => {
+          {list.map((item, index) => {
+            const lemma = typeof item === 'string' ? item : item?.lemma
             if (index > currentIndex - 5 && index < currentIndex + 5) {
               return (
                 <TinderCard
                   ref={childRefs[index]}
                   className="swipe"
-                  key={character?.lemma}
-                  onSwipe={(dir) => swiped(dir, character?.lemma, index)}
-                  onCardLeftScreen={() => outOfFrame(character?.lemma, index)}
+                  key={lemma}
+                  onSwipe={(dir) => swiped(dir, lemma, index)}
+                  onCardLeftScreen={() => outOfFrame(lemma, index)}
                 >
                   <div
                     style={{
-                      backgroundImage: "url(" + character?.imageDescUrl + ")",
+                      backgroundImage: "url(" + item?.imageDescUrl + ")",
                     }}
                     className="card"
                   >
@@ -153,7 +171,7 @@ const WordsPage = () => {
                             style={{ background: "#f98787" }}
                           >
                             <p className="font-bold text-white text-l mt-4 text-center">
-                              {getPercentage(character?.repeatCount)}
+                              {getPercentage(item?.repeatCount)}
                             </p>
                           </div>
                           <div
@@ -161,7 +179,7 @@ const WordsPage = () => {
                             style={{ background: "rgb(6 182 212)" }}
                           >
                             <Link
-                              to={`/quiz/${listName}/${character?.lemma.toLowerCase()}`}
+                              to={`/quiz/${listName}/${lemma.toLowerCase()}`}
                             >
                               <i
                                 class="fa fa-play text-white text-l m-4 text-center "
@@ -176,7 +194,7 @@ const WordsPage = () => {
                           style={{ color: "darkgrey" }}
                           className="text-center relative w-full m-auto cursor-pointer"
                         >
-                          {character?.lemma}
+                          {lemma}
                         </h3>
                       </div>{" "}
                     </div>
