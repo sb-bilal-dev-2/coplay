@@ -30,7 +30,6 @@ const WordsPage = () => {
     location.pathname.split("/")[1] === "wordCollection";
   const wordCollectionWordList = useRequestWordCollectionWordList(listName)
   console.log('wordCollectionWordList', wordCollectionWordList)
-  const navigate = useNavigate();
 
   return (
     <div className="flex items-center justify-center flex-col bg-gray-900 h-screen">
@@ -41,8 +40,12 @@ const WordsPage = () => {
       <WordsSlider
         listName={listName}
         list={isWordCollectionPage ? wordCollectionWordList : listsMap[listName + "List"]}
-        onSwipeLeft={() => {}}
-        onSwipeRight={() => {}}
+        onSwipeLeft={() => { }}
+        onSwipeRight={() => { }}
+        onSwipeTop={() => { }}
+        onSwipeBottom={() => { }}
+        onIndexUpdate={() => { }}
+        isWordCollectionPage={isWordCollectionPage}
       />
     </div>
   );
@@ -60,6 +63,7 @@ const WordsPage = () => {
     onSwipeRight,
     onSwipeTop,
     onSwipeBottom,
+    onIndexUpdate
   }) {
     const [currentIndex, setCurrentIndex] = useState(list.length - 1);
     const [lastDirection, setLastDirection] = useState();
@@ -78,6 +82,7 @@ const WordsPage = () => {
     const updateCurrentIndex = (val) => {
       setCurrentIndex(val);
       currentIndexRef.current = val;
+      onIndexUpdate(val)
     };
 
     const canGoBack = currentIndex < list.length - 1;
@@ -199,9 +204,8 @@ const WordsPage = () => {
                       </div>{" "}
                     </div>
                     <div
-                      className={`face text-gray-950  ${
-                        !fliped ? "face-back" : ""
-                      } border p-2`}
+                      className={`face text-gray-950  ${!fliped ? "face-back" : ""
+                        } border p-2`}
                       onClick={toggleCard}
                     >
                       <div class="border-2 border-sky-300 rounded-md h-full p-4">

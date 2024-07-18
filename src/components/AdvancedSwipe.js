@@ -1,21 +1,46 @@
-import React, { useState, useMemo, useRef } from "react";
-import TinderCard from "react-tinder-card";
-import "./AdvancedSwipe.css";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import "./AdvancedSwipe.css";
+
+/**
+ * check react-tiner-card for initial code or documentation
+ * import TinderCard from "react-tinder-card";
+*/
+// import TinderCard from "react-tinder-card";
+import TinderCard from "./TinderCard";
+import api from "../api";
 
 function AdvancedSwipe({
-  list,
+  list: initialList,
   onSwipeLeft,
   onSwipeRight,
   onSwipeTop,
   onSwipeBottom,
+  reversed,
 }) {
+  const reversedList = useMemo(() => initialList.reverse(), [initialList])
+  const list = reversed ? reversedList : initialList
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(list.length - 1);
   const [lastDirection, setLastDirection] = useState();
   // used for outOfFrame closure
   const currentIndexRef = useRef(currentIndex);
+  const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState(null);
+  const requestWordInfo = async () => {
+    // const wordInfos = (await (api().get('/wordInfos?the_word=' + JSON.stringify(list)))).data
+    // console.log(wordInfos, "wordInfos")
+    // const missingLemmas = wordInfos.filter(item => !item.lemma)
+    
+    // const missingLemmaInfo = await api().post('/wordLemmaInfo', missingLemmas)
+    // console.log(missingLemmaInfo, "missingLemmaInfo")
+    // const new_wordInfosByTheWordMap = {}
+    // wordInfosByTheWordMap.forEach((value) => {new_wordInfosByTheWordMap[value.the_word] = value })
+    // set_wordInfosByTheWordMap(new_wordInfosByTheWordMap)
+  }
 
+  useEffect(() => {
+    requestWordInfo()
+  }, [list])
   const childRefs = useMemo(
     () =>
       Array(list.length)
@@ -87,13 +112,16 @@ function AdvancedSwipe({
                 ref={childRefs[index]}
                 className="swipe"
                 key={character?.lemma}
+                swipeThreshold={0.2}
                 onSwipe={(dir) => swiped(dir, character?.lemma, index)}
                 onCardLeftScreen={() => outOfFrame(character?.lemma, index)}
-                preventSwipe={["right", "left"]}
+                preventSwipe={["up", "down"]}
               >
                 <div
                   style={{
                     backgroundImage: "url(" + character?.imageDescUrl + ")",
+                    transform: `rotateZ(${index - currentIndex}deg)`,
+                    boxShadow: '0.1px 0.1px 2px 0.1px rgba(0, 0, 0, 0.3)'
                   }}
                   className="card"
                 >
