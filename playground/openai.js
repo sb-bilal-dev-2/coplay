@@ -2,9 +2,15 @@ require("dotenv").config();
 const OpenAI = require("openai");
 const fs = require("fs");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
-});
+let openai
+
+try {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+  });
+} catch(err) {
+  console.log('OPENAI_CONNECTION_ERROR', err)
+}
 // generateImage();
 // generateImagesForWords([
 //   "Most Common 1000 Words in English",
@@ -56,13 +62,19 @@ async function promptAI(content, customMessages) {
   if (!content) {
     messages = customMessages
   }
+  if (!openai) {
+    throw new Error('NetworkError')
+  }
   const chatCompletion = await openai.chat.completions.create({
     messages,
-    model: "gpt-3.5-turbo",
+    model: 'gpt-3.5-turbo',
+    temperature: 0.0
   });
 
-  console.log("res", chatCompletion);
-  console.log("choices[0].message", chatCompletion.choices[0].message);
+  console.log('res', chatCompletion)
+  console.log('choices[0].message', chatCompletion.choices[0].message)
+
+  return chatCompletion?.choices[0]?.message
 }
 
 async function generateImage(prompt) {
