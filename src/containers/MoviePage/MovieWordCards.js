@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import AdvancedSwipe from '../../components/AdvancedSwipe'
 import api from '../../api'
+import { useTranslation } from "react-i18next";
+
 
 export default function MovieWordCards({ parsedSubtitleId, userId }) {
     const [lemmas, setLemmas] = useState([])
@@ -19,6 +21,8 @@ export default function MovieWordCards({ parsedSubtitleId, userId }) {
         }
         setLemmas(fetchedLemmas?.data || [])
     }
+      const { t } = useTranslation();
+
     const handleSwipeBottom = () => {
 
     }
@@ -47,6 +51,7 @@ export default function MovieWordCards({ parsedSubtitleId, userId }) {
             onSwipeTop={handleSwipeTop}
             onSwipeLeft={handleSwipeLeft}
             onSwipeRight={handleSwipeRight}
+            title={t("movie word list")}
           />
         )}
         {!!error?.length && error}

@@ -5,10 +5,50 @@ import "./AdvancedSwipe.css";
 /**
  * check react-tiner-card for initial code or documentation
  * import TinderCard from "react-tinder-card";
-*/
+ */
 // import TinderCard from "react-tinder-card";
 import TinderCard from "./TinderCard";
-import api from "../api";
+import { Link } from "react-router-dom";
+
+function getPercentage(index, totalNumbers = 7) {
+  const step = 100 / (totalNumbers - 1); // Calculate step size
+  const percentage = Math.round(index * step);
+  return `${Math.min(percentage, 100)}%`;
+}
+
+const Header = ({ item, listName, list, currentIndex }) => {
+  return (
+    <>
+      <div
+        className="w-18 h-18 absolute rounded-full z-50 bottom-64 left-8 border-4 border-green-300 shadow"
+        style={{ background: "rgb(22 163 74)" }}
+      >
+        <p className="font-bold text-white text-l m-4">
+          {list.length - currentIndex}/{list.length}
+        </p>
+      </div>
+      <div
+        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-36 border-4 border-red-200 shadow"
+        style={{ background: "#f98787" }}
+      >
+        <p className="font-bold text-white text-l mt-4 text-center">
+          {getPercentage(item?.repeatCount)}
+        </p>
+      </div>
+      <div
+        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
+        style={{ background: "rgb(6 182 212)" }}
+      >
+        <Link to={`/quiz/${listName}/${item?.lemma.toLowerCase()}`}>
+          <i
+            class="fa fa-play text-white text-l m-4 text-center "
+            aria-hidden="true"
+          ></i>
+        </Link>
+      </div>
+    </>
+  );
+};
 
 function AdvancedSwipe({
   list: initialList,
@@ -17,9 +57,11 @@ function AdvancedSwipe({
   onSwipeTop,
   onSwipeBottom,
   reversed,
+  header,
+  title
 }) {
-  const reversedList = useMemo(() => initialList.reverse(), [initialList])
-  const list = reversed ? reversedList : initialList
+  const reversedList = useMemo(() => initialList.reverse(), [initialList]);
+  const list = reversed ? reversedList : initialList;
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(list.length - 1);
   const [lastDirection, setLastDirection] = useState();
@@ -30,17 +72,17 @@ function AdvancedSwipe({
     // const wordInfos = (await (api().get('/wordInfos?the_word=' + JSON.stringify(list)))).data
     // console.log(wordInfos, "wordInfos")
     // const missingLemmas = wordInfos.filter(item => !item.lemma)
-    
     // const missingLemmaInfo = await api().post('/wordLemmaInfo', missingLemmas)
     // console.log(missingLemmaInfo, "missingLemmaInfo")
     // const new_wordInfosByTheWordMap = {}
     // wordInfosByTheWordMap.forEach((value) => {new_wordInfosByTheWordMap[value.the_word] = value })
     // set_wordInfosByTheWordMap(new_wordInfosByTheWordMap)
-  }
+  };
+  const [fliped, setFliped] = useState(false);
 
   useEffect(() => {
-    requestWordInfo()
-  }, [list])
+    requestWordInfo();
+  }, [list]);
   const childRefs = useMemo(
     () =>
       Array(list.length)
@@ -61,6 +103,8 @@ function AdvancedSwipe({
   // set last direction and decrease current index
   const swiped = (direction, lemma, index) => {
     setLastDirection(direction);
+    setFliped(false);
+
     updateCurrentIndex(index - 1);
     if (direction === "right") {
       onSwipeRight(lemma);
@@ -101,9 +145,13 @@ function AdvancedSwipe({
     await childRefs[newIndex].current.restoreCard();
   };
 
+  const toggleCard = () => {
+    setFliped(!fliped);
+  };
+
   return (
     <div className="cardMainContainer">
-      <h1>{t("movie word list")}</h1>
+      <h1 className="mb-10">{title}</h1>
       <div className="cardContainer">
         {list.map((character, index) => {
           if (index > currentIndex - 5 && index < currentIndex + 5) {
@@ -121,11 +169,39 @@ function AdvancedSwipe({
                   style={{
                     backgroundImage: "url(" + character?.imageDescUrl + ")",
                     transform: `rotateZ(${index - currentIndex}deg)`,
-                    boxShadow: '0.1px 0.1px 2px 0.1px rgba(0, 0, 0, 0.3)'
+                    boxShadow: "0.1px 0.1px 2px 0.1px rgba(0, 0, 0, 0.3)",
                   }}
                   className="card"
                 >
-                  <h3 style={{ color: "green" }}>{character?.lemma}</h3>
+                  <div className={`face ${fliped ? "face-front" : ""} `}>
+                    {header ? (
+                      <Header
+                        item={character}
+                        list={list}
+                        currentIndex={currentIndex}
+                      />
+                    ) : null}
+                    <div className="bg-green-100 w-full" onClick={toggleCard}>
+                      <h3
+                        style={{ color: "green" }}
+                        className="text-center relative w-full m-auto cursor-pointer"
+                      >
+                        {character?.lemma}
+                      </h3>
+                    </div>
+                  </div>
+                  <div
+                    className={`${
+                      !fliped ? "face-back" : ""
+                    } border p-2 face text-gray-950  `}
+                    onClick={toggleCard}
+                  >
+                    <div class="border-2 border-sky-300 rounded-md h-full p-4">
+                      <p className="text-center text-gray-500 font-bold">
+                        description description description
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </TinderCard>
             );
