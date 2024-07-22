@@ -5,8 +5,6 @@ import StickyHeader from "../components/StickyHeader";
 import api from "../api";
 import AdvancedSwipe from "../components/AdvancedSwipe";
 
-
-//TODO: Wordscollection route crashes
 const useRequestWordCollectionWordList = (listName) => {
   const location = useLocation();
   const [wordCollection, set_wordCollection] = useState();
@@ -26,6 +24,7 @@ const useRequestWordCollectionWordList = (listName) => {
 const WordsPage = () => {
   const listsMap = useRequestUserWordLists();
   const { list: listName } = useParams();
+  console.log("listName", listName)
   const location = useLocation();
   const isWordCollectionPage =
     location.pathname.split("/")[1] === "wordCollection";
@@ -49,7 +48,7 @@ const WordsPage = () => {
       <AdvancedSwipe
         list={
           isWordCollectionPage
-            ? wordCollectionWordList
+            ? wordCollectionWordList || []
             : listsMap[listName + "List"]
         }
         header
