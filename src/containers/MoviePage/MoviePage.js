@@ -74,11 +74,8 @@ const MoviePage = () => {
       <h2 className="absolute z-10 top-3 left-16 text-gray-100">
         {currentItem?.label || title}
       </h2>
-      <VideoPlayer
-        title={title}
-        currentItem={currentItem}
-      />
-      <div className="section bg-secondary card-section">
+      <VideoPlayer title={title} currentItem={currentItem} />
+      <div className="section bg-secondary card-section min-h-screen">
         <div className="section-container">
           <MovieWordCards
             title={title}

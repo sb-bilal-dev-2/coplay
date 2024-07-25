@@ -1,19 +1,25 @@
-import React, { useState } from 'react';
-import classNames from 'classnames';
-import { isFullScreen, useKeyDown } from './useKeyDown';
-import Modal from '../../components/Modal';
-import Subtitles from '../../components/Subtitles';
-import { BASE_SERVER_URL } from '../../api';
-import useMobileDetect from '../../helper/useMobileDetect';
-import { useVideo } from './useVideo';
-import useHandleTap from './useHandleTap';
-import { Controls } from './Controls';
+import React, { useEffect, useState } from "react";
+import classNames from "classnames";
+import { isFullScreen, useKeyDown } from "./useKeyDown";
+import Modal from "../../components/Modal";
+import Subtitles from "../../components/Subtitles";
+import { BASE_SERVER_URL } from "../../api";
+import useMobileDetect from "../../helper/useMobileDetect";
+import { useVideo } from "./useVideo";
+import useHandleTap from "./useHandleTap";
+import { Controls } from "./Controls";
 
 const VideoPlayer = ({ title, currentItem }) => {
   const isMobile = useMobileDetect();
   const [subtitleSetting, setSubtitleSetting] = useState(false);
   const [translateSetting, setTranslateSetting] = useState(false);
-  const [translateLangSetting, setTranslateLangSetting] = useState("uz");
+  const translateLangSubtitleLocal = localStorage.getItem(
+    "translateLangSubtitle"
+  );
+
+  const [translateLangSetting, setTranslateLangSetting] = useState(
+    translateLangSubtitleLocal || "uz"
+  );
 
   const {
     videoRef,
@@ -52,12 +58,16 @@ const VideoPlayer = ({ title, currentItem }) => {
   const localSubtitlePosition = 0.3;
   const volumePercent = videoRef.current?.volume * 100;
 
-  const translateLangSubtitleLocal = localStorage.getItem('translateLangSubtitle');
+ 
   const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(
-    (item) => item.title === translateLangSubtitleLocal
+    (item) => item.title === translateLangSetting
   );
 
-  const handleTap = useHandleTap(videoRef, fullScreenContainer, addKeyDownListener);
+  const handleTap = useHandleTap(
+    videoRef,
+    fullScreenContainer,
+    addKeyDownListener
+  );
 
   return (
     <div

@@ -26,13 +26,17 @@ const Subtitles = ({
   const [currentSubtitle, setCurrentSubtitle] = useState({});
   const [selectionText, setSelectionText] = useState("");
   const [editingValue, setEditingValue] = useState();
-  console.log("subtitles id " + locale, subtitles);
+  // console.log("subtitles id " + locale, subtitles);
   const fetchSubtitles = async () => {
     const subtitleFromLocalStorage = localStorage.getItem(
       ["updatedSubtitle", title, locale].join(".")
     );
+    // console.log("1" + locale + subtitleId);
+
     if (subtitleFromLocalStorage) {
       setSubtitles(JSON.parse(subtitleFromLocalStorage));
+      // console.log("2" + locale);
+
       return;
     }
 
@@ -41,11 +45,19 @@ const Subtitles = ({
       if (!subtitleId) {
         return;
       }
+      // console.log("3" + locale);
+
       response = await api().get(`/subtitles_v2?subtitleId=${subtitleId}`);
       // response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
+      // console.log("4" + locale);
+
       let subtitleText = response.data;
       // const newSubtitles = fromVtt(subtitleText, "ms")
       if (locale !== "en") {
+        // console.log("5" + subtitleId);
+
+        // console.log(subtitleText);
+
         subtitleText = subtitleText.map((item) => {
           return {
             ...item,
@@ -61,7 +73,7 @@ const Subtitles = ({
       console.error("Error fetching subtitles:", error);
     }
   };
- 
+
   useEffect(() => {
     fetchSubtitles();
   }, [subtitleId]);
@@ -131,6 +143,8 @@ const Subtitles = ({
       ["updatedSubtitle", title, locale].join("."),
       JSON.stringify(newSubtitles, undefined, 2)
     );
+
+    console.log(newSubtitles);
     setSubtitles(newSubtitles);
     handleEndEditing();
   };
@@ -179,12 +193,12 @@ const Subtitles = ({
           }
           return (
             <>
+              transaltion
               {createElement(
                 currentSubtitle.tag || "span",
                 { className: "subtitleLine" },
                 subtitleLine
               )}
-
               <br />
             </>
           );
