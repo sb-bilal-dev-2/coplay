@@ -193,7 +193,6 @@ const Subtitles = ({
           }
           return (
             <>
-              transaltion
               {createElement(
                 currentSubtitle.tag || "span",
                 { className: "subtitleLine" },

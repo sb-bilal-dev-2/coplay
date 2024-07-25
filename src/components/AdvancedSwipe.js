@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./AdvancedSwipe.css";
+import { useLocation } from "react-router-dom";
 
 /**
  * check react-tiner-card for initial code or documentation
@@ -50,6 +51,76 @@ const Header = ({ item, listName, list, currentIndex }) => {
   );
 };
 
+const ControllerButtons = ({ swipe, canSwipe, canGoBack, goBack, t }) => {
+  const location = useLocation();
+  let leftButton = "";
+  let rightButton = "";
+
+  switch (location.pathname) {
+    case "/words/learning":
+      leftButton = "repeat";
+      rightButton = "got it";
+      break;
+    case "/words/repeating":
+      leftButton = "repeat";
+      rightButton = "got it";
+      break;
+    case "/words/learned":
+      leftButton = "";
+      rightButton = "";
+      break;
+
+    case "/movie/":
+      leftButton = "know";
+      rightButton = "learn";
+      break;
+    default:
+      leftButton = "know";
+      rightButton = "learn";
+
+      break;
+  }
+
+  const isLearnedPage = location.pathname === "/words/learned";
+
+  return (
+    <div className="buttons">
+      <button
+        style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
+        onClick={() => swipe("left")}
+      >
+        {!isLearnedPage ? (
+          <i className="fa fa-check-double"></i>
+        ) : (
+          <i class="fa-solid fa-arrow-left"></i>
+        )}
+
+        <code className="text-xs text-center p-2">{leftButton}</code>
+      </button>
+      <button
+        style={{ backgroundColor: !canGoBack && "#c3c4d3" }}
+        onClick={() => goBack()}
+      >
+        <i className="fa fa-undo"></i>
+        <code className="text-xs text-center"> {t("back")}</code>
+      </button>
+      <button
+        style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
+        onClick={() => swipe("right")}
+      >
+        {!isLearnedPage ? (
+          <i className="fa fa-plus"></i>
+        ) : (
+          <i class="fa-solid fa-arrow-right"></i>
+        )}
+
+        <br />
+        <code className="text-xs text-center"> {rightButton}</code>
+      </button>
+    </div>
+  );
+};
+
 function AdvancedSwipe({
   list: initialList,
   onSwipeLeft,
@@ -58,7 +129,7 @@ function AdvancedSwipe({
   onSwipeBottom,
   reversed,
   header,
-  title
+  title,
 }) {
   const reversedList = useMemo(() => initialList.reverse(), [initialList]);
   const list = reversed ? reversedList : initialList;
@@ -208,29 +279,13 @@ function AdvancedSwipe({
           }
         })}
       </div>
-      <div className="buttons">
-        <button
-          style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
-          onClick={() => swipe("left")}
-        >
-          <i className="fa fa-check-double"></i>
-          <code className="text-xs text-center p-2">{t("know")}</code>
-        </button>
-        <button
-          style={{ backgroundColor: !canGoBack && "#c3c4d3" }}
-          onClick={() => goBack()}
-        >
-          <i className="fa fa-undo"></i>
-          <code className="text-xs text-center"> {t("back")}</code>
-        </button>
-        <button
-          style={{ backgroundColor: !canSwipe && "#c3c4d3" }}
-          onClick={() => swipe("right")}
-        >
-          <i className="fa fa-plus"></i>
-          <code className="text-xs text-center"> {t("repeat")}</code>
-        </button>
-      </div>
+      <ControllerButtons
+        swipe={swipe}
+        canSwipe={canSwipe}
+        canGoBack={canGoBack}
+        goBack={goBack}
+        t={t}
+      />
     </div>
   );
 }
