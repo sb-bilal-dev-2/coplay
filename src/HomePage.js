@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import useRequests from "./useRequests";
 import { BASE_SERVER_URL } from "./api";
 import { useTranslation } from "react-i18next";
+import Onboarding from "./components/Onboarding";
 
 const HomePage = () => {
   const { items } = useRequests("movies");
@@ -19,6 +20,7 @@ const HomePage = () => {
 
   return (
     <div className="page-container home-page">
+      <Onboarding/>
       <StickyHeader />
       <Hero />
       <div className="section bg-gray-900">

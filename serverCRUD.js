@@ -180,11 +180,11 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
       const existingData = await Model.findById(id);
 
       if (!existingData) {
-        return res.status(404).send('Data not found');
+        return res.status(404).send("Data not found");
       }
 
       // Update only received body keys
-      Object.keys(req.body).forEach(key => {
+      Object.keys(req.body).forEach((key) => {
         existingData[key] = req.body[key];
       });
 

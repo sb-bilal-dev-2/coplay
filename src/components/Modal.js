@@ -8,7 +8,7 @@ function Modal({ show, message, onClose }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal">
+      <div className="modal bg-white">
         <div className="modal-content">
           <p className="error-message">{message}</p>
           <button

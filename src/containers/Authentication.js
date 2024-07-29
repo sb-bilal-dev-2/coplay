@@ -6,6 +6,7 @@ import StickyHeader from "../components/StickyHeader";
 import { Link } from "react-router-dom";
 import { GoogleAuth } from "../components/GoogleAuth";
 import SecondaryButton from "../components/SecondaryButton";
+import LanguageDropdown from "../components/LanguageDropdown";
 
 const Authentication = () => {
   const { screen } = useParams();
@@ -43,6 +44,8 @@ const Authentication = () => {
       "login"
     );
     confirmSignUp(confirmEmail, formData.code, () => navigate("/"));
+
+    localStorage.setItem("resentlySignUp", true);
   };
 
   const handleLogin = (e) => {

@@ -6,6 +6,7 @@ import axios from "axios";
 import "./Account.css";
 import { BASE_SERVER_URL } from "../api";
 import { useTranslation } from "react-i18next";
+import LanguageDropdown from "../components/LanguageDropdown";
 
 const Account = () => {
   const { user: userIdAndEmail } = useAuthentication();
@@ -34,6 +35,10 @@ const Account = () => {
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
   };
+
+  
+  const localMainLanguage = localStorage.getItem("mainLanguage");
+  const learningLanguage = localStorage.getItem("learningLanguage");
 
   return (
     <>
@@ -68,12 +73,26 @@ const Account = () => {
                 aria-hidden="true"
               />
               <div className="flex flex-col">
-                {/* TODO:Create dropdown */}
                 <span className="font-bold">{t("language")}</span>
-                <button onClick={() => changeLanguage("en")}>
-                  English
-                </button>
-                <button onClick={() => changeLanguage("uz")}>Uzbek</button>
+                <div className="flex">
+
+                <LanguageDropdown
+                  selectedLanguage={
+                    localMainLanguage ? localMainLanguage : undefined
+                  }
+                  title="Native language"
+                  withNameLanguage
+                  name="mainLanguage"
+                />
+                <LanguageDropdown
+                  selectedLanguage={
+                    learningLanguage ? learningLanguage : undefined
+                  }
+                  title="Learning language"
+                  withNameLanguage
+                  name="learningLanguages"
+                />
+                </div>
               </div>
             </div>
           </div>

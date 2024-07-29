@@ -19,8 +19,8 @@ var usersWord = new Schema({
 });
 const schema = new Schema({
   username: { type: String },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String },
   verificationCode: { type: Number },
   verifiedEmail: { type: Boolean, default: false },
   verificationCodeTimestamp: { type: Date },

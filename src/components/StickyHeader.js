@@ -6,6 +6,7 @@ import useAuthentication from "../containers/Authentication.util";
 import useRequests from "../useRequests";
 import { BASE_SERVER_URL } from "../api";
 import { useTranslation } from "react-i18next";
+import LanguageDropdown from "./LanguageDropdown";
 
 const logoPath = `${process.env.PUBLIC_URL}/logo-black.png`;
 
@@ -33,6 +34,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
+  const learningLanguage = localStorage.getItem("learningLanguage");
 
   return (
     <header
@@ -131,12 +133,23 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               </Link>
             ) : null}
 
+            {loggedIn ? (
+              <LanguageDropdown
+                name="learningLanguages"
+                selectedLanguage={
+                  learningLanguage ? learningLanguage : undefined
+                }
+              />
+            ) : null}
+
             <div className="user-menu" onClick={handleNavMenuToggle}>
               {loggedIn ? (
-                <UserNav
-                  setIsNavMenuVisible={setIsNavMenuVisible}
-                  isNavMenuVisible={isNavMenuVisible}
-                />
+                <div className="flex">
+                  <UserNav
+                    setIsNavMenuVisible={setIsNavMenuVisible}
+                    isNavMenuVisible={isNavMenuVisible}
+                  />
+                </div>
               ) : (
                 <button>
                   <Link to="/auth/login">
