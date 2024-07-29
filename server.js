@@ -38,6 +38,13 @@ app.get('/hello_world', (req, res) => {
   res.send('Welcome!')
 })
 
+app.get('/occurances_v2', async (req, res) => {
+  const word = req.query.lemma;
+  const results = await findSubtitlesWithWord(word, req.query.mediaLang, req.query.limit);
+  console.log(results);
+  res.status(200).send(results)
+})
+
 app.get('/wordInfoLemmas', async (req, res) => {
   let { the_word, langCode, mainLang, generateIcon } = req.query;
   let WordInfosModel = mongoose.model(`wordInfos__${langCode}__s`, wordInfos.schema);
@@ -393,3 +400,27 @@ export const IP_ADDRESS = '${ip.address()}'
   }
 }
 
+async function findSubtitlesWithWord(word, mediaLang = 'en', limit = 10) {
+  try {
+    const results = await subtitles_model.aggregate([
+      { $unwind: '$subtitles' },
+      { $match: { 'subtitles.usedWords': word, mediaLang } },
+      {
+        $project: {
+          _id: 0,
+          id: '$subtitles.id',
+          text: '$subtitles.text',
+          subtitleInfoId: '$_id',
+          youtubeUrl: '$youtubeUrl',
+          mediaTitle: '$mediaTitle',
+          startTime: '$subtitles.startTime',
+          endTime: '$subtitles.endTime',
+        }
+      }
+    ]).limit(Number(limit));
+    return results;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}

@@ -39,19 +39,13 @@ const Quiz = () => {
 
   const requestLemmaOccurances = async (lemma) => {
     try {
-      const wordData = (await api().get(`/occurances?lemma=${lemma}`)).data
-        .results;
+      const wordData = (await api().get(`/occurances_v2?lemma=${lemma}&limit=5`)).data;
       console.log("wordData", wordData);
       if (wordData.length) {
         set_occurances(wordData);
         const firstOccurance = wordData[0];
         console.log('firstOccurance', firstOccurance)
-        const firstOccuranceSrc =
-          BASE_SERVER_URL +
-          "/" +
-          (firstOccurance.mediaType || 'movie') +
-          "?name=" +
-          firstOccurance.mediaTitle;
+        const firstOccuranceSrc = BASE_SERVER_URL + "/movie?name=" + firstOccurance.mediaTitle;
         console.log('firstOccuranceSrc', firstOccuranceSrc)
         set_currentVideoSrc(firstOccuranceSrc);
       }
@@ -74,6 +68,7 @@ const Quiz = () => {
 
   const [error, set_error] = useState();
   const [currentVideoSrc, set_currentVideoSrc] = useState("");
+  console.log('currentVideoSrc', currentVideoSrc)
   const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
   const videoRef = useRef();
   const inflections = currentLemmaInfo?.inflections.join(", ") || "";
@@ -135,7 +130,7 @@ const Quiz = () => {
     const nextOccurance = occurances[next_playingOccuranceIndex];
     if (!nextOccurance) return;
     set_currentVideoSrc(
-      `${BASE_SERVER_URL}/${nextOccurance.mediaType}?name=${nextOccurance.mediaTitle}`
+      `${BASE_SERVER_URL}/movie?name=${nextOccurance.mediaTitle}`
     );
     videoRef.current.currentTime = nextOccurance.startTime / 1000;
     if (videoRef.current && videoRef.current.paused) {
@@ -166,14 +161,14 @@ const Quiz = () => {
   const currentLemma = currentOccurance?.lemma;
   const currentInflection = currentOccurance?.inflection || currentLemma;
   const pattern = new RegExp(currentInflection, "i");
-  const occuranceMainSubtitle = currentOccurance?.context[1];
+  const occuranceMainSubtitle = currentOccurance?.text;
   const matches = occuranceMainSubtitle?.match(pattern);
   //   console.log("matches", matches);
   const inflectionIndex = matches?.index;
 
   const occuranceMainSubtitleArray = [];
   for (var i = 0; i < occuranceMainSubtitle?.length; i++) {
-    occuranceMainSubtitleArray.push(occuranceMainSubtitle[i]);
+    occuranceMainSubtitleArray.push(occuranceMainSubtitle);
   }
 
   const audioRef = useRef();
@@ -259,14 +254,15 @@ const Quiz = () => {
         </video>
         <div className="Subtitles text-center text-white px-8 text-lg">
           <b>
-            {occuranceMainSubtitleArray.map((occChar, occCharIndex) => {
+            {currentOccurance?.text}
+            {/* {occuranceMainSubtitleArray.map((occChar, occCharIndex) => {
               const className =
                 occCharIndex >= inflectionIndex &&
-                  occCharIndex <= inflectionIndex + currentInflection.length - 1
+                  occCharIndex <= inflectionIndex + currentInflection?.length - 1
                   ? "text-primary"
                   : "";
               return <span className={className}>{occChar}</span>;
-            })}
+            })} */}
           </b>
         </div>
         <h1

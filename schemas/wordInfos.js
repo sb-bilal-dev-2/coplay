@@ -11,29 +11,31 @@ const schema = new Schema({
   romanization: String,
   function: String,
   isLemma: Boolean,
-  inflections: [String], // other wordInfo IDs
-  translations: [Schema({
-    lang: String,
-    text: String,
-  })],
+  translations: Schema.Types.Mixed,
+  rootWord: String,
+  functions: [String],
+  pronounciation: String,
+  shortExaplanation: String,
+  shortDefinition: String,
+  mistyped: Boolean,
+  slang: Boolean,
+  vulgar: Boolean,
+  isHomonym: Boolean,
+  homophones: [String],
+  homographs: [String],
+  informal: Boolean,
+  dialect: String,
+  rude: Boolean,
+  gender: String,
+  irregular: Boolean,
   isHomonym: Boolean,
   homonyms: [String],
   homograms: [String],
   homophones: [String],
-  inflectionInfos: [Schema({
-    text: String,
-    pronounciation: String,
-    romanization: String,
-    function: String,
-    translations: [Schema({
-      lang: String,
-      text: String,
-    })]
-  })],
   within50k: Boolean,
   within5k: Boolean,
   mainDefinition: String,
-  meanings: [
+  definitions: [
     Schema({
       definition: String,
       examples: [String],

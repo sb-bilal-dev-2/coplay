@@ -1,12 +1,12 @@
 const { default: mongoose } = require("mongoose");
 const wordInfos = require("./schemas/wordInfos");
 const fs = require("fs");
-const { promptAI } = require("./playground/openai");
+const { promptAI, generateImage } = require("./playground/openai");
 const { gTranslate } = require("./gTranslate");
 
 // const words_example = ['hello', 'new', 'told', 'lie', 'go']
 // promptWordInfos('en', words_example, 10)
-
+const MINUTE = (1000 * 60) + 500
 const SAMPLE_INPUT_STRINGIFIED = JSON.stringify(
     { the_word: 'go', langCode: 'en' }
 )
@@ -39,10 +39,11 @@ const MAIN_PROMPT = {
     'zh_cn': ``,
     '': ``,
 }
-
-
+const MOCK_WORD_INFOS = [{ lemma: 'hello', the_word: 'go' }, { lemma: 'go', the_word: 'going' }]
+promptImages([{ lemma: 'hello' }, { lemma: 'turmoil' }, { lemma: 'construction' }, { lemma: 'apathy'}], console.log)
+// processTranslations()
 // promptAI(getWordInfoPromptByLanguage('broken', 'en'))
-promptWordInfos('en', ['hello', 'broken'])
+// promptWordInfos('en', ['hello', 'broken'])
 async function promptWordInfos(langCode, words) {
     // const WordInfosModel = mongoose.model(`wordInfos${!!langCode && `_${langCode}`}`, wordInfos.schema)
 
@@ -118,9 +119,11 @@ async function processTranslations(langCode, mainLang, wordInfos, callback) {
 
         if (wordsToReqeust.length === 20) {
             const newTranslations = await Promise.all(wordsToReqeust.map(
-                async () => {
-                    const newTranslation = await requestWordTranslation(wordInfo)
-                    newTranslationsMap[wordInfo.the_word] = newTranslation
+                async (wordToRequest) => {
+                    const newTranslation = await requestWordTranslation(wordToRequest)
+                    newTranslationsMap[wordToRequest.the_word] = newTranslation
+
+                    return [wordToRequest.the_word, newTranslation]
                 }
             ))
             callback(newTranslations)
@@ -142,35 +145,32 @@ async function processTranslations(langCode, mainLang, wordInfos, callback) {
     }
 }
 
-const MINUTE = (1000 * 60) + 500
-async function processImages(wordInfos, callback) {
+async function promptImages(wordInfos, callback) {
     const newImagesMap = {}
-    const wordsToRequest = []
-    const skipWait = true
-    for (const wordInfo of wordInfos) {
+    let wordsToRequest = []
+    console.log('wordInfos', wordInfos)
+    for (let wordInfo of wordInfos) {
         wordsToRequest.push(wordInfo)
-        
-        if (wordsToRequest.length === 5) {
-            if (!skipWait) {
-                await (new Promise((res) => setTimeout(res, MINUTE)))
-            }
+
+        if (wordsToRequest.length === 5 || wordInfo === wordInfos[wordInfos.length - 1]) {
             const newIcons = await Promise.all(wordsToRequest.map(
-                async () => {
-                    const wordPrompt = `simple icon for the word: ${wordInfo}`
+                async (wordToReqeust) => {
+                    word = promptAI()
+                    const wordPrompt = `Generate "${wordToReqeust.lemma}" emoji`
+                    console.log('wordPrompt', wordPrompt)
                     const newIcon = await generateImage(wordPrompt)
-                    newImagesMap[wordInfo.the_word] = newIcon
-                    return newIcon
+                    newImagesMap[wordToReqeust.lemma] = newIcon
+                    return [wordToReqeust.lemma, newIcon]
                 }
             ))
             callback(newIcons)
             wordsToRequest = []
+            await (new Promise((res) => setTimeout(res, MINUTE)))
         }
-        skipWait = false
     }
 
-    return newTranslationsMap
+    return newImagesMap
 }
-
 
 function getWordInfoPromptByLanguage(the_word, langCode) {
     const input = { the_word, langCode }
