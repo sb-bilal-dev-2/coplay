@@ -30,7 +30,7 @@ app.use(cors({
 const { createCRUDEndpoints, models } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
 
-const port = process.argv[2] || 3001;
+const port = (process.argv.includes('--8080') && 8080) || 3001;
 
 app.get('/hello_world', (req, res) => {
   res.type('text/plain')
