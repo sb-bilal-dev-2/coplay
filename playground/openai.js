@@ -55,7 +55,6 @@ async function getTranscriptionOfAudio() {
 }
 
 // Call the function to execute it
-getTranscriptionOfAudio();
 
 async function promptAI(content, customMessages) {
   let messages = [{ role: 'user', content }]

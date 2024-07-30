@@ -11,6 +11,6 @@ or
 
 # Start CRA with 
 
-`npm start --8080`
+`npm run dev`
 
 You can open client app at 3000 and it will be requesting local server running at 8080 

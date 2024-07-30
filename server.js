@@ -41,7 +41,6 @@ app.get('/hello_world', (req, res) => {
 app.get('/occurances_v2', async (req, res) => {
   const word = req.query.lemma;
   const results = await findSubtitlesWithWord(word, req.query.mediaLang, req.query.limit);
-  console.log(results);
   res.status(200).send(results)
 })
 
