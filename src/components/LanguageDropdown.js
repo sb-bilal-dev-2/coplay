@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import useRequests from "../useRequests";
 import useAuthentication from "../containers/Authentication.util";
+import { getUserLanguage } from "../helper/useLocationLanguage";
 
 const LANGUAGES = [
   { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
@@ -8,6 +9,10 @@ const LANGUAGES = [
   { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
   { id: 3, label: "China", iso: "zh", flag: "./china.png" },
 ];
+
+const findFormLanguagesList = (selectedLanguage) => {
+  return LANGUAGES.find((lanuage) => lanuage.iso === selectedLanguage);
+};
 
 const LanguageDropdown = ({
   selectedLanguage,
@@ -20,16 +25,43 @@ const LanguageDropdown = ({
   const dropdownRef = useRef(null);
   const { putItems } = useRequests("users");
   const { user: userIdAndEmail } = useAuthentication();
+  const [languageFromLocation, setLanguageFromLocation] = useState("");
+  const resentlySignUp = localStorage.getItem("resentlySignUp");
+
+  console.log("user", userIdAndEmail);
+  useEffect(() => {
+    const fetchLanguage = async () => {
+      const userLanguage = await getUserLanguage();
+      setLanguageFromLocation(userLanguage);
+    };
+
+    fetchLanguage();
+  }, []);
+
+  useEffect(() => {
+    if (resentlySignUp && name === "mainLanguage") {
+      localStorage.setItem("mainLanguage", languageFromLocation);
+      const resultOfListLanguage = findFormLanguagesList(languageFromLocation);
+
+      setSelectedOption(resultOfListLanguage);
+    }
+  }, [resentlySignUp, languageFromLocation]);
 
   useEffect(() => {
     if (selectedLanguage) {
-      const findSelected = LANGUAGES.find(
-        (lanuage) => lanuage.iso === selectedLanguage
-      );
-
+      const findSelected = findFormLanguagesList(selectedLanguage);
       setSelectedOption(findSelected);
     }
   }, [selectedLanguage]);
+
+  const localLearningLanguage = localStorage.getItem("learningLanguage");
+
+   useEffect(() => {
+     if (localLearningLanguage && name === "learningLanguages") {
+       const findSelected = findFormLanguagesList(localLearningLanguage);
+       setSelectedOption(findSelected);
+     }
+   }, [localLearningLanguage]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -60,6 +92,7 @@ const LanguageDropdown = ({
     }
 
     if (name === "learningLanguages") {
+      //Todo: add other learning languages
       newUserInfo = { learningLanguages: [option.iso] };
       localStorage.setItem("learningLanguage", option.iso);
     }
