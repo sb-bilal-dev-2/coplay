@@ -8,6 +8,7 @@ import useRequests from "./useRequests";
 import { BASE_SERVER_URL } from "./api";
 import { useTranslation } from "react-i18next";
 import Onboarding from "./components/Onboarding";
+import PWAInstall from "./components/PWAInstall";
 
 const HomePage = () => {
   const { items } = useRequests("movies");
@@ -19,7 +20,8 @@ const HomePage = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="page-container home-page">
+    <div className="page-container home-page" id="home">
+      <PWAInstall />
       <Onboarding/>
       <StickyHeader />
       <Hero />

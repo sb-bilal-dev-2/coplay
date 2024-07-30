@@ -8,10 +8,15 @@
   flex-direction: column;
 }
 
+html {
+  height: -webkit-fill-available;
+}
+
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: -webkit-fill-available;
   font-family: "Roboto", sans-serif;
 }
 
