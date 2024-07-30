@@ -11,6 +11,7 @@ var usersWord = new Schema({
     repeatTime: { type: Date },
     learned: Boolean,
     lemma: String,
+    the_word: String,
     archived: Boolean,
     contextType: String,
     contextMoment: String, // HH:MM:SS or chapter-1

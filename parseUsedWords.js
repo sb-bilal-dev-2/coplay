@@ -144,6 +144,9 @@ async function parseUsedWords(mediaInfo) {
         usedLemmas: usedLemmas50kInfosList,
         subtitles: subtitlesWithUsedWords
     }
+    if (mediaInfo.youtubeUrl) {
+        newParsedSubtitle.youtubeUrl = mediaInfo.youtubeUrl
+    }
     console.log('newParsedSubtitle', newParsedSubtitle)
     let parsedSubtitle;
     try {

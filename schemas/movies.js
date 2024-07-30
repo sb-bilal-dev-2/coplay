@@ -42,6 +42,7 @@ const schema = new Schema({
     required: true,
   },
   youtubeDetails: Schema.Types.Mixed,
+  src: String,
   youtubeUrl: String,
   subtitleInfos: [Schema({ _id: String, title: { type: String, unique: true }, translateLang: String })]
 }).add({
