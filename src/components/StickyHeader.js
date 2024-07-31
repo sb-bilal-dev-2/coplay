@@ -133,14 +133,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               </Link>
             ) : null}
 
-            {loggedIn ? (
-              <LanguageDropdown
-                name="learningLanguages"
-                selectedLanguage={
-                  learningLanguage ? learningLanguage : undefined
-                }
-              />
-            ) : null}
+            <LanguageDropdown
+              name="learningLanguages"
+              selectedLanguage={learningLanguage ? learningLanguage : "en"}
+              learningLanguages
+            />
 
             <div className="user-menu" onClick={handleNavMenuToggle}>
               {loggedIn ? (

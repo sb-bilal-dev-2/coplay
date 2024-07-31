@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import useRequests from "../useRequests";
 import useAuthentication from "../containers/Authentication.util";
 import { getUserLanguage } from "../helper/useLocationLanguage";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../store";
+import { useRequestUserWordLists } from "../helper/useUserWords";
 
 const LANGUAGES = [
   { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
@@ -14,11 +17,16 @@ const findFormLanguagesList = (selectedLanguage) => {
   return LANGUAGES.find((lanuage) => lanuage.iso === selectedLanguage);
 };
 
+const findLanguagesByIso = (isoArray) => {
+  return;
+};
+
 const LanguageDropdown = ({
   selectedLanguage,
   title,
   withNameLanguage, //boolean
   name, //"mainLanguage" or "learningLanguages"
+  learningLanguages,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -27,8 +35,12 @@ const LanguageDropdown = ({
   const { user: userIdAndEmail } = useAuthentication();
   const [languageFromLocation, setLanguageFromLocation] = useState("");
   const resentlySignUp = localStorage.getItem("resentlySignUp");
+  const dispatch = useDispatch();
+  const [learningLanguagesList, setLearningLanguagesList] = useState(null);
 
-  console.log("user", userIdAndEmail);
+  const user = useSelector((state) => state.user.user);
+  console.log("get userwords", useRequestUserWordLists());
+
   useEffect(() => {
     const fetchLanguage = async () => {
       const userLanguage = await getUserLanguage();
@@ -56,12 +68,12 @@ const LanguageDropdown = ({
 
   const localLearningLanguage = localStorage.getItem("learningLanguage");
 
-   useEffect(() => {
-     if (localLearningLanguage && name === "learningLanguages") {
-       const findSelected = findFormLanguagesList(localLearningLanguage);
-       setSelectedOption(findSelected);
-     }
-   }, [localLearningLanguage]);
+  useEffect(() => {
+    if (localLearningLanguage && name === "learningLanguages") {
+      const findSelected = findFormLanguagesList(localLearningLanguage);
+      setSelectedOption(findSelected);
+    }
+  }, [localLearningLanguage]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -83,7 +95,6 @@ const LanguageDropdown = ({
   };
 
   const chooseLanguage = (option, name) => {
-    console.log("handleUserInfo", option, name);
     let newUserInfo;
 
     if (name === "mainLanguage") {
@@ -92,11 +103,13 @@ const LanguageDropdown = ({
     }
 
     if (name === "learningLanguages") {
-      //Todo: add other learning languages
-      newUserInfo = { learningLanguages: [option.iso] };
+      newUserInfo = {
+        learningLanguages: [...user.learningLanguages, option.iso],
+      };
       localStorage.setItem("learningLanguage", option.iso);
     }
 
+    console.log("new user", newUserInfo);
     putItems([
       {
         email: userIdAndEmail.email,
@@ -104,6 +117,26 @@ const LanguageDropdown = ({
         ...newUserInfo,
       },
     ]);
+  };
+
+  const handleSwitch = (option) => {
+    setSelectedOption(option);
+    toggleDropdown();
+  };
+
+  useEffect(() => {
+    if (learningLanguages) {
+      const matchingLanguages = LANGUAGES.filter((language) =>
+        user?.learningLanguages?.includes(language.iso)
+      );
+
+      setLearningLanguagesList(matchingLanguages);
+    }
+  }, [user]);
+
+  const [addLanguageModal, setAddLanguageModal] = useState(false);
+  const handleClose = () => {
+    setAddLanguageModal(false);
   };
 
   return (
@@ -131,32 +164,82 @@ const LanguageDropdown = ({
         <i class="fas fa-chevron-down float-right px-1"></i>
       </div>
       {isOpen && (
-        <ul className="absolute z-10  w-28 bg-black border border-none mt-1 rounded shadow-lg  ">
-          {LANGUAGES.map((option) => (
-            <li
-              key={option.id}
-              className="text-white px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
-              onClick={() => handleOptionClick(option)}
+        <ul className="absolute z-10  w-28 bg-black border border-none mt-1 rounded shadow-lg">
+          {learningLanguages && user
+            ? learningLanguagesList?.map((option) => (
+                <li
+                  key={option.id}
+                  className="text-white px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
+                  onClick={() => handleSwitch(option)}
+                >
+                  <span>{option.label}</span>
+                  <img
+                    alt="flag"
+                    src={option.flag}
+                    className="w-6 h-6 overflow-hidden rounded-full"
+                  />
+                </li>
+              ))
+            : LANGUAGES.map((option) => (
+                <li
+                  key={option.id}
+                  className="text-white px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
+                  onClick={() => handleOptionClick(option)}
+                >
+                  <span>{option.label}</span>
+                  <img
+                    alt="flag"
+                    src={option.flag}
+                    className="w-6 h-6 overflow-hidden rounded-full"
+                  />
+                </li>
+              ))}
+
+          {learningLanguages ? (
+            <button
+              className=" text-white w-full font-bold py-2 px-2"
+              onClick={() => {setAddLanguageModal(true) }}
             >
-              <span>{option.label}</span>
-              <img
-                alt="flag"
-                src={option.flag}
-                className="w-6 h-6 overflow-hidden rounded-full"
-              />
-            </li>
-          ))}
-          {/* <li
-            className="px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
-            onClick={() => openModal()}
-          >
-            <span>Add language </span>
-            <i class="fa-solid fa-plus"></i>
-          </li> */}
+              Add language
+              <i class="fa-solid fa-plus px-1"></i>
+            </button>
+          ) : null}
+          
+          <ChooseLanguageModal
+            handleClose={handleClose}
+            show={addLanguageModal}
+          />
         </ul>
       )}
     </div>
   );
 };
+
+function ChooseLanguageModal({ handleClose, show }) {
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal bg-black text-white">
+        <div className="modal-content">
+          <h1 className="font-bold text-xl py-4">Choose new language</h1>
+          <LanguageDropdown
+            title="Learning language"
+            withNameLanguage
+            name="learningLanguages"
+          />
+          <button
+            className="font-bold bg-yellow-500 rounded-md text-white w-full text-center py-4 mt-4"
+            onClick={() => handleClose()}
+          >
+            Let's start learn more!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default LanguageDropdown;
