@@ -9,7 +9,8 @@ import MovieWordCards from "./MovieWordCards";
 import useAuthentication from "../Authentication.util";
 import SecondaryButton from "../../components/SecondaryButton";
 import { usePremiumStatus } from "../../helper/usePremiumStatus";
-import VideoPlayer from "./VideoPlayer";
+// import VideoPlayer from "./VideoPlayer";
+import DashVideoPlayer from "../../components/DashVideoPlayer";
 
 const MoviePage = () => {
   const { t } = useTranslation();
@@ -74,7 +75,8 @@ const MoviePage = () => {
       <h2 className="absolute z-10 top-3 left-16 text-gray-100">
         {currentItem?.label || title}
       </h2>
-      <VideoPlayer title={title} currentItem={currentItem} />
+      <DashVideoPlayer title={title} currentItem={currentItem} />
+      {/* <VideoPlayer title={title} currentItem={currentItem} /> */}
       <div className="section bg-secondary card-section min-h-screen">
         <div className="section-container">
           <MovieWordCards

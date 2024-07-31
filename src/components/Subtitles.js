@@ -1,5 +1,4 @@
 import React, { createElement, useCallback, useEffect, useState } from "react";
-import { fromVtt } from "subtitles-parser-vtt";
 import "./Subtitles.css";
 import Tooltip from "./Tooltip";
 import { createDebouncedFunction } from "../debounce";

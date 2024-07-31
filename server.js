@@ -30,7 +30,7 @@ app.use(cors({
 const { createCRUDEndpoints, models } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
 
-const port = process.argv[2] || 3001;
+const port = (process.argv.includes('--8080') && 8080) || 3001;
 
 app.get('/hello_world', (req, res) => {
   res.type('text/plain')
@@ -41,7 +41,6 @@ app.get('/hello_world', (req, res) => {
 app.get('/occurances_v2', async (req, res) => {
   const word = req.query.lemma;
   const results = await findSubtitlesWithWord(word, req.query.mediaLang, req.query.limit);
-  console.log(results);
   res.status(200).send(results)
 })
 

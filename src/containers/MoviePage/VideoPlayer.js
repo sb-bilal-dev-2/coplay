@@ -94,7 +94,7 @@ const VideoPlayer = ({ title, currentItem }) => {
         onCanPlay={handleCanPlay}
       >
         <source
-          src={BASE_SERVER_URL + `/movie?name=${title}`}
+          src={BASE_SERVER_URL + `/movieFiles/${title}.mp4`}
           type="video/mp4"
         />
       </video>
