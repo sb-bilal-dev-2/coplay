@@ -23,7 +23,7 @@ export default function Onboarding() {
 
   return (
     <div className="modal-overlay">
-      <div className="modal bg-black text-white">
+      <div className="modal bg-black text-white w-device-width h-device-height">
         <div className="modal-content">
           <h1 className="font-bold text-xl py-4">
             Let's get more info about you
