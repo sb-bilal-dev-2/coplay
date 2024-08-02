@@ -257,7 +257,7 @@ function AdvancedSwipe({
                         style={{ color: "green" }}
                         className="text-center relative w-full m-auto cursor-pointer"
                       >
-                        {character?.lemma}
+                         {typeof character === 'string' ? character : character?.lemma}
                       </h3>
                     </div>
                   </div>

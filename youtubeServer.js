@@ -4,7 +4,10 @@ const { exec } = require('child_process');
 const { initCRUDAndDatabase } = require('./serverCRUD')
 initCRUDAndDatabase()
 const { movies_model } = require('./schemas/movies')
-const { newContent_single } = require('./newContent')
+const { parseAndTranslate_single } = require('./newContent');
+const { getTranscriptionOfAudio } = require('./playground/openai');
+const path = require('path');
+const { toVtt } = require('subtitles-parser-vtt');
 /**
  * Example CLI
  * 
@@ -27,6 +30,9 @@ const { newContent_single } = require('./newContent')
 // Example usage
 const videoURL = process.argv[2]?.replaceAll(`'`, ' ').replaceAll(`"`, ' ');
 const mediaLang = process.argv[3];
+const idTitle = process.argv.includes('--idTitle')
+
+
 if (!videoURL) { throw Error('Pass Url as in Example CLI ') }
 if (!mediaLang) { throw Error('Pass media language as in Example CLI ') }
 
@@ -36,15 +42,17 @@ async function processYoutubeVideo() {
     console.log('processing video: ' + videoURL)
     await downloadYouTubeVideo(videoURL)
     const mediaInfo = await getVideoInfoAndStore(videoURL)
-    await newContent_single(mediaInfo)
+    await getTranscriptionAndStoreAsVtt(mediaInfo)
+    await parseAndTranslate_single(mediaInfo)
 }
 
 // Function to get video information
 async function getVideoInfoAndStore(url) {
+    let adjustedInfo;
     try {
         const { videoDetails } = await ytdl.getInfo(url);
-        const title = videoDetails.title + '_' + videoDetails.videoId
-        const adjustedInfo = {
+        const title = idTitle ? videoDetails.videoId : videoDetails.title + '_' + videoDetails.videoId
+        adjustedInfo = {
             title,
             mediaLang,
             label: videoDetails.title,
@@ -53,34 +61,31 @@ async function getVideoInfoAndStore(url) {
             isShortsEligible: videoDetails.isShortsEligible,
             youtubeUrl: url,
             // youtubeDetails: videoDetails,
-
         }
-        const webpLocation = `"./files/movieFiles/${title}.webp"`
-        console.log('webpLocation', webpLocation)
-        if (fs.existsSync(webpLocation)) {
-            const renameThumbnailExt_command = `mv ${webpLocation} "./files/movieFiles/${title}.jpg"`
-            await executeCli(renameThumbnailExt_command)
-        }
-
         console.log('adjustedInfo', adjustedInfo)
         const newItem = await movies_model.create(adjustedInfo)
         console.log('newItem', newItem)
         return newItem
     } catch (error) {
+        const DUPLICATE_KEY_ERROR_CODE = 11000
+        if (error.code === DUPLICATE_KEY_ERROR_CODE) {
+            console.log('Skipping to store duplicate title: ' + error.keyValue.title)
+            return movies_model.findOne({ title: adjustedInfo.title });
+        }
         console.error('Error getting video information:', error);
+
         throw error;
     }
 }
-
 async function downloadYouTubeVideo(url) {
     // audio download test 
     // const command = `yt-dlp -f 249 --write-sub --no-check-certificate '${url}'`;
-    const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(id)s.%(ext)s' --no-check-certificate '${url}'`;
+    const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.%(ext)s' --no-check-certificate '${url}'`;
     await executeCli(video_command)
         .then((message) => console.log('Video Download successful:', message))
         .catch((error) => console.error('Video Download failed:', error))
 
-    const audio_command = `yt-dlp -f 249 -o './files/movieFiles/%(title)s_%(id)s.%(ext)s' --no-check-certificate '${url}'`;
+    const audio_command = `yt-dlp -f bestaudio -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.mp3' --no-check-certificate '${url}'`;
     await executeCli(audio_command)
         .then((message) => console.log('Audio Download successful:', message))
         .catch((error) => console.error('Audio Download failed:', error))
@@ -102,3 +107,13 @@ function executeCli(command) {
     });
 }
 
+async function getTranscriptionAndStoreAsVtt(mediaInfo) {
+    const vttPath = path.resolve(`files/movieFiles/${mediaInfo.title}.${mediaInfo.mediaLang}.vtt`)
+    const isMissingVtt = !fs.existsSync(path.resolve(vttPath))
+    if (isMissingVtt) {
+        const transcription = await getTranscriptionOfAudio(path.resolve(`files/movieFiles/${mediaInfo.title}.mp3`))
+
+        const newSubtitiles = transcription.segments.map(({ start, end, text, id }) => ({ startTime: start * 1000, endTime: end * 1000, text, id }))
+        fs.writeFileSync(vttPath, toVtt(newSubtitiles))
+    }
+}

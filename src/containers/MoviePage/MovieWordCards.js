@@ -16,6 +16,7 @@ export default function MovieWordCards({ parsedSubtitleId, userId }) {
         let fetchedLemmas
         try {
             fetchedLemmas = await api().get(`/movie_words/${parsedSubtitleId}?without_user_words=true`);
+            console.log('fetchedLemmas', fetchedLemmas)
         } catch (err) {
             set_error(err.message)
         }

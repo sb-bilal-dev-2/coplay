@@ -161,7 +161,7 @@ const Subtitles = ({
         className={classNames(["subtitle", className])}
         onPointerUp={handleMouseUp}
       >
-        {currentSubtitle?.subtitleLines?.map((subtitleLine) => {
+        {currentSubtitle?.text?.split('\n').map((subtitleLine) => {
           if (tooltip) {
             return (
               <>

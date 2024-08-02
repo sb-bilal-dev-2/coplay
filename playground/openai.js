@@ -1,6 +1,7 @@
 require("dotenv").config();
 const OpenAI = require("openai");
 const fs = require("fs");
+const path = require("path");
 
 let openai
 
@@ -22,16 +23,16 @@ try {
 //   "Travel Vocabulary 101"
 // ]);
 
-async function getTranscriptionOfAudio() {
+async function getTranscriptionOfAudio(filePath) {
   try {
-    const filePath = "public/pizza.mp3";
+    // const filePath = "public/pizza.mp3";
     // Check if the file exists and is readable
-    if (!fs.existsSync(filePath)) {
-      throw new Error(`File ${filePath} does not exist.`);
-    }
+    // if (!fs.existsSync(filePath)) {
+    //   throw new Error(`File ${filePath} does not exist.`);
+    // }
 
-    console.log("Starting transcription...");
-    const readStream = fs.createReadStream(filePath);
+    console.log("Starting transcription... for: " + filePath, path.resolve(filePath));
+    const readStream = fs.createReadStream(path.resolve(filePath));
     readStream.on("error", (err) => {
       console.error("Error reading the file:", err);
     });
@@ -41,11 +42,13 @@ async function getTranscriptionOfAudio() {
       model: "whisper-1",
       response_format: "verbose_json",
       timestamp_granularities: ["segment"],
+      
     });
 
-    console.log(transcription);
-    if (transcription && transcription) {
-      console.log("Transcription completed:");
+    if (transcription) {
+      console.log("Transcription completed for: " + filePath);
+
+      return transcription
     } else {
       console.log("Transcription did not return any text.");
     }

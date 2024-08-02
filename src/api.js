@@ -8,7 +8,7 @@ export const api = () => {
     return axios.create({
         baseURL: BASE_SERVER_URL,
         headers: {
-            learningLanguage: 'en',
+            learningLanguage: localStorage.getItem('learningLanguage') || 'en',
             Authorization: "Bearer " + localStorage.getItem('token')
         }
     })

@@ -10,81 +10,75 @@ const movies_model = require('./schemas/movies').movies_model;
  */
 const MAIN_LANGUAGES = ['uz', 'ru', 'en', 'tr']
 
-if (process.argv[1].includes('newContent.js')) {
-    const single = process.argv.includes('--single')
-    if (single) {
-        const title = process.argv[3]?.replaceAll('"', ' ')?.replaceAll("'", ' ')
-        newContent_single(title)
-    } else {
-        newContent(process.argv[2])
-    }
-}
+newContentCLI()
 
-async function newContent_single(mediaInfo) {
-    if (typeof mediaInfo === 'string') {
-        mediaInfo = await movies_model.find({ title: mediaInfo })
-    }
-    const parsedWords = await parseUsedWords(mediaInfo)
-    const translatedMap = {}
-    mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[item.translateLang] = true })
-    await Promise.all(MAIN_LANGUAGES.filter(item => translatedMap[item]).map(translateLang => {
-        return prepareSubtitleTranslations(contentFolder = './files/movieFiles', mediaInfo, translateLang, parsedWords)
-    }))
-}
+async function parseAndTranslate_single(mediaInfo, translateLanguages) {
+    try {
+        if (typeof mediaInfo === 'string') {
+            try {
+                mediaInfo = await movies_model.findOne({ title: mediaInfo })
+            } catch(err) {
+                console.error('err.code: ' + err.code + ' err.message: ' + err.message)
+            }
 
-async function newContent(mediaLang = 'en') {
-    const contentFolder = './files/movieFiles'
-    let { missingMediaTranslations, missingMediaParsedWords } = await getNewContentTitles(contentFolder, mediaLang)
-    const newParsedSubtitlesMap = {}
-    await Promise.all(missingMediaParsedWords.map(async mediaInfo => {
-        const mediaTitle = mediaInfo.title
-        console.log('mediaTitle: ', mediaTitle)
-
-        newParsedSubtitlesMap[mediaTitle] = await parseUsedWords(mediaInfo)
-    }))
-    await Promise.all(missingMediaTranslations.map(async ([mediaInfo, translateLang]) => {
-        const mediaTitle = mediaInfo.title
-        console.log('mediaTitle: ', mediaTitle, translateLang)
-
-        const newSubtitleId = await prepareSubtitleTranslations(contentFolder, mediaInfo, translateLang, newParsedSubtitlesMap[mediaInfo.title])
-        console.log('newSubtitleId', newSubtitleId)
-        return newSubtitleId
-    }))
-}
-
-async function getNewContentTitles(contentFolder, mediaLang = 'en') {
-    const allMedia = await movies_model.find({})
-    const missingMediaTranslations = []
-    const missingMediaParsedWords = []
-
-    allMedia.forEach((mediaInfo) => {
+            console.log('Parsing Media. Info: ', mediaInfo)
+        }
+        let parsedWords
         if (!mediaInfo.parsedSubtitleId) {
-            missingMediaParsedWords.push(mediaInfo)
+            console.log('Will parse subtitle for the title: ' + mediaInfo.title)
+
+            parsedWords = await parseUsedWords(mediaInfo)
+        }
+        const translatedMap = {}
+        mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[item.translateLang] = true })
+
+        console.log('Translating languages: ', translateLanguages)
+        if (translateLanguages) {
+            await Promise.all((translateLanguages.length ? translateLanguages : MAIN_LANGUAGES).filter(item => !translatedMap[item] && item !== mediaInfo.mediaLang).map(translateLang => {
+                return prepareSubtitleTranslations(contentFolder = './files/movieFiles', mediaInfo, translateLang, parsedWords)
+            }))
+        }    
+    } catch(error) {
+        console.log('Error code and message: ', error.code, error.message)
+    }
+}
+
+async function parseAndTranslate(mediaLang = 'en', translateLanguages) {
+    const allMedia = await movies_model.find({ mediaLang })
+    await Promise.all(allMedia.map(async (mediaInfo) => parseAndTranslate_single(mediaInfo, translateLanguages)))
+}
+
+async function newContentCLI() {
+    if (process.argv[1].includes('newContent') ) {
+        const translateLangsCmdIndex = process.argv.indexOf('--translateLangs')
+        let translateLangs;
+        if (translateLangsCmdIndex !== -1) {
+            translateLangs = process.argv[translateLangsCmdIndex + 1]?.split(',') || []
         }
 
-        const existingSubtitleTranslationsMap = {}
-        mediaInfo?.subtitleInfos?.forEach(subtitleTrans => { existingSubtitleTranslationsMap[subtitleTrans.translateLang] = true })
-        console.log('mediaInfo', mediaInfo)
-        MAIN_LANGUAGES.forEach((language) => {
-            if (language !== mediaLang) {
-                if (!existingSubtitleTranslationsMap[language]) {
-                    missingMediaTranslations.push([mediaInfo, language])
-                }
+        const singleContent = process.argv.indexOf('--title')
+        if (singleContent !== -1) {
+            const title = process.argv[singleContent + 1]?.replaceAll('"', ' ')
+    
+            if (!title) {
+              console.log('No title was followed after --title')
+            } {
+              console.log('Parsing the title: ' + title)
+              parseAndTranslate_single(title, translateLangs)
             }
-        })
-    })
-
-    console.log('No Translations and highlights for', missingMediaTranslations.map(item => item[0]?.title + ', ' + item[1]))
-    console.log('No Parsed Words for', missingMediaParsedWords)
-
-    return {
-        missingMediaTranslations,
-        missingMediaParsedWords,
-    }
+        } else {
+            const mediaLang = process.argv.indexOf('--mediaLang')
+    
+            if (mediaLang === -1) {
+                console.log('Pass either `--title TITLE` or `--mediaLang en` to process all english')
+            }
+            parseAndTranslate(process.argv[2], translateLangs)
+        }
+    }    
 }
 
 module.exports = {
     MAIN_LANGUAGES,
-    newContent,
-    newContent_single
+    parseAndTranslate,
+    parseAndTranslate_single
 }
