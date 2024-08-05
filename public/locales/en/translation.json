@@ -31,5 +31,10 @@
   "plan": "Plan",
   "month": "{{item}} Month",
   "buy": "Buy",
-  "awesome": "Awesome"
+  "awesome": "Awesome",
+  "add new languages": "Add new languages",
+  "add new language": "Add new language",
+  "learning": "Learning",
+  "native language": "Native language",
+  "want to learn": "Want to learn"
 }

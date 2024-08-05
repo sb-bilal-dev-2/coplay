@@ -31,5 +31,10 @@
   "plan": "reja",
   "month": "{{item}} Oy",
   "buy": "sotib olish",
-  "awesome": "Ajoyib"
+  "awesome": "Ajoyib",
+  "add new languages": "Yangi tillar qo'shing",
+  "add new language": "Yangi til qo'shing",
+  "learning": "O'rganish",
+  "native language": "Asosiy til",
+  "want to learn": "O'rganmoqchi bo'lgan til"
 }

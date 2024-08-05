@@ -22,10 +22,10 @@ const sortByLearningState = (items = [], repeatCountToPostponeTimeDifference = R
     const REPEAT_POSTPONE_TIME_DIFFERENCE =
       repeatCountToPostponeTimeDifference[repeatCount] || Infinity;
     const currentTime = Date.now();
-    console.log("currentTime", currentTime, item.repeatTime);
+    // console.log("currentTime", currentTime, item.repeatTime);
     const repeatTime = item.repeatTime || currentTime;
     const timeDifference = currentTime - repeatTime;
-    console.log("timeDifference", timeDifference);
+    // console.log("timeDifference", timeDifference);
     if (repeatCount < repeatCountToPostponeTimeDifference.maxRepeat) {
       if (
         !item.repeatCount ||

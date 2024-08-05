@@ -42,8 +42,8 @@ const StickyHeader = ({ type = "primary", authPage }) => {
         isSticky || searching ? "nav-menu-visible" : ""
       } ${type}`}
     >
-      <Link to="/">
-        <img class="h-14" src={logoPath} alt="C Play logo placeholder" />
+      <Link to="/" className="relative min-h-max min-w-max">
+        <img class="h-14 w-14" src={logoPath} alt="C Play logo placeholder" />
       </Link>
       <div class="flex items-center">
         {!authPage && (
@@ -57,7 +57,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                   onChange={(ev) => setSearch(ev.target.value)}
                 />
                 <button
-                  className="text-gray-150 float-right mr-4 ml-6 pointer"
+                  className="text-gray-150 float-right pointer"
                   onClick={() => {
                     setSearching(!searching);
                     setSearch("");
@@ -128,7 +128,10 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               </button>
             )}
             {!isPricePage ? (
-              <Link to="/price_page" className="font-bold p-2">
+              <Link
+                to="/price_page"
+                className="font-bold p-2 min-h-max min-w-max mr-2"
+              >
                 Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
               </Link>
             ) : null}
@@ -217,12 +220,6 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
               <b>{t("my list")}</b>
             </Link>
           </li>
-          {/* <li>
-            <Link to="/favourites">
-              <i class="fa-solid fa-heart text-gray-400  m-2" />
-              <b>Favourites</b>
-            </Link>
-          </li> */}
           <li>
             <button onClick={handleLogout}>
               <i class="fa-solid fa-door-open text-gray-400  m-2" />

@@ -4,26 +4,26 @@ import useAuthentication from "../containers/Authentication.util";
 import { getUserLanguage } from "../helper/useLocationLanguage";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../store";
-import { useRequestUserWordLists } from "../helper/useUserWords";
+import { useTranslation } from "react-i18next";
+import "./LanguageModal.css";
 
-const LANGUAGES = [
+export const LANGUAGES = [
   { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
   { id: 1, label: "English", iso: "en", flag: "./USA.webp" },
   { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
   { id: 3, label: "China", iso: "zh", flag: "./china.png" },
 ];
 
+export const APP_LANGUAGES = [
+  { id: "en", iso: "en", label: "English" },
+  { id: "uz", iso: "uz", label: "Uzbek" },
+];
+
 const findFormLanguagesList = (selectedLanguage) => {
   return LANGUAGES.find((lanuage) => lanuage.iso === selectedLanguage);
 };
 
-const LanguageDropdown = ({
-  selectedLanguage,
-  title,
-  withNameLanguage, //boolean
-  name, //"mainLanguage" or "learningLanguages"
-  learningLanguages,
-}) => {
+const LanguageDropdown = ({ selectedLanguage }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const dropdownRef = useRef(null);
@@ -33,9 +33,10 @@ const LanguageDropdown = ({
   const resentlySignUp = localStorage.getItem("resentlySignUp");
   const dispatch = useDispatch();
   const [learningLanguagesList, setLearningLanguagesList] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const user = useSelector((state) => state.user.user);
-  console.log("get userwords", useRequestUserWordLists());
+  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     const fetchLanguage = async () => {
@@ -47,7 +48,7 @@ const LanguageDropdown = ({
   }, []);
 
   useEffect(() => {
-    if (resentlySignUp && name === "mainLanguage") {
+    if (resentlySignUp) {
       localStorage.setItem("mainLanguage", languageFromLocation);
       const resultOfListLanguage = findFormLanguagesList(languageFromLocation);
 
@@ -65,7 +66,7 @@ const LanguageDropdown = ({
   const localLearningLanguage = localStorage.getItem("learningLanguage");
 
   useEffect(() => {
-    if (localLearningLanguage && name === "learningLanguages") {
+    if (localLearningLanguage) {
       const findSelected = findFormLanguagesList(localLearningLanguage);
       setSelectedOption(findSelected);
     }
@@ -84,8 +85,7 @@ const LanguageDropdown = ({
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const handleOptionClick = (option) => {
-    setSelectedOption(option);
+  const handleOptionClick = (option, name) => {
     setIsOpen(false);
     chooseLanguage(option, name);
   };
@@ -96,9 +96,12 @@ const LanguageDropdown = ({
     if (name === "mainLanguage") {
       newUserInfo = { mainLanguage: option.iso };
       localStorage.setItem("mainLanguage", option.iso);
+      i18n.changeLanguage(option.iso);
     }
 
     if (name === "learningLanguages") {
+      setSelectedOption(option);
+
       newUserInfo = {
         learningLanguages: [...user.learningLanguages, option.iso],
       };
@@ -115,191 +118,155 @@ const LanguageDropdown = ({
     ]);
   };
 
-  const handleSwitch = (option) => {
-    setSelectedOption(option);
-    toggleDropdown();
-  };
-
   useEffect(() => {
-    if (learningLanguages) {
-      const matchingLanguages = LANGUAGES.filter((language) =>
-        user?.learningLanguages?.includes(language.iso)
-      );
+    const matchingLanguages = LANGUAGES.filter((language) =>
+      user?.learningLanguages?.includes(language.iso)
+    );
 
-      setLearningLanguagesList(matchingLanguages);
-    }
+    setLearningLanguagesList(matchingLanguages);
   }, [user]);
 
-  const [addLanguageModal, setAddLanguageModal] = useState(false);
-  const handleClose = () => {
-    setAddLanguageModal(false);
-  };
+  const toggleModal = () => setShowModal(!showModal);
 
   return (
-    <div className="relative inline-block py-2" ref={dropdownRef}>
-      {title ? <p className="font-bold px-2">{title}</p> : null}
+    <div ref={dropdownRef}>
       <div
-        className="border border-none rounded px-2 cursor-pointer items-center flex"
-        onClick={toggleDropdown}
+        className="border border-none rounded cursor-pointer "
+        onClick={() => toggleDropdown()}
       >
         {selectedOption ? (
-          <div className="flex justify-between">
-            {withNameLanguage ? (
-              <span className="pr-3">{selectedOption.label}</span>
-            ) : null}
+          <div className="flex justify-between items-center">
             <img
               alt="flag"
               src={selectedOption.flag}
-              className="w-6 h-6 overflow-hidden rounded-full"
+              className="w-6 h-6 rounded-full mr-1"
             />
+            <span className="">{selectedOption.iso}</span>
+            <i class="fas fa-chevron-down float-right px-1 text-sm"></i>
           </div>
         ) : (
           "Choose language"
         )}
-
-        <i class="fas fa-chevron-down float-right px-1"></i>
       </div>
-      {isOpen && (
-        <ul className="absolute z-10  w-28 bg-black border border-none mt-1 rounded shadow-lg">
-          {learningLanguages && user
-            ? learningLanguagesList?.map((option) => (
-                <li
-                  key={option.id}
-                  className="text-white px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
-                  onClick={() => handleSwitch(option)}
-                >
-                  <span>{option.label}</span>
-                  <img
-                    alt="flag"
-                    src={option.flag}
-                    className="w-6 h-6 overflow-hidden rounded-full"
-                  />
-                </li>
-              ))
-            : LANGUAGES.map((option) => (
-                <li
-                  key={option.id}
-                  className="text-white px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
-                  onClick={() => handleOptionClick(option)}
-                >
-                  <span>{option.label}</span>
-                  <img
-                    alt="flag"
-                    src={option.flag}
-                    className="w-6 h-6 overflow-hidden rounded-full"
-                  />
-                </li>
-              ))}
 
-          {learningLanguages ? (
-            <button
-              className=" text-white w-full font-bold py-2 px-2"
-              onClick={() => {
-                setAddLanguageModal(true);
-              }}
+      {isOpen ? (
+        <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
+          <div className="flex justify-between items-center">
+            <i
+              class="fa-solid fa-x  cursor-pointer"
+              onClick={() => toggleDropdown()}
+            ></i>
+            <span
+              className="flex items-center bg-yellow-500 text-white py-1 px-2 rounded-full cursor-pointer"
+              onClick={() => toggleModal()}
             >
-              Add language
-              <i class="fa-solid fa-plus px-1"></i>
-            </button>
-          ) : null}
+              <i class="fa-solid fa-plus pr-2"></i> {t("add new languages")}
+            </span>
+          </div>
 
-          <ChooseLanguageModal
-            handleClose={handleClose}
-            show={addLanguageModal}
-            learningLanguagesList={learningLanguagesList}
-          />
-        </ul>
-      )}
+          <h1 className="font-bold text-white text-center">
+            {t("add new language")}
+          </h1>
+
+          <div className="w-60 m-auto mt-10">
+            <p className="font-bold mb-1 ">{t("learning")}:</p>
+            {user
+              ? learningLanguagesList?.map((option) => (
+                  <li
+                    key={option.id}
+                    className={`${
+                      selectedOption?.iso === option?.iso
+                        ? "border-yellow-400"
+                        : "border-gray-500"
+                    } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
+                    onClick={() =>
+                      handleOptionClick(option, "learningLanguages")
+                    }
+                  >
+                    <img
+                      alt="flag"
+                      src={option.flag}
+                      className="w-6 h-6 overflow-hidden rounded-full mr-4"
+                    />
+                    <span>{option.label}</span>
+                  </li>
+                ))
+              : null}
+          </div>
+        </div>
+      ) : null}
+      <ChooseLanguageModal
+        show={showModal}
+        toggleModal={toggleModal}
+        handleOptionClick={handleOptionClick}
+        selectedOption={selectedOption}
+        t={t}
+      />
     </div>
   );
 };
 
-function ChooseLanguageModal({ handleClose, show, learningLanguagesList }) {
-  const { putItems } = useRequests("users");
-  const user = useSelector((state) => state.user.user);
-  const { user: userIdAndEmail } = useAuthentication();
-
-  const addLanguage = (option) => {
-    let newUserInfo;
-
-    newUserInfo = {
-      learningLanguages: [...user.learningLanguages, option.iso],
-    };
-    localStorage.setItem("learningLanguage", option.iso);
-
-    putItems([
-      {
-        email: userIdAndEmail.email,
-        _id: userIdAndEmail.id,
-        ...newUserInfo,
-      },
-    ]);
-  };
-
-  const removeLanguage = (option) => {
-    const updatedLanguages = user.learningLanguages.filter(
-      (language) => language !== option.iso
-    );
-
-    const newUserInfo = {
-      ...user,
-      learningLanguages: updatedLanguages,
-    };
-
-    putItems([
-      {
-        email: userIdAndEmail.email,
-        _id: userIdAndEmail.id,
-        ...newUserInfo,
-      },
-    ]);
-  };
-
+function ChooseLanguageModal({
+  show,
+  toggleModal,
+  handleOptionClick,
+  selectedOption,
+  t
+}) {
   if (!show) return null;
+
+  const mainLanguage = localStorage.getItem("mainLanguage");
+
   return (
-    <div className="modal-overlay">
-      <div className="modal bg-black text-white">
-        <div className="modal-content">
-          <h1 className="font-bold text-xl py-4">Choose new language</h1>
-          <ul>
-            {LANGUAGES.map((option) =>
-              learningLanguagesList?.map((learningLanguage) => (
-                <li
-                  key={option.id}
-                  className="text-white px-4 py-2 hover:bg-transparent cursor-pointer transition-colors duration-150 ease-in-out flex items-center justify-between"
-                  onClick={() => alert("something")}
-                >
-                  <span>{option.label}</span>
-                  <img
-                    alt="flag"
-                    src={option.flag}
-                    className="w-6 h-6 overflow-hidden rounded-full"
-                  />
-                  {option.iso === learningLanguage.iso ? (
-                    <div className="flex justify-between items-center">
-                      <i class="fa-solid fa-check"></i>
-                      <i
-                        class="fa-solid fa-x"
-                        onClick={() => removeLanguage(option)}
-                      ></i>
-                    </div>
-                  ) : (
-                    <i
-                      class="fa-solid fa-plus"
-                      onClick={() => addLanguage(option)}
-                    ></i>
-                  )}
-                </li>
-              ))
-            )}
-          </ul>
-          <button
-            className="font-bold bg-yellow-500 rounded-md text-white w-full text-center py-4 mt-4"
-            onClick={() => handleClose()}
-          >
-            Let's start learn more!
-          </button>
+    <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
+      <i
+        class="fa-solid fa-arrow-left float-left cursor-pointer"
+        onClick={() => toggleModal()}
+      ></i>
+      <h1 className="font-bold text-white">{t("add new language")}</h1>
+
+      <div className="w-60 m-auto mt-10">
+        <p className="font-bold mb-2">{t("native language")}</p>
+        <div className="py-2">
+          {APP_LANGUAGES.map((option) => (
+            <span
+              key={option.iso}
+              className={`${
+                mainLanguage === option.iso
+                  ? "border-yellow-400"
+                  : "border-gray-500"
+              } p-2 mr-4 border-2  rounded-xl cursor-pointer`}
+              onClick={() => handleOptionClick(option, "mainLanguage")}
+            >
+              {option.label}
+            </span>
+          ))}
         </div>
+      </div>
+
+      <div className="w-60 m-auto mt-10">
+        <p className="font-bold mb-1 ">{t("want to learn")}:</p>
+        {LANGUAGES.map((option) => (
+          <li
+            key={option.id}
+            className={`${
+              selectedOption?.iso === option?.iso
+                ? "border-yellow-400"
+                : "border-gray-500"
+            } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
+            onClick={() => {
+              handleOptionClick(option, "learningLanguages");
+              toggleModal();
+            }}
+          >
+            <img
+              alt="flag"
+              src={option.flag}
+              className="w-6 h-6 overflow-hidden rounded-full mr-4"
+            />
+            <span>{option.label}</span>
+          </li>
+        ))}
       </div>
     </div>
   );
