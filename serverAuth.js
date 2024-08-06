@@ -299,12 +299,10 @@ async function requireAuth(req, res, next) {
   
   let token = req.header('Authorization');
   // Check if token exists
-  if (!token) {
+  if (!token || token === 'Bearer undefined') {
     return res.status(401).json({ message: 'Access denied. Token is missing.' });
   }
-  // console.log('REQ: ', req)
   token = token?.split('Bearer ')[1]
-  // console.log('TOKEN', token)
 
   jwt.verify(token, SECRET, (err, user) => {
     if (err) {

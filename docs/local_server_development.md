@@ -1,4 +1,4 @@
-# Make sure you have following env variables
+# Make sure you have correct env variables
 
 REACT_APP_BASE_URL=https://coplay.live/api
 REACT_APP_BASE_URL_LOCALHOST=http://localhost:8080

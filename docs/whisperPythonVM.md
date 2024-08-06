@@ -1,6 +1,10 @@
 # Activate virtual environment
 
-source /mnt/disks/mydisk/python_venv/bin/activate
+source /mnt/disks/mydisk/whisper_pyvenv/bin/activate
 
-# Whisper installed location
-/home/cosmoingiliz/.local/lib/python3.9/site-packages
+# On installation before pip install openai-whisper
+
+Use mydisk as /tmp
+
+sudo chmod 1777 /mnt/disks/mydisk/tmp
+export TMPDIR=/mnt/disks/mydisk/tmp

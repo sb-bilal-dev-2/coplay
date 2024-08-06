@@ -164,16 +164,15 @@ app.get('/movie_words/:parsedSubtitleId', async (req, res) => {
       const movieSubtitle = await subtitles_model.findById(parsedSubtitleId);
       movieWords = movieSubtitle.subtitles.reduce((acc, item) => acc.concat(item.usedWords), [])
 
-      console.log('movieWords?.length', movieWords?.length, movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
       console.error('Could not fetch words: ', err.code, err.message)
       return res.status(404).send(err.message)
     }
-    const userWordsMap = userWords.reduce((acc, item) => (acc[item.lemma] = item, acc), {})
-    const movieWordsWithoutUserWords = movieWords.filter(item => item && !userWordsMap[item.lemma])
-
-    res.status(200).send(movieWordsWithoutUserWords)
+    const userWordsMap = userWords.reduce((acc, item) => (acc[item] = item, acc), {})
+    const movieWordsWithoutUserWords = movieWords.filter(item => (item && !Number(item) && !userWordsMap[item]))
+    const movieWordsUnduplicated = Object.keys(movieWordsWithoutUserWords.reduce((acc, item) => (acc[item] = item, acc), {}))
+    res.status(200).send(movieWordsUnduplicated)
   } catch (err) {
     res.status(500).send(err.message)
   }

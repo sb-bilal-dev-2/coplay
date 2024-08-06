@@ -130,6 +130,16 @@ function AdvancedSwipe({
   reversed,
   header,
   title,
+  onError = (err) => {
+    if (err?.response?.status === 401) {
+      if (window.confirm('Sign in to add words and for more! \nPress ok to go to login screen')) {
+        window.location.replace(window.location.origin + '/#/auth/login')
+      }
+    } 
+    // if (err?.response?.status === 403) {
+    //   redirectToLoginPage = LoginSreen('Login expired, please sign in again \nPress ok to go to login screen')
+    // }
+  }
 }) {
   const reversedList = useMemo(() => initialList.reverse(), [initialList]);
   const list = reversed ? reversedList : initialList;
@@ -140,14 +150,11 @@ function AdvancedSwipe({
   const currentIndexRef = useRef(currentIndex);
   const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState(null);
   const requestWordInfo = async () => {
+    const next10Items = list.slice(currentIndex, currentIndex + 10)
     // const wordInfos = (await (api().get('/wordInfos?the_word=' + JSON.stringify(list)))).data
-    // console.log(wordInfos, "wordInfos")
-    // const missingLemmas = wordInfos.filter(item => !item.lemma)
-    // const missingLemmaInfo = await api().post('/wordLemmaInfo', missingLemmas)
-    // console.log(missingLemmaInfo, "missingLemmaInfo")
-    // const new_wordInfosByTheWordMap = {}
-    // wordInfosByTheWordMap.forEach((value) => {new_wordInfosByTheWordMap[value.the_word] = value })
-    // set_wordInfosByTheWordMap(new_wordInfosByTheWordMap)
+    const new_wordInfosByTheWordMap = {}
+    wordInfosByTheWordMap.forEach((value) => {new_wordInfosByTheWordMap[value.the_word] = value })
+    set_wordInfosByTheWordMap(new_wordInfosByTheWordMap)
   };
   const [fliped, setFliped] = useState(false);
 
@@ -168,20 +175,32 @@ function AdvancedSwipe({
   };
 
   const canGoBack = currentIndex < list.length - 1;
+  // increase current index and show card
+  const goBack = async () => {
+    if (!canGoBack) return;
+    const newIndex = currentIndex + 1;
+    console.log('GO BACK to index', newIndex)
+    updateCurrentIndex(newIndex);
 
+    await childRefs[newIndex].current.restoreCard();
+  };
+  const handleSwipeError = (err) => {
+    console.log('err', err)
+    onError(err)
+    goBack()
+  }
   const canSwipe = currentIndex >= 0;
-
   // set last direction and decrease current index
-  const swiped = (direction, lemma, index) => {
+  const swiped = async (direction, lemma, index) => {
     setLastDirection(direction);
     setFliped(false);
 
     updateCurrentIndex(index - 1);
     if (direction === "right") {
-      onSwipeRight(lemma);
+      onSwipeRight(lemma).catch(handleSwipeError);
     } else if ((direction = "left")) {
-      onSwipeLeft(lemma);
-    }
+      onSwipeLeft(lemma).catch(handleSwipeError);
+    }  
 
     if (direction === "up" || direction === "down") {
       console.log("Swipe up or down is disabled");
@@ -207,15 +226,6 @@ function AdvancedSwipe({
     }
   };
 
-  // increase current index and show card
-  const goBack = async () => {
-    if (!canGoBack) return;
-    const newIndex = currentIndex + 1;
-    updateCurrentIndex(newIndex);
-
-    await childRefs[newIndex].current.restoreCard();
-  };
-
   const toggleCard = () => {
     setFliped(!fliped);
   };
@@ -230,17 +240,18 @@ function AdvancedSwipe({
               <TinderCard
                 ref={childRefs[index]}
                 className="swipe"
-                key={character?.lemma}
+                key={character}
                 swipeThreshold={0.2}
-                onSwipe={(dir) => swiped(dir, character?.lemma, index)}
-                onCardLeftScreen={() => outOfFrame(character?.lemma, index)}
+                onSwipe={(dir) => swiped(dir, character, index)}
+                onCardLeftScreen={() => outOfFrame(character, index)}
                 preventSwipe={["up", "down"]}
               >
                 <div
                   style={{
                     backgroundImage: "url(" + character?.imageDescUrl + ")",
-                    transform: `rotateZ(${index - currentIndex}deg)`,
+                    transform: `rotateZ(${(index - currentIndex) * 1}deg)`,
                     boxShadow: "0.1px 0.1px 2px 0.1px rgba(0, 0, 0, 0.3)",
+                    left: `${Math.abs((index - currentIndex) * 1)}px`
                   }}
                   className="card"
                 >
