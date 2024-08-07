@@ -143,7 +143,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
     }
 
     localStorage.setItem("learningLanguage", option.iso);
-    console.log('afterLangChange', afterLangChange)
+
     if (afterLangChange) afterLangChange()
   };
 

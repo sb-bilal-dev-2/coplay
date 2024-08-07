@@ -3,7 +3,6 @@ import "./StickyHeader.css"; // Make sure to create the corresponding CSS file
 import { Link, useLocation } from "react-router-dom";
 import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
-import useRequests from "../useRequests";
 import { BASE_SERVER_URL } from "../api";
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from "./LanguageDropdown";
@@ -24,9 +23,6 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const { getItems: getWordCollections } = useDynamicReducer('wordCollections')
   const movies = videoItems?.filter(item => item.category !== 'Music');
   const clips = videoItems?.filter(item => item.category === 'Music');
-  // const { items: clips } = useRequests("clips");
-  // const { items: quizzes } = useRequests("quizzes");
-  // const { items: wordCollections } = useRequests("wordCollections");
 
   const filterByLabel = (items) => {
     return items?.filter((movie) =>
