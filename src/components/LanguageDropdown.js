@@ -91,20 +91,7 @@ const LanguageDropdown = ({ selectedLanguage }) => {
   const toggleDropdown = () => setIsOpen(!isOpen);
   const toggleModal = () => setShowModal(!showModal);
 
-  const handleOptionClick = (option, name) => {
-    setIsOpen(false);
-
-    if (name === "mainLanguage") {
-      chooseNativeLang(option);
-    }
-
-    if (name === "learningLanguages") {
-      chooseLearningLang(option);
-      setSelectedOption(option);
-    }
-  };
-
-  const chooseNativeLang = (option) => {
+  const handleNativeLang = (option) => {
     let newUserInfo;
 
     newUserInfo = { mainLanguage: option.iso };
@@ -128,30 +115,39 @@ const LanguageDropdown = ({ selectedLanguage }) => {
     );
   };
 
-  const chooseLearningLang = (option) => {
+  const handleLearningLang = (option) => {
+    setSelectedOption(option);
+    setIsOpen(false);
+
     let newUserInfo;
 
     newUserInfo = {
       learningLanguages: [...user.learningLanguages, option.iso],
     };
 
-      putItems([
-        {
-          email: userIdAndEmail.email,
-          _id: userIdAndEmail.id,
-          ...newUserInfo,
-        },
-      ]);
+    putItems([
+      {
+        email: userIdAndEmail.email,
+        _id: userIdAndEmail.id,
+        ...newUserInfo,
+      },
+    ]);
 
-      dispatch(
-        updateUser({
-          ...user,
-          learningLanguages: [...user.learningLanguages, option.iso],
-        })
-      );
+    dispatch(
+      updateUser({
+        ...user,
+        learningLanguages: [...user.learningLanguages, option.iso],
+      })
+    );
 
     localStorage.setItem("learningLanguage", option.iso);
   };
+
+  const handleLangLocal = (option) => {
+    setSelectedOption(option);
+    setIsOpen(false);
+    localStorage.setItem("learningLanguage", option.iso);
+  }
 
   return (
     <div ref={dropdownRef}>
@@ -174,37 +170,70 @@ const LanguageDropdown = ({ selectedLanguage }) => {
       </div>
 
       {isOpen ? (
-        <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
-          <div className="flex justify-between items-center">
-            <i
-              class="fa-solid fa-x  cursor-pointer"
-              onClick={() => toggleDropdown()}
-            ></i>
-            <span
-              className="flex items-center bg-yellow-500 text-white py-1 px-2 rounded-full cursor-pointer"
-              onClick={() => toggleModal()}
-            >
-              <i class="fa-solid fa-plus pr-2"></i> {t("add new languages")}
-            </span>
-          </div>
+        !user ? (
+          <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
+            <div className="flex justify-between items-center">
+              <i
+                class="fa-solid fa-x  cursor-pointer"
+                onClick={() => toggleDropdown()}
+              ></i>
+              <span
+                className="flex items-center bg-yellow-500 text-white py-1 px-2 rounded-full cursor-pointer"
+                onClick={() => toggleModal()}
+              >
+                <i class="fa-solid fa-plus pr-2"></i> {t("add new languages")}
+              </span>
+            </div>
 
-          <h1 className="font-bold text-white text-center">
-            {t("add new language")}
-          </h1>
-          <div className="w-60 m-auto mt-10">
-            <p className="font-bold mb-1 ">{t("learning")}:</p>
-            <LearningLanguages
-              selectedOption={selectedOption}
-              handleOptionClick={handleOptionClick}
-            />
+            <h1 className="font-bold text-white text-center">
+              {t("add new language")}
+            </h1>
+            <div className="w-60 m-auto mt-10">
+              <p className="font-bold mb-1 ">{t("learning")}:</p>
+              <LearningLanguages
+                selectedOption={selectedOption}
+                handleLearningLang={handleLearningLang}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
+            <div className="flex justify-between items-center">
+              <i
+                class="fa-solid fa-x  cursor-pointer"
+                onClick={() => toggleDropdown()}
+              ></i>
+            </div>
+            <div className="w-60 m-auto mt-10">
+              <p className="font-bold mb-1 ">{t("want to learn")}:</p>
+              {LANGUAGES.map((option) => (
+                <li
+                  key={option.id}
+                  className={`${
+                    localLearningLanguage === option.iso
+                      ? "border-yellow-400"
+                      : "border-gray-500"
+                  } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
+                  onClick={() => handleLangLocal(option)}
+                >
+                  <img
+                    alt="flag"
+                    src={option.flag}
+                    className="w-6 h-6 overflow-hidden rounded-full mr-4"
+                  />
+                  <span>{option.label}</span>
+                </li>
+              ))}
+            </div>
+          </div>
+        )
       ) : null}
 
       <ChooseLanguageModal
         show={showModal}
         toggleModal={toggleModal}
-        handleOptionClick={handleOptionClick}
+        handleLearningLang={handleLearningLang}
+        handleNativeLang={handleNativeLang}
         t={t}
       />
     </div>
@@ -214,7 +243,8 @@ const LanguageDropdown = ({ selectedLanguage }) => {
 const ChooseLanguageModal = ({
   show,
   toggleModal,
-  handleOptionClick,
+  handleLearningLang,
+  handleNativeLang,
   t,
 }) => {
   const user = useSelector((state) => state.user.user);
@@ -223,7 +253,7 @@ const ChooseLanguageModal = ({
 
   const filteredLanguages = useMemo(() => {
     return LANGUAGES.filter(
-      (lang) => !user?.learningLanguages.includes(lang.iso)
+      (lang) => !user?.learningLanguages?.includes(lang.iso)
     );
   }, [user?.learningLanguages]);
 
@@ -248,7 +278,7 @@ const ChooseLanguageModal = ({
                   ? "border-yellow-400"
                   : "border-gray-500"
               } p-2 mr-4 border-2 rounded-xl cursor-pointer`}
-              onClick={() => handleOptionClick(option, "mainLanguage")}
+              onClick={() => handleNativeLang(option)}
             >
               {option.label}
             </span>
@@ -263,7 +293,7 @@ const ChooseLanguageModal = ({
             <div
               className={`flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
               onClick={() => {
-                handleOptionClick(option, "learningLanguages");
+                handleLearningLang(option);
                 toggleModal();
               }}
             >
@@ -281,7 +311,7 @@ const ChooseLanguageModal = ({
   );
 };
 
-const LearningLanguages = ({ selectedOption, handleOptionClick }) => {
+const LearningLanguages = ({ selectedOption, handleLearningLang }) => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const { user: userIdAndEmail } = useAuthentication();
@@ -289,7 +319,7 @@ const LearningLanguages = ({ selectedOption, handleOptionClick }) => {
 
   const languageItem = useMemo(() => {
     return LANGUAGES.filter((lang) =>
-      user.learningLanguages.includes(lang.iso)
+      user?.learningLanguages?.includes(lang.iso)
     );
   }, [user.learningLanguages]);
 
@@ -324,7 +354,7 @@ const LearningLanguages = ({ selectedOption, handleOptionClick }) => {
                 ? "border-yellow-400"
                 : "border-gray-500"
             } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
-            onClick={() => handleOptionClick(option, "learningLanguages")}
+            onClick={() => handleLearningLang(option)}
           >
             <img
               alt="flag"
