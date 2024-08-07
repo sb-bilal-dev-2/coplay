@@ -10,6 +10,7 @@ import { useLocation } from "react-router-dom";
 // import TinderCard from "react-tinder-card";
 import TinderCard from "./TinderCard";
 import { Link } from "react-router-dom";
+import api from "../api";
 
 function getPercentage(index, totalNumbers = 7) {
   const step = 100 / (totalNumbers - 1); // Calculate step size
@@ -148,15 +149,21 @@ function AdvancedSwipe({
   const [lastDirection, setLastDirection] = useState();
   // used for outOfFrame closure
   const currentIndexRef = useRef(currentIndex);
-  const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState(null);
+  const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState({});
   const requestWordInfo = async () => {
     const next10Items = list.slice(currentIndex, currentIndex + 10)
-    // const wordInfos = (await (api().get('/wordInfos?the_word=' + JSON.stringify(list)))).data
-    const new_wordInfosByTheWordMap = {}
-    wordInfosByTheWordMap.forEach((value) => {new_wordInfosByTheWordMap[value.the_word] = value })
-    set_wordInfosByTheWordMap(new_wordInfosByTheWordMap)
+    const itemsToRequest = next10Items.filter(item => !wordInfosByTheWordMap[item])
+
+    const newWordInfos = await Promise.all(itemsToRequest.map(async (item) => {
+      const wordInfo = (await (api().get('/wordInfoLemmas?the_word=' + item))).data.results[0]
+      return wordInfo
+    }))
+    console.log('newWordInfos', newWordInfos)
+    newWordInfos.filter(item => item).forEach((item) => (wordInfosByTheWordMap[item.the_word]))
+    set_wordInfosByTheWordMap(wordInfosByTheWordMap)
   };
   const [fliped, setFliped] = useState(false);
+  console.log('wordInfosByTheWordMap', wordInfosByTheWordMap)
 
   useEffect(() => {
     requestWordInfo();

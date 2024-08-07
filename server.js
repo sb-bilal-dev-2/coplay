@@ -44,16 +44,10 @@ app.get('/occurances_v2', async (req, res) => {
 })
 
 app.get('/wordInfoLemmas', async (req, res) => {
-  let { the_word, langCode, mainLang, generateIcon } = req.query;
+  let { the_word, langCode, mainLang } = req.query;
   let WordInfosModel = mongoose.model(`wordInfos__${langCode}__s`, wordInfos.schema);
   const wordInfo = WordInfosModel.find({ the_word });
   const { lemma, translations, romanization } = wordInfo;
-  // if (langCode === 'en') {
-  //   WordInfosModel = wordInfos.wordInfos_model
-  // } else {
-    // WordInfosModel = mongoose.model(`wordInfos__${langCode}__s`, wordInfos.schema)
-  // }
-
   const update_wordInfo = {}
   const homonyms = []
   if (!lemma) {
@@ -65,21 +59,17 @@ app.get('/wordInfoLemmas', async (req, res) => {
       update_wordInfo = { ...update_wordInfo, ...promptInfos }
     }
   }
-  if (!translations) {
-    update_wordInfo.translations = {}
-  }
-  if (!translations[mainLang]) {
-    update_wordInfo.translations[mainLang] = requestTranslation(the_word)
-  }  
+  // if (!translations) {
+  //   update_wordInfo.translations = {}
+  // }
+  // if (!translations[mainLang]) {
+  //   update_wordInfo.translations[mainLang] = requestTranslation(the_word)
+  // }  
 
-  if (shouldRomanize && !romanization) {
-    update_wordInfo.romanization = await requestRomanization(the_word)
-  }
+  // if (shouldRomanize && !romanization) {
+  //   update_wordInfo.romanization = await requestRomanization(the_word)
+  // }
   
-  if (!images.length && generateIcon === '1') {
-    await generateImages(the_word)
-  }
-
   // const updated_wordInfo = await WordInfosModel.findOneAndUpdate(update_word)
   const updated_wordInfo = update_wordInfo
 

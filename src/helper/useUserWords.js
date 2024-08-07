@@ -12,16 +12,18 @@ export function useRequestUserWordLists(cancelRequest) {
   );
 
   const getUserWords = async () => {
-    try {
-      const userProps = await api().get("/get-user?allProps=1");
-      console.log("userProps", userProps);
-      dispatch(updateUser(userProps?.data));
-    } catch (err) {
-      if (err.message === "Request failed with status code 403") {
-        localStorage.removeItem("token");
-        redirect("/");
-      }
-      console.log("err", err);
+    if (localStorage.getItem('token')) {
+      try {
+        const userProps = await api().get("/get-user?allProps=1");
+        console.log("userProps", userProps);
+        dispatch(updateUser(userProps?.data));
+      } catch (err) {
+        if (err.message === "Request failed with status code 403") {
+          localStorage.removeItem("token");
+          redirect("/");
+        }
+        console.log("err", err);
+      }  
     }
   };
 

@@ -198,6 +198,8 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   );
 
   const handleLogout = () => {
+    console.log("REMOVING TOKEN 3")
+
     localStorage.removeItem("token");
   };
 

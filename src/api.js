@@ -10,7 +10,7 @@ export const api = () => {
         baseURL: BASE_SERVER_URL,
         headers: {
             learningLanguage: localStorage.getItem('learningLanguage') || 'en',
-            Authorization: token ? "Bearer " : undefined 
+            Authorization: token ? "Bearer " + token : undefined 
         }
     })
 }
