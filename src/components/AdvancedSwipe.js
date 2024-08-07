@@ -300,7 +300,7 @@ function AdvancedSwipe({
                         <b>Definition:</b> {wordInfo?.shortDefinition}
                       </p>
                       <p className="text-center text-gray-500 font-bold">
-                        <b>Short Explanation:</b> {wordInfo?.shortExplanation}
+                        <b>Explanation:</b> {wordInfo?.shortExplanation}
                       </p>
                       <p className="text-center text-gray-500 font-bold">
                         <b>Pronounciation:</b> {wordInfo?.pronounciation}

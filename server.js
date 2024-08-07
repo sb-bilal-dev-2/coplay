@@ -53,16 +53,16 @@ app.get('/wordInfoLemma', async (req, res) => {
     let WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
     const requestedWordInfos = await WordInfosModel.find({ the_word });
     console.log('requestedWordInfos', requestedWordInfos)
+    const wordInfo = requestedWordInfos[0]
 
-    if (!requestedWordInfos.length) {
+    if (!requestedWordInfos.length || !wordInfo) {
       res.status(404).send('Word info Not found: ' + the_word)
     }
 
-    const wordInfo = requestedWordInfos[0]
     let updatedWordInfo = wordInfo;
     if (!wordInfo.shortDescription) {
       console.log('wordInfo.shortDescription')
-      if (!updatedWordInfo.the_word_translations) {
+      if (!updatedWordInfo?.the_word_translations) {
         updatedWordInfo.the_word_translations = {}
       }
       console.log('updatedWordInfo 1', updatedWordInfo)
@@ -75,8 +75,8 @@ app.get('/wordInfoLemma', async (req, res) => {
         console.log('updatedKey', updatedKey, updatedWordInfosKeys[updatedKey])
         updatedWordInfo[updatedKey] = updatedWordInfosKeys[updatedKey]
       })
+      console.log('updatedWordInfo 2', updatedWordInfo)
     }
-    console.log('updatedWordInfo 2', updatedWordInfo)
 
     if (mainLang !== 'en' && wordInfo.shortDescription && (!wordInfo.shortDescription_translations || !wordInfo.shortDescription_translations[mainLang])) {
       console.log('wordInfo.shortDescription')
@@ -89,8 +89,8 @@ app.get('/wordInfoLemma', async (req, res) => {
         }
         updatedWordInfo[translationKey][mainLang] = translationKeys[translationKey]
       })
+      console.log('updatedWordInfo 3', updatedWordInfo)
     }
-    console.log('updatedWordInfo 3', updatedWordInfo)
     if (updatedWordInfo.shortExaplanation) {
       shortExaplanation.shortExplanation = updatedWordInfo.shortExaplanation
     }
