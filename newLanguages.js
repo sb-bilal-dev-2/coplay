@@ -53,9 +53,8 @@ async function processNewLearningLanguage(langCode, minimumOccurance) {
 async function get_languageWords(langCode, minimumOccurance) {
     const MINIMUM_OCCURANCE = minimumOccurance || 30
     const url = `https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/${langCode}/${langCode}_full.txt`
-    console.log('requested url: ', url)
+    console.log('requested words: ', url)
     const response = await axios.get(url);
-    console.log('words file response', response)
 
     const words = response.data.split('\n').map((item) => item.split(' ')).filter(item => Number(item[1]) >= MINIMUM_OCCURANCE).map(item => ({ the_word: item[0], occuranceCount: Number(item[1]) }))
 

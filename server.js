@@ -8,7 +8,6 @@ const range = require('range-parser');
 const bodyParser = require('body-parser');
 const fromVtt = require('subtitles-parser-vtt').fromVtt
 const { initAuth, getUserIdByRequestToken } = require('./serverAuth');
-const { translateVtt } = require('./translateVtt');
 const initCRUDAndDatabase = require('./serverCRUD').initCRUDAndDatabase;
 const fsPromises = require('fs/promises')
 const ip = require('ip');
@@ -30,7 +29,7 @@ app.use(cors({
 const { createCRUDEndpoints, models } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
 
-const port = (process.argv.includes('--8080') && 8080) || 3001;
+const port = (process.argv.includes('--8080') && 8080) || (process.argv.includes('--5000') && 5000) || 9090;
 
 app.get('/hello_world', (req, res) => {
   res.type('text/plain')
@@ -148,23 +147,6 @@ function getContentType(extension) {
   }
 }
 
-
-// app.get('/translate', async (req, res) => {
-//   try {
-//     const { locale, name } = req.query;
-//     const baseURL = 'cloud.digital/subtitles/';
-//     const engVtt = baseURL + 'en';
-//     const translationVttTree = await translateVtt(locale, name);
-//     const newTranslation = await (new Model(translationVttTree)).save();
-//     await newTranslation.save();
-//     newData = new Model(engVtt);
-//     await newData.save();
-
-//     res.status(200).send();
-//   } catch(err) {
-
-//   }
-// })
 app.get('/movie_words/:parsedSubtitleId', async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req)
@@ -178,16 +160,19 @@ app.get('/movie_words/:parsedSubtitleId', async (req, res) => {
     const userWords = user?.words || []
     let movieWords
     try {
-      movieWords = (await subtitles_model.findById(parsedSubtitleId).select({ usedLemmas: 1 })).usedLemmas
-      console.log('movieWords?.length', movieWords?.length)
+      console.log('parsedSubtitleId requested', parsedSubtitleId)
+      const movieSubtitle = await subtitles_model.findById(parsedSubtitleId);
+      movieWords = movieSubtitle.subtitles.reduce((acc, item) => acc.concat(item.usedWords), [])
+
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
+      console.error('Could not fetch words: ', err.code, err.message)
       return res.status(404).send(err.message)
     }
-    const userWordsMap = {}; userWords.forEach(item => { userWordsMap[item.lemma] = item });
-    const movieWordsWithoutUserWords = movieWords.filter(item => item && !userWordsMap[item.lemma])
-
-    res.status(200).send(movieWordsWithoutUserWords)
+    const userWordsMap = userWords.reduce((acc, item) => (acc[item] = item, acc), {})
+    const movieWordsWithoutUserWords = movieWords.filter(item => (item && !Number(item) && !userWordsMap[item]))
+    const movieWordsUnduplicated = Object.keys(movieWordsWithoutUserWords.reduce((acc, item) => (acc[item] = item, acc), {}))
+    res.status(200).send(movieWordsUnduplicated)
   } catch (err) {
     res.status(500).send(err.message)
   }
@@ -264,9 +249,6 @@ app.get('/subtitles', async (req, res) => {
       subtitlesVttPath = path.join(__dirname, 'files', 'movieFiles', `${name}.${locale || defaultTranslateLanguage}.subtitles.json`)
     }
     console.log('subtitlesVttPath', subtitlesVttPath)
-    // if (!fs.existsSync(subtitlesVttPath) && version === 'translate') {
-    //   await translateVtt(locale, name)
-    // }
     let subtitlesVtt;
     try {
       if (subtitlesVttPath.indexOf('.vtt') !== -1) {
@@ -335,7 +317,6 @@ function createFileRoute(app, folder) {
 
     try {
       const fileContent = await fsPromises.readFile(fullPath);
-      console.log('fullPath', fullPath)
 
       // Determine the file type based on the extension
       const fileExtension = path.extname(fullPath).toLowerCase();

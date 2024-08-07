@@ -101,9 +101,9 @@ async function prepareSubtitleTranslations(
   if (!mediaInfo) {
     console.error('mediaInfo missing at prepareSubtitleTranslations')
   }
-  console.log('STARTING...')
+  console.log(`Translating to ${translateLanguage} title: ${mediaInfo.title} `)
   try {
-    const subtitlesVttPath = path.join(contentFolder, `${mediaInfo?.title}.${mediaInfo?.mediaLang || 'en'}.vtt`);
+    const subtitlesVttPath = path.resolve(path.join(contentFolder, `${mediaInfo?.title}.${mediaInfo?.mediaLang || 'en'}.vtt`));
 
     if (!subtitles) {
       console.log('mediaInfo.parsedSubtitleId', mediaInfo.parsedSubtitleId)
@@ -112,7 +112,7 @@ async function prepareSubtitleTranslations(
       subtitles = fromVtt(subtitlesVtt, 'ms');
       console.log('NO SUBTITLES at', mediaInfo?.title)
     }
-    const temp_file_save_path = `${contentFolder}/${mediaInfo?.title}.${translateLanguage}.temp.subtitles.json`
+    const temp_file_save_path = path.resolve(`${contentFolder}/${mediaInfo?.title}.${translateLanguage}.temp.subtitles.json`)
     const inputPrompt = {
       mediaLang: mediaInfo?.mediaLang || 'en',
       translateLanguage
@@ -121,8 +121,7 @@ async function prepareSubtitleTranslations(
     let itemsToProcess = []
     const existingProcessedSubtitles = fs.existsSync(temp_file_save_path) ? require(temp_file_save_path) : []
     console.log("existingProcessedSubtitles.length", existingProcessedSubtitles.length)
-    const existingProcessedSubtitlesMap = {}
-    existingProcessedSubtitles?.forEach(item => { existingProcessedSubtitlesMap[item.id] = item })
+    const existingProcessedSubtitlesMap = existingProcessedSubtitles.reduce(acc, item => (acc[item.id] = item, acc), {})
     let count = 0
     console.log('subtitles - ' + mediaInfo?.title, subtitles?.length);
     let index = -1
@@ -159,7 +158,7 @@ async function prepareSubtitleTranslations(
             const newSubtitle = await subtitles_model.create({
               mediaTitle: mediaInfo?.title,
               title: translateLanguage,
-              mediaLang: mediaInfo.mediaLang || 'en',
+              mediaLang: mediaInfo.mediaLang,
               translateLang: translateLanguage,
               mediaId: mediaInfo._id,
               subtitles: processedTranslations

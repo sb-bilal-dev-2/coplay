@@ -23,12 +23,14 @@ const initCRUDAndDatabase = (ownApp) => {
       app.use(cors({
         origin: '*'
       }));
-      app.listen(8080, () => {
-        console.log(`Server is running on 8080 ${8080}`);
+      app.listen(7070, () => {
+        console.log(`Server is running on 7070 ${7070}`);
       });
     }
   }
-  mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PWD}@cluster0.lwg2plw.mongodb.net/?retryWrites=true&w=majority`);
+  const mongooseConnectionUri = `mongodb+srv://${DB_USER}:${DB_PWD}@cluster0.lwg2plw.mongodb.net/?retryWrites=true&w=majority`
+  console.log('Mongoose URI: ' + mongooseConnectionUri)
+  mongoose.connect(mongooseConnectionUri);
   return {
     app,
     mongoose,
@@ -60,8 +62,14 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
   const DEFAULT_ITEM_LIMIT = 20;
   app.get(`/${uri}`, async (req, res) => {
     // Retrieve data from the database
+    console.log("req.headers", req.headers)
+
     try {
       const filterQuery = getFilterFromQuery(req.query)
+      if (req.headers.learninglanguage) {
+        filterQuery.mediaLang = req.headers.learninglanguage
+      }
+      console.log('filterQuery', filterQuery)
       let query = Model.find(filterQuery);
 
       // Search functionality

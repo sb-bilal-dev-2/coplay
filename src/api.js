@@ -5,11 +5,12 @@ const USE_LOCALHOST_SERVER = process.env.NODE_ENV === 'development'
 export const BASE_SERVER_URL = USE_LOCALHOST_SERVER ? process.env.REACT_APP_BASE_URL_LOCALHOST : process.env.REACT_APP_BASE_URL; // Replace with your actual base URL
 
 export const api = () => {
+    const token = localStorage.getItem('token')
     return axios.create({
         baseURL: BASE_SERVER_URL,
         headers: {
-            learningLanguage: 'en',
-            Authorization: "Bearer " + localStorage.getItem('token')
+            learningLanguage: localStorage.getItem('learningLanguage') || 'en',
+            Authorization: token ? "Bearer " : undefined 
         }
     })
 }
