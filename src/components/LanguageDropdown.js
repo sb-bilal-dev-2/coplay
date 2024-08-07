@@ -147,7 +147,7 @@ const LanguageDropdown = ({ selectedLanguage }) => {
     setSelectedOption(option);
     setIsOpen(false);
     localStorage.setItem("learningLanguage", option.iso);
-  }
+  };
 
   return (
     <div ref={dropdownRef}>
@@ -169,8 +169,8 @@ const LanguageDropdown = ({ selectedLanguage }) => {
         )}
       </div>
 
-      {isOpen ? (
-        !user ? (
+      {!user ? (
+        isOpen ? (
           <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
             <div className="flex justify-between items-center">
               <i
@@ -196,37 +196,37 @@ const LanguageDropdown = ({ selectedLanguage }) => {
               />
             </div>
           </div>
-        ) : (
-          <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
-            <div className="flex justify-between items-center">
-              <i
-                class="fa-solid fa-x  cursor-pointer"
-                onClick={() => toggleDropdown()}
-              ></i>
-            </div>
-            <div className="w-60 m-auto mt-10">
-              <p className="font-bold mb-1 ">{t("want to learn")}:</p>
-              {LANGUAGES.map((option) => (
-                <li
-                  key={option.id}
-                  className={`${
-                    localLearningLanguage === option.iso
-                      ? "border-yellow-400"
-                      : "border-gray-500"
-                  } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
-                  onClick={() => handleLangLocal(option)}
-                >
-                  <img
-                    alt="flag"
-                    src={option.flag}
-                    className="w-6 h-6 overflow-hidden rounded-full mr-4"
-                  />
-                  <span>{option.label}</span>
-                </li>
-              ))}
-            </div>
+        ) : null
+      ) : isOpen ? (
+        <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
+          <div className="flex justify-between items-center">
+            <i
+              class="fa-solid fa-x  cursor-pointer"
+              onClick={() => toggleDropdown()}
+            ></i>
           </div>
-        )
+          <div className="w-60 m-auto mt-10">
+            <p className="font-bold mb-1 ">{t("want to learn")}:</p>
+            {LANGUAGES.map((option) => (
+              <li
+                key={option.id}
+                className={`${
+                  localLearningLanguage === option.iso
+                    ? "border-yellow-400"
+                    : "border-gray-500"
+                } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
+                onClick={() => handleLangLocal(option)}
+              >
+                <img
+                  alt="flag"
+                  src={option.flag}
+                  className="w-6 h-6 overflow-hidden rounded-full mr-4"
+                />
+                <span>{option.label}</span>
+              </li>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       <ChooseLanguageModal
