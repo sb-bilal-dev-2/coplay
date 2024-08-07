@@ -5,6 +5,9 @@ import "./LanguageModal.css";
 import { motion } from "framer-motion";
 import useAuthentication from "../containers/Authentication.util";
 import useRequests from "../useRequests";
+import { updateUser } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import { useRequestUserWordLists } from "../helper/useUserWords";
 
 export default function Onboarding() {
   const [show, setShow] = useState();
@@ -12,10 +15,20 @@ export default function Onboarding() {
   const { i18n, t } = useTranslation();
   const [step, setStep] = useState(0);
   const { user: userIdAndEmail } = useAuthentication();
+  const { getUserWords } = useRequestUserWordLists();
   const { putItems } = useRequests("users");
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
 
   const nextStep = () => setStep((prevStep) => Math.min(prevStep + 1, 2));
   const prevStep = () => setStep((prevStep) => Math.max(prevStep - 1, 0));
+
+  useEffect(() => {
+    if (!user) {
+      let fetchUser = getUserWords();
+      dispatch(updateUser(fetchUser));
+    }
+  }, []);
 
   const handleLearningLanguage = (option) => {
     let newUserInfo;
@@ -32,13 +45,16 @@ export default function Onboarding() {
       },
     ]);
 
+    dispatch(updateUser({ ...user, learningLanguages: [option.iso] }));
+
     localStorage.setItem("learningLanguage", option.iso);
   };
 
   const handleNativeLanguage = (option) => {
     let newUserInfo;
 
-    newUserInfo = { mainLanguage: option.iso };
+    newUserInfo = { ...user, mainLanguage: option.iso };
+
     putItems([
       {
         email: userIdAndEmail.email,
@@ -46,6 +62,8 @@ export default function Onboarding() {
         ...newUserInfo,
       },
     ]);
+
+    // dispatch(updateUser(newUserInfo));
 
     i18n.changeLanguage(option.iso);
     localStorage.setItem("mainLanguage", option.iso);
@@ -97,8 +115,8 @@ export default function Onboarding() {
                     localMainLanguage === option.iso
                       ? "border-yellow-500"
                       : "border-gray-500"
-                  } inline-block p-2 mr-4 border-2 rounded-xl cursor-pointer hover:bg-orange-400 hover:text-white transition-colors`}
-                  onClick={() => handleNativeLanguage(option.iso)}
+                  } inline-block p-2 mr-4 border-2 rounded cursor-pointer hover:bg-orange-400 hover:text-white transition-colors`}
+                  onClick={() => handleNativeLanguage(option)}
                 >
                   {option.label}
                 </span>
@@ -122,7 +140,7 @@ export default function Onboarding() {
                     learningLanguage === option.iso
                       ? "border-yellow-500"
                       : "border-gray-500"
-                  } flex items-center p-2 mt-4 border-2 border-gray-400 rounded-xl cursor-pointer  hover:text-white transition-colors`}
+                  } flex items-center p-2 mt-4 border-2 border-gray-400 rounded cursor-pointer  hover:text-white transition-colors`}
                   onClick={() => handleLearningLanguage(option)}
                 >
                   <img
@@ -141,7 +159,7 @@ export default function Onboarding() {
     }
   };
 
-  if(!show) return null;
+  if (!show) return null;
 
   return (
     <div className="z-50 min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center">

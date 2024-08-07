@@ -139,7 +139,6 @@ const StickyHeader = ({ type = "primary", authPage }) => {
             <LanguageDropdown
               name="learningLanguages"
               selectedLanguage={learningLanguage ? learningLanguage : "en"}
-              learningLanguages
             />
 
             <div className="user-menu" onClick={handleNavMenuToggle}>

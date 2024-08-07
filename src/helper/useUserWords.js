@@ -31,5 +31,5 @@ export function useRequestUserWordLists(cancelRequest) {
     }
   }, []);
 
-  return { learnedList, learningList, repeatingList };
+  return { learnedList, learningList, repeatingList, getUserWords };
 }
