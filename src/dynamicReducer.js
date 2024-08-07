@@ -112,7 +112,7 @@ initDynamicSlice('movies');
 
 export const useDynamicReducer = (uri) => {
   const dispatch = useDispatch();
-  const { items, loading, error } = useSelector(state => (console.log('state.dynamicReducers', state[uri]), state[uri]));
+  const { items, loading, error } = useSelector(state => state[uri]);
   const { getItems, putItems, deleteItem } = dynamicReducerActions[uri];
 
   useEffect(() => {

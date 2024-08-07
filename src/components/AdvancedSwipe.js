@@ -142,6 +142,7 @@ function AdvancedSwipe({
     // }
   }
 }) {
+  const mainLang = 'en'
   const reversedList = useMemo(() => initialList.reverse(), [initialList]);
   const list = reversed ? reversedList : initialList;
   const { t } = useTranslation();
@@ -151,15 +152,17 @@ function AdvancedSwipe({
   const currentIndexRef = useRef(currentIndex);
   const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState({});
   const requestWordInfo = async () => {
+    console.log('list', list)
     const next10Items = list.slice(currentIndex, currentIndex + 10)
+    console.log('next10Items', next10Items)
     const itemsToRequest = next10Items.filter(item => !wordInfosByTheWordMap[item])
-
+    // console.log('wordInfoLemmas', await (api().get('/wordInfoLemmas?mainLang=en&the_word=' + itemsToRequest[0])))
     const newWordInfos = await Promise.all(itemsToRequest.map(async (item) => {
-      const wordInfo = (await (api().get('/wordInfoLemmas?the_word=' + item))).data.results[0]
+      const wordInfo = (await (api().get(`/wordInfoLemma?mainLang=${mainLang}&the_word=` + item))).data
       return wordInfo
-    }))
+    }).map(prms => prms.catch((err) => console.log('err', err, err.response.status))))
     console.log('newWordInfos', newWordInfos)
-    newWordInfos.filter(item => item).forEach((item) => (wordInfosByTheWordMap[item.the_word]))
+    newWordInfos.filter(item => item).forEach((item) => (wordInfosByTheWordMap[item.the_word] = item))
     set_wordInfosByTheWordMap(wordInfosByTheWordMap)
   };
   const [fliped, setFliped] = useState(false);
@@ -242,6 +245,8 @@ function AdvancedSwipe({
       <h1 className="mb-10">{title}</h1>
       <div className="cardContainer">
         {list.map((character, index) => {
+          const wordInfo = wordInfosByTheWordMap[character]
+          console.log('wordInfo ' + character, wordInfo)
           if (index > currentIndex - 5 && index < currentIndex + 5) {
             return (
               <TinderCard
@@ -273,7 +278,7 @@ function AdvancedSwipe({
                     <div className="bg-green-100 w-full" onClick={toggleCard}>
                       <h3
                         style={{ color: "green" }}
-                        className="text-center relative w-full m-auto cursor-pointer"
+                        className="text-center relative w-full m-auto cursor-pointer text-4xl py-5 hover:opacity-90"
                       >
                          {typeof character === 'string' ? character : character?.lemma}
                       </h3>
@@ -286,8 +291,19 @@ function AdvancedSwipe({
                     onClick={toggleCard}
                   >
                     <div class="border-2 border-sky-300 rounded-md h-full p-4">
+                      {wordInfo?.the_word_translations && wordInfo?.the_word_translations['en'] &&
+                        <p className="text-center text-gray-500 font-bold">
+                          <b>en:</b> {wordInfo?.the_word_translations['en']}
+                        </p>                    
+                      }
                       <p className="text-center text-gray-500 font-bold">
-                        description description description
+                        <b>Definition:</b> {wordInfo?.shortDefinition}
+                      </p>
+                      <p className="text-center text-gray-500 font-bold">
+                        <b>Short Explanation:</b> {wordInfo?.shortExplanation}
+                      </p>
+                      <p className="text-center text-gray-500 font-bold">
+                        <b>Pronounciation:</b> {wordInfo?.pronounciation}
                       </p>
                     </div>
                   </div>

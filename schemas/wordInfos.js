@@ -15,7 +15,7 @@ const schema = new Schema({
   rootWord: String,
   functions: [String],
   pronounciation: String,
-  shortExaplanation: String,
+  shortExplanation: String,
   shortDefinition: String,
   mistyped: Boolean,
   slang: Boolean,
@@ -44,6 +44,9 @@ const schema = new Schema({
   ],
   images: [String],
   descriptiveImages: [String],
+  the_word_translations: Schema.Types.Mixed,
+  shortExplanation_translations: Schema.Types.Mixed,
+  shortDefinition_translations: Schema.Types.Mixed,
   // pronounciations: {
   //   type: String,
   //   required: true,

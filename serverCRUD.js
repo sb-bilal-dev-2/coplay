@@ -62,14 +62,14 @@ const createCRUDEndpoints = (uri, model, requireAuth) => {
   const DEFAULT_ITEM_LIMIT = 20;
   app.get(`/${uri}`, async (req, res) => {
     // Retrieve data from the database
-    console.log("req.headers", req.headers)
+    // console.log("req.headers", req.headers)
 
     try {
       const filterQuery = getFilterFromQuery(req.query)
       if (req.headers.learninglanguage) {
         filterQuery.mediaLang = req.headers.learninglanguage
       }
-      console.log('filterQuery', filterQuery)
+      // console.log('filterQuery', filterQuery)
       let query = Model.find(filterQuery);
 
       // Search functionality

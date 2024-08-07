@@ -15,6 +15,8 @@ const { default: mongoose } = require('mongoose');
 const { subtitles_model } = require('./schemas/subtitles');
 const { promptAI } = require('./playground/openai');
 const wordInfos = require('./schemas/wordInfos');
+const { promptWordInfos, processTranslations } = require('./promptWordInfos');
+const { gTranslate } = require('./gTranslate');
 
 // console.log(ip.address())
 writeDevelopmentIPAddress()
@@ -39,62 +41,80 @@ app.get('/hello_world', (req, res) => {
 
 app.get('/occurances_v2', async (req, res) => {
   const word = req.query.lemma;
-  const results = await findSubtitlesWithWord(word, req.query.mediaLang, req.query.limit);
+  const results = await findSubtitlesWithWord(word, req.headers.learninglanguage, req.query.limit);
   res.status(200).send(results)
 })
 
-app.get('/wordInfoLemmas', async (req, res) => {
-  let { the_word, langCode, mainLang } = req.query;
-  let WordInfosModel = mongoose.model(`wordInfos__${langCode}__s`, wordInfos.schema);
-  const wordInfo = WordInfosModel.find({ the_word });
-  const { lemma, translations, romanization } = wordInfo;
-  const update_wordInfo = {}
-  const homonyms = []
-  if (!lemma) {
-    const promptInfos = JSON.parse(await promptAI(lemma))
+app.get('/wordInfoLemma', async (req, res) => {
+  let { the_word, mainLang } = req.query;
+  const { learninglanguage } = req.headers; 
+  console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
+  try {
+    let WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
+    const requestedWordInfos = await WordInfosModel.find({ the_word });
+    console.log('requestedWordInfos', requestedWordInfos)
 
-    if (Array.isArray(promptInfos)) {
-      update_wordInfo = { ...update_wordInfo, ...promptInfos }
-    } else {
-      update_wordInfo = { ...update_wordInfo, ...promptInfos }
+    if (!requestedWordInfos.length) {
+      res.status(404).send('Word info Not found: ' + the_word)
     }
-  }
-  // if (!translations) {
-  //   update_wordInfo.translations = {}
-  // }
-  // if (!translations[mainLang]) {
-  //   update_wordInfo.translations[mainLang] = requestTranslation(the_word)
-  // }  
 
-  // if (shouldRomanize && !romanization) {
-  //   update_wordInfo.romanization = await requestRomanization(the_word)
-  // }
-  
-  // const updated_wordInfo = await WordInfosModel.findOneAndUpdate(update_word)
-  const updated_wordInfo = update_wordInfo
+    const wordInfo = requestedWordInfos[0]
+    let updatedWordInfo = wordInfo;
+    if (!wordInfo.shortDescription) {
+      console.log('wordInfo.shortDescription')
+      if (!updatedWordInfo.the_word_translations) {
+        updatedWordInfo.the_word_translations = {}
+      }
+      console.log('updatedWordInfo 1', updatedWordInfo)
+      if (!updatedWordInfo.the_word_translations[mainLang]) {
+        updatedWordInfo.the_word_translations[mainLang] = await gTranslate(wordInfo.the_word, mainLang)
+      }
+      const updatedWordInfosKeys = (await promptWordInfos(learninglanguage, [wordInfo.the_word]))[0]
+      console.log('updatedWordInfosKeys 10', updatedWordInfosKeys)
+      Object.keys(updatedWordInfosKeys).map(updatedKey => {
+        console.log('updatedKey', updatedKey, updatedWordInfosKeys[updatedKey])
+        updatedWordInfo[updatedKey] = updatedWordInfosKeys[updatedKey]
+      })
+    }
+    console.log('updatedWordInfo 2', updatedWordInfo)
 
-  // await Promise.all(homonyms.map(item => ({ ...item, romanization: requestRomanization(item.the_word)})).map(homonym => WordInfosModel.create(homonym)))
-  let lemmaInfo = null;
-  if (updated_wordInfo.isLemma) {
-    lemmaInfo = updated_wordInfo
-  } else {
-    lemmaInfo = WordInfosModel.findOneAndUpdate({ lemma: updated_wordInfo.lemma }, { push$: { inflictions: updated_wordInfo._id } })
+    if (mainLang !== 'en' && wordInfo.shortDescription && (!wordInfo.shortDescription_translations || !wordInfo.shortDescription_translations[mainLang])) {
+      console.log('wordInfo.shortDescription')
+
+      const translationKeysMap = await processTranslations(learninglanguage, mainLang, [wordInfo])
+      const translationKeys = translationKeysMap[wordInfo.the_word] //
+      Object.keys(translationKeys).map((translationKey) => {
+        if (!updatedWordInfo[translationKey]) {
+          updatedWordInfo[translationKey] = {}
+        }
+        updatedWordInfo[translationKey][mainLang] = translationKeys[translationKey]
+      })
+    }
+    console.log('updatedWordInfo 3', updatedWordInfo)
+    if (updatedWordInfo.shortExaplanation) {
+      shortExaplanation.shortExplanation = updatedWordInfo.shortExaplanation
+    }
+    if (!wordInfo.shortDescription || wordInfo.translations) {
+      await WordInfosModel.findByIdAndUpdate(wordInfo._id, updatedWordInfo)
+    }
+    res.status(200).send(updatedWordInfo)  
+  } catch (err) {
+    console.log('err', err)
+    res.status(500)
   }
-  res.status(200).send(lemmaInfo)
-  // should respond with lemma word
 })
 
 app.get('/movie', (req, res) => {
   const videoPath = getHighestExistingQualityPathForTitle(req.query.name, req.query.quality)
-  console.log(req.query.name)
-  console.log('videoPath', videoPath)
+  // console.log(req.query.name)
+  // console.log('videoPath', videoPath)
   const videoStat = fs.statSync(videoPath);
   const fileSize = videoStat.size;
   const rangeRequest = req.headers.range;
 
   if (rangeRequest) {
     const ranges = range(fileSize, rangeRequest);
-    console.log('ranges', ranges)
+    // console.log('ranges', ranges)
     if (ranges === -1) {
       // 416 Range Not Satisfiable
       res.status(416).send('Requested range not satisfiable');
@@ -348,9 +368,9 @@ function getHighestExistingQualityPathForTitle(title, chosenQuality) {
     }
   }
   const defaultQuality = path.join(__dirname, 'files', 'movieFiles', `/${title}.mp4`)
-  console.log('defaultQuality', defaultQuality)
+  // console.log('defaultQuality', defaultQuality)
   if (fs.existsSync(defaultQuality)) {
-    console.log('returning defaultQuality')
+    // console.log('returning defaultQuality')
     return defaultQuality
   }
 }

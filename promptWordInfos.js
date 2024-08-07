@@ -1,5 +1,5 @@
 const { default: mongoose } = require("mongoose");
-const wordInfos = require("./schemas/wordInfos");
+// const wordInfos = require("./schemas/wordInfos");
 const fs = require("fs");
 const { promptAI, generateImage } = require("./playground/openai");
 const { gTranslate } = require("./gTranslate");
@@ -15,7 +15,7 @@ const SAMPLE_RESPONSE_STRINGIFIED = JSON.stringify({
     rootWord: 'go',
     functions: ['verb', 'noun'],
     pronounciation: 'ɡəʊ',
-    shortExaplanation: 'The word "go" is a verb that generally means to move or travel from one place to another. It can also refer to taking an action, proceeding with something, or functioning in a certain way.',
+    shortExplanation: 'The word "go" is a verb that generally means to move or travel from one place to another. It can also refer to taking an action, proceeding with something, or functioning in a certain way.',
     shortDefinition: 'move from one place to another',
 })
 
@@ -35,12 +35,13 @@ const OPTIONAL_VALUES = JSON.stringify({
 })
 
 const MAIN_PROMPT = {
-    'en': `Give root word and lemma of the given word also 'shortExaplanation' and 'shortDefinition' which are always in english`,
-    'zh_cn': ``,
+    'en': `Give root word and lemma of the given word also 'shortExplanation' and 'shortDefinition' which are always in english.
+    I provided other needed options in OPTIONAL_VALUES and their key naming describes what they are well.`,
+    '': ``,
     '': ``,
 }
-const MOCK_WORD_INFOS = [{ lemma: 'hello', the_word: 'go' }, { lemma: 'go', the_word: 'going' }]
-promptImages([{ lemma: 'hello' }, { lemma: 'turmoil' }, { lemma: 'construction' }, { lemma: 'apathy'}], console.log)
+// const MOCK_WORD_INFOS = [{ lemma: 'hello', the_word: 'go' }, { lemma: 'go', the_word: 'going' }]
+// promptImages([{ lemma: 'hello' }, { lemma: 'turmoil' }, { lemma: 'construction' }, { lemma: 'apathy'}], console.log)
 // processTranslations()
 // promptAI(getWordInfoPromptByLanguage('broken', 'en'))
 // promptWordInfos('en', ['hello', 'broken'])
@@ -68,29 +69,35 @@ async function promptWordInfos(langCode, words) {
                 console.log('wrdInfo', wrdInfo)
                 try {
                     // if (!lemma) {
-                    let responseMessage = promptAI(getWordInfoPromptByLanguage(wrdInfo, langCode))
+                    let responseMessage = await promptAI(getWordInfoPromptByLanguage(wrdInfo, langCode))
                     try {
-                        if (responseMessage.includes("REAL_RESPONSE: ")) {
-                            wordPromptInfo = JSON.stringify(responseMessage.split('REAL_RESPONSE: ')[1])
+                        console.log('response 1', responseMessage)
+                        if (responseMessage?.content?.includes("REAL_RESPONSE: ")) {
+                            console.log('response 2')
+                            const parsableResponse = responseMessage?.content?.split('REAL_RESPONSE: ')[1]
+                            console.log('parsableResponse', parsableResponse)
+
+                            wordPromptInfo = JSON.parse(parsableResponse)
                             console.log('responseMessage', responseMessage)
                         } else {
-                            responseMessage = JSON.stringify(responseMessage)
+                            console.log('response 3')
+                            responseMessage = JSON.parse(responseMessage?.content)
                         }
                     } catch (err) {
-                        throw new Error('InvalidResponse')
+                        throw new Error('InvalidResponse: ' + JSON.stringify(responseMessage))
                     }
                     // wordPromptInfo = await promptAI(getWordInfoPromptByLanguage(the_word, langCode))
                     // }
                 } catch (err) {
                     console.log('error for word: ', wrdInfo)
                     const errorName = handleOpenAIError(err);
-                    if (errorName = 'Network') {
+                    if (errorName.includes('Network')) {
 
-                    } else if (errorName = 'UsageLimit') {
+                    } else if (errorName.includes('UsageLimit')) {
 
-                    } else if (errorName = 'RateLimit') {
+                    } else if (errorName.includes('RateLimit')) {
 
-                    } else if (errorName = 'InvalidResponse') {
+                    } else if (errorName.includes('InvalidResponse')) {
 
                     } else {
 
@@ -100,8 +107,8 @@ async function promptWordInfos(langCode, words) {
                 return { ...wordPromptInfo }
             }))
             processedWords.push(...new_processedWords)
-            const processPath = `./process/newLanguageWords_${langCode}.json`
-            fs.writeFileSync(processPath, JSON.stringify(processedWords, undefined, 2))
+            // const processPath = `./process/newLanguageWords_${langCode}.json`
+            // fs.writeFileSync(processPath, JSON.stringify(processedWords, undefined, 2))
             wordsToRequest = []
         }
 
@@ -117,13 +124,13 @@ async function processTranslations(langCode, mainLang, wordInfos, callback) {
     for (const wordInfo of wordInfos) {
         wordsToReqeust.push(wordInfo)
 
-        if (wordsToReqeust.length === 20) {
+        if (wordsToReqeust.length === 20 || wordsToReqeust.length === wordInfos.length) {
             const newTranslations = await Promise.all(wordsToReqeust.map(
                 async (wordToRequest) => {
-                    const newTranslation = await requestWordTranslation(wordToRequest)
-                    newTranslationsMap[wordToRequest.the_word] = newTranslation
+                    const newTranslatedValues = await requestWordTranslation(wordToRequest)
+                    newTranslationsMap[wordToRequest.the_word] = newTranslatedValues
 
-                    return [wordToRequest.the_word, newTranslation]
+                    return [wordToRequest.the_word, newTranslatedValues]
                 }
             ))
             callback(newTranslations)
@@ -134,14 +141,12 @@ async function processTranslations(langCode, mainLang, wordInfos, callback) {
     return newTranslationsMap
 
     async function requestWordTranslation(wordInfo) {
-        const [lemma, the_word, shortDefinition, shortDescription] = Promise.all([
-            await gTranslate(wordInfo.lemma, mainLang, langCode),
-            await gTranslate(wordInfo.the_word, mainLang, langCode),
+        const [shortDefinition_translations, shortDescription_translations] = Promise.all([
             await openAITranslate(wordInfo.shortDefinition, mainLang, langCode),
             await openAITranslate(wordInfo.shortDescription, mainLang, langCode)
         ])
 
-        return { lemma, the_word, shortDefinition, shortDescription }
+        return { shortDefinition_translations, shortDescription_translations }
     }
 }
 
@@ -188,6 +193,11 @@ REAL_INPUT: ${JSON.stringify(input)}
     return finalPrompt
 }
 
+async function openAITranslate(text, mainLang, textLang) {
+    const translationResponse = await promptAI(`Translate following text to from ${textLang} to ${mainLang} and return { translation: String }. Text: ${text}`)
+    return JSON.parse(translationResponse).translation
+}
+
 /**
  * 
  * @param {*} error 
@@ -231,3 +241,8 @@ const handleOpenAIError = (error) => {
     }
 };
 
+module.exports = {
+    promptWordInfos,
+    promptImages,
+    processTranslations
+}
