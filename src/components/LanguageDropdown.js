@@ -94,7 +94,7 @@ const LanguageDropdown = ({ selectedLanguage }) => {
   const handleOptionClick = (option, name) => {
     setIsOpen(false);
 
-    if (name === "learningLanguages") {
+    if (name === "mainLanguage") {
       chooseNativeLang(option);
     }
 
@@ -218,7 +218,8 @@ const ChooseLanguageModal = ({
   t,
 }) => {
   const user = useSelector((state) => state.user.user);
-  const mainLanguage = localStorage.getItem("mainLanguage");
+  const localMainLangugae = localStorage.getItem("mainLanguage");
+  console.log("mainLanguage", localMainLangugae);
 
   const filteredLanguages = useMemo(() => {
     return LANGUAGES.filter(
@@ -243,7 +244,7 @@ const ChooseLanguageModal = ({
             <span
               key={option.iso}
               className={`${
-                mainLanguage === option.iso
+                localMainLangugae === option.iso
                   ? "border-yellow-400"
                   : "border-gray-500"
               } p-2 mr-4 border-2 rounded-xl cursor-pointer`}
