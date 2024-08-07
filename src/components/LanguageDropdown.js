@@ -17,7 +17,7 @@ export const LANGUAGES = [
   { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
   { id: 1, label: "English", iso: "en", flag: "./USA.webp" },
   { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
-  { id: 3, label: "China", iso: "zh", flag: "./china.png" },
+  { id: 3, label: "Chinese", iso: "zh", flag: "./china.png" },
 ];
 
 export const APP_LANGUAGES = [
@@ -29,7 +29,7 @@ const findFormLanguagesList = (selectedLanguage) => {
   return LANGUAGES.find((lanuage) => lanuage.iso === selectedLanguage);
 };
 
-const LanguageDropdown = ({ selectedLanguage }) => {
+const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
   const { i18n, t } = useTranslation();
   const dropdownRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -120,33 +120,31 @@ const LanguageDropdown = ({ selectedLanguage }) => {
     setIsOpen(false);
 
     let newUserInfo;
-
-    newUserInfo = {
-      learningLanguages: [...user.learningLanguages, option.iso],
-    };
-
-    putItems([
-      {
-        email: userIdAndEmail.email,
-        _id: userIdAndEmail.id,
-        ...newUserInfo,
-      },
-    ]);
-
-    dispatch(
-      updateUser({
-        ...user,
+    const token = localStorage.getItem("token")
+    if (token) {
+      newUserInfo = {
         learningLanguages: [...user.learningLanguages, option.iso],
-      })
-    );
+      };
+
+      putItems([
+        {
+          email: userIdAndEmail.email,
+          _id: userIdAndEmail.id,
+          ...newUserInfo,
+        },
+      ]);
+
+      dispatch(
+        updateUser({
+          ...user,
+          learningLanguages: [...user.learningLanguages, option.iso],
+        })
+      );
+    }
 
     localStorage.setItem("learningLanguage", option.iso);
-  };
-
-  const handleLangLocal = (option) => {
-    setSelectedOption(option);
-    setIsOpen(false);
-    localStorage.setItem("learningLanguage", option.iso);
+    console.log('afterLangChange', afterLangChange)
+    if (afterLangChange) afterLangChange()
   };
 
   return (
@@ -168,9 +166,7 @@ const LanguageDropdown = ({ selectedLanguage }) => {
           "Choose language"
         )}
       </div>
-
-      {!user ? (
-        isOpen ? (
+      {isOpen && (
           <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
             <div className="flex justify-between items-center">
               <i
@@ -196,39 +192,7 @@ const LanguageDropdown = ({ selectedLanguage }) => {
               />
             </div>
           </div>
-        ) : null
-      ) : isOpen ? (
-        <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
-          <div className="flex justify-between items-center">
-            <i
-              class="fa-solid fa-x  cursor-pointer"
-              onClick={() => toggleDropdown()}
-            ></i>
-          </div>
-          <div className="w-60 m-auto mt-10">
-            <p className="font-bold mb-1 ">{t("want to learn")}:</p>
-            {LANGUAGES.map((option) => (
-              <li
-                key={option.id}
-                className={`${
-                  localLearningLanguage === option.iso
-                    ? "border-yellow-400"
-                    : "border-gray-500"
-                } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
-                onClick={() => handleLangLocal(option)}
-              >
-                <img
-                  alt="flag"
-                  src={option.flag}
-                  className="w-6 h-6 overflow-hidden rounded-full mr-4"
-                />
-                <span>{option.label}</span>
-              </li>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
+        )}
       <ChooseLanguageModal
         show={showModal}
         toggleModal={toggleModal}
@@ -353,7 +317,7 @@ const LearningLanguages = ({ selectedOption, handleLearningLang }) => {
               selectedOption?.iso === option?.iso
                 ? "border-yellow-400"
                 : "border-gray-500"
-            } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
+            } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80 text-red-200`}
             onClick={() => handleLearningLang(option)}
           >
             <img

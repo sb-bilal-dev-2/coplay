@@ -4,18 +4,18 @@ import "./HomePage.css";
 import HorizontalScrollMenu from "./components/HorizontalScrollMenu";
 import StickyHeader from "./components/StickyHeader";
 import Footer from "./components/Footer";
-import useRequests from "./useRequests";
 import { BASE_SERVER_URL } from "./api";
 import { useTranslation } from "react-i18next";
 import Onboarding from "./components/Onboarding";
 import PWAInstall from "./components/PWAInstall";
+import { useSelector } from "react-redux";
+import { useDynamicReducer } from "./dynamicReducer";
 
 const HomePage = () => {
-  const { items } = useRequests("movies");
-  const { items: wordCollections } = useRequests("wordCollections");
-
-  const movies = items?.filter(item => item.category !== 'Music');
-  const clips = items?.filter(item => item.category === 'Music');
+  const { items: videos } = useDynamicReducer("movies");
+  const { items: wordCollections } = useDynamicReducer("wordCollections");
+  const movies = videos?.filter(item => item.category !== 'Music');
+  const clips = videos?.filter(item => item.category === 'Music');
 
   const { t } = useTranslation();
 

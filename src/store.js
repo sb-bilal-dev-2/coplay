@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
+import { dynamicReducers } from './dynamicReducer'
 
 const initialState = {
     count: 0,
@@ -27,6 +28,8 @@ export const { updateUser, updateGivenUserValues } = userSlice.actions
 export const store = configureStore({
     reducer: {
         user: userSlice.reducer,
+        ...dynamicReducers,
+        // ...dynamicReducers
     },
 })
 

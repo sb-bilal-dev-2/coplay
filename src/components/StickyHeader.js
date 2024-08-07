@@ -7,8 +7,7 @@ import useRequests from "../useRequests";
 import { BASE_SERVER_URL } from "../api";
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from "./LanguageDropdown";
-
-const logoPath = `${process.env.PUBLIC_URL}/logo-black.png`;
+import { useDynamicReducer } from "../dynamicReducer";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -21,10 +20,13 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   // useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
   const handleNavMenuToggle = () => setIsNavMenuVisible(!isNavMenuVisible);
 
-  const { items: movies } = useRequests("movies");
-  const { items: clips } = useRequests("clips");
-  const { items: quizzes } = useRequests("quizzes");
-  const { items: wordCollections } = useRequests("wordCollections");
+  const { items: videoItems, getItems: getVideos } = useDynamicReducer('movies')
+  const { getItems: getWordCollections } = useDynamicReducer('wordCollections')
+  const movies = videoItems?.filter(item => item.category !== 'Music');
+  const clips = videoItems?.filter(item => item.category === 'Music');
+  // const { items: clips } = useRequests("clips");
+  // const { items: quizzes } = useRequests("quizzes");
+  // const { items: wordCollections } = useRequests("wordCollections");
 
   const filterByLabel = (items) => {
     return items?.filter((movie) =>
@@ -43,7 +45,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       } ${type}`}
     >
       <Link to="/" className="relative min-h-max min-w-max">
-        <img class="h-14 w-14" src={logoPath} alt="C Play logo placeholder" />
+        <img class="h-14 w-14" src="logo-black.png" alt="C Play logo placeholder" />
       </Link>
       <div class="flex items-center">
         {!authPage && (
@@ -137,8 +139,8 @@ const StickyHeader = ({ type = "primary", authPage }) => {
             ) : null}
 
             <LanguageDropdown
-              name="learningLanguages"
               selectedLanguage={learningLanguage ? learningLanguage : "en"}
+              afterLangChange={() => (getVideos(), getWordCollections())}
             />
 
             <div className="user-menu" onClick={handleNavMenuToggle}>

@@ -1,5 +1,6 @@
 import { useReducer, useEffect } from 'react';
 import api from './api';
+import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     loading: false,
@@ -47,12 +48,38 @@ const dataReducer = (uri) => (state, action) => {
         requestError,
     }
  */
+// export const dynamicReducers = {
 
-export const reducers = {}
+// }
+// export const dynamicActions = {}
+// init_useRequests_2('wordCollections')
+// function init_useRequests_2(uri) {
+//     const dynamicSlice = createSlice({
+//         name: uri,
+//         initialState,
+//         reducers: {
+//             // 'update' + uri.charAt(0).toUpperCase() + uri.slice(1)
+//             ['get_movies']: async (state, action) => {
+//                 // const response = await api('/movies').get(url, data)
+//                 state.items = action.payload
+//             },
+            
+//         },
+//     })
+
+//     dynamicReducers[uri] = dynamicSlice.reducer
+// }
+
+// const useRequests_2 = (uri) => {
+
+// }
+
+const reducers = {}
 
 const useRequests = (uri) => {
     const reducer = reducers[uri] = dataReducer(uri);
     const [getItemsState, dispatchGet] = useReducer(reducer, initialState);
+    // const itemsState = useSelector((state) => state[uri].items)
     const request = async (method, url, data = null) => {
         try {
             dispatchGet({ type: `${uri}_${method}_REQUEST` });
@@ -89,6 +116,12 @@ const useRequests = (uri) => {
         getItems(); // Fetch initial data
     }, [uri]); // Re-fetch data when URI changes
 
+    // useEffect(() => {
+    //     const [items, setItems] = useState([])
+    // })
+    if (uri === 'movies') {
+        console.log('getItemsState.items', getItemsState.items)
+    }
     return {
         items: getItemsState.items,
         requestLoading: getItemsState.loading,
