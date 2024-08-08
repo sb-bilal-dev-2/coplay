@@ -154,3 +154,16 @@
   background-color: transparent; /* Color of the scrollbar track */
 }
 
+.hide_link {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .hide_in_mobile {
+    display: none;
+  }
+
+  .show_in_mobile {
+    display: block !important;
+  }
+}

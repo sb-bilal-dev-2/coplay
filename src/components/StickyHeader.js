@@ -19,10 +19,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   // useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
   const handleNavMenuToggle = () => setIsNavMenuVisible(!isNavMenuVisible);
 
-  const { items: videoItems, getItems: getVideos } = useDynamicReducer('movies')
-  const { getItems: getWordCollections } = useDynamicReducer('wordCollections')
-  const movies = videoItems?.filter(item => item.category !== 'Music');
-  const clips = videoItems?.filter(item => item.category === 'Music');
+  const { items: videoItems, getItems: getVideos } =
+    useDynamicReducer("movies");
+  const { getItems: getWordCollections } = useDynamicReducer("wordCollections");
+  const movies = videoItems?.filter((item) => item.category !== "Music");
+  const clips = videoItems?.filter((item) => item.category === "Music");
 
   const filterByLabel = (items) => {
     return items?.filter((movie) =>
@@ -41,7 +42,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       } ${type}`}
     >
       <Link to="/" className="relative min-h-max min-w-max">
-        <img class="h-14 w-14" src="logo-black.png" alt="C Play logo placeholder" />
+        <img
+          class="h-14 w-14"
+          src="logo-black.png"
+          alt="C Play logo placeholder"
+        />
       </Link>
       <div class="flex items-center">
         {!authPage && (
@@ -128,7 +133,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
             {!isPricePage ? (
               <Link
                 to="/price_page"
-                className="font-bold p-2 min-h-max min-w-max mr-2"
+                className="font-bold p-2 min-h-max min-w-max mr-2 hide_in_mobile"
               >
                 Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
               </Link>
@@ -196,10 +201,13 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   );
 
   const handleLogout = () => {
-    console.log("REMOVING TOKEN 3")
+    console.log("REMOVING TOKEN 3");
 
     localStorage.removeItem("token");
   };
+
+  const location = useLocation();
+  const isPricePage = location.pathname.includes("price_page");
 
   return (
     <>
@@ -224,6 +232,14 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
               <i class="fa-solid fa-door-open text-gray-400  m-2" />
               <b>{t("sign out")}</b>
             </button>
+          </li>
+          <li className="hide_link show_in_mobile">
+            <Link
+              to="/price_page"
+              className="font-bold p-2 min-h-max min-w-max mr-2"
+            >
+              Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
+            </Link>
           </li>
         </ul>
       )}
