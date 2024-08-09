@@ -7,6 +7,7 @@ import { BASE_SERVER_URL } from "../api";
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from "./LanguageDropdown";
 import { useDynamicReducer } from "../dynamicReducer";
+import { googleLogout } from "@react-oauth/google";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -202,6 +203,12 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   const handleLogout = () => {
     console.log("REMOVING TOKEN 3");
+
+    const isGoogleOuth = localStorage.getItem("googleOuth");
+
+    if (isGoogleOuth) {
+      googleLogout();
+    }
 
     localStorage.removeItem("token");
   };

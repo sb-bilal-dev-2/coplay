@@ -80,7 +80,7 @@ const router = createHashRouter(
 root.render(
   <ErrorBoundary>
     <I18nextProvider i18n={i18n}>
-      <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <GoogleOAuthProvider clientId="198137546875-ivuds0gm94nojrpdrbcsiqbmm3j0co6i.apps.googleusercontent.com">
         <Provider store={store}>
           <RouterProvider router={router} />
         </Provider>
