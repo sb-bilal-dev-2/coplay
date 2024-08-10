@@ -213,7 +213,6 @@ const ChooseLanguageModal = ({
 }) => {
   const user = useSelector((state) => state.user.user);
   const localMainLangugae = localStorage.getItem("mainLanguage");
-  console.log("mainLanguage", localMainLangugae);
 
   const filteredLanguages = useMemo(() => {
     return LANGUAGES.filter(

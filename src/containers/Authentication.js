@@ -6,7 +6,6 @@ import StickyHeader from "../components/StickyHeader";
 import { Link } from "react-router-dom";
 import { GoogleAuth } from "../components/GoogleAuth";
 import SecondaryButton from "../components/SecondaryButton";
-import LanguageDropdown from "../components/LanguageDropdown";
 
 const Authentication = () => {
   const { screen } = useParams();
@@ -50,6 +49,7 @@ const Authentication = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    console.log("login 1");
     login(() => navigate("/"));
   };
 
@@ -66,63 +66,65 @@ const Authentication = () => {
   };
 
   const renderSignUpForm = () => (
-    <form className="flex flex-col items-center" onSubmit={handleSignUp}>
-      {/* <label>
+    <div className="flex flex-col items-center">
+      <form className="flex flex-col items-center" onSubmit={handleSignUp}>
+        {/* <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "username") && 'input-error'} input mb-2`} placeholder="Username" type="text" name="username" value={formData.username || ''} onChange={handleInputChange} />
       </label> */}
-      <label>
-        <input
-          className={`${
-            Array.isArray(error) &&
-            !!error.find((err) => err.name === "email") &&
-            "input-error"
-          } input mb-2`}
-          placeholder="Email"
-          type="email"
-          name="email"
-          value={formData.email || ""}
-          onChange={handleInputChange}
+        <label>
+          <input
+            className={`${
+              Array.isArray(error) &&
+              !!error.find((err) => err.name === "email") &&
+              "input-error"
+            } input mb-2`}
+            placeholder="Email"
+            type="email"
+            name="email"
+            value={formData.email || ""}
+            onChange={handleInputChange}
+          />
+        </label>
+        <label>
+          <input
+            className={`${
+              Array.isArray(error) &&
+              !!error.find((err) => err.name === "password") &&
+              "input-error"
+            } input mb-2`}
+            placeholder="Password"
+            type="password"
+            name="password"
+            value={formData.password || ""}
+            onChange={handleInputChange}
+          />
+        </label>
+        <label>
+          <input
+            className={`${
+              Array.isArray(error) &&
+              !!error.find((err) => err.name === "passwordRepeat") &&
+              "input-error"
+            } input mb-2`}
+            placeholder="Repeat Password"
+            type="password"
+            name="passwordRepeat"
+            value={formData.passwordRepeat || ""}
+            onChange={handleInputChange}
+          />
+        </label>
+        <p className="mt-2">
+          Already have an account? <Link to="/auth/login">Login</Link>
+        </p>
+        <SecondaryButton
+          title="Sign Up"
+          type="submit"
+          disabled={isLoading}
+          button
         />
-      </label>
-      <label>
-        <input
-          className={`${
-            Array.isArray(error) &&
-            !!error.find((err) => err.name === "password") &&
-            "input-error"
-          } input mb-2`}
-          placeholder="Password"
-          type="password"
-          name="password"
-          value={formData.password || ""}
-          onChange={handleInputChange}
-        />
-      </label>
-      <label>
-        <input
-          className={`${
-            Array.isArray(error) &&
-            !!error.find((err) => err.name === "passwordRepeat") &&
-            "input-error"
-          } input mb-2`}
-          placeholder="Repeat Password"
-          type="password"
-          name="passwordRepeat"
-          value={formData.passwordRepeat || ""}
-          onChange={handleInputChange}
-        />
-      </label>
-      <p className="mt-2">
-        Already have an account? <Link to="/auth/login">Login</Link>
-      </p>
-      <SecondaryButton
-        title="Sign Up"
-        type="submit"
-        disabled={isLoading}
-        button
-      />
+      </form>
       <GoogleAuth />
-    </form>
+    </div>
   );
 
   const renderConfirmSignUpForm = () => (
@@ -157,7 +159,7 @@ const Authentication = () => {
   );
 
   const renderLoginForm = () => (
-    <>
+    <div className="flex flex-col items-center">
       <form className="flex flex-col items-center" onSubmit={handleLogin}>
         <p className="mt-2 text-center text-white">
           Don't have an account? <Link to="/auth/signup">Sign up</Link>
@@ -199,9 +201,9 @@ const Authentication = () => {
           type="submit"
           button
         />
-        <GoogleAuth />
       </form>
-    </>
+      <GoogleAuth />
+    </div>
   );
 
   const renderForgotPasswordForm = () => (

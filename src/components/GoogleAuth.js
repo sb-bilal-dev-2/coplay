@@ -1,26 +1,46 @@
-import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import { useGoogleLogin } from "@react-oauth/google";
+import api from "../api";
+import {updateUser} from "../store"
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 
 /**
  * Console @see https://console.cloud.google.com/apis/credentials
  */
 
 export const GoogleAuth = () => {
-  const login = useGoogleLogin({
-    onSuccess: (credentialResponse) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
+  const loginAuth = useGoogleLogin({
+    onSuccess: async (credentialResponse) => {
       console.log("Login Success:", credentialResponse);
-      localStorage.setItem("googleOuth", true);
+      console.log("Access Token:", credentialResponse.access_token);
+
+      try {
+        const response = await api().post("/auth/google", {
+          token: credentialResponse.access_token,
+        });
+
+        console.log("user google", response);
+
+        dispatch(updateUser(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        navigate("/")
+      } catch (error) {
+        console.log("Error get user from google", error);
+      }
     },
     onError: () => {
       console.log("Login Failed");
     },
   });
+
   return (
     <div className="google_login">
       <button
-        onClick={() => login()}
-        className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        onClick={() => loginAuth()}
+        className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
         <img
           className="w-5 h-5 mr-2"

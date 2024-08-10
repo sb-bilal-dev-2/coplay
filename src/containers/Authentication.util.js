@@ -104,6 +104,7 @@ const useAuthentication = (missUserRequest) => {
         const data = await response.json();
 
         setToken(data.token);
+
         localStorage.setItem('token', data.token);
         callback()
       }

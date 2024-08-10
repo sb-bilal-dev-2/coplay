@@ -202,8 +202,6 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   );
 
   const handleLogout = () => {
-    console.log("REMOVING TOKEN 3");
-
     const isGoogleOuth = localStorage.getItem("googleOuth");
 
     if (isGoogleOuth) {
