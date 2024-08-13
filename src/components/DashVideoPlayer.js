@@ -78,7 +78,7 @@ function DashVideoPlayer({ title, currentItem }) {
   );
 }
 
-function SubtitlePanel({ title, currentItem, fullScreenContainer, videoRef, currentTime }) {
+function SubtitlePanel({ title, currentItem, videoRef, currentTime }) {
   // const isMobile = useMobileDetect();
   const [subtitleSetting, setSubtitleSetting] = useState(false);
   const [translateSetting, setTranslateSetting] = useState(false);
@@ -89,11 +89,11 @@ function SubtitlePanel({ title, currentItem, fullScreenContainer, videoRef, curr
   const [translateLangSetting, setTranslateLangSetting] = useState(
     translateLangSubtitleLocal || "uz"
   );
-
+    // console.log('translateLangSubtitleLocal', translateLangSubtitleLocal)
   const [addKeyDownListener, removeKeyDownListener] = useKeyDown({
     videoRef,
     justRewindedTimeout: { current: null },
-    fullScreenContainer,
+    // fullScreenContainer,
     volumeInfoShowTimeout: { current: null },
   });
 
@@ -101,18 +101,18 @@ function SubtitlePanel({ title, currentItem, fullScreenContainer, videoRef, curr
   const subtitlePosition = 0.35;
   const localSubtitleScale = 1.6;
   const localSubtitlePosition = 0.3;
-  const volumePercent = videoRef.current?.volume * 100;
+  // const volumePercent = videoRef.current?.volume * 100;
 
 
   const translatedSubtitleInfo = currentItem?.subtitleInfos?.find(
     (item) => item.title === translateLangSetting
   );
 
-  const handleTap = useHandleTap(
-    videoRef,
-    fullScreenContainer,
-    addKeyDownListener
-  );
+  // const handleTap = useHandleTap(
+  //   videoRef,
+  //   fullScreenContainer,
+  //   addKeyDownListener
+  // );
 
 
   return (

@@ -76,11 +76,11 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
               </span>
             ) : null}
 
-            <li key={_id}>{label}</li>
+            <div className="list-card__title">{label}</div>
           </Link>
         ))}
       </ul>
-      {!hasScrolledEnd && (
+      {!hasScrolledEnd && items.length !== 1 && (
         <button
           style={{
             background:

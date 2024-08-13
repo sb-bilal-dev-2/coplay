@@ -4,7 +4,7 @@ import api from '../../api'
 import { useTranslation } from "react-i18next";
 
 
-export default function MovieWordCards({ parsedSubtitleId, userId }) {
+export default function MovieWordCards({ parsedSubtitleId, userId, mediaLang }) {
     const [lemmas, setLemmas] = useState([])
     const [error, set_error] = useState('')
     console.log('userId', userId)
@@ -30,13 +30,13 @@ export default function MovieWordCards({ parsedSubtitleId, userId }) {
     const handleSwipeTop = () => {
 
     }
-    const handleSwipeLeft = async (lemma) => {
-        const newWord = { lemma, repeatCount: 7, repeatTime: Date.now() }
+    const handleSwipeLeft = async (the_word) => {
+        const newWord = { the_word, repeatCount: 7, repeatTime: Date.now() }
         await api().post('/self_words', [newWord])
 
     }
-    const handleSwipeRight = async (lemma) => {
-        const newWord = { lemma, repeatCount: 0, repeatTime: Date.now() }
+    const handleSwipeRight = async (the_word) => {
+        const newWord = { the_word, repeatCount: 0, repeatTime: Date.now() }
         await api().post('/self_words', [newWord])
     }
     useEffect(() => {
@@ -45,14 +45,15 @@ export default function MovieWordCards({ parsedSubtitleId, userId }) {
 
     return (
       <div>
-        {!!lemmas.length && (
+        {!!lemmas.length && mediaLang && (
           <AdvancedSwipe
-            list={lemmas}
+            list={lemmas.reverse()}
             onSwipeBottom={handleSwipeBottom}
             onSwipeTop={handleSwipeTop}
             onSwipeLeft={handleSwipeLeft}
             onSwipeRight={handleSwipeRight}
             title={t("movie word list")}
+            mediaLang={mediaLang}
           />
         )}
         {!!error?.length && error}

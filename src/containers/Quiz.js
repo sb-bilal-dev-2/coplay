@@ -37,9 +37,9 @@ const Quiz = () => {
   const [animatePause, set_animatePause] = useState(false);
   const navigate = useNavigate()
 
-  const requestLemmaOccurances = async (lemma) => {
+  const requestLemmaOccurances = async (the_word) => {
     try {
-      const wordData = (await api().get(`/occurances_v2?lemma=${lemma}&limit=5`)).data;
+      const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=5`)).data;
       console.log("wordData", wordData);
       if (wordData.length) {
         set_occurances(wordData);
@@ -62,8 +62,8 @@ const Quiz = () => {
       videoRef.current.pause()
     }
     set_practicingWordIndex(practicingWordIndex + 1);
-    console.log("nextPracticingWord?.lemma", nextPracticingWord?.lemma);
-    await requestCurrentLemmaInfo(nextPracticingWord?.lemma);
+    console.log("nextPracticingWord?.the_word", nextPracticingWord?.the_word);
+    await requestCurrentLemmaInfo(nextPracticingWord?.the_word);
   };
 
   const [error, set_error] = useState();
@@ -72,11 +72,11 @@ const Quiz = () => {
   const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
   const videoRef = useRef();
   const inflections = currentLemmaInfo?.inflections.join(", ") || "";
-  const requestCurrentLemmaInfo = async (newCurrentLemma) => {
+  const requestCurrentLemmaInfo = async (newCurrent_the_word) => {
     let newCurrentLemmaInfo;
     try {
-      requestLemmaOccurances(newCurrentLemma);
-      const response = await api().get(`/wordInfos?lemma=${newCurrentLemma}`);
+      requestLemmaOccurances(newCurrent_the_word);
+      const response = await api().get(`/wordInfos?lemma=${newCurrent_the_word}`);
       console.log("response", response);
 
       newCurrentLemmaInfo = response?.data?.results[0];
@@ -112,14 +112,14 @@ const Quiz = () => {
       console.log("err: ", err);
     }
 
-    let newCurrentLemma = userWords[0]?.lemma;
+    let newCurrent_the_word = userWords[0]?.the_word;
 
     if (word) {
-      newCurrentLemma = userWords.find((item) => item.lemma === word)?.lemma
+      newCurrent_the_word = userWords.find((item) => item.the_word === word)?.the_word
     }
-    console.log('newCurrentLemma', newCurrentLemma)
+    console.log('newCurrent_the_word', newCurrent_the_word)
     set_practicingWords(userWords);
-    await requestCurrentLemmaInfo(newCurrentLemma);
+    await requestCurrentLemmaInfo(newCurrent_the_word);
   };
   console.log('practicingWords', practicingWords)
   const playNextOccurance = async () => {
@@ -158,7 +158,7 @@ const Quiz = () => {
   }, [currentVideoSrc, occurances.length]);
   console.log('occurances', occurances)
   const currentOccurance = occurances[playingOccuranceIndex];
-  const currentLemma = currentOccurance?.lemma;
+  const currentLemma = currentOccurance?.the_word;
   const currentInflection = currentOccurance?.inflection || currentLemma;
   const pattern = new RegExp(currentInflection, "i");
   const occuranceMainSubtitle = currentOccurance?.text;

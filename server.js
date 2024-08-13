@@ -17,7 +17,7 @@ const { promptAI } = require('./playground/openai');
 const wordInfos = require('./schemas/wordInfos');
 const { promptWordInfos, processTranslations } = require('./promptWordInfos');
 const { gTranslate } = require('./gTranslate');
-
+const { getOccurancesFromYoutube } = require('./youtubeGetOccurances.js')
 // console.log(ip.address())
 writeDevelopmentIPAddress()
 
@@ -42,6 +42,7 @@ app.get('/hello_world', (req, res) => {
 app.get('/occurances_v2', async (req, res) => {
   const word = req.query.lemma;
   const results = await findSubtitlesWithWord(word, req.headers.learninglanguage, req.query.limit);
+  const youtubeOccurances = await getOccurancesFromYoutube(text, req.headers.learningLanguage, req.query.limit)
   res.status(200).send(results)
 })
 
@@ -60,8 +61,7 @@ app.get('/wordInfoLemma', async (req, res) => {
     }
 
     let updatedWordInfo = wordInfo;
-    if (!wordInfo.shortDescription) {
-      console.log('wordInfo.shortDescription')
+    if (wordInfo && wordInfo.shortDefinition) {
       if (!updatedWordInfo?.the_word_translations) {
         updatedWordInfo.the_word_translations = {}
       }
@@ -78,8 +78,8 @@ app.get('/wordInfoLemma', async (req, res) => {
       console.log('updatedWordInfo 2', updatedWordInfo)
     }
 
-    if (mainLang !== 'en' && wordInfo.shortDescription && (!wordInfo.shortDescription_translations || !wordInfo.shortDescription_translations[mainLang])) {
-      console.log('wordInfo.shortDescription')
+    if (mainLang !== 'en' && wordInfo.shortDefinition && (!wordInfo.shortDefinition_translations || !wordInfo.shortDefinition_translations[mainLang])) {
+      console.log('wordInfo.shortDefinition')
 
       const translationKeysMap = await processTranslations(learninglanguage, mainLang, [wordInfo])
       const translationKeys = translationKeysMap[wordInfo.the_word] //
@@ -91,10 +91,15 @@ app.get('/wordInfoLemma', async (req, res) => {
       })
       console.log('updatedWordInfo 3', updatedWordInfo)
     }
-    if (updatedWordInfo.shortExaplanation) {
-      shortExaplanation.shortExplanation = updatedWordInfo.shortExaplanation
-    }
-    if (!wordInfo.shortDescription || wordInfo.translations) {
+
+    if (
+      wordInfo && (
+      !wordInfo.shortDefinition
+      || !wordInfo.the_word_translations
+      || !wordInfo.the_word_translations[mainLang]
+      || !wordInfo.shortDefinition_translations
+      || !wordInfo.shortDefinition_translations[mainLang]
+    )) {
       await WordInfosModel.findByIdAndUpdate(wordInfo._id, updatedWordInfo)
     }
     res.status(200).send(updatedWordInfo)  
@@ -179,7 +184,7 @@ app.get('/movie_words/:parsedSubtitleId', async (req, res) => {
       console.error('Could not fetch words: ', err.code, err.message)
       return res.status(404).send(err.message)
     }
-    const userWordsMap = userWords.reduce((acc, item) => (acc[item] = item, acc), {})
+    const userWordsMap = userWords.reduce((acc, item) => (acc[item.the_word] = item, acc), {})
     const movieWordsWithoutUserWords = movieWords.filter(item => (item && !Number(item) && !userWordsMap[item]))
     const movieWordsUnduplicated = Object.keys(movieWordsWithoutUserWords.reduce((acc, item) => (acc[item] = item, acc), {}))
     res.status(200).send(movieWordsUnduplicated)
@@ -193,30 +198,33 @@ app.post('/self_words', requireAuth, async (req, res) => {
     const { language } = req.query;
     const User = models.users;
     const _id = req.userId;
-    const updatedWords = req.body
-    // console.log('updatedWords', updatedWords)
+    const wordListKey = language ? `${language}_words` : 'words';
+
+    const updatedWordOrWordsArray = req.body
+    // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
     const user = await User.findById(_id)
-    const userWords = user?.words || []
-    const userWordsMap = {};
-    userWords.forEach(item => { userWordsMap[item.lemma] = item })
-    console.log('userWordsMap', userWordsMap)
-    updatedWords.forEach(item => {
-      if (userWordsMap[item.lemma]) {
-        Object.keys(item).forEach(key => {
-          userWordsMap[item.lemma][key] = item[key]
-        })
-      } else {
-        userWordsMap[item.lemma] = item;
+    if (!user) {
+      res.statusCode(404).send('Requested user not found')
+    }
+    const updatedWordsMap = !Array.isArray(updatedWordOrWordsArray) ? [updatedWordOrWordsArray] : updatedWordOrWordsArray.reduce((acc, item) => (acc[item.the_word] = item, acc), {})
+    console.log('updatedWordsMap', updatedWordsMap)
+    const userWords = user[wordListKey] || []
+    console.log('userWords.length', userWords.length)
+    // console.log('words', words)
+    userWords.forEach(userWord => {
+      const updatedWordMatch = updatedWordsMap[userWord.the_word]
+      delete updatedWordsMap[userWord.the_word]
+      if (updatedWordMatch) {
+        userWord = updatedWordMatch
       }
     })
-    const words = Object.keys(userWordsMap).map(key => userWordsMap[key]);
-    // console.log('words', words)
     const update = {
       _id,
       updatedTime: Date.now()
     }
-    const key = language ? `${language}_words` : 'words';
-    update[key] = words;
+    const addedNewWordsArray = Object.values(updatedWordsMap)
+    update[wordListKey] = addedNewWordsArray.concat(userWords);
+    console.log('update', update)
     // console.log('update', update)
     console.log('_id', _id)
     await User.findByIdAndUpdate(_id, update)

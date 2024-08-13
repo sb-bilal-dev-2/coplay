@@ -22,9 +22,6 @@ const schema = new Schema({
   },
   genre: [String],
   isPremium: Boolean,
-  mediaUrl: {
-    type: String,
-  },
   posterUrl: {
     type: String
   },

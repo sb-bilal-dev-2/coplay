@@ -19,3 +19,7 @@ tmpfs           796M     0  796M   0% /run/user/1000
 
 sudo chmod 1777 /mnt/disks/mydisk/tmp
 export TMPDIR=/mnt/disks/mydisk/tmp
+
+# Free up cache
+`rm -rf ~/.cache/*`
+Check cache space: `du -sh ~/.cache`

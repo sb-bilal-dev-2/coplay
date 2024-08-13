@@ -11,6 +11,8 @@ import { useLocation } from "react-router-dom";
 import TinderCard from "./TinderCard";
 import { Link } from "react-router-dom";
 import api from "../api";
+import { speakText } from "./speakText";
+import { useSelector } from "react-redux";
 
 function getPercentage(index, totalNumbers = 7) {
   const step = 100 / (totalNumbers - 1); // Calculate step size
@@ -18,7 +20,7 @@ function getPercentage(index, totalNumbers = 7) {
   return `${Math.min(percentage, 100)}%`;
 }
 
-const Header = ({ item, listName, list, currentIndex }) => {
+const Header = ({ repeatCount, the_word, listName, list, currentIndex }) => {
   return (
     <>
       <div
@@ -34,14 +36,14 @@ const Header = ({ item, listName, list, currentIndex }) => {
         style={{ background: "#f98787" }}
       >
         <p className="font-bold text-white text-l mt-4 text-center">
-          {getPercentage(item?.repeatCount)}
+          {getPercentage(repeatCount)}
         </p>
       </div>
       <div
         className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
         style={{ background: "rgb(6 182 212)" }}
       >
-        <Link to={`/quiz/${listName}/${item?.lemma.toLowerCase()}`}>
+        <Link to={`/quiz/${listName}/${the_word?.toLowerCase()}`}>
           <i
             class="fa fa-play text-white text-l m-4 text-center "
             aria-hidden="true"
@@ -123,7 +125,7 @@ const ControllerButtons = ({ swipe, canSwipe, canGoBack, goBack, t }) => {
 };
 
 function AdvancedSwipe({
-  list: initialList,
+  list,
   onSwipeLeft,
   onSwipeRight,
   onSwipeTop,
@@ -131,6 +133,7 @@ function AdvancedSwipe({
   reversed,
   header,
   title,
+  mediaLang,
   onError = (err) => {
     if (err?.response?.status === 401) {
       if (window.confirm('Sign in to add words and for more! \nPress ok to go to login screen')) {
@@ -142,9 +145,7 @@ function AdvancedSwipe({
     // }
   }
 }) {
-  const mainLang = 'en'
-  const reversedList = useMemo(() => initialList.reverse(), [initialList]);
-  const list = reversed ? reversedList : initialList;
+  const mainLang = useSelector(state => state.user?.user?.mainLanguage)
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(list.length - 1);
   const [lastDirection, setLastDirection] = useState();
@@ -153,7 +154,8 @@ function AdvancedSwipe({
   const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState({});
   const requestWordInfo = async () => {
     console.log('list', list)
-    const next10Items = list.slice(currentIndex, currentIndex + 10)
+    console.log('currentIndex', currentIndex - 10,currentIndex + 1)
+    const next10Items = list.slice(currentIndex - 10, currentIndex + 1)
     console.log('next10Items', next10Items)
     const itemsToRequest = next10Items.filter(item => !wordInfosByTheWordMap[item])
     // console.log('wordInfoLemmas', await (api().get('/wordInfoLemmas?mainLang=en&the_word=' + itemsToRequest[0])))
@@ -246,7 +248,7 @@ function AdvancedSwipe({
       <div className="cardContainer">
         {list.map((character, index) => {
           const wordInfo = wordInfosByTheWordMap[character]
-          console.log('wordInfo ' + character, wordInfo)
+
           if (index > currentIndex - 5 && index < currentIndex + 5) {
             return (
               <TinderCard
@@ -260,7 +262,7 @@ function AdvancedSwipe({
               >
                 <div
                   style={{
-                    backgroundImage: "url(" + character?.imageDescUrl + ")",
+                    backgroundImage: "url(" + wordInfo?.imageDescUrl + ")",
                     transform: `rotateZ(${(index - currentIndex) * 1}deg)`,
                     boxShadow: "0.1px 0.1px 2px 0.1px rgba(0, 0, 0, 0.3)",
                     left: `${Math.abs((index - currentIndex) * 1)}px`
@@ -270,17 +272,19 @@ function AdvancedSwipe({
                   <div className={`face ${fliped ? "face-front" : ""} `}>
                     {header ? (
                       <Header
-                        item={character}
+                        repeatCount={wordInfo?.repeatCount}
+                        the_word={character}
                         list={list}
                         currentIndex={currentIndex}
                       />
                     ) : null}
-                    <div className="bg-green-100 w-full" onClick={toggleCard}>
+                    <div className="w-full" onClick={toggleCard}>
+                      <i className="fa-solid fa-volume-high p-4 cursor-pointer hover:opacity-70" style={{ color: '#9198e5' }} onClick={() => speakText(character, wordInfo?.lang || mediaLang, 0.7)}></i>
                       <h3
                         style={{ color: "green" }}
                         className="text-center relative w-full m-auto cursor-pointer text-4xl py-5 hover:opacity-90"
                       >
-                         {typeof character === 'string' ? character : character?.lemma}
+                         {wordInfo?.the_word || character}
                       </h3>
                     </div>
                   </div>
@@ -291,9 +295,9 @@ function AdvancedSwipe({
                     onClick={toggleCard}
                   >
                     <div class="border-2 border-sky-300 rounded-md h-full p-4">
-                      {wordInfo?.the_word_translations && wordInfo?.the_word_translations['en'] &&
+                      {wordInfo?.the_word_translations && wordInfo?.the_word_translations[mainLang] &&
                         <p className="text-center text-gray-500 font-bold">
-                          <b>en:</b> {wordInfo?.the_word_translations['en']}
+                          <b>en:</b> {wordInfo?.the_word_translations[mainLang]}
                         </p>                    
                       }
                       <p className="text-center text-gray-500 font-bold">

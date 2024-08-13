@@ -32,7 +32,6 @@ const findFormLanguagesList = (selectedLanguage) => {
 const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
   const { i18n, t } = useTranslation();
   const dropdownRef = useRef(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [languageFromLocation, setLanguageFromLocation] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -80,7 +79,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+        setShowModal(false);
       }
     };
 
@@ -88,7 +87,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
+  const toggleDropdown = () => setShowModal(!showModal);
   const toggleModal = () => setShowModal(!showModal);
 
   const handleNativeLang = (option) => {
@@ -117,7 +116,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
 
   const handleLearningLang = (option) => {
     setSelectedOption(option);
-    setIsOpen(false);
+    setShowModal(false);
 
     let newUserInfo;
     const token = localStorage.getItem("token")
@@ -150,7 +149,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
   return (
     <div ref={dropdownRef}>
       <div
-        className="border border-none rounded cursor-pointer "
+        className="border border-none rounded cursor-pointer px-2"
         onClick={() => toggleDropdown()}
       >
         {selectedOption ? (
@@ -166,33 +165,6 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
           "Choose language"
         )}
       </div>
-      {isOpen && (
-          <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
-            <div className="flex justify-between items-center">
-              <i
-                class="fa-solid fa-x  cursor-pointer"
-                onClick={() => toggleDropdown()}
-              ></i>
-              <span
-                className="flex items-center bg-yellow-500 text-white py-1 px-2 rounded-full cursor-pointer"
-                onClick={() => toggleModal()}
-              >
-                <i class="fa-solid fa-plus pr-2"></i> {t("add new languages")}
-              </span>
-            </div>
-
-            <h1 className="font-bold text-white text-center">
-              {t("add new language")}
-            </h1>
-            <div className="w-60 m-auto mt-10">
-              <p className="font-bold mb-1 ">{t("learning")}:</p>
-              <LearningLanguages
-                selectedOption={selectedOption}
-                handleLearningLang={handleLearningLang}
-              />
-            </div>
-          </div>
-        )}
       <ChooseLanguageModal
         show={showModal}
         toggleModal={toggleModal}
@@ -225,7 +197,7 @@ const ChooseLanguageModal = ({
   return (
     <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
       <i
-        className="fa-solid fa-arrow-left float-left cursor-pointer"
+        className="fa-solid fa-times float-left cursor-pointer"
         onClick={() => toggleModal()}
       ></i>
       <h1 className="font-bold text-white">{t("add new language")}</h1>
@@ -271,68 +243,6 @@ const ChooseLanguageModal = ({
         ))}
       </div>
     </div>
-  );
-};
-
-const LearningLanguages = ({ selectedOption, handleLearningLang }) => {
-  const user = useSelector((state) => state.user.user);
-  const dispatch = useDispatch();
-  const { user: userIdAndEmail } = useAuthentication();
-  const { putItems } = useRequests("users");
-
-  const languageItem = useMemo(() => {
-    return LANGUAGES.filter((lang) =>
-      user?.learningLanguages?.includes(lang.iso)
-    );
-  }, [user.learningLanguages]);
-
-  const handleDelete = useCallback(
-    (option) => {
-      const newLearningLanguages = user.learningLanguages.filter(
-        (iso) => iso !== option.iso
-      );
-
-      putItems([
-        {
-          email: userIdAndEmail.email,
-          _id: userIdAndEmail.id,
-          learningLanguages: newLearningLanguages,
-        },
-      ]);
-
-      dispatch(
-        updateUser({ ...user, learningLanguages: newLearningLanguages })
-      );
-    },
-    [user, userIdAndEmail, dispatch, putItems]
-  );
-
-  return (
-    <>
-      {languageItem.map((option) => (
-        <li key={option.id} className="list-none flex items-center h-auto">
-          <div
-            className={`${
-              selectedOption?.iso === option?.iso
-                ? "border-yellow-400"
-                : "border-gray-500"
-            } flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80 text-red-200`}
-            onClick={() => handleLearningLang(option)}
-          >
-            <img
-              alt="flag"
-              src={option.flag}
-              className="w-6 h-6 overflow-hidden rounded-full mr-4"
-            />
-            <span>{option.label}</span>
-          </div>
-          <i
-            class="fa-solid fa-x cursor-pointer p-2 mt-2"
-            onClick={() => handleDelete(option)}
-          ></i>
-        </li>
-      ))}
-    </>
   );
 };
 

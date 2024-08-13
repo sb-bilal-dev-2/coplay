@@ -83,7 +83,7 @@ export const useKeyDown = ({
       case "Enter":
         // Pause control
 
-        fullScreenContainer.current.webkitRequestFullScreen();
+        fullScreenContainer?.current?.webkitRequestFullScreen();
 
       default:
         break;

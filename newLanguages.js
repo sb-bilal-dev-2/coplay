@@ -19,7 +19,7 @@ const LEARNING_LANGUAGES = ['ko', 'ru', 'en', 'tr', 'zh_cn']
 // potential_languages = ['ar', 'jp', 'de', 'it', 'es', 'hi', 'pt']
 // others ['in', 'th', 'pt_br', 'uk']
 // Promise.all(potential_languages.map(async (langCode) => await processNewLearningLanguage(langCode))
-// processNewLearningLanguage('tr')
+// processNewLearningLanguage('en')
 // processNewLearningLanguage('fr')
 // processNewLearningLanguage('ko')
 // processNewLearningLanguage('ru')

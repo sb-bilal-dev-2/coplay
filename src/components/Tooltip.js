@@ -23,7 +23,7 @@ function Tooltip(props) {
 
   const handleInfoClick = () => {
     const word = {
-      lemma: text,
+      the_text: text,
       repeatCount: 1,
       repeatTime: Date.now(),
     };
@@ -32,7 +32,7 @@ function Tooltip(props) {
 
     if (isAdded) {
       const word = {
-        lemma: text,
+        the_text: text,
         repeatCount: 7,
         repeatTime: Date.now(),
       };

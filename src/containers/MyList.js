@@ -47,7 +47,7 @@ function RenderTagList({ list = [], name }) {
   };
   const learnFullList = () => {
     const words = list.map((item) => ({
-      lemma: item.lemma,
+      the_word: item.the_word,
       repeatCount: 7,
       repeatTime: Date.now(),
     }));
@@ -67,13 +67,13 @@ function RenderTagList({ list = [], name }) {
     //         }
     //     }
     // })
-    const repeatCountsByLemma = {};
+    const repeatCountsBy_the_word = {};
     list.forEach((item) => {
-      repeatCountsByLemma[item.lemma] = item.repeatCount || 0;
+      repeatCountsBy_the_word[item.the_word] = item.repeatCount || 0;
     });
-    const words = selectedItems.map((lemma) => ({
-      lemma,
-      repeatCount: repeatCountsByLemma[lemma] + 1,
+    const words = selectedItems.map((the_word) => ({
+      the_word,
+      repeatCount: repeatCountsBy_the_word[the_word] + 1,
       repeatTime: Date.now(),
     }));
     postUserWords("/self_words", words);
@@ -82,8 +82,8 @@ function RenderTagList({ list = [], name }) {
   };
 
   const learnSelected = () => {
-    const words = selectedItems.map((lemma) => ({
-      lemma,
+    const words = selectedItems.map((the_word) => ({
+      the_word,
       repeatCount: 7,
       repeatTime: Date.now(),
     }));
@@ -93,8 +93,8 @@ function RenderTagList({ list = [], name }) {
   };
 
   const unlearnSelected = () => {
-    const words = selectedItems.map((lemma) => ({
-      lemma,
+    const words = selectedItems.map((the_word) => ({
+      the_word,
       repeatCount: 0,
       repeatTime: Date.now(),
     }));
@@ -167,18 +167,18 @@ function RenderTagList({ list = [], name }) {
         {list.map((item) => {
           return (
             <button
-              key={item.lemma}
+              key={item.the_word}
               onClick={() =>
                 isEditing
-                  ? handleTagClick(item.lemma)
-                  : navigate(`/quiz/${name}/${item.lemma}`)
+                  ? handleTagClick(item.the_word)
+                  : navigate(`/quiz/${name}/${item.the_word}`)
               }
               className={classNames(
                 `TagItem text-gray-50 repeat${item.repeatCount || 0}`,
-                { selected: selectedItems.includes(item.lemma) }
+                { selected: selectedItems.includes(item.the_word) }
               )}
             >
-              {item.lemma}
+              {item.the_word}
             </button>
           );
         })}

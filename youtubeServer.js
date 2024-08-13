@@ -59,7 +59,7 @@ async function getVideoInfoAndStore(url) {
             category: videoDetails.category,
             keywords: videoDetails.keywords,
             isShortsEligible: videoDetails.isShortsEligible,
-            youtubeUrl: url,
+            youtubeUrl: videoDetails.video_url,
             // youtubeDetails: videoDetails,
         }
         console.log('adjustedInfo', adjustedInfo)

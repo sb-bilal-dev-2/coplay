@@ -141,12 +141,12 @@ async function processTranslations(langCode, mainLang, wordInfos, callback) {
     return newTranslationsMap
 
     async function requestWordTranslation(wordInfo) {
-        const [shortDefinition_translations, shortDescription_translations] = Promise.all([
+        const [shortDefinition_translations, shortExplanation_translations] = Promise.all([
             await openAITranslate(wordInfo.shortDefinition, mainLang, langCode),
             await openAITranslate(wordInfo.shortDescription, mainLang, langCode)
         ])
 
-        return { shortDefinition_translations, shortDescription_translations }
+        return { shortDefinition_translations, shortExplanation_translations }
     }
 }
 

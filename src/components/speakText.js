@@ -6,11 +6,12 @@
  */
 // window.speechSynthesis.getVoices() - availible voices (176)
 
-export const speakText = (text, lang = "en-US") => {
+export const speakText = (text, lang = "en-US", speed) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    utterThis.pitch = 1.5;
-
+    utterance.pitch = 1.3;
+    utterance.rate = speed || 0.5 // 0.5 slow
+    console.log('lang', lang, text)
     window.speechSynthesis.speak(utterance);
 }
 

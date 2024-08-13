@@ -33,12 +33,12 @@ const WordsPage = () => {
 
   const handleSwipeBottom = () => {};
   const handleSwipeTop = () => {};
-  const handleSwipeLeft = async (lemma) => {
-    const newWord = { lemma, repeatCount: 7, repeatTime: Date.now() };
+  const handleSwipeLeft = async (the_word) => {
+    const newWord = { the_word, repeatCount: 7, repeatTime: Date.now() };
     await api().post("/self_words", [newWord]);
   };
-  const handleSwipeRight = async (lemma) => {
-    const newWord = { lemma, repeatCount: 0, repeatTime: Date.now() };
+  const handleSwipeRight = async (the_word) => {
+    const newWord = { the_word, repeatCount: 0, repeatTime: Date.now() };
     await api().post("/self_words", [newWord]);
   };
 
@@ -47,9 +47,9 @@ const WordsPage = () => {
       <StickyHeader />
       <AdvancedSwipe
         list={
-          isWordCollectionPage
+          (isWordCollectionPage
             ? wordCollectionWordList || []
-            : listsMap[listName + "List"]
+            : listsMap[listName + "List"])?.reverse()
         }
         header
         title={isWordCollectionPage ? "Word collection" : "My words"}
