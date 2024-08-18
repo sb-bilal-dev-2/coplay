@@ -17,8 +17,7 @@ const { promptAI } = require('./playground/openai');
 const wordInfos = require('./schemas/wordInfos');
 const { promptWordInfos, processTranslations } = require('./promptWordInfos');
 const { gTranslate } = require('./gTranslate');
-const { getOccurancesFromYoutube } = require('./youtubeGetOccurances.js')
-// console.log(ip.address())
+
 writeDevelopmentIPAddress()
 
 const app = express();
@@ -42,7 +41,7 @@ app.get('/hello_world', (req, res) => {
 app.get('/occurances_v2', async (req, res) => {
   const word = req.query.lemma;
   const results = await findSubtitlesWithWord(word, req.headers.learninglanguage, req.query.limit);
-  const youtubeOccurances = await getOccurancesFromYoutube(text, req.headers.learningLanguage, req.query.limit)
+  // const youtubeOccurances = await getOccurancesFromYoutube(text, req.headers.learningLanguage, req.query.limit)
   res.status(200).send(results)
 })
 

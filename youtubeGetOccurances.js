@@ -1,51 +1,70 @@
-const express = require('express');
-const { google } = require('googleapis');
-const { OAuth2Client } = require('google-auth-library');
-const srtParser = require('subtitle');
-require('dotenv').config();
+// const Client_ID = '286582041318-c9l94c5im2gispviq7kr376ga7u4hgj7.apps.googleusercontent.com'
+// const Client_secret = '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'
+// const { google } = require('googleapis');
+// const axios = require('axios');
+// const srtParser = require('subtitle');
+require('dotenv').config()
 
-const app = express();
+// const youtube = google.youtube({ version: 'v3', auth: process.env.GOOGLE_API_KEY || 'AIzaSyAr4_UXl3AGdIqNzJxLf2mtAzYw4w0WqOs' });
+// searchVideos()
+// For Linux:
+// wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+// sudo apt install ./google-chrome-stable_current_amd64.deb
 
-const CLIENT_ID = '286582041318-sp4i63fq3jsulvnkikrgrpk7145t8dmo.apps.googleusercontent.com' || process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = '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' || process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = 'http://coplay.live:4545/oauth2callback';
+const puppeteer = require('puppeteer');
 
-const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-
-// Set up the YouTube API client
-const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
-
-app.get('/auth', (req, res) => {
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: ['https://www.googleapis.com/auth/youtube.force-ssl']
+async function parseVideoSrcs(keyword, language, numberOfItems) {
+  const browser = await puppeteer.launch({
+    executablePath: '/usr/bin/google-chrome-stable' // Only for Linux
   });
-  res.redirect(authUrl);
-});
+  const page = await browser.newPage();
+  const url = `https://youglish.com/pronounce/${keyword}/${language}`;
 
-app.get('/oauth2callback', async (req, res) => {
-  const { code } = req.query;
-  const { tokens } = await oauth2Client.getToken(code);
-  oauth2Client.setCredentials(tokens);
-  res.send('Authentication successful! You can now use the API.');
-});
+  await page.goto(url, { waitUntil: 'networkidle0' });
 
-app.get('/search', async (req, res) => {
-  try {
-    const { query } = req.query;
-    if (!query) {
-      return res.status(400).json({ error: 'Query parameter is required' });
+  const videoSrcs = [];
+
+  for (let i = 0; i < numberOfItems; i++) {
+    // Wait for the iframe to load
+    await page.waitForSelector('#player');
+
+    // Get the src of the iframe
+    const src = await page.$eval('#player', el => el.src);
+    videoSrcs.push(src);
+
+    // Click the next button if it's not the last iteration
+    if (i < numberOfItems - 1) {
+      await page.click('#b_next');
+      // Wait for the page to load the next video
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
     }
+  }
+
+  await browser.close();
+
+  return videoSrcs;
+}
+
+// Example usage
+parseVideoSrcs('hello', 'english', 2)
+  .then(srcs => console.log(srcs))
+  .catch(err => console.error(err));
+
+
+async function searchVideos() {
+  try {
+    const query = 'someone'
 
     // Search for videos
     const searchResponse = await youtube.search.list({
       part: 'id,snippet',
-      q: query,
+      q: query + ',cc',
       type: 'video',
       videoCaption: 'closedCaption',
-      maxResults: 5
+      safeSearch: 'strict',
+      maxResults: 5 // Adjust as needed
     });
-
+    console.log('searchResponse', searchResponse.data.items)
     const results = [];
 
     for (const item of searchResponse.data.items) {
@@ -57,44 +76,39 @@ app.get('/search', async (req, res) => {
         videoId: videoId
       });
 
+      // Get the first English caption track (you might want to add more logic here)
       const captionTrack = captionResponse.data.items.find(
         track => track.snippet.language === 'en'
       );
-
+      // GET https://www.googleapis.com/youtube/v3/captions/id
+    //   console.log('captionTrack', captionTrack)
       if (captionTrack) {
         // Download the actual subtitle content
-        const subtitleResponse = await youtube.captions.download({
-          id: captionTrack.id,
-          tfmt: 'srt'
-        });
+        // const subtitleResponse = await axios.get(
+        //   `https://www.googleapis.com/youtube/v3/captions/${captionTrack.id}`,
+        //   { responseType: 'text' }
+        // );
+        // console.log('subtitleResponse.data', subtitleResponse.data)
+        // // Parse the subtitle content
+        // const parsedSubtitles = srtParser.parse(subtitleResponse.data);
 
-        // Parse the subtitle content
-        const parsedSubtitles = srtParser.parse(subtitleResponse.data);
+        // // Search for the query in subtitles
+        // const matches = parsedSubtitles?.filter(sub => 
+        //   sub.text.toLowerCase().includes(query.toLowerCase())
+        // );
 
-        // Search for the query in subtitles
-        const matches = parsedSubtitles.filter(sub => 
-          sub.text.toLowerCase().includes(query.toLowerCase())
-        );
-
-        results.push({
-          videoId,
-          title: item.snippet.title,
-          matches: matches.map(match => ({
-            text: match.text,
-            start: match.start,
-            end: match.end
-          }))
-        });
+        // results.push({
+        //   videoId,
+        //   title: item.snippet.title,
+        //   matches: matches.map(match => ({
+        //     text: match.text,
+        //     start: match.start,
+        //     end: match.end
+        //   }))
+        // });
       }
     }
-
-    res.json(results);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'An error occurred while processing your request' });
   }
-});
-
-const PORT = process.env.PORT || 4545;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
+}

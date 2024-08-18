@@ -15,3 +15,7 @@ stop apache server `sudo systemctl stop apache2`
 Start `pm2 start server.js`
 Stop `pm2 stop 0`
 Restart `pm2 restart 0`
+
+# PM list all running services
+
+`pm2 list`

@@ -3,12 +3,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 // const TelegramBot = require('node-telegram-bot-api');
 const User = require("./schemas/users.js").users_model; // Update the path accordingly
-const { OAuth2Client } = require("google-auth-library");
 const axios = require("axios");
-
-const clientID =
-  "198137546875-ivuds0gm94nojrpdrbcsiqbmm3j0co6i.apps.googleusercontent.com";
-const client = new OAuth2Client(clientID);
 
 const SECRET = "BILALS_COSMO_SECRET_KEY";
 // Function to generate JWT
