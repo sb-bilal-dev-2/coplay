@@ -3,7 +3,6 @@ import React, {
   useRef,
   useEffect,
   useMemo,
-  useCallback,
 } from "react";
 import useRequests from "../useRequests";
 import useAuthentication from "../containers/Authentication.util";

@@ -23,9 +23,30 @@ function showMainMenu(chatId) {
   bot.sendMessage(chatId, "Please choose an option:", options);
 }
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  showMainMenu(chatId);
+  const code = match[1].trim(); // This will contain your_custom_code or be empty
+
+  if (code) {
+    // User came with a deep link containing a code
+    bot.sendMessage(chatId, "Opening authentication page...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Open Auth Web App",
+              web_app: {
+                url: `${TG_LOGIN}/#/auth/login?code=${code}&telegramChatId=${chatId}`,
+              },
+            },
+          ],
+        ],
+      },
+    });
+  } else {
+    // User started the bot without a code
+    showMainMenu(chatId);
+  }
 });
 
 bot.on("callback_query", (callbackQuery) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./StickyHeader.css"; // Make sure to create the corresponding CSS file
+import "./StickyHeader.css";
 import { Link, useLocation } from "react-router-dom";
 import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import LanguageDropdown from "./LanguageDropdown";
 import { useDynamicReducer } from "../dynamicReducer";
 import { googleLogout } from "@react-oauth/google";
+import api from "../api";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -186,7 +187,7 @@ function getPlaceholderUrl(firstLetter) {
   return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
 }
 
-const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
+const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
   const { t } = useTranslation();
   const { user: userIdAndEmail } = useAuthentication();
   const userEmail = userIdAndEmail?.email || "";
@@ -211,8 +212,21 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
     localStorage.removeItem("token");
   };
 
-  const location = useLocation();
-  const isPricePage = location.pathname.includes("price_page");
+  // const location = useLocation();
+  // const isPricePage = location.pathname.includes("price_page");
+
+  const _Id = userIdAndEmail?.id;
+  const generateConnectionCode = async () => {
+    try {
+      const response = await api().post("/api/generate-telegram-code", {
+        _Id,
+      });
+
+      window.location.href = response.data.telegramLink;
+    } catch (error) {
+      console.error("Error generating connection code:", error);
+    }
+  };
 
   return (
     <>
@@ -238,6 +252,21 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
               <b>{t("sign out")}</b>
             </button>
           </li>
+        {/* TODO: check if telegram connected condition */}
+          {_Id && (
+            <li className="list-none">
+              <button className="flex" onClick={() => generateConnectionCode()}>
+                <img
+                  src="/tg-bot-img.png"
+                  width={30}
+                  height={30}
+                  alt="tg-bot-img"
+                />
+                <b>{t("connect to telegram")}</b>
+              </button>
+            </li>
+          )}
+
           <li className="hide_link show_in_mobile">
             <Link
               to="/price_page"

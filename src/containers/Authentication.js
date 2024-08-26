@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import useAuthentication from "./Authentication.util";
-import { redirect, useNavigate, useParams } from "react-router";
+import { redirect, useNavigate, useParams, useLocation } from "react-router";
 import "./Authentication.css";
 import StickyHeader from "../components/StickyHeader";
 import { Link } from "react-router-dom";
@@ -23,10 +23,22 @@ const Authentication = () => {
     isLoading,
     error,
   } = useAuthentication();
+  const location = useLocation();
 
   useEffect(() => {
     resetFormData();
   }, [screen]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const code = searchParams.get("code");
+    const telegramChatId = searchParams.get("telegramChatId");
+
+    if (location.pathname === "/auth/login" && code && telegramChatId) {
+      alert(`Code: ${code}, Telegram Chat ID: ${telegramChatId}`);
+      login(() => navigate("/"));
+    }
+  }, [location, navigate]);
 
   const handleInputChange = (e) => {
     updateFormDataValue(e.target.name, e.target.value);
@@ -49,7 +61,6 @@ const Authentication = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log("login 1");
     login(() => navigate("/"));
   };
 
@@ -299,7 +310,6 @@ const Authentication = () => {
       </button>
     </form>
   );
-  console.log("error", error);
   const renderMainAuth = () => (
     <div className="Authentication-co section bg-secondary min-h-screen">
       <div className="section-container pt-20">

@@ -1,22 +1,22 @@
-const { ObjectId } = require('mongodb');
-const { default: mongoose } = require('mongoose');
+const { ObjectId } = require("mongodb");
+const { default: mongoose } = require("mongoose");
 
-const Schema = require('mongoose').Schema;
+const Schema = require("mongoose").Schema;
 
 var usersWord = new Schema({
-    isPhrase: Boolean,
-    wordId: ObjectId,
-    note: String,
-    repeatCount: Number,
-    repeatTime: { type: Date },
-    learned: Boolean,
-    lemma: String,
-    the_word: String,
-    archived: Boolean,
-    contextType: String,
-    contextMoment: String, // HH:MM:SS or chapter-1
-    contextUrl: String,
-    contextTitle: String,
+  isPhrase: Boolean,
+  wordId: ObjectId,
+  note: String,
+  repeatCount: Number,
+  repeatTime: { type: Date },
+  learned: Boolean,
+  lemma: String,
+  the_word: String,
+  archived: Boolean,
+  contextType: String,
+  contextMoment: String, // HH:MM:SS or chapter-1
+  contextUrl: String,
+  contextTitle: String,
 });
 const schema = new Schema({
   username: { type: String },
@@ -32,6 +32,11 @@ const schema = new Schema({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },
   note: String,
+  telegram: {
+    code: String,
+    isConnected: Boolean,
+    chatId: String,
+  },
 }).add({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },
@@ -39,6 +44,6 @@ const schema = new Schema({
 });
 
 module.exports = {
-    schema,
-    users_model: mongoose.model('users', schema)
-}
+  schema,
+  users_model: mongoose.model("users", schema),
+};

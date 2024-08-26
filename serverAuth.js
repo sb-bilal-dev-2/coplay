@@ -24,7 +24,6 @@ const transporter = nodemailer.createTransport({
 });
 
 // Configure Telegram bot
-// const telegramBot = new TelegramBot('your_telegram_bot_token', { polling: true });
 let app;
 
 const initAuth = (ownApp) => {
@@ -237,34 +236,66 @@ const initAuth = (ownApp) => {
 
   // Login endpoint
   app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, code, telegramChatId } = req.body;
+    // TODO: update telegram status and chat id
 
-    try {
-      // Find the user by email
-      const user = await User.findOne({ email });
-      console.log("user logined: ", user);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+    if (code) {
+      try {
+        // Find the user by code
+        const user = await User.findOne({
+          telegram: {
+            code,
+          },
+        });
+
+        const update = {
+          isConnected: true,
+          chatId: telegramChatId,
+        };
+
+        const updateTelegram = await User.findByIdAndUpdate(user._id, update);
+        console.log("user logined: ", updateTelegram);
+
+        if (!user) {
+          return res.status(401).json({ message: "Invalid code" });
+        }
+
+        // Generate JWT and send it in the response
+        const token = generateToken(user);
+        console.log("Token generated: ", token);
+        res.json({ token });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
       }
+    } else {
+      try {
+        // Find the user by email
+        const user = await User.findOne({ email });
+        console.log("user logined: ", user);
+        if (!user) {
+          return res.status(401).json({ message: "Invalid email or password" });
+        }
 
-      // Verify the password
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        // Verify the password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+          return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // Verify if the email is already verified
+        if (!user.verifiedEmail) {
+          return res.status(401).json({ message: "Email not verified" });
+        }
+
+        // Generate JWT and send it in the response
+        const token = generateToken(user);
+        console.log("token generated: ", token);
+        res.json({ token });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
       }
-
-      // Verify if the email is already verified
-      if (!user.verifiedEmail) {
-        return res.status(401).json({ message: "Email not verified" });
-      }
-
-      // Generate JWT and send it in the response
-      const token = generateToken(user);
-      console.log("token generated: ", token);
-      res.json({ token });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
     }
   });
 
