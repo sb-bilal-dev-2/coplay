@@ -25,9 +25,9 @@ function showMainMenu(chatId) {
 
 bot.onText(/\/start(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  const code = match[1].trim(); // This will contain your_custom_code or be empty
+  const id = match[1].trim(); // This will contain your_custom_code or be empty
 
-  if (code) {
+  if (id) {
     // User came with a deep link containing a code
     bot.sendMessage(chatId, "Opening authentication page...", {
       reply_markup: {
@@ -36,14 +36,17 @@ bot.onText(/\/start(.*)/, (msg, match) => {
             {
               text: "Open Auth Web App",
               web_app: {
-                url: `${TG_LOGIN}/#/auth/login?code=${code}&telegramChatId=${chatId}`,
+                url: `${TG_LOGIN}/#/auth/login?id=${id}&telegramChatId=${chatId}`,
               },
             },
           ],
         ],
       },
     });
-    console.log("code provided", `${TG_LOGIN}/#/auth/login?code=${code}&telegramChatId=${chatId}`)
+    console.log(
+      "code provided",
+      `${TG_LOGIN}/#/auth/login?id=${id}&telegramChatId=${chatId}`
+    );
   } else {
     // User started the bot without a code
     showMainMenu(chatId);

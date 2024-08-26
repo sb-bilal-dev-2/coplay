@@ -32,11 +32,8 @@ const schema = new Schema({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },
   note: String,
-  telegram: {
-    code: String,
-    isConnected: Boolean,
-    chatId: String,
-  },
+  isTelegramConnected: Boolean,
+  chatId: String,
 }).add({
   createdTime: { type: Date, default: Date.now },
   updatedTime: { type: Date, default: Date.now },

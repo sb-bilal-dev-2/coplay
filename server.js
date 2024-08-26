@@ -54,39 +54,16 @@ app.get("/occurances_v2", async (req, res) => {
   res.status(200).send(results);
 });
 
-const crypto = require("crypto");
-
-// In-memory store for connection codes (replace with a database in production)
-const connectionCodes = new Map();
-
-// Generate a unique connection code
-function generateConnectionCode(userId) {
-  const code = crypto.randomBytes(3).toString("hex");
-  connectionCodes.set(code, userId);
-  return code;
-}
-
 // API endpoint to generate connection code
 app.post("/api/generate-telegram-code", (req, res) => {
   try {
     const { _Id } = req.body;
-    const User = models.users;
 
     if (!_Id) {
       return res.status(400).json({ error: "userId is required" });
     }
 
-    const code = generateConnectionCode(_Id);
-    const telegramLink = `https://t.me/copaly_bot?start=${code}`;
-
-    const update = {
-      _Id,
-      telegram: {
-        code,
-      },
-    };
-
-    User.findByIdAndUpdate(_Id, update);
+    const telegramLink = `https://t.me/copaly_bot?start=${_Id}`;
 
     res.json({ telegramLink });
   } catch (error) {

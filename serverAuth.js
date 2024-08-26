@@ -234,91 +234,60 @@ const initAuth = (ownApp) => {
     }
   });
 
+  // telegram-login endpoint
+  app.post("/telegram-login", async (req, res) => {
+    const { userId, telegramChatId } = req.body;
+
+    try {
+      const update = {
+        isTelegramConnected: true,
+        chatId: telegramChatId,
+      };
+
+      const user = await User.findOneAndUpdate({ userId }, update);
+      console.log("Login with telegram");
+
+      const token = generateToken(user);
+      console.log("Token generated: ", token);
+      res.json({ token });
+    } catch (error) {
+      console.error("Error details:", error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error", error: error.message });
+    }
+  });
+
   // Login endpoint
   app.post("/login", async (req, res) => {
-    const { email, password, code, telegramChatId } = req.body;
+    const { email, password } = req.body;
 
-    if (code) {
-      try {
-        // Find the user by code
-        const user = await User.findOne({
-          telegram: {
-            code,
-          },
-        });
-
-        const update = {
-          isConnected: true,
-          chatId: telegramChatId,
-        };
-
-        const updateTelegram = await User.findByIdAndUpdate(user._id, update);
-        console.log("user logined: ", updateTelegram);
-
-        if (!user) {
-          return res.status(401).json({ message: "Invalid code" });
-        }
-
-        // Generate JWT and send it in the response
-        const token = generateToken(user);
-        console.log("Token generated: ", token);
-        res.json({ token });
-      } catch (error) {
-         console.error("Error details:", error);
-
-         if (error.name === "ValidationError") {
-           return res
-             .status(400)
-             .json({ message: "Validation error", details: error.message });
-         }
-
-         if (error.name === "CastError") {
-           return res.status(400).json({ message: "Invalid ID format" });
-         }
-
-         if (error.code === 11000) {
-           return res.status(409).json({ message: "Duplicate key error" });
-         }
-
-         if (error.name === "JsonWebTokenError") {
-           return res.status(401).json({ message: "Invalid token" });
-         }
-
-         if (error.name === "TokenExpiredError") {
-           return res.status(401).json({ message: "Token expired" });
-         }
-         res
-           .status(500)
-           .json({ message: "Internal Server Error", error: error.message });
+    try {
+      // Find the user by email
+      const user = await User.findOne({ email });
+      console.log("user logined: ", user);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
       }
-    } else {
-      try {
-        // Find the user by email
-        const user = await User.findOne({ email });
-        console.log("user logined: ", user);
-        if (!user) {
-          return res.status(401).json({ message: "Invalid email or password" });
-        }
 
-        // Verify the password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-          return res.status(401).json({ message: "Invalid email or password" });
-        }
-
-        // Verify if the email is already verified
-        if (!user.verifiedEmail) {
-          return res.status(401).json({ message: "Email not verified" });
-        }
-
-        // Generate JWT and send it in the response
-        const token = generateToken(user);
-        console.log("token generated: ", token);
-        res.json({ token });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+      // Verify the password
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res.status(401).json({ message: "Invalid email or password" });
       }
+
+      // Verify if the email is already verified
+      if (!user.verifiedEmail) {
+        return res.status(401).json({ message: "Email not verified" });
+      }
+
+      // Generate JWT and send it in the response
+      const token = generateToken(user);
+      console.log("token generated: ", token);
+      res.json({ token });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   });
 

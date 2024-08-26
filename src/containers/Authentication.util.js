@@ -155,6 +155,39 @@ const useAuthentication = (missUserRequest) => {
     }
   };
 
+   const telegramLogin = async (callback) => {
+     try {
+       setIsLoading(true);
+
+       const response = await fetch(`${BASE_SERVER_URL}/telegram-login`, {
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify(formData),
+       });
+
+       if (!response.ok) {
+         let newError = new Error("telegram-login Failed");
+
+         throw newError;
+       }
+
+       const data = await response.json();
+
+       setToken(data.token);
+       localStorage.setItem("token", data.token);
+
+       setIsLoading(false);
+
+       callback();
+     } catch (error) {
+       console.error(error);
+       setError(error);
+       setIsLoading(false);
+     }
+   };
+
   const forgotPassword = async (email) => {
     try {
       setIsLoading(true);
@@ -257,6 +290,7 @@ const useAuthentication = (missUserRequest) => {
     forgotPassword,
     resetPassword,
     logout,
+    telegramLogin,
   };
 };
 

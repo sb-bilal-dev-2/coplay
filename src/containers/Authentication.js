@@ -22,6 +22,7 @@ const Authentication = () => {
     resendCode,
     isLoading,
     error,
+    telegramLogin,
   } = useAuthentication();
   const location = useLocation();
 
@@ -31,12 +32,11 @@ const Authentication = () => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const code = searchParams.get("code");
+    const id = searchParams.get("id");
     const telegramChatId = searchParams.get("telegramChatId");
 
-    if (location.pathname === "/auth/login" && code && telegramChatId) {
-      alert(`Code: ${code}, Telegram Chat ID: ${telegramChatId}`);
-      login(() => navigate("/"));
+    if (location.pathname === "/auth/login" && id && telegramChatId) {
+      telegramLogin(() => navigate("/"));
     }
   }, [location, navigate]);
 
