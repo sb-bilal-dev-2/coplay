@@ -237,7 +237,6 @@ const initAuth = (ownApp) => {
   // Login endpoint
   app.post("/login", async (req, res) => {
     const { email, password, code, telegramChatId } = req.body;
-    // TODO: update telegram status and chat id
 
     if (code) {
       try {
@@ -265,8 +264,32 @@ const initAuth = (ownApp) => {
         console.log("Token generated: ", token);
         res.json({ token });
       } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+         console.error("Error details:", error);
+
+         if (error.name === "ValidationError") {
+           return res
+             .status(400)
+             .json({ message: "Validation error", details: error.message });
+         }
+
+         if (error.name === "CastError") {
+           return res.status(400).json({ message: "Invalid ID format" });
+         }
+
+         if (error.code === 11000) {
+           return res.status(409).json({ message: "Duplicate key error" });
+         }
+
+         if (error.name === "JsonWebTokenError") {
+           return res.status(401).json({ message: "Invalid token" });
+         }
+
+         if (error.name === "TokenExpiredError") {
+           return res.status(401).json({ message: "Token expired" });
+         }
+         res
+           .status(500)
+           .json({ message: "Internal Server Error", error: error.message });
       }
     } else {
       try {

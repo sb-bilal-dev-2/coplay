@@ -43,6 +43,7 @@ bot.onText(/\/start(.*)/, (msg, match) => {
         ],
       },
     });
+    console.log("code provided", `${TG_LOGIN}/#/auth/login?code=${code}&telegramChatId=${chatId}`)
   } else {
     // User started the bot without a code
     showMainMenu(chatId);
