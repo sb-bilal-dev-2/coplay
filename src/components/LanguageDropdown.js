@@ -6,7 +6,6 @@ import React, {
 } from "react";
 import useRequests from "../useRequests";
 import useAuthentication from "../containers/Authentication.util";
-import { getUserLanguage } from "../helper/useLocationLanguage";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../store";
 import { useTranslation } from "react-i18next";
@@ -42,15 +41,6 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
 
   const resentlySignUp = localStorage.getItem("resentlySignUp");
   const localLearningLanguage = localStorage.getItem("learningLanguage");
-
-  useEffect(() => {
-    const fetchLanguage = async () => {
-      const userLanguage = await getUserLanguage();
-      setLanguageFromLocation(userLanguage);
-    };
-
-    fetchLanguage();
-  }, []);
 
   useEffect(() => {
     if (resentlySignUp) {
