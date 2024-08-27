@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import useRequests from "../useRequests";
 import useAuthentication from "../containers/Authentication.util";
 import { useDispatch, useSelector } from "react-redux";
@@ -108,31 +103,40 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
     setShowModal(false);
 
     let newUserInfo;
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
+
+    const isUserHaveLang = (user, option) => {
+      return user?.learningLanguages?.includes(option.iso);
+    };
+
+    console.log("user", user);
+
     if (token) {
       newUserInfo = {
         learningLanguages: [...user.learningLanguages, option.iso],
       };
 
-      putItems([
-        {
-          email: userIdAndEmail.email,
-          _id: userIdAndEmail.id,
-          ...newUserInfo,
-        },
-      ]);
+      if (!isUserHaveLang(user, option)) {
+        putItems([
+          {
+            email: userIdAndEmail.email,
+            _id: userIdAndEmail.id,
+            ...newUserInfo,
+          },
+        ]);
 
-      dispatch(
-        updateUser({
-          ...user,
-          learningLanguages: [...user.learningLanguages, option.iso],
-        })
-      );
+        dispatch(
+          updateUser({
+            ...user,
+            learningLanguages: [...user.learningLanguages, option.iso],
+          })
+        );
+      }
     }
 
     localStorage.setItem("learningLanguage", option.iso);
 
-    if (afterLangChange) afterLangChange()
+    if (afterLangChange) afterLangChange();
   };
 
   return (
@@ -159,6 +163,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
         toggleModal={toggleModal}
         handleLearningLang={handleLearningLang}
         handleNativeLang={handleNativeLang}
+        selectedOption={selectedOption}
         t={t}
       />
     </div>
@@ -170,19 +175,13 @@ const ChooseLanguageModal = ({
   toggleModal,
   handleLearningLang,
   handleNativeLang,
+  selectedOption,
   t,
 }) => {
   const user = useSelector((state) => state.user.user);
   const localMainLangugae = localStorage.getItem("mainLanguage");
 
-  const filteredLanguages = useMemo(() => {
-    return LANGUAGES.filter(
-      (lang) => !user?.learningLanguages?.includes(lang.iso)
-    );
-  }, [user?.learningLanguages]);
-
   if (!show) return null;
-
   return (
     <div className="language_modal absolute z-10 left-0 top-0 border border-none rounded shadow-lg bg-black p-6">
       <i
@@ -212,10 +211,14 @@ const ChooseLanguageModal = ({
 
       <div className="w-60 m-auto mt-10">
         <p className="font-bold mb-1 ">{t("want to learn")}:</p>
-        {filteredLanguages.map((option) => (
+        {LANGUAGES.map((option) => (
           <li key={option.id} className="list-none flex items-center">
             <div
-              className={`flex p-2 mt-4 border-2 rounded-xl cursor-pointer w-80`}
+              className={`${
+                selectedOption.iso === option.iso
+                  ? "border-yellow-400"
+                  : "border-gray-500"
+              } flex w-32 p-2 mt-4 border-2 rounded-xl cursor-pointer`}
               onClick={() => {
                 handleLearningLang(option);
                 toggleModal();
