@@ -32,12 +32,12 @@ const Authentication = () => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const id = searchParams.get("id");
+    const userId = searchParams.get("userId");
     const telegramChatId = searchParams.get("telegramChatId");
 
-    if (id && telegramChatId) {
+    if (userId && telegramChatId) {
       // alert(`id:${id} && telegramChatId ${telegramChatId}`);
-      telegramLogin(() => navigate("/"));
+      telegramLogin(userId, telegramChatId, () => navigate("/"));
     }
   }, [location, navigate]);
 

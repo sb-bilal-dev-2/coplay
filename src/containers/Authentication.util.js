@@ -155,39 +155,37 @@ const useAuthentication = (missUserRequest) => {
     }
   };
 
-   const telegramLogin = async (callback) => {
-     try {
-       setIsLoading(true);
+ const telegramLogin = async (userId, telegramChatId, callback) => {
+  try {
+    setIsLoading(true);
 
-       const response = await fetch(`${BASE_SERVER_URL}/telegram-login`, {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify(formData),
-       });
+    const response = await fetch(`${BASE_SERVER_URL}/telegram-login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, telegramChatId }),
+    });
 
-       if (!response.ok) {
-         let newError = new Error("telegram-login Failed");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Telegram login failed");
+    }
 
-         throw newError;
-       }
+    const data = await response.json();
 
-       const data = await response.json();
+    setToken(data.token);
+    localStorage.setItem("token", data.token);
 
-       setToken(data.token);
-       localStorage.setItem("token", data.token);
+    setIsLoading(false);
 
-       setIsLoading(false);
-
-       callback();
-     } catch (error) {
-       console.error(error);
-       setError(error);
-       setIsLoading(false);
-     }
-   };
-
+    callback();
+  } catch (error) {
+    console.error(error);
+    setError(error.message);
+    setIsLoading(false);
+  }
+};
   const forgotPassword = async (email) => {
     try {
       setIsLoading(true);
