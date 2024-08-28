@@ -155,7 +155,7 @@ const useAuthentication = (missUserRequest) => {
     }
   };
 
- const telegramLogin = async (userId, telegramChatId, callback) => {
+const telegramLogin = async (userId, telegramChatId, callback) => {
   try {
     setIsLoading(true);
 
@@ -167,12 +167,15 @@ const useAuthentication = (missUserRequest) => {
       body: JSON.stringify({ userId, telegramChatId }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Telegram login failed");
+      throw new Error(data.message || "Telegram login failed");
     }
 
-    const data = await response.json();
+    if (!data.token) {
+      throw new Error("No token received from server");
+    }
 
     setToken(data.token);
     localStorage.setItem("token", data.token);
@@ -181,11 +184,13 @@ const useAuthentication = (missUserRequest) => {
 
     callback();
   } catch (error) {
-    console.error(error);
+    console.error("Telegram login error:", error);
     setError(error.message);
     setIsLoading(false);
   }
 };
+
+
   const forgotPassword = async (email) => {
     try {
       setIsLoading(true);
