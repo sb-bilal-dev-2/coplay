@@ -35,7 +35,8 @@ const Authentication = () => {
     const id = searchParams.get("id");
     const telegramChatId = searchParams.get("telegramChatId");
 
-    if (location.pathname === "/auth/login" && id && telegramChatId) {
+    if (id && telegramChatId) {
+      // alert(`id:${id} && telegramChatId ${telegramChatId}`);
       telegramLogin(() => navigate("/"));
     }
   }, [location, navigate]);
