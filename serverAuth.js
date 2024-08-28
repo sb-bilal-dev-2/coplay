@@ -236,13 +236,15 @@ const initAuth = (ownApp) => {
 
   // telegram-login endpoint
   app.post("/telegram-login", async (req, res) => {
-    const { userId, telegramChatId } = req.body;
+    const { id, telegramChatId } = req.body;
 
     try {
       const update = {
         isTelegramConnected: true,
         chatId: telegramChatId,
       };
+
+      let userId = id
 
       const user = await User.findOneAndUpdate({ userId }, update);
       console.log("Login with telegram");
