@@ -23,52 +23,40 @@ function showMainMenu(chatId) {
   bot.sendMessage(chatId, "Please choose an option:", options);
 }
 
-bot.onText(/\/start auth/, (msg) => {
-  const chatId = msg.chat.id;
-  const username = msg.from.username;
-
-  // Send user data to your web application
-  bot.sendMessage(chatId, "Please click the button below to authenticate:", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Authenticate",
-            url: `${TG_LOGIN}/#/auth/login?username=${username}&telegramChatId=${chatId}
-            )}`,
-          },
-        ],
-      ],
-    },
-  });
-});
-
 bot.onText(/\/start(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
-  const userId = match[1].trim(); // This will contain your_custom_code or be empty
+  const username = msg.from.username;
+  const params = match[1].trim(); // This will contain additional parameters or be empty
 
-  if (userId) {
+  if (params === 'auth') {
+    // User wants to authenticate
+    bot.sendMessage(chatId, "Please click the button below to authenticate:", {
+      reply_markup: {
+        inline_keyboard: [[
+          {
+            text: "Authenticate",
+            url: `${TG_LOGIN}/#/auth/login?username=${username}&telegramChatId=${chatId}`
+          }
+        ]]
+      }
+    });
+  } else if (params) {
     // User came with a deep link containing a code
     bot.sendMessage(chatId, "Opening authentication page...", {
       reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Open Auth Web App",
-              web_app: {
-                url: `${TG_LOGIN}/#/auth/login?userId=${userId}&telegramChatId=${chatId}`,
-              },
-            },
-          ],
-        ],
-      },
+        inline_keyboard: [[
+          {
+            text: "Open Auth Web App",
+            web_app: {
+              url: `${TG_LOGIN}/#/auth/login?userId=${params}&telegramChatId=${chatId}`
+            }
+          }
+        ]]
+      }
     });
-    console.log(
-      "code provided",
-      `${TG_LOGIN}/#/auth/login?userId=${userId}&telegramChatId=${chatId}`
-    );
+    console.log("code provided", `${TG_LOGIN}/#/auth/login?userId=${params}&telegramChatId=${chatId}`);
   } else {
-    // User started the bot without a code
+    // User started the bot without any parameters
     showMainMenu(chatId);
   }
 });

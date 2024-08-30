@@ -163,7 +163,7 @@ const initAuth = (ownApp) => {
          return res.status(404).json({ message: "User not created" });
        }
 
-       console.log("Login with telegram");
+       console.log("Login with telegram", user);
 
        const token = generateToken(user);
 
