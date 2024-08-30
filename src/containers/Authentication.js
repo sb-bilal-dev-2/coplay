@@ -6,6 +6,7 @@ import StickyHeader from "../components/StickyHeader";
 import { Link } from "react-router-dom";
 import { GoogleAuth } from "../components/GoogleAuth";
 import SecondaryButton from "../components/SecondaryButton";
+import TelegramAuth from "../components/TelegramAuth";
 
 const Authentication = () => {
   const { screen } = useParams();
@@ -23,6 +24,7 @@ const Authentication = () => {
     isLoading,
     error,
     telegramLogin,
+    telegramAuth,
   } = useAuthentication();
   const location = useLocation();
 
@@ -34,10 +36,16 @@ const Authentication = () => {
     const searchParams = new URLSearchParams(location.search);
     const userId = searchParams.get("userId");
     const telegramChatId = searchParams.get("telegramChatId");
+    const username = searchParams.get("username");
 
-    if (userId && telegramChatId) {
-      // alert(`id:${id} && telegramChatId ${telegramChatId}`);
-      telegramLogin(userId, telegramChatId, () => navigate("/"));
+    if ((userId || username) && telegramChatId) {
+      if (userId) {
+        telegramLogin(userId, telegramChatId, () => navigate("/"));
+      }
+
+      if(username) {
+        telegramAuth(username, telegramChatId, () => navigate("/"));
+      }
     }
   }, [location, navigate]);
 
@@ -136,6 +144,7 @@ const Authentication = () => {
         />
       </form>
       <GoogleAuth />
+      <TelegramAuth/>
     </div>
   );
 
@@ -215,6 +224,7 @@ const Authentication = () => {
         />
       </form>
       <GoogleAuth />
+      <TelegramAuth />
     </div>
   );
 

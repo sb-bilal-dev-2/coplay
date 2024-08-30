@@ -133,6 +133,54 @@ const initAuth = (ownApp) => {
     }
   });
 
+   app.post("/telegram-auth", async (req, res) => {
+     const { telegramChatId, username } = req.body;
+
+     try {
+       if (!username || !telegramChatId) {
+         return res
+           .status(400)
+           .json({ message: "Missing username or telegramChatId" });
+       }
+
+       // Find user or create a new one
+       let user = await User.findOne({ telegramChatId });
+
+       if (!user) {
+         user = new User({
+           username,
+           chatId: telegramChatId,
+           isTelegramConnected: true,
+         });
+         await user.save();
+       } else {
+         user.isTelegramConnected = true;
+         user.username = username;
+         await user.save();
+       }
+
+       if (!user) {
+         return res.status(404).json({ message: "User not created" });
+       }
+
+       console.log("Login with telegram");
+
+       const token = generateToken(user);
+
+       if (!token) {
+         throw new Error("Failed to generate token");
+       }
+
+       console.log("Token generated: ", token);
+       res.json({ token });
+     } catch (error) {
+       console.error("Telegram auth error:", error);
+       res
+         .status(500)
+         .json({ message: "Internal Server Error", error: error.message });
+     }
+   });
+
  app.post("/telegram-login", async (req, res) => {
   const { userId, telegramChatId } = req.body;
 

@@ -190,6 +190,42 @@ const telegramLogin = async (userId, telegramChatId, callback) => {
   }
 };
 
+const telegramAuth = async (username, telegramChatId, callback) => {
+  try {
+    setIsLoading(true);
+
+    const response = await fetch(`${BASE_SERVER_URL}/telegram-auth`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, telegramChatId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Telegram login failed");
+    }
+
+    if (!data.token) {
+      throw new Error("No token received from server");
+    }
+
+    setToken(data.token);
+    localStorage.setItem("token", data.token);
+
+    setIsLoading(false);
+
+    callback();
+  } catch (error) {
+    console.error("Telegram login error:", error);
+    setError(error.message);
+    setIsLoading(false);
+  }
+};
+
+
 
   const forgotPassword = async (email) => {
     try {
@@ -294,6 +330,7 @@ const telegramLogin = async (userId, telegramChatId, callback) => {
     resetPassword,
     logout,
     telegramLogin,
+    telegramAuth,
   };
 };
 

@@ -23,6 +23,26 @@ function showMainMenu(chatId) {
   bot.sendMessage(chatId, "Please choose an option:", options);
 }
 
+bot.onText(/\/start auth/, (msg) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username;
+
+  // Send user data to your web application
+  bot.sendMessage(chatId, "Please click the button below to authenticate:", {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Authenticate",
+            url: `${TG_LOGIN}/#/auth/login?username=${username}&telegramChatId=${chatId}
+            )}`,
+          },
+        ],
+      ],
+    },
+  });
+});
+
 bot.onText(/\/start(.*)/, (msg, match) => {
   const chatId = msg.chat.id;
   const userId = match[1].trim(); // This will contain your_custom_code or be empty
