@@ -25,8 +25,7 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (!user) {
-      let fetchUser = getUserWords();
-      dispatch(updateUser(fetchUser));
+      getUserWords();
     }
   }, []);
 
@@ -63,7 +62,7 @@ export default function Onboarding() {
       },
     ]);
 
-    // dispatch(updateUser(newUserInfo));
+    dispatch(updateUser(newUserInfo));
 
     i18n.changeLanguage(option.iso);
     localStorage.setItem("mainLanguage", option.iso);
