@@ -6,7 +6,7 @@
  */
 // window.speechSynthesis.getVoices() - availible voices (176)
 
-export const speakText = (text, lang = "en-US", speed) => {
+export const speakText = (text, lang = localStorage.getItem('learningLanguage'), speed) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.pitch = 1.3;

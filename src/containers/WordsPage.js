@@ -9,15 +9,15 @@ const useRequestWordCollectionWordList = (listName) => {
   const location = useLocation();
   const [wordCollection, set_wordCollection] = useState();
   const requestWordCollection = async () => {
-    const response = await api().get(`/wordLists?forTitle=${listName}`);
+    const response = await api().get(`/wordCollections?title=${listName}`);
 
-    set_wordCollection(response?.data?.results[0]?.list);
+    set_wordCollection(response?.data?.results[0]?.keywords?.map(item => item.the_word));
   };
 
   useEffect(() => {
     requestWordCollection();
   }, [location.pathname]);
-
+  console.log('wordCollection', wordCollection)
   return wordCollection;
 };
 
@@ -41,18 +41,17 @@ const WordsPage = () => {
     const newWord = { the_word, repeatCount: 0, repeatTime: Date.now() };
     await api().post("/self_words", [newWord]);
   };
-
+  const reversedList = (isWordCollectionPage
+    ? wordCollectionWordList?.reverse() || []
+    : listsMap[listName + "List"]?.reverse())
+    console.log('reversedList', reversedList)
   return (
     <div className="flex items-center justify-center flex-col bg-gray-900 h-screen">
       <StickyHeader />
       <AdvancedSwipe
-        list={
-          (isWordCollectionPage
-            ? wordCollectionWordList || []
-            : listsMap[listName + "List"])?.reverse()
-        }
+        list={reversedList}
         header
-        title={isWordCollectionPage ? "Word collection" : "My words"}
+        title={isWordCollectionPage ? listName : "My words"}
         onSwipeBottom={handleSwipeBottom}
         onSwipeTop={handleSwipeTop}
         onSwipeLeft={handleSwipeLeft}

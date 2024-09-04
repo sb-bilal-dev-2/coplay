@@ -35,6 +35,7 @@ const schema = new Schema({
   homophones: [String],
   within50k: Boolean,
   within5k: Boolean,
+  isPhrase: Boolean,
   mainDefinition: String,
   definitions: [
     Schema({
@@ -45,6 +46,9 @@ const schema = new Schema({
   ],
   images: [String],
   descriptiveImages: [String],
+  youglishSrcs: [String],
+  youglishOccurances: Number,
+  youglishParsed: Boolean,
   the_word_translations: Schema.Types.Mixed,
   detailedExplanation_translations: Schema.Types.Mixed,
   shortExplanation_translations: Schema.Types.Mixed,

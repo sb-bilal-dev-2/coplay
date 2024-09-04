@@ -6,6 +6,7 @@ export const BASE_SERVER_URL = USE_LOCALHOST_SERVER ? process.env.REACT_APP_BASE
 
 export const api = () => {
     const token = localStorage.getItem('token')
+
     return axios.create({
         baseURL: BASE_SERVER_URL,
         headers: {

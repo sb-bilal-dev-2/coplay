@@ -16,41 +16,46 @@ import { useSelector } from "react-redux";
 
 function getPercentage(index, totalNumbers = 7) {
   const step = 100 / (totalNumbers - 1); // Calculate step size
-  const percentage = Math.round(index * step);
-  return `${Math.min(percentage, 100)}%`;
-}
+  const percentage = Math.min(Math.round(index * step), 100) || 0;
 
-const Header = ({ repeatCount, the_word, listName, list, currentIndex }) => {
+  return percentage && `${percentage}%`;
+}
+const DISPLAY_ITEMS_LIMIT = 5;
+
+const Header = ({ repeatCount, the_word, title, list, currentIndex }) => {
+  const percentage = getPercentage(repeatCount);
   return (
-    <>
+    <div className="px-2">
       <div
-        className="w-18 h-18 absolute rounded-full z-50 bottom-64 left-8 border-4 border-green-300 shadow"
+        className="w-18 h-18 absolute rounded-full z-50 -top-4 left-12 border-4 border-green-300 shadow"
         style={{ background: "rgb(22 163 74)" }}
       >
         <p className="font-bold text-white text-l m-4">
           {list.length - currentIndex}/{list.length}
         </p>
       </div>
+      {!!percentage &&
       <div
-        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-36 border-4 border-red-200 shadow"
+        className="w-16 h-16 absolute rounded-full z-50 -top-4 right-36 border-4 border-red-200 shadow"
         style={{ background: "#f98787" }}
       >
         <p className="font-bold text-white text-l mt-4 text-center">
-          {getPercentage(repeatCount)}
+          {percentage}
         </p>
       </div>
+      }
       <div
-        className="w-16 h-16 absolute rounded-full z-50 bottom-64 right-8 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
-        style={{ background: "rgb(6 182 212)" }}
+        className="w-16 h-16 absolute rounded-full z-50 -top-4 right-12 flex justify-center items-center cursor-pointer border-4 border-sky-400 shadow-sm"
+        style={{ background: "rgb(212 78 6)" }}
       >
-        <Link to={`/quiz/${listName}/${the_word?.toLowerCase()}`}>
+        <Link to={`/quiz/${title}/${the_word?.toLowerCase()}`}>
           <i
             class="fa fa-play text-white text-l m-4 text-center "
             aria-hidden="true"
           ></i>
         </Link>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -147,20 +152,20 @@ function AdvancedSwipe({
 }) {
   const mainLang = useSelector(state => state.user?.user?.mainLanguage)
   const { t } = useTranslation();
-  const [currentIndex, setCurrentIndex] = useState(list.length - 1);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [lastDirection, setLastDirection] = useState();
   // used for outOfFrame closure
   const currentIndexRef = useRef(currentIndex);
   const [wordInfosByTheWordMap, set_wordInfosByTheWordMap] = useState({});
   const requestWordInfo = async () => {
     console.log('list', list)
-    console.log('currentIndex', currentIndex - 10,currentIndex + 1)
-    const next10Items = list.slice(currentIndex - 10, currentIndex + 1)
+    
+    const next10Items = list.slice(-currentIndex)
     console.log('next10Items', next10Items)
     const itemsToRequest = next10Items.filter(item => !wordInfosByTheWordMap[item])
     // console.log('wordInfoLemmas', await (api().get('/wordInfoLemmas?mainLang=en&the_word=' + itemsToRequest[0])))
     const newWordInfos = await Promise.all(itemsToRequest.map(async (item) => {
-      const wordInfo = (await (api().get(`/wordInfoLemma?mainLang=${mainLang}&the_word=` + item))).data
+      const wordInfo = (await (api().get(`/wordInfoLemma?mainLang=${'en'}&the_word=` + item))).data
       return wordInfo
     }).map(prms => prms.catch((err) => console.log('err', err, err.response.status))))
     console.log('newWordInfos', newWordInfos)
@@ -172,6 +177,7 @@ function AdvancedSwipe({
 
   useEffect(() => {
     requestWordInfo();
+    updateCurrentIndex(list.length - 1)
   }, [list]);
   const childRefs = useMemo(
     () =>
@@ -193,8 +199,8 @@ function AdvancedSwipe({
     const newIndex = currentIndex + 1;
     console.log('GO BACK to index', newIndex)
     updateCurrentIndex(newIndex);
-
-    await childRefs[newIndex].current.restoreCard();
+    console.log('childRefs', childRefs, childRefs[newIndex], newIndex)
+    await childRefs[newIndex]?.current?.restoreCard();
   };
   const handleSwipeError = (err) => {
     console.log('err', err)
@@ -241,6 +247,7 @@ function AdvancedSwipe({
   const toggleCard = () => {
     setFliped(!fliped);
   };
+  console.log('currentIndex', currentIndex)
 
   return (
     <div className="cardMainContainer">
@@ -248,8 +255,7 @@ function AdvancedSwipe({
       <div className="cardContainer">
         {list.map((character, index) => {
           const wordInfo = wordInfosByTheWordMap[character]
-
-          if (index > currentIndex - 5 && index < currentIndex + 5) {
+          if (index > currentIndex - DISPLAY_ITEMS_LIMIT || index > currentIndex + DISPLAY_ITEMS_LIMIT) {
             return (
               <TinderCard
                 ref={childRefs[index]}
@@ -272,6 +278,7 @@ function AdvancedSwipe({
                   <div className={`face ${fliped ? "face-front" : ""} `}>
                     {header ? (
                       <Header
+                        title={title}
                         repeatCount={wordInfo?.repeatCount}
                         the_word={character}
                         list={list}
@@ -280,12 +287,15 @@ function AdvancedSwipe({
                     ) : null}
                     <div className="w-full" onClick={toggleCard}>
                       <i className="fa-solid fa-volume-high p-4 cursor-pointer hover:opacity-70" style={{ color: '#9198e5' }} onClick={() => speakText(character, wordInfo?.lang || mediaLang, 0.7)}></i>
-                      <h3
-                        style={{ color: "green" }}
-                        className="text-center relative w-full m-auto cursor-pointer text-4xl py-5 hover:opacity-90"
-                      >
-                         {wordInfo?.the_word || character}
-                      </h3>
+                      <div className="absolute bottom-8 w-full" >
+                        <h3
+                          style={{ color: "green" }}
+                          className="text-center w-full m-auto cursor-pointer text-4xl py-5 hover:opacity-90"
+                        >
+                          {wordInfo?.the_word || character}
+                        </h3>
+                        <p className="text-center w-full text-xl text-gray-700">{wordInfo?.rominized || wordInfo?.pronounciation}</p>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -297,17 +307,15 @@ function AdvancedSwipe({
                     <div class="border-2 border-sky-300 rounded-md h-full p-4">
                       {wordInfo?.the_word_translations && wordInfo?.the_word_translations[mainLang] &&
                         <p className="text-center text-gray-500 font-bold">
-                          <b>en:</b> {wordInfo?.the_word_translations[mainLang]}
+                          {wordInfo?.the_word_translations[mainLang]}
                         </p>                    
                       }
-                      <p className="text-center text-gray-500 font-bold">
+                      <p className="text-center text-gray-500">
                         <b>Definition:</b> {wordInfo?.shortDefinition}
                       </p>
-                      <p className="text-center text-gray-500 font-bold">
+                      <br />
+                      <p className="text-center text-gray-500">
                         <b>Explanation:</b> {wordInfo?.shortExplanation}
-                      </p>
-                      <p className="text-center text-gray-500 font-bold">
-                        <b>Pronounciation:</b> {wordInfo?.pronounciation}
                       </p>
                     </div>
                   </div>

@@ -15,7 +15,7 @@ const { default: axios } = require('axios');
 initCRUDAndDatabase()
 
 // Available word occurances = https://github.com/hermitdave/FrequencyWords/tree/master/content/2018
-const LEARNING_LANGUAGES = ['ko', 'ru', 'en', 'tr', 'zh_cn']
+const LEARNING_LANGUAGES = ['ko', 'ru', 'en', 'tr', 'zh-CN']
 // potential_languages = ['ar', 'jp', 'de', 'it', 'es', 'hi', 'pt']
 // others ['in', 'th', 'pt_br', 'uk']
 // Promise.all(potential_languages.map(async (langCode) => await processNewLearningLanguage(langCode))
@@ -23,6 +23,7 @@ const LEARNING_LANGUAGES = ['ko', 'ru', 'en', 'tr', 'zh_cn']
 // processNewLearningLanguage('fr')
 // processNewLearningLanguage('ko')
 // processNewLearningLanguage('ru')
+// processNewLearningLanguage('zh-CN', 10)
 // processCommonWordInfos('ru')
 async function processNewLearningLanguage(langCode, minimumOccurance) {
     return await insertWords()
@@ -51,8 +52,9 @@ async function processNewLearningLanguage(langCode, minimumOccurance) {
 }
 
 async function get_languageWords(langCode, minimumOccurance) {
+    const langCodeLoweSnakeCase = langCode.toLowerCase().replace('-', '_')
     const MINIMUM_OCCURANCE = minimumOccurance || 30
-    const url = `https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/${langCode}/${langCode}_full.txt`
+    const url = `https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/${langCodeLoweSnakeCase}/${langCodeLoweSnakeCase}_full.txt`
     console.log('requested words: ', url)
     const response = await axios.get(url);
 

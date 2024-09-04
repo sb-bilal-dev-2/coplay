@@ -89,7 +89,7 @@ e.g. SAMPLE OUTPUT JSON
 REAL INPUT JSON
 `;
 
-const ELIGIBLE_CHAT_GPT_TRANSLATIONS = ['ru', 'tr', 'kr', 'cn']
+const ELIGIBLE_CHAT_GPT_TRANSLATIONS = ['ru', 'tr', 'kr', 'zh-CN']
 
 async function prepareSubtitleTranslations(
   contentFolder = './files/movieFiles',

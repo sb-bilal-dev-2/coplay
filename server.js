@@ -1,23 +1,24 @@
-require("dotenv").config();
-const express = require("express");
-const fs = require("fs");
-const { readFile } = require("fs/promises");
-const path = require("path");
-const cors = require("cors");
-const range = require("range-parser");
-const bodyParser = require("body-parser");
-const fromVtt = require("subtitles-parser-vtt").fromVtt;
-const { initAuth, getUserIdByRequestToken } = require("./serverAuth");
-const initCRUDAndDatabase = require("./serverCRUD").initCRUDAndDatabase;
-const fsPromises = require("fs/promises");
-const ip = require("ip");
-const { default: mongoose } = require("mongoose");
-const { subtitles_model } = require("./schemas/subtitles");
-const { promptAI } = require("./playground/openai");
-const wordInfos = require("./schemas/wordInfos");
-const { promptWordInfos, processTranslations } = require("./promptWordInfos");
-const { gTranslate } = require("./gTranslate");
-const { users_model } = require("./schemas/users");
+require('dotenv').config();
+const express = require('express');
+const fs = require('fs');
+const { readFile } = require('fs/promises');
+const path = require('path');
+const cors = require('cors')
+const range = require('range-parser');
+const bodyParser = require('body-parser');
+const fromVtt = require('subtitles-parser-vtt').fromVtt
+const { initAuth, getUserIdByRequestToken } = require('./serverAuth');
+const initCRUDAndDatabase = require('./serverCRUD').initCRUDAndDatabase;
+const fsPromises = require('fs/promises')
+const ip = require('ip');
+const { default: mongoose } = require('mongoose');
+const { subtitles_model } = require('./schemas/subtitles');
+const { promptAI } = require('./playground/openai');
+const wordInfos = require('./schemas/wordInfos');
+const { promptWordInfos, processTranslations } = require('./promptWordInfos');
+const { gTranslate } = require('./gTranslate');
+const { users_model } = require('./schemas/users');
+const { wordCollections_model } = require('./schemas/wordCollections');
 
 writeDevelopmentIPAddress();
 
@@ -29,13 +30,12 @@ app.use(
   })
 );
 
-const { createCRUDEndpoints, models } = initCRUDAndDatabase(app);
-const { requireAuth } = initAuth(app);
-
 const port =
   (process.argv.includes("--8080") && 8080) ||
   (process.argv.includes("--5000") && 5000) ||
   9090;
+const { createCRUDEndpoints } = initCRUDAndDatabase(app)
+const { requireAuth } = initAuth(app)
 
 app.get("/hello_world", (req, res) => {
   res.type("text/plain");
@@ -45,14 +45,23 @@ app.get("/hello_world", (req, res) => {
 
 app.get("/occurances_v2", async (req, res) => {
   const word = req.query.lemma;
-  const results = await findSubtitlesWithWord(
-    word,
-    req.headers.learninglanguage,
-    req.query.limit
-  );
-  // const youtubeOccurances = await getOccurancesFromYoutube(text, req.headers.learningLanguage, req.query.limit)
-  res.status(200).send(results);
-});
+  let results = await findSubtitlesWithWord(word, req.headers.learninglanguage, req.query.limit);
+  if (results.length <= 10) {
+    const WordInfosModel = mongoose.model(`wordInfos__${req.headers.learninglanguage}__s`, wordInfos.schema);
+    const wordInfo = WordInfosModel.findOne({ the_word: word })
+
+    if (!wordInfo) {
+      if (!wordInfo.youglishSrcs) {
+        const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(word, req.headers.learninglanguage, 10)
+        WordInfosModel.findOneAndUpdate({ the_word: word, youglishSrcs, youglishOccurances }, { upsert: true })
+        results = results.concat(youglishSrcs)
+      }
+    } else {
+      // an unknown phrase or unknown word
+    }
+  }
+  res.status(200).send(results)
+})
 
 // API endpoint to generate connection code
 app.post("/api/generate-telegram-code", (req, res) => {
@@ -74,15 +83,34 @@ app.post("/api/generate-telegram-code", (req, res) => {
   }
 });
 
-app.get("/wordInfoLemma", async (req, res) => {
+app.get('/processWordInfos', async (req, res) => {
+  const { mediaLang, title, type } = req.query
+  const query = { mediaLang }
+
+  if (title) {
+    query.title
+  }
+  let list;
+  if (type !== 'movies') {
+    list = (await wordCollections_model.find(query)).reduce((acc, item) => acc.concat(item.list), [])
+  } else {
+    list = (await subtitles_model.find(query)).reduce((acc, item) => acc.concat(item.usedWords), [])
+  }
+
+  const updatedWords = await promptWordInfos(
+    list.map(item => item.the_word),
+    mediaLang
+  )
+
+  res.statusCode(200).send(updatedWords)
+})
+
+app.get('/wordInfoLemma', async (req, res) => {
   let { the_word, mainLang } = req.query;
-  const { learninglanguage } = req.headers;
-  console.log("the_word, mainLang", the_word, mainLang, learninglanguage);
+  const { learninglanguage } = req.headers; 
+  console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
   try {
-    let WordInfosModel = mongoose.model(
-      `wordInfos__${learninglanguage}__s`,
-      wordInfos.schema
-    );
+    const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
     const requestedWordInfos = await WordInfosModel.find({ the_word });
     console.log("requestedWordInfos", requestedWordInfos);
     const wordInfo = requestedWordInfos[0];
@@ -103,15 +131,27 @@ app.get("/wordInfoLemma", async (req, res) => {
           mainLang
         );
       }
-      const updatedWordInfosKeys = (
-        await promptWordInfos(learninglanguage, [wordInfo.the_word])
-      )[0];
-      console.log("updatedWordInfosKeys 10", updatedWordInfosKeys);
-      Object.keys(updatedWordInfosKeys).map((updatedKey) => {
-        console.log("updatedKey", updatedKey, updatedWordInfosKeys[updatedKey]);
-        updatedWordInfo[updatedKey] = updatedWordInfosKeys[updatedKey];
-      });
-      console.log("updatedWordInfo 2", updatedWordInfo);
+      const updatedWordInfosKeys = (await promptWordInfos([wordInfo.the_word], learninglanguage))[0]
+      console.log('updatedWordInfosKeys 10', updatedWordInfosKeys)
+      Object.keys(updatedWordInfosKeys).map(updatedKey => {
+        console.log('updatedKey', updatedKey, updatedWordInfosKeys[updatedKey])
+        updatedWordInfo[updatedKey] = updatedWordInfosKeys[updatedKey]
+      })
+      console.log('updatedWordInfo 2', updatedWordInfo)
+    }
+
+    if (mainLang !== 'en' && wordInfo.shortDefinition && (!wordInfo.shortDefinition_translations || !wordInfo.shortDefinition_translations[mainLang])) {
+      console.log('wordInfo.shortDefinition')
+
+      const translationKeysMap = await processTranslations(learninglanguage, mainLang, [wordInfo])
+      const translationKeys = translationKeysMap[wordInfo.the_word] //
+      Object.keys(translationKeys).map((translationKey) => {
+        if (!updatedWordInfo[translationKey]) {
+          updatedWordInfo[translationKey] = {}
+        }
+        updatedWordInfo[translationKey][mainLang] = translationKeys[translationKey]
+      })
+      console.log('updatedWordInfo 3', updatedWordInfo)
     }
 
     if (
@@ -225,7 +265,7 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
     let user;
 
     if (mongoose.Types.ObjectId.isValid(user_id)) {
-      user = await models.users.findById(user_id);
+      user = await users_model.findById(user_id)
     }
     const userWords = user?.words || [];
     let movieWords;
@@ -264,7 +304,7 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
 app.post("/self_words", requireAuth, async (req, res) => {
   try {
     const { language } = req.query;
-    const User = models.users;
+    const User = users_model;
     const _id = req.userId;
     const wordListKey = language ? `${language}_words` : "words";
 
@@ -395,13 +435,13 @@ createFileRoute(app, "clipFiles");
 createCRUDEndpoints("users");
 createCRUDEndpoints("movies");
 // createCRUDEndpoints('subtitles');
-createCRUDEndpoints("clips");
-createCRUDEndpoints("quizzes");
+// createCRUDEndpoints('clips');
+// createCRUDEndpoints('quizzes');
 // createCRUDEndpoints('words');
-createCRUDEndpoints("wordCollections");
-createCRUDEndpoints("wordLists");
-createCRUDEndpoints("wordInfos");
-createCRUDEndpoints("occurances");
+createCRUDEndpoints('wordCollections');
+createCRUDEndpoints('wordInfos');
+// createCRUDEndpoints('occurances');
+
 
 // createCRUDEndpoints('favorites', {
 //   middleware: requireAuth,

@@ -4,13 +4,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const wordInfos = require('./schemas/wordInfos');
 
 const DB_USER = process.env.DATABASE_USER;
 const DB_PWD = process.env.DATABASE_PASSWORD;
 const SCHEMAS_PATH = './schemas'
 // Initialize Express app and middleware
 let app;
-let models = {}
 
 // Function to initialize MongoDB connection
 const initCRUDAndDatabase = (ownApp) => {
@@ -35,50 +35,30 @@ const initCRUDAndDatabase = (ownApp) => {
     app,
     mongoose,
     createCRUDEndpoints,
-    models,
   }
 };
 // Function to create CRUD endpoints
-const createCRUDEndpoints = (uri, model, requireAuth) => {
+const createCRUDEndpoints = (uri) => {
   // Load Mongoose schema from the provided path
-  let Model = model;
-
-  if (!model) {
-    // const schema = require(`${SCHEMAS_PATH}/${uri}.js`);
-
-    // // Add createdTime, updatedTime, and note keys to the schema
-    // schema.add({
-    //   createdTime: { type: Date, default: Date.now },
-    //   updatedTime: { type: Date, default: Date.now },
-    //   note: String,
-    // });
-  
-    // Create a Mongoose model
-    Model = require(`${SCHEMAS_PATH}/${uri}.js`)[uri + '_model'];
-  }
-  models[uri] = Model;
+  let Model = require(`${SCHEMAS_PATH}/${uri}.js`)[uri + '_model'];
 
   // CRUD Endpoints
   const DEFAULT_ITEM_LIMIT = 20;
   app.get(`/${uri}`, async (req, res) => {
     // Retrieve data from the database
-    // console.log("req.headers", req.headers)
-
     try {
+      const { learninglanguage } = req.headers
       const filterQuery = getFilterFromQuery(req.query)
-      if (req.headers.learninglanguage) {
-        filterQuery.mediaLang = req.headers.learninglanguage
+      if (['wordCollections', 'movies'].includes(uri) && learninglanguage) {
+        filterQuery.mediaLang = learninglanguage
       }
       // console.log('filterQuery', filterQuery)
       let query = Model.find(filterQuery);
-
-      // Search functionality
-      // if (req.query.match) {
-      //   const matchKey = req.query.matchKey || 'title';
-
-      //   const match = req.query.match;
-      //   query = query.where(matchKey).equals(match);
-      // }
+      //
+      if (uri === 'wordInfos') {
+        query = mongoose.model(`wordInfos${!!learninglanguage && `__${learninglanguage}__s`}`, wordInfos.schema)
+          .find(filterQuery)
+      }
 
       // Pagination
       const page = parseInt(req.query.page) || 1;
@@ -243,5 +223,4 @@ function getFilterFromQuery(query) {
 module.exports = {
   initCRUDAndDatabase,
   createCRUDEndpoints,
-  models
 };

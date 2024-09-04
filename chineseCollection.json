@@ -1,0 +1,652 @@
+[
+  {
+    "title": "Basic Greetings",
+    "mediaLang": "zh-CN",
+    "level": "Beginner",
+    "keywords": [
+      {
+        "the_keyword": "你好",
+        "romanized": "nǐ hǎo",
+        "meaning": "Hello"
+      },
+      {
+        "the_keyword": "再见",
+        "romanized": "zàijiàn",
+        "meaning": "Goodbye"
+      },
+      {
+        "the_keyword": "谢谢",
+        "romanized": "xièxiè",
+        "meaning": "Thank you"
+      },
+      {
+        "the_keyword": "对不起",
+        "romanized": "duìbuqǐ",
+        "meaning": "Sorry"
+      },
+      {
+        "the_keyword": "请",
+        "romanized": "qǐng",
+        "meaning": "Please"
+      },
+      {
+        "the_keyword": "你叫什么名字？",
+        "romanized": "Nǐ jiào shénme míngzì?",
+        "meaning": "What's your name?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "你好吗？",
+        "romanized": "Nǐ hǎo ma?",
+        "meaning": "How are you?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我很好，谢谢！",
+        "romanized": "Wǒ hěn hǎo, xièxiè!",
+        "meaning": "I'm fine, thank you!",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "At the Market",
+    "mediaLang": "zh-CN",
+    "level": "Beginner",
+    "keywords": [
+      {
+        "the_keyword": "多少钱",
+        "romanized": "duōshǎo qián",
+        "meaning": "How much?"
+      },
+      {
+        "the_keyword": "便宜",
+        "romanized": "piányí",
+        "meaning": "Cheap"
+      },
+      {
+        "the_keyword": "贵",
+        "romanized": "guì",
+        "meaning": "Expensive"
+      },
+      {
+        "the_keyword": "我要",
+        "romanized": "wǒ yào",
+        "meaning": "I want"
+      },
+      {
+        "the_keyword": "蔬菜",
+        "romanized": "shūcài",
+        "meaning": "Vegetables"
+      },
+      {
+        "the_keyword": "这个多少钱？",
+        "romanized": "Zhège duōshǎo qián?",
+        "meaning": "How much is this?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我可以试试吗？",
+        "romanized": "Wǒ kěyǐ shìshi ma?",
+        "meaning": "Can I try it on?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "便宜点吧！",
+        "romanized": "Piányí diǎn ba!",
+        "meaning": "Can it be cheaper?",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Travel",
+    "mediaLang": "zh-CN",
+    "level": "Intermediate",
+    "keywords": [
+      {
+        "the_keyword": "火车站",
+        "romanized": "huǒchēzhàn",
+        "meaning": "Train station"
+      },
+      {
+        "the_keyword": "飞机场",
+        "romanized": "fēijīchǎng",
+        "meaning": "Airport"
+      },
+      {
+        "the_keyword": "出发",
+        "romanized": "chūfā",
+        "meaning": "Depart"
+      },
+      {
+        "the_keyword": "目的地",
+        "romanized": "mùdìdì",
+        "meaning": "Destination"
+      },
+      {
+        "the_keyword": "护照",
+        "romanized": "hùzhào",
+        "meaning": "Passport"
+      },
+      {
+        "the_keyword": "请问，厕所在哪里？",
+        "romanized": "Qǐngwèn, cèsuǒ zài nǎlǐ?",
+        "meaning": "Excuse me, where is the restroom?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "你知道怎么去…吗？",
+        "romanized": "Nǐ zhīdào zěnme qù… ma?",
+        "meaning": "Do you know how to get to…?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我想去火车站",
+        "romanized": "Wǒ xiǎng qù huǒchēzhàn",
+        "meaning": "I want to go to the train station.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Ordering Food",
+    "mediaLang": "zh-CN",
+    "level": "Intermediate",
+    "keywords": [
+      {
+        "the_keyword": "菜单",
+        "romanized": "càidān",
+        "meaning": "Menu"
+      },
+      {
+        "the_keyword": "点菜",
+        "romanized": "diǎn cài",
+        "meaning": "Order food"
+      },
+      {
+        "the_keyword": "素食",
+        "romanized": "sùshí",
+        "meaning": "Vegetarian food"
+      },
+      {
+        "the_keyword": "辣",
+        "romanized": "là",
+        "meaning": "Spicy"
+      },
+      {
+        "the_keyword": "结账",
+        "romanized": "jiézhàng",
+        "meaning": "Pay the bill"
+      },
+      {
+        "the_keyword": "我想要点菜",
+        "romanized": "Wǒ xiǎng yào diǎn cài",
+        "meaning": "I want to order food.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "请给我…",
+        "romanized": "Qǐng gěi wǒ…",
+        "meaning": "Please give me…",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我吃素",
+        "romanized": "Wǒ chīsù",
+        "meaning": "I am vegetarian.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Weather",
+    "mediaLang": "zh-CN",
+    "level": "Beginner",
+    "keywords": [
+      {
+        "the_keyword": "天气",
+        "romanized": "tiānqì",
+        "meaning": "Weather"
+      },
+      {
+        "the_keyword": "下雨",
+        "romanized": "xià yǔ",
+        "meaning": "Rain"
+      },
+      {
+        "the_keyword": "晴天",
+        "romanized": "qíngtiān",
+        "meaning": "Sunny day"
+      },
+      {
+        "the_keyword": "冷",
+        "romanized": "lěng",
+        "meaning": "Cold"
+      },
+      {
+        "the_keyword": "热",
+        "romanized": "rè",
+        "meaning": "Hot"
+      },
+      {
+        "the_keyword": "今天的天气怎么样？",
+        "romanized": "Jīntiān de tiānqì zěnme yàng?",
+        "meaning": "How is the weather today?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "外面下雨了",
+        "romanized": "Wàimiàn xià yǔ le",
+        "meaning": "It's raining outside.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "明天会很热",
+        "romanized": "Míngtiān huì hěn rè",
+        "meaning": "It will be very hot tomorrow.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Cultural Context - Chinese New Year",
+    "mediaLang": "zh-CN",
+    "level": "Intermediate",
+    "keywords": [
+      {
+        "the_keyword": "春节",
+        "romanized": "Chūnjié",
+        "meaning": "Spring Festival"
+      },
+      {
+        "the_keyword": "红包",
+        "romanized": "hóngbāo",
+        "meaning": "Red envelope"
+      },
+      {
+        "the_keyword": "舞龙",
+        "romanized": "wǔlóng",
+        "meaning": "Dragon dance"
+      },
+      {
+        "the_keyword": "年夜饭",
+        "romanized": "niányèfàn",
+        "meaning": "New Year's Eve dinner"
+      },
+      {
+        "the_keyword": "烟花",
+        "romanized": "yānhuā",
+        "meaning": "Fireworks"
+      },
+      {
+        "the_keyword": "春节快乐！",
+        "romanized": "Chūnjié kuàilè!",
+        "meaning": "Happy Spring Festival!",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "你收到红包了吗？",
+        "romanized": "Nǐ shōudào hóngbāo le ma?",
+        "meaning": "Did you receive a red envelope?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "年夜饭吃什么？",
+        "romanized": "Niányèfàn chī shénme?",
+        "meaning": "What do you eat for New Year's Eve dinner?",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Health & Wellness",
+    "mediaLang": "zh-CN",
+    "level": "Advanced",
+    "keywords": [
+      {
+        "the_keyword": "健康",
+        "romanized": "jiànkāng",
+        "meaning": "Health"
+      },
+      {
+        "the_keyword": "锻炼",
+        "romanized": "duànliàn",
+        "meaning": "Exercise"
+      },
+      {
+        "the_keyword": "营养",
+        "romanized": "yíngyǎng",
+        "meaning": "Nutrition"
+      },
+      {
+        "the_keyword": "压力",
+        "romanized": "yālì",
+        "meaning": "Stress"
+      },
+      {
+        "the_keyword": "睡眠",
+        "romanized": "shuìmián",
+        "meaning": "Sleep"
+      },
+      {
+        "the_keyword": "保持健康很重要",
+        "romanized": "Bǎochí jiànkāng hěn zhòngyào",
+        "meaning": "Maintaining health is important.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "你每天锻炼吗？",
+        "romanized": "Nǐ měitiān duànliàn ma?",
+        "meaning": "Do you exercise every day?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "均衡的营养有助于健康",
+        "romanized": "Jūnhéng de yíngyǎng yǒu zhù yú jiànkāng",
+        "meaning": "Balanced nutrition contributes to health.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Workplace Vocabulary",
+    "mediaLang": "zh-CN",
+    "level": "Advanced",
+    "keywords": [
+      {
+        "the_keyword": "会议",
+        "romanized": "huìyì",
+        "meaning": "Meeting"
+      },
+      {
+        "the_keyword": "文件",
+        "romanized": "wénjiàn",
+        "meaning": "Document"
+      },
+      {
+        "the_keyword": "同事",
+        "romanized": "tóngshì",
+        "meaning": "Colleague"
+      },
+      {
+        "the_keyword": "项目",
+        "romanized": "xiàngmù",
+        "meaning": "Project"
+      },
+      {
+        "the_keyword": "进展",
+        "romanized": "jìnzhǎn",
+        "meaning": "Progress"
+      },
+      {
+        "the_keyword": "我们下午有个会议",
+        "romanized": "Wǒmen xiàwǔ yǒu gè huìyì",
+        "meaning": "We have a meeting this afternoon.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "请你发给我文件",
+        "romanized": "Qǐng nǐ fā gěi wǒ wénjiàn",
+        "meaning": "Please send me the document.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "项目进展顺利吗？",
+        "romanized": "Xiàngmù jìnzhǎn shùnlì ma?",
+        "meaning": "Is the project progressing smoothly?",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Public Transport",
+    "mediaLang": "zh-CN",
+    "level": "Intermediate",
+    "keywords": [
+      {
+        "the_keyword": "公交车",
+        "romanized": "gōngjiāo chē",
+        "meaning": "Bus"
+      },
+      {
+        "the_keyword": "地铁",
+        "romanized": "dìtiě",
+        "meaning": "Subway"
+      },
+      {
+        "the_keyword": "票",
+        "romanized": "piào",
+        "meaning": "Ticket"
+      },
+      {
+        "the_keyword": "站",
+        "romanized": "zhàn",
+        "meaning": "Station"
+      },
+      {
+        "the_keyword": "班次",
+        "romanized": "bāncì",
+        "meaning": "Frequency"
+      },
+      {
+        "the_keyword": "请问，地铁站在哪里？",
+        "romanized": "Qǐngwèn, dìtiě zhàn zài nǎlǐ?",
+        "meaning": "Excuse me, where is the subway station?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我需要买一张票",
+        "romanized": "Wǒ xūyào mǎi yī zhāng piào",
+        "meaning": "I need to buy a ticket.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "这班车什么时候到？",
+        "romanized": "Zhè bān chē shénme shíhòu dào?",
+        "meaning": "When does this bus arrive?",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Restaurants & Dining",
+    "mediaLang": "zh-CN",
+    "level": "Intermediate",
+    "keywords": [
+      {
+        "the_keyword": "餐厅",
+        "romanized": "cāntīng",
+        "meaning": "Restaurant"
+      },
+      {
+        "the_keyword": "菜单",
+        "romanized": "càidān",
+        "meaning": "Menu"
+      },
+      {
+        "the_keyword": "服务员",
+        "romanized": "fúwùyuán",
+        "meaning": "Waiter/Waitress"
+      },
+      {
+        "the_keyword": "账单",
+        "romanized": "zhàngdān",
+        "meaning": "Bill"
+      },
+      {
+        "the_keyword": "饮料",
+        "romanized": "yǐnliào",
+        "meaning": "Drink"
+      },
+      {
+        "the_keyword": "请给我菜单",
+        "romanized": "Qǐng gěi wǒ càidān",
+        "meaning": "Please give me the menu.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我们想要点菜",
+        "romanized": "Wǒmen xiǎng yào diǎn cài",
+        "meaning": "We would like to order food.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "请结账",
+        "romanized": "Qǐng jiézhàng",
+        "meaning": "Please bring the bill.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Emergency Situations",
+    "mediaLang": "zh-CN",
+    "level": "Advanced",
+    "keywords": [
+      {
+        "the_keyword": "警察",
+        "romanized": "jǐngchá",
+        "meaning": "Police"
+      },
+      {
+        "the_keyword": "医院",
+        "romanized": "yīyuàn",
+        "meaning": "Hospital"
+      },
+      {
+        "the_keyword": "救护车",
+        "romanized": "jiùhùchē",
+        "meaning": "Ambulance"
+      },
+      {
+        "the_keyword": "火灾",
+        "romanized": "huǒzāi",
+        "meaning": "Fire"
+      },
+      {
+        "the_keyword": "急救",
+        "romanized": "jíjiù",
+        "meaning": "First aid"
+      },
+      {
+        "the_keyword": "请叫救护车",
+        "romanized": "Qǐng jiào jiùhùchē",
+        "meaning": "Please call an ambulance.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我需要急救",
+        "romanized": "Wǒ xūyào jíjiù",
+        "meaning": "I need first aid.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "发生了火灾",
+        "romanized": "Fāshēng le huǒzāi",
+        "meaning": "There has been a fire.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Banking & Finance",
+    "mediaLang": "zh-CN",
+    "level": "Advanced",
+    "keywords": [
+      {
+        "the_keyword": "银行",
+        "romanized": "yínháng",
+        "meaning": "Bank"
+      },
+      {
+        "the_keyword": "账户",
+        "romanized": "zhànghù",
+        "meaning": "Account"
+      },
+      {
+        "the_keyword": "存款",
+        "romanized": "cúnkuǎn",
+        "meaning": "Deposit"
+      },
+      {
+        "the_keyword": "取款",
+        "romanized": "qǔkuǎn",
+        "meaning": "Withdraw money"
+      },
+      {
+        "the_keyword": "汇款",
+        "romanized": "huìkuǎn",
+        "meaning": "Remit money"
+      },
+      {
+        "the_keyword": "我需要开一个银行账户",
+        "romanized": "Wǒ xūyào kāi yīgè yínháng zhànghù",
+        "meaning": "I need to open a bank account.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "请帮我取款",
+        "romanized": "Qǐng bāng wǒ qǔkuǎn",
+        "meaning": "Please help me withdraw money.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我想汇款到中国",
+        "romanized": "Wǒ xiǎng huìkuǎn dào Zhōngguó",
+        "meaning": "I want to remit money to China.",
+        "isPhrase": true
+      }
+    ]
+  },
+  {
+    "title": "Entertainment & Leisure",
+    "mediaLang": "zh-CN",
+    "level": "Beginner",
+    "keywords": [
+      {
+        "the_keyword": "电影",
+        "romanized": "diànyǐng",
+        "meaning": "Movie"
+      },
+      {
+        "the_keyword": "音乐",
+        "romanized": "yīnyuè",
+        "meaning": "Music"
+      },
+      {
+        "the_keyword": "书",
+        "romanized": "shū",
+        "meaning": "Book"
+      },
+      {
+        "the_keyword": "游戏",
+        "romanized": "yóuxì",
+        "meaning": "Game"
+      },
+      {
+        "the_keyword": "运动",
+        "romanized": "yùndòng",
+        "meaning": "Exercise"
+      },
+      {
+        "the_keyword": "你喜欢看电影吗？",
+        "romanized": "Nǐ xǐhuān kàn diànyǐng ma?",
+        "meaning": "Do you like watching movies?",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "这本书很有趣",
+        "romanized": "Zhè běn shū hěn yǒuqù",
+        "meaning": "This book is very interesting.",
+        "isPhrase": true
+      },
+      {
+        "the_keyword": "我们去打篮球吧",
+        "romanized": "Wǒmen qù dǎ lánqiú ba",
+        "meaning": "Let's go play basketball.",
+        "isPhrase": true
+      }
+    ]
+  }
+]

@@ -79,16 +79,21 @@ async function getVideoInfoAndStore(url) {
 }
 async function downloadYouTubeVideo(url) {
     // audio download test 
-    // const command = `yt-dlp -f 249 --write-sub --no-check-certificate '${url}'`;
-    const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.%(ext)s' --no-check-certificate '${url}'`;
-    await executeCli(video_command)
-        .then((message) => console.log('Video Download successful:', message))
-        .catch((error) => console.error('Video Download failed:', error))
+    try {
+        const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.%(ext)s' --no-check-certificate '${url}'`;
+        await executeCli(video_command)
+            .then((message) => console.log('Video Download successful:', message))
+            .catch((error) => console.error('Video Download failed:', error))
+    
+        const audio_command = `yt-dlp -f bestaudio -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.mp3' --no-check-certificate '${url}'`;
+        await executeCli(audio_command)
+            .then((message) => console.log('Audio Download successful:', message))
+            .catch((error) => console.error('Audio Download failed:', error))
 
-    const audio_command = `yt-dlp -f bestaudio -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.mp3' --no-check-certificate '${url}'`;
-    await executeCli(audio_command)
-        .then((message) => console.log('Audio Download successful:', message))
-        .catch((error) => console.error('Audio Download failed:', error))
+    } catch(err) {
+        console.log('ERROR at download: ', err)
+    }
+    // const command = `yt-dlp -f 249 --write-sub --no-check-certificate '${url}'`;
 }
 
 function executeCli(command) {

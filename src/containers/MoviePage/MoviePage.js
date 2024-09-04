@@ -80,7 +80,7 @@ const MoviePage = () => {
         {!currentItem?.youtubeUrl && (currentItem?.label || title)}
       </h2>
       {currentItem && currentItem?.youtubeUrl ?
-        <YoutubePlayer videoIdOrUrl={currentItem?.youtubeUrl} />
+        <YoutubePlayer videoIdOrUrl={currentItem?.youtubeUrl} controls />
           : currentItem &&
         <DashVideoPlayer title={title} currentItem={currentItem} />
       }

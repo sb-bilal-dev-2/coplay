@@ -3,9 +3,12 @@ const { default: mongoose } = require("mongoose");
 const fs = require("fs");
 const { promptAI, generateImage } = require("./playground/openai");
 const { gTranslate } = require("./gTranslate");
+const { schema: wordInfosSchema } = require('./schemas/wordInfos');
+
+// require("./serverCRUD").initCRUDAndDatabase()
 
 // const words_example = ['hello', 'new', 'told', 'lie', 'go']
-// promptWordInfos('en', words_example, 10)
+// promptWordInfos(words_example, 'en', 10)
 const MINUTE = (1000 * 60) + 500
 const SAMPLE_INPUT_STRINGIFIED = JSON.stringify(
     { the_word: 'go', langCode: 'en' }
@@ -44,8 +47,30 @@ const MAIN_PROMPT = {
 // promptImages([{ lemma: 'hello' }, { lemma: 'turmoil' }, { lemma: 'construction' }, { lemma: 'apathy'}], console.log)
 // processTranslations()
 // promptAI(getWordInfoPromptByLanguage('broken', 'en'))
-// promptWordInfos('en', ['hello', 'broken'])
-async function promptWordInfos(langCode, words) {
+// promptWordInfos(['hello', 'broken'], 'en')
+// promptWordInfoAndUpdateDB('hello', 'en')
+async function promptWordInfoAndUpdateDB(the_word, mediaLang) {
+    const WordInfosModel = mongoose.model(`wordInfos${!!mediaLang && `__${mediaLang.toLowerCase()}__s`}`, wordInfosSchema)
+
+    try {
+        const existingWordInfo = await WordInfosModel.findOne({ the_word })
+
+        if (existingWordInfo && !existingWordInfo.shortDefinition) {
+
+            const promptRes = (await promptWordInfos([the_word], mediaLang))[0]
+
+            Object.keys(promptRes).forEach((key) => {
+                existingWordInfo[key] = promptRes[key]
+            })
+
+            existingWordInfo.save()
+        }
+    } catch (err) {
+        console.log('PROMPT ERROR: ' + the_word, err)
+    }
+}
+
+async function promptWordInfos(words, langCode) {
     // const WordInfosModel = mongoose.model(`wordInfos${!!langCode && `_${langCode}`}`, wordInfos.schema)
 
     const PROCESS_ITEMS_PER_INTERVAL = 20;
@@ -243,6 +268,7 @@ const handleOpenAIError = (error) => {
 
 module.exports = {
     promptWordInfos,
+    promptWordInfoAndUpdateDB,
     promptImages,
     processTranslations
 }

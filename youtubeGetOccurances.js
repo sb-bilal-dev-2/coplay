@@ -1,114 +1,450 @@
 // const Client_ID = '286582041318-c9l94c5im2gispviq7kr376ga7u4hgj7.apps.googleusercontent.com'
 // const Client_secret = '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'
-// const { google } = require('googleapis');
+const { google } = require('googleapis');
+const fs = require('fs')
+const path = require('path')
+const os = require('os')
+const { exec } = require('child_process')
 // const axios = require('axios');
 // const srtParser = require('subtitle');
 require('dotenv').config()
+const { initCRUDAndDatabase } = require('./serverCRUD')
+initCRUDAndDatabase()
+const { schema: wordInfosSchema } = require('./schemas/wordInfos')
+const { wordCollections_model } = require('./schemas/wordCollections')
+const ytdl = require('ytdl-core')
 
-// const youtube = google.youtube({ version: 'v3', auth: process.env.GOOGLE_API_KEY || 'AIzaSyAr4_UXl3AGdIqNzJxLf2mtAzYw4w0WqOs' });
+const youtube = google.youtube({ version: 'v3', auth: process.env.GOOGLE_API_KEY || 'AIzaSyAr4_UXl3AGdIqNzJxLf2mtAzYw4w0WqOs' });
 // searchVideos()
 // For Linux:
 // wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 // sudo apt install ./google-chrome-stable_current_amd64.deb
+const { load, cut } = require('@node-rs/jieba')
+const pinyin = require("chinese-to-pinyin")
 
 const puppeteer = require('puppeteer');
 
-async function parseVideoSrcs(keyword, language, numberOfItems) {
+const { default: mongoose } = require('mongoose');
+const { promptWordInfoAndUpdateDB } = require('./promptWordInfos');
+
+// Call the update function
+// updateWordCollectionWordInfos('zh-CN')
+  // updateWordOccurances('en');
+  // getWordOccuranceThroughYouglish('get', 'en', 3)
+  //   .then(srcs => console.log(srcs))
+  //   .catch(err => console.error(err));
+
+  // searchDownloadAndCheckSubtitles('这个多少钱?', 'zh-CN')
+  // searchDownloadAndCheckSubtitles('Someone', 'en')
+  // .then(results => {
+  //   console.log('Results:', results);
+  // })
+  // .catch(error => {
+  //   console.error('Error:', error);
+  // });
+
+
+async function updateWordCollectionWordInfos(mediaLang) {
+  const wordCollections = await wordCollections_model.find({ mediaLang })
+  const keywords = wordCollections.reduce((acc, item) => acc.concat(item.keywords), [])
+  const WordInfosModel = mongoose.model(`wordInfos${!!mediaLang && `__${mediaLang.toLowerCase()}__s`}`, wordInfosSchema)
+  console.log('keywords', keywords)
+
+  for (const keyword of keywords) {
+    const { the_word } = keyword;
+    const existingWordInfo = await WordInfosModel.findOne({ the_word: the_word })
+    console.log('existingWordInfo for ' + the_word, existingWordInfo)
+
+    if (existingWordInfo) {
+      const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(the_word, mediaLang, 15)
+      console.log('youglishSrcs', youglishSrcs)
+      console.log('youglishOccurances', youglishOccurances)
+
+      existingWordInfo.youglishSrcs = youglishSrcs;
+      existingWordInfo.youglishOccurances = youglishOccurances;
+      existingWordInfo.youglishParsed = true;
+      await existingWordInfo.save()
+    } else if (!existingWordInfo) {
+      const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(the_word, mediaLang, 15)
+      console.log('youglishSrcs', youglishSrcs)
+      console.log('youglishOccurances', youglishOccurances)
+      const isPhrase = getIsPhrase(the_word, mediaLang)
+      await WordInfosModel.create({
+        isPhrase,
+        the_word: the_word,
+        youglishSrcs,
+        youglishOccurances,
+        youglishParsed: true,
+      })
+    }
+    await promptWordInfoAndUpdateDB(the_word, mediaLang)
+  }
+  console.log('UPDATED KEYWORDS:', keywords.map(item => item.the_word))
+
+
+}
+
+const ROMINIZE_FUNCTION = {
+  'zh-CN': (text) => pinyin(text),
+  'jp': () => { },
+  'th': () => { },
+  'ko': () => { },
+  'default': () => { }
+}
+
+const SPACELESS_LANG_WORD_PARSE = {
+  'zh-CN': (text) => {
+    try {
+      load()
+    } catch { }
+    // loadDict(fs.readFileSync(...))
+    // loadTFIDFDict(fs.readFileSync(...))
+
+    return cut(text, false)
+    // ["我们", "中", "出", "了", "一个", "叛徒"]
+  },
+  // 'ko': () => { },
+  'jp': () => { },
+  'th': () => { },
+}
+
+function getIsPhrase(text, mediaLang) {
+  if (text.length === 1) return false
+  const customParseWords = SPACELESS_LANG_WORD_PARSE[mediaLang]
+
+  if (customParseWords) {
+    return customParseWords(text).length > 1
+  } else {
+    return text.trim().includes(' ')
+  }
+}
+
+async function updateWordOccurances(langCode) {
+  const WordInfosModel = mongoose.model(`wordInfos${!!langCode && `__${langCode}__s`}`, wordInfosSchema)
+  try {
+    // Fetch all wordInfos
+    const wordInfos = await WordInfosModel.find({}).sort({ occurance: 1 });
+    console.log('wordInfos', wordInfos)
+    // Use for...of to handle async operations sequentially
+    for (const wordInfo of wordInfos) {
+      const { the_word, occurance } = wordInfo;
+
+      try {
+        // Call the getWordOccuranceThroughYouglish function for the current wordInfo
+        const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(the_word, langCode, 5);
+
+        // Update the wordInfo document with the obtained sources
+        wordInfo.youglishSrcs = youglishSrcs;
+        wordInfo.youglishOccurances = youglishOccurances;
+        await wordInfo.save();
+
+        console.log(`Successfully updated: ${the_word} occ: ${occurance} new videoSrcs.length: ${videoSrcs.length}`);
+      } catch (err) {
+        // Handle errors specific to the current wordInfo
+        console.error(`Error processing ${the_word} occ: ${occurance}`, err);
+        // Optionally, update the document with an error status or leave it unchanged
+        wordInfo.youglishSrcs = [];
+        wordInfo.youglishOccurances = 0;
+        await wordInfo.save();
+      }
+    }
+
+    console.log('All wordInfos processed.');
+  } catch (err) {
+    // Handle errors that occur during the database operation or iteration
+    console.error('Error fetching or updating wordInfos:', err);
+  }
+}
+
+const LANGUAGE_QUERY_BY_LANG_CODE = {
+  'en': 'english',
+  'en-US': 'english',
+  'ru': 'russian',
+  'zh-CN': 'chinese'
+}
+
+async function getWordOccuranceThroughYouglish(keyword, langCode, numberOfItems) {
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/google-chrome-stable' // Only for Linux
+    args: ['--incognito'],
+    // headless: false,
+    // executablePath: '/usr/bin/google-chrome-stable' // Only for Linux
+    timeout: 10000
   });
+  console.log('launched browser...')
+  // Create a new incognito browser context
+  // const context = await browser.createIncognitoBrowserContext();
+  // Create a new page inside the incognito context
   const page = await browser.newPage();
-  const url = `https://youglish.com/pronounce/${keyword}/${language}`;
+
+  const url = `https://youglish.com/pronounce/${keyword}/${LANGUAGE_QUERY_BY_LANG_CODE[langCode]}`;
 
   await page.goto(url, { waitUntil: 'networkidle0' });
+  console.log('new page')
+  // await page.screenshot({ path: 'screenshot1.png' });
 
-  const videoSrcs = [];
+  const youglishSrcs = [];
+  let youglishOccurances;
 
-  for (let i = 0; i < numberOfItems; i++) {
-    // Wait for the iframe to load
-    await page.waitForSelector('#player');
+  try {
+    youglishOccurances = Number(await page.$eval('#ttl_total', el => el.innerHTML)) || 0
+    const limit = (youglishOccurances < numberOfItems ? youglishOccurances : numberOfItems) - 1
+    for (let i = 0; i < limit; i++) {
+      // Wait for the iframe to load
+      await page.waitForSelector('#player');
+      // await page.screenshot({ path: 'screenshot2.png' });
 
-    // Get the src of the iframe
-    const src = await page.$eval('#player', el => el.src);
-    videoSrcs.push(src);
+      // let src = await page.$eval('#player', el => el.src);
+      // Get the src of the iframe
+      await page.click('#player', { button: 'right' });
+      // // await videoElement.click({ button: 'right' });
+      // await page.screenshot({ path: 'screenshot_rightclick.png' });
+      const iframeElement = await page.waitForSelector('#player');
+      const iframe = await iframeElement.contentFrame();
+      console.log('iframe', iframe)
+      await iframe.waitForSelector('#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate > span.ytp-time-wrapper > span.ytp-time-current')
+      const lastAnchorElement = await iframe.$('#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-right-controls > a:last-of-type');
+      console.log('lastAnchorElement', lastAnchorElement)
+      const timeElement = await iframe.$('#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate > span.ytp-time-wrapper > span.ytp-time-current');
+      const timeElementContent = await iframe.evaluate(el => el.innerHTML, timeElement);
+      const timeInSeconds = timeToSeconds(timeElementContent.trim())
+      console.log('Time: ', timeElementContent, timeInSeconds)
+      const href = lastAnchorElement && await iframe.evaluate(el => el.getAttribute('href'), lastAnchorElement);
+      console.log('Href of the last <a> tag:', href);
+      // #movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-right-controls > a
+      const src = href + '&t=' + timeInSeconds
+      // await page.screenshot({ path: 'screenshot_mouse_to_youtube.png' });
 
-    // Click the next button if it's not the last iteration
-    if (i < numberOfItems - 1) {
-      await page.click('#b_next');
-      // Wait for the page to load the next video
-      await page.waitForNavigation({ waitUntil: 'networkidle0' });
+      // await new Promise(res => setTimeout(res, 2000))
+      // Wait for the clipboard operation to complete
+      // await page.waitForTimeout(1000);
+
+      // Evaluate in browser context to get clipboard content
+      // const copiedUrl2 = await page.evaluate(() => navigator.clipboard.readText());
+
+      // console.log('copiedUrl2 video URL at current time:', copiedUrl2);
+
+      // const title = await page.$eval('#player', el => el.title);
+      // src = copiedUrl;
+      console.log(`src ${i + 1} of ${limit}`, src)
+      // const elementHandle = await page.$('#player_container');
+      // console.log('html', await page.evaluate(el => el.outerHTML, elementHandle))
+
+      youglishSrcs.push(src);
+      // Click the next button if it's not the last iteration
+      if (i < limit - 1) {
+        await page.click('#b_next');
+        // Wait for the page to load the next video
+        // await page.screenshot({ path: 'screenshot3.png' });
+        // await page.waitForNavigation({ waitUntil: 'networkidle0' });
+        // await page.screenshot({ path: 'screenshot4.png' });
+      }
     }
+
+  } catch (err) {
+
   }
 
   await browser.close();
 
-  return videoSrcs;
+  return { youglishSrcs, youglishOccurances };
 }
 
 // Example usage
-parseVideoSrcs('hello', 'english', 2)
-  .then(srcs => console.log(srcs))
-  .catch(err => console.error(err));
+// getWordOccuranceThroughYouglish('hello', 'en', 2)
+//   .then(srcs => console.log(srcs))
+//   .catch(err => console.error(err));
 
-
-async function searchVideos() {
-  try {
-    const query = 'someone'
-
-    // Search for videos
-    const searchResponse = await youtube.search.list({
-      part: 'id,snippet',
-      q: query + ',cc',
-      type: 'video',
-      videoCaption: 'closedCaption',
-      safeSearch: 'strict',
-      maxResults: 5 // Adjust as needed
+function executeCli(command) {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.warn(`Stderr: ${stderr}`);
+      }
+      resolve(stdout);
     });
-    console.log('searchResponse', searchResponse.data.items)
+  });
+}
+
+async function searchDownloadAndCheckSubtitles(query, mediaLang = 'en') {
+  try {
+    const videos = await searchVideos(query, mediaLang);
     const results = [];
 
-    for (const item of searchResponse.data.items) {
-      const videoId = item.id.videoId;
-
-      // Get caption tracks for the video
-      const captionResponse = await youtube.captions.list({
-        part: 'snippet',
-        videoId: videoId
-      });
-
-      // Get the first English caption track (you might want to add more logic here)
-      const captionTrack = captionResponse.data.items.find(
-        track => track.snippet.language === 'en'
-      );
-      // GET https://www.googleapis.com/youtube/v3/captions/id
-    //   console.log('captionTrack', captionTrack)
-      if (captionTrack) {
-        // Download the actual subtitle content
-        // const subtitleResponse = await axios.get(
-        //   `https://www.googleapis.com/youtube/v3/captions/${captionTrack.id}`,
-        //   { responseType: 'text' }
-        // );
-        // console.log('subtitleResponse.data', subtitleResponse.data)
-        // // Parse the subtitle content
-        // const parsedSubtitles = srtParser.parse(subtitleResponse.data);
-
-        // // Search for the query in subtitles
-        // const matches = parsedSubtitles?.filter(sub => 
-        //   sub.text.toLowerCase().includes(query.toLowerCase())
-        // );
-
-        // results.push({
-        //   videoId,
-        //   title: item.snippet.title,
-        //   matches: matches.map(match => ({
-        //     text: match.text,
-        //     start: match.start,
-        //     end: match.end
-        //   }))
-        // });
+    const tempDir = 'files/temp';
+    fs.rmSync(tempDir)
+    fs.mkdirSync(tempDir)
+    for (const video of videos) {
+      const subtitlesPath = await downloadSubtitles(video.id, tempDir, mediaLang);
+      if (subtitlesPath) {
+        const parsedSubtitles = await parseSubtitles(subtitlesPath);
+        const matches = checkSubtitlesForQuery(parsedSubtitles, query);
+        if (matches.length > 0) {
+          results.push({
+            videoUrl: `https://www.youtube.com/watch?v=${video.id}`,
+            title: video.title,
+            matches: matches
+          });
+        }
       }
     }
+
+    // Clean up temporary directory
+    await fs.rm(tempDir, { recursive: true, force: true });
+
+    return results;
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in searchDownloadAndCheckSubtitles:', error);
+    return [];
   }
+}
+
+async function searchVideos(query, mediaLang) {
+  const searchResponse = await youtube.search.list({
+    part: 'id,snippet',
+    q: `"${query}"`,
+    type: 'video',
+    videoCaption: 'closedCaption',
+    safeSearch: 'strict',
+    maxResults: 30
+  });
+
+  return searchResponse.data.items.map(item => ({
+    id: item.id.videoId,
+    title: item.snippet.title
+  }));
+}
+
+async function downloadSubtitles(videoId, tempDir, mediaLang) {
+  const outputTemplate = path.join(tempDir, `${videoId}.%(ext)s`);
+  // const command = `yt-dlp --skip-download --write-sub --sub-lang ${mediaLang} --no-check-certificate -o "${outputTemplate}" https://www.youtube.com/watch?v=${videoId}`;
+  const url = `https://www.youtube.com/watch?v=${videoId}`
+  try {
+    const video_command = `yt-dlp -f mp4 --write-thumbnail --skip-download --write-sub --all-subs -o '${tempDir}/%(id)s.%(ext)s' --no-check-certificate '${url}'`;
+    await executeCli(video_command)
+      .then((message) => console.log('Video Download successful:', message))
+      .catch((error) => console.error('Video Download failed:', error))
+    const subtitlesPath = path.join('./files/temp', `${videoId}.${mediaLang}.vtt`);
+
+    // Check if the file exists
+    if (fs.existsSync(subtitlesPath)) {
+      return subtitlesPath;
+    };
+  } catch (error) {
+    console.error(`Error downloading subtitles for video ${videoId}:`, error);
+    return null;
+  }
+}
+
+async function parseSubtitles(vttPath) {
+  try {
+    const vttContent = await fs.readFile(vttPath, 'utf-8');
+    return vttFrom(vttContent, 's', true); // Assuming YouTube auto-transcript format
+  } catch (error) {
+    console.error(`Error parsing VTT file: ${error}`);
+    return null;
+  }
+}
+
+function checkSubtitlesForQuery(parsedSubtitles, query) {
+  const matches = [];
+  for (const subtitle of parsedSubtitles) {
+    if (subtitle.text.toLowerCase().includes(query.toLowerCase())) {
+      matches.push({
+        text: subtitle.text,
+        start: subtitle.start,
+        end: subtitle.end
+      });
+    }
+  }
+  return matches;
+}
+// const ytdl = require('ytdl-core');
+// const { google } = require('googleapis');
+
+// // You need to set up a Google Cloud project and get an API key
+// const API_KEY = 'YOUR_YOUTUBE_API_KEY';
+// const youtube = google.youtube({ version: 'v3', auth: API_KEY });
+
+async function getChannelVideos(channelId, maxResults = 50) {
+  try {
+    const response = await youtube.search.list({
+      part: 'id',
+      channelId: channelId,
+      type: 'video',
+      order: 'date',
+      maxResults: maxResults
+    });
+
+    return response.data.items.map(item => `https://www.youtube.com/watch?v=${item.id.videoId}`);
+  } catch (error) {
+    console.error('Error fetching channel videos:', error);
+    return [];
+  }
+}
+
+async function getPlaylistVideos(playlistId, maxResults = 50) {
+  try {
+    const response = await youtube.playlistItems.list({
+      part: 'contentDetails',
+      playlistId: playlistId,
+      maxResults: maxResults
+    });
+
+    return response.data.items.map(item => `https://www.youtube.com/watch?v=${item.contentDetails.videoId}`);
+  } catch (error) {
+    console.error('Error fetching playlist videos:', error);
+    return [];
+  }
+}
+
+function timeToSeconds(timeString) {
+  // Split the timeString by colon
+  const parts = timeString.split(':').map(part => parseInt(part, 10));
+
+  // Initialize variables with default values
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+
+  // Assign values based on the number of parts
+  if (parts.length === 3) {
+    hours = parts[0];
+    minutes = parts[1];
+    seconds = parts[2];
+  } else if (parts.length === 2) {
+    minutes = parts[0];
+    seconds = parts[1];
+  } else if (parts.length === 1) {
+    seconds = parts[0];
+  }
+
+  // Calculate the total seconds
+  return (hours * 3600) + (minutes * 60) + seconds;
+}
+
+// Example usage:
+// async function main() {
+//   const channelId = 'UCBR8-60-B28hp2BmDPdntcQ'; // YouTube Spotlight channel
+//   const playlistId = 'PLbpi6ZahtOH6Blw3RGYpWkSByi_T7Rygb'; // YouTube Rewind playlist
+
+//   const channelVideos = await getChannelVideos(channelId);
+//   console.log('Channel videos:', channelVideos);
+
+//   const playlistVideos = await getPlaylistVideos(playlistId);
+//   console.log('Playlist videos:', playlistVideos);
+
+//   // Example of downloading a video using ytdl-core
+//   if (channelVideos.length > 0) {
+//     const videoUrl = channelVideos[0];
+//     // ytdl(videoUrl).pipe(fs.createWriteStream('video.mp4'));
+//   }
+// }
+
+// main();
+module.exports = {
+  updateWordCollectionWordInfos
 }

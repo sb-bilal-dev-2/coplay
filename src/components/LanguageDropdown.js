@@ -7,15 +7,16 @@ import { useTranslation } from "react-i18next";
 import "./LanguageModal.css";
 
 export const LANGUAGES = [
-  { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
+  // { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
   { id: 1, label: "English", iso: "en", flag: "./USA.webp" },
   { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
-  { id: 3, label: "Chinese", iso: "zh", flag: "./china.png" },
+  { id: 3, label: "Chinese", iso: "zh-CN", flag: "./china.png" },
 ];
 
 export const APP_LANGUAGES = [
   { id: "en", iso: "en", label: "English" },
-  { id: "uz", iso: "uz", label: "Uzbek" },
+  { id: "uz", iso: "uz", label: "O'zbekcha" },
+  { id: "ru", iso: "ru", label: "Русский" },
 ];
 
 const findFormLanguagesList = (selectedLanguage) => {
@@ -102,26 +103,14 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
     setSelectedOption(option);
     setShowModal(false);
 
-    let newUserInfo;
-    const token = localStorage.getItem("token");
-
-    const isUserHaveLang = (user, option) => {
-      return user?.learningLanguages?.includes(option.iso);
-    };
-
-    console.log("user", user);
-
+    const token = localStorage.getItem("token")
     if (token) {
-      newUserInfo = {
-        learningLanguages: [...user.learningLanguages, option.iso],
-      };
-
-      if (!isUserHaveLang(user, option)) {
+      if (!user.learningLanguages.includes(option.iso)) {
         putItems([
           {
             email: userIdAndEmail.email,
             _id: userIdAndEmail.id,
-            ...newUserInfo,
+            learningLanguages: [...user.learningLanguages, option.iso],
           },
         ]);
 
@@ -178,7 +167,6 @@ const ChooseLanguageModal = ({
   selectedOption,
   t,
 }) => {
-  const user = useSelector((state) => state.user.user);
   const localMainLangugae = localStorage.getItem("mainLanguage");
 
   if (!show) return null;
@@ -196,11 +184,10 @@ const ChooseLanguageModal = ({
           {APP_LANGUAGES.map((option) => (
             <span
               key={option.iso}
-              className={`${
-                localMainLangugae === option.iso
+              className={`${localMainLangugae === option.iso
                   ? "border-yellow-400"
                   : "border-gray-500"
-              } p-2 mr-4 border-2 rounded-xl cursor-pointer`}
+                } p-2 mr-4 border-2 rounded-xl cursor-pointer`}
               onClick={() => handleNativeLang(option)}
             >
               {option.label}
