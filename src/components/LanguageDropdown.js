@@ -105,7 +105,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
 
     const token = localStorage.getItem("token")
     if (token) {
-      if (!user.learningLanguages.includes(option.iso)) {
+      if (!user?.learningLanguages.includes(option.iso)) {
         putItems([
           {
             email: userIdAndEmail.email,
