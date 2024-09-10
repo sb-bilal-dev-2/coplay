@@ -3,6 +3,7 @@
   height: 80vh;
   left: 36%;
   top: 41px;
+  user-select: none;
 }
 
 @media (max-width: 600px) {

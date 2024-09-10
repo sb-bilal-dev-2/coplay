@@ -46,8 +46,12 @@ app.get("/hello_world", (req, res) => {
 app.get("/occurances_v2", async (req, res) => {
   const word = req.query.lemma;
   let results = await findSubtitlesWithWord(word, req.headers.learninglanguage, req.query.limit);
+  const WordInfosModel = mongoose.model(`wordInfos__${req.headers.learninglanguage}__s`, wordInfos.schema);
+
+  if (!WordInfosModel) {
+    return res.status(400).send('learninglanguage header is missing');
+  }
   if (results.length <= 10) {
-    const WordInfosModel = mongoose.model(`wordInfos__${req.headers.learninglanguage}__s`, wordInfos.schema);
     const wordInfo = WordInfosModel.findOne({ the_word: word })
 
     if (!wordInfo) {

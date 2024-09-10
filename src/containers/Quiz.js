@@ -83,7 +83,7 @@ const Quiz = () => {
           <i className="fa fa-arrow-left" aria-hidden="true"></i>
         </button>
         {
-          currentAvailableOccurancesLength && (
+          !!currentAvailableOccurancesLength && (
             <YoutubePlayer videoIdOrUrl={currentWordInfo?.youglishSrcs[playingOccuranceIndex]} />
           )
         }
@@ -183,7 +183,7 @@ function useWordColletionWordInfos(list, paramWord) {
   useEffect(() => {
     requestWords()
   }, [list])
-  const currentWord = wordCollection?.keywords[practicingWordIndex]?.the_word
+  const currentWord = wordCollection?.keywords[practicingWordIndex]?.the_word || list[practicingWordIndex] || paramWord
   const currentWordInfo = wordInfos[currentWord]
   return { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord }
 }

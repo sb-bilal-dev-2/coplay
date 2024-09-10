@@ -39,7 +39,7 @@ const OPTIONAL_VALUES = JSON.stringify({
 
 const MAIN_PROMPT = {
     'en': `Give root word and lemma of the given word also 'shortExplanation' and 'shortDefinition' which are always in english.
-    I provided other needed options in OPTIONAL_VALUES and their key naming describes what they are well.`,
+    I provided other needed options in OPTIONAL_VALUES and their key naming describes what they are well. If it is a phrase don't give lemma, rootWord, functions. Give usedWords and explain as needed for the phrase but still with json.`,
     '': ``,
     '': ``,
 }
@@ -63,7 +63,7 @@ async function promptWordInfoAndUpdateDB(the_word, mediaLang) {
                 existingWordInfo[key] = promptRes[key]
             })
 
-            existingWordInfo.save()
+            await existingWordInfo.save()
         }
     } catch (err) {
         console.log('PROMPT ERROR: ' + the_word, err)

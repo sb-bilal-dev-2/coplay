@@ -13,35 +13,34 @@ initCRUDAndDatabase()
 const { schema: wordInfosSchema } = require('./schemas/wordInfos')
 const { wordCollections_model } = require('./schemas/wordCollections')
 const ytdl = require('ytdl-core')
+const puppeteer = require('puppeteer')
 
 const youtube = google.youtube({ version: 'v3', auth: process.env.GOOGLE_API_KEY || 'AIzaSyAr4_UXl3AGdIqNzJxLf2mtAzYw4w0WqOs' });
 // searchVideos()
 // For Linux:
 // wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 // sudo apt install ./google-chrome-stable_current_amd64.deb
-const { load, cut } = require('@node-rs/jieba')
 const pinyin = require("chinese-to-pinyin")
 
-const puppeteer = require('puppeteer');
-
 const { default: mongoose } = require('mongoose');
-const { promptWordInfoAndUpdateDB } = require('./promptWordInfos');
+const { promptWordInfos } = require('./promptWordInfos');
+const { getIsPhrase } = require('./utils/getIsPhrase');
 
 // Call the update function
 // updateWordCollectionWordInfos('zh-CN')
-  // updateWordOccurances('en');
-  // getWordOccuranceThroughYouglish('get', 'en', 3)
-  //   .then(srcs => console.log(srcs))
-  //   .catch(err => console.error(err));
+// updateAllWord('en');
+// getWordOccuranceThroughYouglish('便宜', 'zh-CN', 3)
+//   .then(srcs => console.log(srcs))
+//   .catch(err => console.error(err));
 
-  // searchDownloadAndCheckSubtitles('这个多少钱?', 'zh-CN')
-  // searchDownloadAndCheckSubtitles('Someone', 'en')
-  // .then(results => {
-  //   console.log('Results:', results);
-  // })
-  // .catch(error => {
-  //   console.error('Error:', error);
-  // });
+// searchDownloadAndCheckSubtitles('这个多少钱?', 'zh-CN')
+// searchDownloadAndCheckSubtitles('Someone', 'en')
+// .then(results => {
+//   console.log('Results:', results);
+// })
+// .catch(error => {
+//   console.error('Error:', error);
+// });
 
 
 async function updateWordCollectionWordInfos(mediaLang) {
@@ -55,33 +54,33 @@ async function updateWordCollectionWordInfos(mediaLang) {
     const existingWordInfo = await WordInfosModel.findOne({ the_word: the_word })
     console.log('existingWordInfo for ' + the_word, existingWordInfo)
 
+    const isPhrase = getIsPhrase(the_word, mediaLang)
+    const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(the_word, mediaLang, 15)
+    const newWordInfo = existingWordInfo || { isPhrase, the_word: the_word }
+    newWordInfo.youglishSrcs = youglishSrcs;
+    newWordInfo.youglishOccurances = youglishOccurances;
+    newWordInfo.youglishParsed = true;
+    console.log('youglishSrcs', youglishSrcs)
+    console.log('youglishOccurances', youglishOccurances)
     if (existingWordInfo) {
-      const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(the_word, mediaLang, 15)
-      console.log('youglishSrcs', youglishSrcs)
-      console.log('youglishOccurances', youglishOccurances)
-
-      existingWordInfo.youglishSrcs = youglishSrcs;
-      existingWordInfo.youglishOccurances = youglishOccurances;
-      existingWordInfo.youglishParsed = true;
-      await existingWordInfo.save()
-    } else if (!existingWordInfo) {
-      const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(the_word, mediaLang, 15)
-      console.log('youglishSrcs', youglishSrcs)
-      console.log('youglishOccurances', youglishOccurances)
-      const isPhrase = getIsPhrase(the_word, mediaLang)
-      await WordInfosModel.create({
-        isPhrase,
-        the_word: the_word,
-        youglishSrcs,
-        youglishOccurances,
-        youglishParsed: true,
-      })
+      await newWordInfo.save()
     }
-    await promptWordInfoAndUpdateDB(the_word, mediaLang)
+
+    // const promptRes =  existingWordInfo?.shortDefinition ? {} : (await promptWordInfos([the_word], mediaLang))[0]
+    const promptRes =  (await promptWordInfos([the_word], mediaLang))[0]
+    
+    Object.keys(promptRes).forEach((key) => {
+      newWordInfo[key] = promptRes[key]
+    })
+
+    if (existingWordInfo) {
+      await newWordInfo.save()
+    } else if (!existingWordInfo) {
+      await WordInfosModel.create(newWordInfo)
+    }
+    // await promptWordInfoAndUpdateDB(the_word, mediaLang)
   }
   console.log('UPDATED KEYWORDS:', keywords.map(item => item.the_word))
-
-
 }
 
 const ROMINIZE_FUNCTION = {
@@ -92,34 +91,7 @@ const ROMINIZE_FUNCTION = {
   'default': () => { }
 }
 
-const SPACELESS_LANG_WORD_PARSE = {
-  'zh-CN': (text) => {
-    try {
-      load()
-    } catch { }
-    // loadDict(fs.readFileSync(...))
-    // loadTFIDFDict(fs.readFileSync(...))
-
-    return cut(text, false)
-    // ["我们", "中", "出", "了", "一个", "叛徒"]
-  },
-  // 'ko': () => { },
-  'jp': () => { },
-  'th': () => { },
-}
-
-function getIsPhrase(text, mediaLang) {
-  if (text.length === 1) return false
-  const customParseWords = SPACELESS_LANG_WORD_PARSE[mediaLang]
-
-  if (customParseWords) {
-    return customParseWords(text).length > 1
-  } else {
-    return text.trim().includes(' ')
-  }
-}
-
-async function updateWordOccurances(langCode) {
+async function updateAllWord(langCode) {
   const WordInfosModel = mongoose.model(`wordInfos${!!langCode && `__${langCode}__s`}`, wordInfosSchema)
   try {
     // Fetch all wordInfos
@@ -136,6 +108,7 @@ async function updateWordOccurances(langCode) {
         // Update the wordInfo document with the obtained sources
         wordInfo.youglishSrcs = youglishSrcs;
         wordInfo.youglishOccurances = youglishOccurances;
+        wordInfo.youglishParsed = true;
         await wordInfo.save();
 
         console.log(`Successfully updated: ${the_word} occ: ${occurance} new videoSrcs.length: ${videoSrcs.length}`);
@@ -145,6 +118,8 @@ async function updateWordOccurances(langCode) {
         // Optionally, update the document with an error status or leave it unchanged
         wordInfo.youglishSrcs = [];
         wordInfo.youglishOccurances = 0;
+        wordInfo.youglishParsed = true;
+
         await wordInfo.save();
       }
     }
@@ -175,29 +150,41 @@ async function getWordOccuranceThroughYouglish(keyword, langCode, numberOfItems)
   // const context = await browser.createIncognitoBrowserContext();
   // Create a new page inside the incognito context
   const page = await browser.newPage();
+  await page.setViewport({ width: 1920, height: 1080 });
+  
+  await page.setUserAgent(
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+  );
 
   const url = `https://youglish.com/pronounce/${keyword}/${LANGUAGE_QUERY_BY_LANG_CODE[langCode]}`;
 
   await page.goto(url, { waitUntil: 'networkidle0' });
+    // That's it, a single line of code to solve reCAPTCHAs 🎉
+
   console.log('new page')
-  // await page.screenshot({ path: 'screenshot1.png' });
+  await page.screenshot({ path: 'screenshot1.png' });
+
+  await page.screenshot({ path: 'screenshot2.png' });
 
   const youglishSrcs = [];
   let youglishOccurances;
+  try {
+    youglishOccurances = Number(await page.$eval('#ttl_total', el => el.innerHTML)) || 0    
+  } catch (err) {
+  }
 
   try {
-    youglishOccurances = Number(await page.$eval('#ttl_total', el => el.innerHTML)) || 0
     const limit = (youglishOccurances < numberOfItems ? youglishOccurances : numberOfItems) - 1
     for (let i = 0; i < limit; i++) {
       // Wait for the iframe to load
       await page.waitForSelector('#player');
-      // await page.screenshot({ path: 'screenshot2.png' });
+      await page.screenshot({ path: 'screenshot2.png' });
 
       // let src = await page.$eval('#player', el => el.src);
       // Get the src of the iframe
       await page.click('#player', { button: 'right' });
       // // await videoElement.click({ button: 'right' });
-      // await page.screenshot({ path: 'screenshot_rightclick.png' });
+      await page.screenshot({ path: 'screenshot_rightclick.png' });
       const iframeElement = await page.waitForSelector('#player');
       const iframe = await iframeElement.contentFrame();
       console.log('iframe', iframe)
@@ -234,7 +221,7 @@ async function getWordOccuranceThroughYouglish(keyword, langCode, numberOfItems)
       if (i < limit - 1) {
         await page.click('#b_next');
         // Wait for the page to load the next video
-        // await page.screenshot({ path: 'screenshot3.png' });
+        await page.screenshot({ path: 'screenshot3.png' });
         // await page.waitForNavigation({ waitUntil: 'networkidle0' });
         // await page.screenshot({ path: 'screenshot4.png' });
       }
