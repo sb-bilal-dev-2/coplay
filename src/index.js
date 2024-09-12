@@ -67,11 +67,12 @@ const router = createHashRouter(
         loader={authenticatedRoute}
       />
       <Route path="quiz/:list" element={<Quiz />} loader={authenticatedRoute} />
-      <Route
+      {/* TODO: Return if project have payment system */}
+      {/* <Route
         path="price_page"
         element={<PricePage />}
         loader={authenticatedRoute}
-      />
+      /> */}
       <Route path="*" element={<NotFound />} />
     </>
   )

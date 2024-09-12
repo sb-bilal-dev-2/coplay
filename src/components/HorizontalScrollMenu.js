@@ -67,14 +67,15 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
               }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
             }}
           >
-            {isPremium ? (
+            {/* TODO: Refactor if project needs premium */}
+            {/* {isPremium ? (
               <span
                 className="font-bold  bg-white rounded-full text-center text-sm relative mb-0.5 float-right"
                 style={{ width: "30px", height: "30px", lineHeight: "2" }}
               >
                 <i class="fa-solid fa-crown text-yellow-400"></i>
               </span>
-            ) : null}
+            ) : null} */}
 
             <div className="list-card__title">{label || title}</div>
           </Link>

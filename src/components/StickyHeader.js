@@ -132,6 +132,8 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 <i className="fas fa-search"></i>
               </button>
             )}
+            {/* 
+            //TODO: return if buy premium is needed
             {!isPricePage ? (
               <Link
                 to="/price_page"
@@ -140,6 +142,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
               </Link>
             ) : null}
+            */}
 
             <LanguageDropdown
               selectedLanguage={learningLanguage ? learningLanguage : "en"}
@@ -194,7 +197,6 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
   const emailLetters = userEmail.match(/[A-Z]/gi) || [];
   const firstLetter =
     (!!emailLetters?.length && emailLetters[0]?.toUpperCase()) || "";
-  // console.log('emailLetters', emailLetters)
   const avatarPath = getPlaceholderUrl(firstLetter);
   const outsideNavClickWrapperRef = useRef(null);
 
@@ -252,7 +254,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
               <b>{t("sign out")}</b>
             </button>
           </li>
-        {/* TODO: check if telegram connected condition */}
+          {/* TODO: check if telegram connected condition */}
           {_Id && (
             <li className="list-none">
               <button className="flex" onClick={() => generateConnectionCode()}>
@@ -267,6 +269,8 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
             </li>
           )}
 
+          {/*
+          //TODO: Return if project has payment
           <li className="hide_link show_in_mobile">
             <Link
               to="/price_page"
@@ -274,7 +278,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
             >
               Buy premium <i class="fa-solid fa-crown text-yellow-400"></i>
             </Link>
-          </li>
+          </li> */}
         </ul>
       )}
     </>
