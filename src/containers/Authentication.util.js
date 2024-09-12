@@ -37,7 +37,7 @@ const useAuthentication = (missUserRequest) => {
       });
 
       if (!response.ok) {
-        if (response.status === 400) {
+        if (response?.status === 400) {
           const newError = new Error('User Already Exists');
           newError.name = 'email'
           throw newError
@@ -132,7 +132,7 @@ const useAuthentication = (missUserRequest) => {
       if (!response.ok) {
         let newError = new Error('Login Failed')
 
-        if (response.status === 401) {
+        if (response?.status === 401) {
           newError.message = "Wrong login or password"
 
           throw newError

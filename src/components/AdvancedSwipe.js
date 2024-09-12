@@ -167,7 +167,7 @@ function AdvancedSwipe({
     const newWordInfos = await Promise.all(itemsToRequest.map(async (item) => {
       const wordInfo = (await (api().get(`/wordInfoLemma?mainLang=${'en'}&the_word=` + item))).data
       return wordInfo
-    }).map(prms => prms.catch((err) => console.log('err', err, err.response.status))))
+    }).map(prms => prms.catch((err) => console.log('err', err, err?.response?.status))))
     console.log('newWordInfos', newWordInfos)
     newWordInfos.filter(item => item).forEach((item) => (wordInfosByTheWordMap[item.the_word] = item))
     set_wordInfosByTheWordMap(wordInfosByTheWordMap)

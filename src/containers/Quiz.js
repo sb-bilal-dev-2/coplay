@@ -8,6 +8,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { usePost } from './usePost';
 import { sortByLearningState } from "../helper/sortByLearningState";
 import YoutubePlayer from "../components/YoutubePlayer";
+import videojs from 'video.js';
+import ErrorBoundary from "./ErrorBoundary";
+import { usePrevious } from "@uidotdev/usehooks";
 
 const PLAYING_OCCURANCE_LIMIT = 5;
 
@@ -27,33 +30,88 @@ function useTelegramWebApp() {
   }
 }
 
+const QuizVideoPlayer = ({ videoSrc, startTime, autoPlay }) => {
+  const videoRef = useRef();
+  const [error, set_error] = useState(null)
+  const loadAndPlay = async () => {
+    const exists = await checkResourceExists(videoSrc)
+    if (!exists) {
+      set_error('Not Found')
+      videoRef.current.src = ''
+      await videoRef.current.load();
+      return
+    }
+    try {
+      videoRef.current.src = videoSrc
+      await videoRef.current.load();
+      console.log('videoSrc', videoSrc)
+      console.log("startTime", startTime);
+      if (videoRef.current && autoPlay) {
+        await videoRef.current.play();
+      }
+    } catch (error) {
+      console.error('Play error: ', error)
+    }
+  }
+
+  const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
+
+  useEffect(() => {
+    loadAndPlay()
+    set_error(null)
+    set_isLoadedMetadata(false)
+  }, [videoSrc]);
+
+  async function playVideo() {
+    if (autoPlay && !error) {
+      try {
+        videoRef.current.currentTime = startTime
+        await videoRef.current.play()
+      } catch(error) {
+        console.log('PLAY ERROR', error)
+      }
+    }
+  }
+
+  useEffect(() => {
+    console.log('isLoadedMetadata', isLoadedMetadata)
+    console.log('error', error)
+    if (isLoadedMetadata) {
+      playVideo()
+    }
+  }, [startTime, isLoadedMetadata])
+
+  return (
+    <div data-vjs-player>
+      {!error &&
+        <video
+        ref={videoRef}
+        className="video-js vjs-default-skin w-full"
+        onErrorCapture={(error) => console.error('NEW ERROR', error)}
+        onLoadedMetadata={() => {
+          set_isLoadedMetadata(true)
+          try {
+            console.log("occurances[playingOccuranceIndex].startTime", startTime);
+            videoRef.current.currentTime = startTime;
+          } catch(error) {
+            console.error('onLoadedMetadata error: ', error)
+          }
+        }}
+      />
+      }
+    </div>
+  )
+}
+
 const Quiz = () => {
   const { } = useTelegramWebApp()
   const { list, word: paramWord } = useParams();
   const [isShowingDefinitions, set_isShowingDefinitions] = useState();
-  const [occurances, set_occurances] = useState([]);
   const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
-  const { currentWord, wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo } = useWordColletionWordInfos(list, paramWord)
+  const { currentWord, wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(list, paramWord)
   // console.log('FOO', FOO)
   // const { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo } = FOO
   const navigate = useNavigate()
-  const requestLemmaOccurances = async (the_word) => {
-    try {
-      const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=5`)).data;
-      console.log("wordData", wordData);
-      if (wordData.length) {
-        set_occurances(wordData);
-      }
-    } catch (err) {
-      console.log("err", err);
-    }
-  };
-
-  const requestListAndGetCurrentLemmaInfo = async () => {
-  };
-  const playNextOccurance = async () => {
-  };
-
 
   // const [postUserWords] = usePost()
   // const updateRepeatCount = async (pWord) => {
@@ -69,11 +127,12 @@ const Quiz = () => {
   console.log('currentWordInfo', currentWordInfo)
   console.log('practicingWordIndex', practicingWordIndex)
   console.log('wordCollection', wordCollection)
-  const currentAvailableOccurancesLength = currentWordInfo?.youglishSrcs?.length;
-  const prevOccButtonDisabled = playingOccuranceIndex <= 0;
-  const nextOccButtonDisabled = playingOccuranceIndex >= currentAvailableOccurancesLength - 1;
+  console.log('currentWordOccurances', currentWordOccurances)
+  const currentOccuranceTypeIsYoutube = currentWordOccurances[playingOccuranceIndex]?.mediaSrc?.includes('youtube.com')
+  const prevOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex <= 0;
+  const nextOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex >= currentAvailableOccurancesLength - 1;
   return (
-    <>
+    <ErrorBoundary>
       {/* <WebcamCapture /> */}
       <div className="QuizMain flex-grow bg-video text-gray text-gray-100 relative">
         <button
@@ -84,7 +143,14 @@ const Quiz = () => {
         </button>
         {
           !!currentAvailableOccurancesLength && (
-            <YoutubePlayer videoIdOrUrl={currentWordInfo?.youglishSrcs[playingOccuranceIndex]} />
+            currentOccuranceTypeIsYoutube ?
+              <YoutubePlayer videoIdOrUrl={currentWordOccurances[playingOccuranceIndex]?.mediaSrc} />
+              :
+              <QuizVideoPlayer
+                autoPlay={playingOccuranceIndex !== 0}
+                videoSrc={`${BASE_SERVER_URL}/movie?name=${currentWordOccurances[playingOccuranceIndex]?.mediaTitle}`}
+                startTime={currentWordOccurances[playingOccuranceIndex]?.startTime / 1000}
+              />
           )
         }
         <div className="Subtitles text-center text-white px-8 text-lg">
@@ -93,25 +159,23 @@ const Quiz = () => {
           </b> */}
         </div>
         <div className="mb-4">
-          {currentAvailableOccurancesLength ?
-            <h4>
-              <i
-                className={`fa-solid fa-backward-step p-2 ${!!prevOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
-                onClick={() => !prevOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex - 1)}>
-              </i>
-              <span className="select-none">
-                {playingOccuranceIndex + 1}/{currentAvailableOccurancesLength}
+          <h4>
+            <i
+              className={`fa-solid fa-backward-step p-2 ${!!prevOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
+              onClick={() => !prevOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex - 1)}>
+            </i>
+            <span className="select-none">
+              {playingOccuranceIndex + 1}/{currentAvailableOccurancesLength}
 
-              </span>
-              <i
-                className={`fa-solid fa-forward-step p-2 ${!!nextOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
-                onClick={() => !nextOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex + 1)}>
-              </i>
-              <span>
-                {/* <br /> */}
-              </span>
-            </h4> : ''
-          }
+            </span>
+            <i
+              className={`fa-solid fa-forward-step p-2 ${!!nextOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
+              onClick={() => !nextOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex + 1)}>
+            </i>
+            <span>
+              {/* <br /> */}
+            </span>
+          </h4> : ''
         </div>
         <div className="overflow relative">
           <div
@@ -158,7 +222,7 @@ const Quiz = () => {
           </h3>
         </div> */}
       </div>
-    </>
+    </ErrorBoundary>
   );
 };
 
@@ -166,18 +230,40 @@ function useWordColletionWordInfos(list, paramWord) {
   const [wordCollection, set_wordCollection] = useState()
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
+  const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
+
+  const request_wordOccurances = async (the_word) => {
+    try {
+      const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`)).data;
+      console.log("wordData", wordData);
+      if (wordData.length) {
+        return wordData
+      }
+    } catch (err) {
+      console.log("err", err);
+    }
+  };
+
   const requestWords = async () => {
     const wordCollection = (await api('').get(`/wordCollections?title=${list}`)).data.results[0];
     set_wordCollection(wordCollection)
     set_practicingWordIndex(wordCollection.keywords.reduce((previousIndex, item, currentIndex) => item.the_word === paramWord ? currentIndex : previousIndex, 0))
     const new_wordInfos = {}
+    const new_wordOccurancesMap = {}
     await Promise.all(wordCollection.keywords.map(async (keyword) => {
       const response = await api().get(`/wordInfos?the_word=${keyword.the_word}`);
 
       if (!new_wordInfos[keyword.the_word]) {
         new_wordInfos[keyword.the_word] = response?.data?.results[0]
       }
+
+      const newOccurances = await request_wordOccurances(keyword.the_word)
+      console.log('newOccurances', newOccurances)
+      if (newOccurances?.length) {
+        new_wordOccurancesMap[keyword.the_word] = newOccurances;
+      }
     }))
+    set_wordOccurancesMap(new_wordOccurancesMap)
     set_wordInfos(new_wordInfos)
   }
   useEffect(() => {
@@ -185,8 +271,29 @@ function useWordColletionWordInfos(list, paramWord) {
   }, [list])
   const currentWord = wordCollection?.keywords[practicingWordIndex]?.the_word || list[practicingWordIndex] || paramWord
   const currentWordInfo = wordInfos[currentWord]
-  return { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord }
+  const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
+  const currentAvailableOccurancesLength = currentWordOccurances?.length
+  return { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
 }
 
+function checkResourceExists(url) {
+  return fetch(url, { method: 'HEAD' })
+    .then(response => {
+      if (response.ok) {
+        // Resource exists (status code 200-299)
+        return true;
+      } else if (response.status === 404) {
+        // Resource does not exist
+        return false;
+      } else {
+        // Some other status code
+        throw new Error(`HTTP status ${response.status}`);
+      }
+    })
+    .catch(error => {
+      console.error('Error checking resource:', error);
+      return false;
+    });
+}
 
 export default Quiz;

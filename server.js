@@ -51,19 +51,7 @@ app.get("/occurances_v2", async (req, res) => {
   if (!WordInfosModel) {
     return res.status(400).send('learninglanguage header is missing');
   }
-  if (results.length <= 10) {
-    const wordInfo = WordInfosModel.findOne({ the_word: word })
 
-    if (!wordInfo) {
-      if (!wordInfo.youglishSrcs) {
-        const { youglishSrcs, youglishOccurances } = await getWordOccuranceThroughYouglish(word, req.headers.learninglanguage, 10)
-        WordInfosModel.findOneAndUpdate({ the_word: word, youglishSrcs, youglishOccurances }, { upsert: true })
-        results = results.concat(youglishSrcs)
-      }
-    } else {
-      // an unknown phrase or unknown word
-    }
-  }
   res.status(200).send(results)
 })
 
@@ -555,6 +543,7 @@ async function findSubtitlesWithWord(word, mediaLang = "en", limit = 10) {
             subtitleInfoId: "$_id",
             youtubeUrl: "$youtubeUrl",
             mediaTitle: "$mediaTitle",
+            mediaSrc: "$mediaSrc",
             startTime: "$subtitles.startTime",
             endTime: "$subtitles.endTime",
           },

@@ -8,6 +8,7 @@ const schema = new Schema({
     mediaTitle: String,
     mediaId: { type: String, required: true },
     mediaLang: { type: String, required: true },
+    mediaSrc: String,
     translateLang: String,
     subtitles: [Schema.Types.Mixed],
     usedLemmas: [Schema.Types.Mixed],

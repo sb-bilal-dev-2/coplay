@@ -37,7 +37,7 @@ const HomePage = () => {
         <h2>{t("words collections")}</h2>
         <HorizontalScrollMenu
           items={wordCollections}
-          baseRoute="wordCollection"
+          baseRoute="quiz"
           verticalCard
         />
       </div>
