@@ -21,9 +21,9 @@ export default function Footer() {
           >
             <i className="fab fa-youtube"></i>
           </a>
-          <h1 className="cursor-pointer text-center text-gray-400 hover:text-white  px-4">
+          {/* <h1 className="cursor-pointer text-center text-gray-400 hover:text-white  px-4">
             <i class="fa-solid fa-heart text-red-600 "></i> Support Us
-          </h1>
+          </h1> */}
         </div>
         <div className="flex">
           <a
