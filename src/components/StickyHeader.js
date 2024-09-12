@@ -9,6 +9,7 @@ import LanguageDropdown from "./LanguageDropdown";
 import { useDynamicReducer } from "../dynamicReducer";
 import { googleLogout } from "@react-oauth/google";
 import api from "../api";
+import { useSelector } from "react-redux";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -199,7 +200,11 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
     (!!emailLetters?.length && emailLetters[0]?.toUpperCase()) || "";
   const avatarPath = getPlaceholderUrl(firstLetter);
   const outsideNavClickWrapperRef = useRef(null);
+  const isTelegramConnected = useSelector(
+    (state) => state.user?.user?.isTelegramConnected
+  );
 
+  console.log("isTelegramConnected", isTelegramConnected);
   useOutsideAlerter(outsideNavClickWrapperRef, () =>
     setIsNavMenuVisible(false)
   );
@@ -254,8 +259,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
               <b>{t("sign out")}</b>
             </button>
           </li>
-          {/* TODO: check if telegram connected condition */}
-          {_Id && (
+          {!isTelegramConnected && (
             <li className="list-none">
               <button className="flex" onClick={() => generateConnectionCode()}>
                 <img
