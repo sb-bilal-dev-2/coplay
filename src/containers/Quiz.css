@@ -1,5 +1,5 @@
 
-.QuizMain video {
+.QuizMain .VideoContainer {
     margin-top: 160px;
     height: 50vh;
     object-fit: cover;

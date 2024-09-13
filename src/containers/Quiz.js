@@ -33,72 +33,94 @@ function useTelegramWebApp() {
 const QuizVideoPlayer = ({ videoSrc, startTime, autoPlay }) => {
   const videoRef = useRef();
   const [error, set_error] = useState(null)
-  const loadAndPlay = async () => {
-    const exists = await checkResourceExists(videoSrc)
-    if (!exists) {
-      set_error('Not Found')
-      videoRef.current.src = ''
-      await videoRef.current.load();
-      return
-    }
-    try {
-      videoRef.current.src = videoSrc
-      await videoRef.current.load();
-      console.log('videoSrc', videoSrc)
-      console.log("startTime", startTime);
-      if (videoRef.current && autoPlay) {
-        await videoRef.current.play();
-      }
-    } catch (error) {
-      console.error('Play error: ', error)
-    }
-  }
-
+  const playerRef = useRef(null)
   const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
 
   useEffect(() => {
-    loadAndPlay()
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
     set_error(null)
     set_isLoadedMetadata(false)
+
+    if (!playerRef.current) {
+      playerRef.current = videojs(videoElement, {
+        controls: true,
+        autoplay: true,
+        preload: 'auto',
+        fluid: true,
+        sources: [{
+          src: videSrc,
+          type: 'video/mp4'
+        }],
+        html5: {
+          nativeControlsForTouch: false,
+        },
+        playsinline: true,
+      });
+      playerRef.current.on('aderror', () => {
+        console.log('perror a', playerRef.current.error()); //Gives MEDIA_ERR_SRC_NOT_SUPPORTED error
+      })
+      playerRef.current.on('error', () => {
+        console.log('perror', playerRef.current.error()); //Gives MEDIA_ERR_SRC_NOT_SUPPORTED error
+      })
+
+    } else {
+      console.log('set src')
+      playerRef.current.src('https://coplay.live/api/movieFiles/frozen.480.mp4')
+      playerRef.current.currentTime(startTime)
+      // playerRef.current.on('loadedmetadata', function() {
+      //   console.log('load medatada finish')
+      //   playerRef.current.currentTime(startTime);
+      // });
+    }
+
+    // return () => {
+    //   if (playerRef.current) {
+    //     console.log('disposed')
+    //     playerRef.current.dispose();
+    //     playerRef.current = null;
+    //   }
+    // };
   }, [videoSrc]);
 
   async function playVideo() {
-    if (autoPlay && !error) {
+    if (!error) {
+      console.log('play next')
       try {
-        videoRef.current.currentTime = startTime
-        await videoRef.current.play()
-      } catch(error) {
+        await playerRef.current.currentTime(startTime)
+        await playerRef.current.play()
+      } catch (error) {
         console.log('PLAY ERROR', error)
       }
     }
   }
 
   useEffect(() => {
-    console.log('isLoadedMetadata', isLoadedMetadata)
-    console.log('error', error)
     if (isLoadedMetadata) {
       playVideo()
     }
   }, [startTime, isLoadedMetadata])
 
   return (
-    <div data-vjs-player>
-      {!error &&
-        <video
-        ref={videoRef}
-        className="video-js vjs-default-skin w-full"
-        onErrorCapture={(error) => console.error('NEW ERROR', error)}
-        onLoadedMetadata={() => {
-          set_isLoadedMetadata(true)
-          try {
-            console.log("occurances[playingOccuranceIndex].startTime", startTime);
-            videoRef.current.currentTime = startTime;
-          } catch(error) {
-            console.error('onLoadedMetadata error: ', error)
-          }
-        }}
-      />
-      }
+    <div className="VideoContainer">
+      <div data-vjs-player>
+        {!error &&
+          <video
+            ref={videoRef}
+            className="video-js vjs-default-skin w-full"
+            onErrorCapture={(error) => console.error('NEW ERROR', error)}
+            onLoadedMetadata={() => {
+              set_isLoadedMetadata(true)
+              try {
+                console.log("occurances[playingOccuranceIndex].startTime", startTime);
+                videoRef.current.currentTime = startTime;
+              } catch (error) {
+                console.error('onLoadedMetadata error: ', error)
+              }
+            }}
+          />
+        }
+      </div>
     </div>
   )
 }
@@ -123,11 +145,11 @@ const Quiz = () => {
   //   usersPracticingWord.repeatTime = Date.now();
   //   postUserWords('/self_words', [usersPracticingWord])
   // }
-  console.log('currentWord', currentWord)
-  console.log('currentWordInfo', currentWordInfo)
-  console.log('practicingWordIndex', practicingWordIndex)
-  console.log('wordCollection', wordCollection)
-  console.log('currentWordOccurances', currentWordOccurances)
+  // console.log('currentWord', currentWord)
+  // console.log('currentWordInfo', currentWordInfo)
+  // console.log('practicingWordIndex', practicingWordIndex)
+  // console.log('wordCollection', wordCollection)
+  // console.log('currentWordOccurances', currentWordOccurances)
   const currentOccuranceTypeIsYoutube = currentWordOccurances[playingOccuranceIndex]?.mediaSrc?.includes('youtube.com')
   const prevOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex <= 0;
   const nextOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex >= currentAvailableOccurancesLength - 1;
@@ -147,7 +169,7 @@ const Quiz = () => {
               <YoutubePlayer videoIdOrUrl={currentWordOccurances[playingOccuranceIndex]?.mediaSrc} />
               :
               <QuizVideoPlayer
-                autoPlay={playingOccuranceIndex !== 0}
+                // autoPlay={playingOccuranceIndex !== 0}
                 videoSrc={`${BASE_SERVER_URL}/movie?name=${currentWordOccurances[playingOccuranceIndex]?.mediaTitle}`}
                 startTime={currentWordOccurances[playingOccuranceIndex]?.startTime / 1000}
               />
@@ -235,7 +257,7 @@ function useWordColletionWordInfos(list, paramWord) {
   const request_wordOccurances = async (the_word) => {
     try {
       const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`)).data;
-      console.log("wordData", wordData);
+      // console.log("wordData", wordData);
       if (wordData.length) {
         return wordData
       }
@@ -258,7 +280,7 @@ function useWordColletionWordInfos(list, paramWord) {
       }
 
       const newOccurances = await request_wordOccurances(keyword.the_word)
-      console.log('newOccurances', newOccurances)
+      // console.log('newOccurances', newOccurances)
       if (newOccurances?.length) {
         new_wordOccurancesMap[keyword.the_word] = newOccurances;
       }
@@ -276,7 +298,7 @@ function useWordColletionWordInfos(list, paramWord) {
   return { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
 }
 
-function checkResourceExists(url) {
+async function checkResourceExists(url) {
   return fetch(url, { method: 'HEAD' })
     .then(response => {
       if (response.ok) {
