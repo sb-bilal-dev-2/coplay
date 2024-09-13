@@ -1,9 +1,20 @@
 
-.QuizMain .VideoContainer {
-    margin-top: 160px;
-    height: 50vh;
-    object-fit: cover;
+#vjs_video_3 {
+    /* margin-top: 160px; */
+    height: 50vh !important;
+    padding-top: 0 !important;
+    overflow-y: hidden;
 }
+
+.QuizMain video {
+    /* object-fit: cover; */
+}
+
+.video-js {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
 
 .QuizMain h1 {
     font-size: 3em;

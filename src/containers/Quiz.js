@@ -11,6 +11,7 @@ import YoutubePlayer from "../components/YoutubePlayer";
 import videojs from 'video.js';
 import ErrorBoundary from "./ErrorBoundary";
 import { usePrevious } from "@uidotdev/usehooks";
+import Video from "../components/Video";
 
 const PLAYING_OCCURANCE_LIMIT = 5;
 
@@ -30,11 +31,48 @@ function useTelegramWebApp() {
   }
 }
 
-const QuizVideoPlayer = ({ videoSrc, startTime, autoPlay }) => {
+const QuizVideoPlayer = ({ videoSrc, startTime }) => {
   const videoRef = useRef();
   const [error, set_error] = useState(null)
-  const playerRef = useRef(null)
+  // const playerRef = useRef(null)
   const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
+  const containerRef = useRef(null)
+  const playerRef = React.useRef(null);
+
+  const videoJsOptions = {
+    controls: true,
+    autoplay: true,
+    preload: 'auto',
+    fluid: true,
+    sources: [{
+      src: videoSrc,
+      type: 'video/mp4'
+    }],
+    html5: {
+      nativeControlsForTouch: false,
+    },
+    playsinline: true,
+  };
+
+  const handlePlayerReady = (player) => {
+    playerRef.current = player;
+    set_isLoadedMetadata(true);
+    try {
+      console.log("occurances[playingOccuranceIndex].startTime", startTime);
+      videoRef.current.currentTime = startTime;
+    } catch (error) {
+      console.error('onLoadedMetadata error: ', error);
+    }
+
+    // You can handle player events here, for example:
+    player.on('waiting', () => {
+      videojs.log('player is waiting');
+    });
+
+    player.on('dispose', () => {
+      videojs.log('player will dispose');
+    });
+  };
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -42,45 +80,63 @@ const QuizVideoPlayer = ({ videoSrc, startTime, autoPlay }) => {
     set_error(null)
     set_isLoadedMetadata(false)
 
-    if (!playerRef.current) {
-      playerRef.current = videojs(videoElement, {
-        controls: true,
-        autoplay: true,
-        preload: 'auto',
-        fluid: true,
-        sources: [{
-          src: videSrc,
-          type: 'video/mp4'
-        }],
-        html5: {
-          nativeControlsForTouch: false,
-        },
-        playsinline: true,
-      });
-      playerRef.current.on('aderror', () => {
-        console.log('perror a', playerRef.current.error()); //Gives MEDIA_ERR_SRC_NOT_SUPPORTED error
-      })
+    if (playerRef.current) {
       playerRef.current.on('error', () => {
         console.log('perror', playerRef.current.error()); //Gives MEDIA_ERR_SRC_NOT_SUPPORTED error
-      })
+        playerRef.current.dispose()
+        playerRef.current = null
 
-    } else {
-      console.log('set src')
-      playerRef.current.src('https://coplay.live/api/movieFiles/frozen.480.mp4')
-      playerRef.current.currentTime(startTime)
-      // playerRef.current.on('loadedmetadata', function() {
-      //   console.log('load medatada finish')
-      //   playerRef.current.currentTime(startTime);
-      // });
+        // Manually add back the data-vjs-player element
+        const dataVjsPlayerElement = React.createElement('div');
+        dataVjsPlayerElement.setAttribute('data-vjs-player', '');
+        containerRef.current.appendChild(dataVjsPlayerElement);
+        const newVideoElement = React.createElement()
+      })
     }
 
-    // return () => {
-    //   if (playerRef.current) {
-    //     console.log('disposed')
-    //     playerRef.current.dispose();
-    //     playerRef.current = null;
-    //   }
-    // };
+    // if (!playerRef.current) {
+    //   playerRef.current = videojs(videoElement, {
+    //     controls: true,
+    //     autoplay: true,
+    //     preload: 'auto',
+    //     fluid: true,
+    //     sources: [{
+    //       src: videoSrc,
+    //       type: 'video/mp4'
+    //     }],
+    //     html5: {
+    //       nativeControlsForTouch: false,
+    //     },
+    //     playsinline: true,
+    //   });
+    //   playerRef.current.on('error', () => {
+    //     console.log('perror', playerRef.current.error()); //Gives MEDIA_ERR_SRC_NOT_SUPPORTED error
+    //     playerRef.current.dispose()
+    //     playerRef.current = null
+
+    //     // Manually add back the data-vjs-player element
+    //     const dataVjsPlayerElement = React.createElement('div');
+    //     dataVjsPlayerElement.setAttribute('data-vjs-player', '');
+    //     containerRef.current.appendChild(dataVjsPlayerElement);     
+    //     const newVideoElement = React.createElement()   
+    //   })
+    // } else {
+    //   console.log('set src')
+    //   playerRef.current.src(videoSrc)
+    //   playerRef.current.currentTime(startTime)
+    //   // playerRef.current.on('loadedmetadata', function() {
+    //   //   console.log('load medatada finish')
+    //   //   playerRef.current.currentTime(startTime);
+    //   // });
+    // }
+
+    // // return () => {
+    // //   if (playerRef.current) {
+    // //     console.log('disposed')
+    // //     playerRef.current.dispose();
+    // //     playerRef.current = null;
+    // //   }
+    // // };
   }, [videoSrc]);
 
   async function playVideo() {
@@ -104,23 +160,26 @@ const QuizVideoPlayer = ({ videoSrc, startTime, autoPlay }) => {
   return (
     <div className="VideoContainer">
       <div data-vjs-player>
-        {!error &&
-          <video
-            ref={videoRef}
-            className="video-js vjs-default-skin w-full"
-            onErrorCapture={(error) => console.error('NEW ERROR', error)}
-            onLoadedMetadata={() => {
-              set_isLoadedMetadata(true)
-              try {
-                console.log("occurances[playingOccuranceIndex].startTime", startTime);
-                videoRef.current.currentTime = startTime;
-              } catch (error) {
-                console.error('onLoadedMetadata error: ', error)
-              }
-            }}
-          />
-        }
+        {!error && (
+          <Video options={videoJsOptions} onReady={handlePlayerReady} />
+          // <video
+          //   ref={videoRef}
+          //   className="video-js vjs-default-skin vjs-big-play-centered vjs-16-9"
+          //   style={{ width: '100%', height: '100%' }}
+          //   onErrorCapture={(error) => console.error('NEW ERROR', error)}
+          //   onLoadedMetadata={() => {
+          //     set_isLoadedMetadata(true);
+          //     try {
+          //       console.log("occurances[playingOccuranceIndex].startTime", startTime);
+          //       videoRef.current.currentTime = startTime;
+          //     } catch (error) {
+          //       console.error('onLoadedMetadata error: ', error);
+          //     }
+          //   }}
+          // />
+        )}
       </div>
+
     </div>
   )
 }
