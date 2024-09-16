@@ -8,12 +8,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { usePost } from './usePost';
 import { sortByLearningState } from "../helper/sortByLearningState";
 import YoutubePlayer from "../components/YoutubePlayer";
-import videojs from 'video.js';
 import ErrorBoundary from "./ErrorBoundary";
-import { usePrevious } from "@uidotdev/usehooks";
-import Video from "../components/Video";
-
-const PLAYING_OCCURANCE_LIMIT = 5;
+import VideojsInited from "../components/VideojsInited";
 
 function useTelegramWebApp() {
   let telegramApp = window.Telegram.WebApp
@@ -31,78 +27,106 @@ function useTelegramWebApp() {
   }
 }
 
-const QuizVideoPlayer = ({ videoSrc, startTime }) => {
-  const videoRef = useRef();
-  const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
-  const playerRef = React.useRef(null);
+export const GoBackButton = () => {
+  const navigate = useNavigate()
 
-  const videoJsOptions = {
-    controls: true,
-    autoplay: true,
-    preload: 'auto',
-    fluid: true,
-    sources: [{
-      src: videoSrc,
-      type: 'video/mp4'
-    }],
-    html5: {
-      nativeControlsForTouch: false,
-    },
-    playsinline: true,
-  };
+  return (<button
+    onClick={() => navigate(-1)}
+    className="absolute z-10 top-4 left-4 text-white cursor-pointer"
+  >
+    <i className="fa fa-arrow-left" aria-hidden="true"></i>
+  </button>
+  )
+}
 
-  const handlePlayerReady = (player) => {
-    playerRef.current = player;
-    set_isLoadedMetadata(true);
-    try {
-      console.log("occurances[playingOccuranceIndex].startTime", startTime);
-      videoRef.current.currentTime = startTime;
-    } catch (error) {
-      console.error('onLoadedMetadata error: ', error);
-    }
+export const WordCarousel = ({list, activeIndex, currentWordInfo, onLeftClick, onRightClick}) => {
+  const [isShowingDefinitions, set_isShowingDefinitions] = useState();
+  console.log('list', list)
+  return (
+    <div className="overflow relative py-2">
+      <div
+        className="transition-transform duration-300 ease-in-out flex"
+        style={{ transform: `translateX(calc(-${activeIndex * 80}% + 10%))` }}
+      >
+        {list?.map((keyword, index) => {
+          return (
+            <div
+              style={{ minHeight: '130px', flexShrink: 0, width: '80%', transform: `${activeIndex === index ? 'scale(1.15)' : ''}` }}
+              className="headline-1 cursor-pointer p-4 paper text-yellowishorange flex flex-col justify-around items-center"
+              onClick={() => set_isShowingDefinitions(!isShowingDefinitions)}
+            >
+              {!isShowingDefinitions ?
+                <>
+                  <h1>
+                    {keyword?.the_word}
+                  </h1>
+                  <code className="block text-center" >{currentWordInfo?.pronounciation || keyword?.romanized}</code>
+                </>
+                :
+                <>
+                  {/* <h4>
+                    {keyword?.meaning}
+                  </h4> */}
+                  <h4>
+                    {currentWordInfo?.shortDefinition || keyword?.meaning}
+                  </h4>
+                </>
+              }
+            </div>
+          )
+        })
+        }
+      </div>
+      {!!list?.length && activeIndex > 0 &&
+        <i
+          onClick={onLeftClick}
+          className="fa-solid fa-chevron-left absolute p-2 py-11 left-0 top-1/2 transform -translate-y-1/2 text-gray" j
+        />
+      }
+      {!!list?.length && activeIndex < list.length - 1 &&
+        <i
+          onClick={onRightClick}
+          className="fa-solid fa-chevron-right absolute p-2 py-11 right-0 top-1/2 transform -translate-y-1/2 text-gray"
+        />
+      }
+    </div>
+  )
+}
 
-    // You can handle player events here, for example:
-    player.on('waiting', () => {
-      videojs.log('player is waiting');
-    });
+export const OccuranceButtons = ({ playingOccuranceIndex, currentAvailableOccurancesLength, set_playingOccuranceIndex }) => {
+  const prevOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex <= 0;
+  const nextOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex >= currentAvailableOccurancesLength - 1;
 
-    player.on('dispose', () => {
-      videojs.log('player will dispose');
-    });
-  };
-
-  async function playVideo() {
-    console.log('play next')
-    try {
-      await playerRef.current.currentTime(startTime)
-      await playerRef.current.play()
-    } catch (error) {
-      console.log('PLAY ERROR', error)
-    }
-  }
-
-  useEffect(() => {
-    if (isLoadedMetadata) {
-      playVideo()
-    }
-  }, [startTime, isLoadedMetadata])
 
   return (
-    <div className="VideoContainer">
-      <Video options={videoJsOptions} onReady={handlePlayerReady} />
+    <div className="py-12">
+      <h4>
+        <i
+          className={`fa-solid fa-backward-step p-2 ${!!prevOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
+          onClick={() => !prevOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex - 1)}>
+        </i>
+        <span className="select-none">
+          {playingOccuranceIndex + 1}/{currentAvailableOccurancesLength}
+
+        </span>
+        <i
+          className={`fa-solid fa-forward-step p-2 ${!!nextOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
+          onClick={() => !nextOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex + 1)}>
+        </i>
+        <span>
+          {/* <br /> */}
+        </span>
+      </h4>
     </div>
+
   )
 }
 
 const Quiz = () => {
   const { } = useTelegramWebApp()
-  const { list, word: paramWord } = useParams();
-  const [isShowingDefinitions, set_isShowingDefinitions] = useState();
+  const { list: listName, word: paramWord } = useParams();
   const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
-  const { currentWord, wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(list, paramWord)
-  // console.log('FOO', FOO)
-  // const { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo } = FOO
-  const navigate = useNavigate()
+  const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(listName, paramWord)
 
   // const [postUserWords] = usePost()
   // const updateRepeatCount = async (pWord) => {
@@ -119,172 +143,115 @@ const Quiz = () => {
   // console.log('practicingWordIndex', practicingWordIndex)
   // console.log('wordCollection', wordCollection)
   // console.log('currentWordOccurances', currentWordOccurances)
-  const currentOccuranceTypeIsYoutube = currentWordOccurances[playingOccuranceIndex]?.mediaSrc?.includes('youtube.com')
-  const prevOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex <= 0;
-  const nextOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex >= currentAvailableOccurancesLength - 1;
+  console.log('currentWordInfo', currentWordInfo)
+
+  const currentPlayingOccurance = currentWordOccurances[playingOccuranceIndex]
+  const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
   return (
     <ErrorBoundary>
-      {/* <WebcamCapture /> */}
-      <div className="QuizMain flex-grow bg-video text-gray text-gray-100 relative">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute z-10 top-4 left-4 text-white cursor-pointer"
-        >
-          <i className="fa fa-arrow-left" aria-hidden="true"></i>
-        </button>
-        {
-          !!currentAvailableOccurancesLength && (
-            currentOccuranceTypeIsYoutube ?
-              <YoutubePlayer videoIdOrUrl={currentWordOccurances[playingOccuranceIndex]?.mediaSrc} />
-              :
-              <QuizVideoPlayer
-                // autoPlay={playingOccuranceIndex !== 0}
-                videoSrc={`${BASE_SERVER_URL}/movie?name=${currentWordOccurances[playingOccuranceIndex]?.mediaTitle}`}
-                startTime={currentWordOccurances[playingOccuranceIndex]?.startTime / 1000}
-              />
-          )
-        }
-        <div className="Subtitles text-center text-white px-8 text-lg">
-          {/* <b>
-            {currentWord}
-          </b> */}
-        </div>
-        <div className="mb-4">
-          <h4>
-            <i
-              className={`fa-solid fa-backward-step p-2 ${!!prevOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
-              onClick={() => !prevOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex - 1)}>
-            </i>
-            <span className="select-none">
-              {playingOccuranceIndex + 1}/{currentAvailableOccurancesLength}
-
-            </span>
-            <i
-              className={`fa-solid fa-forward-step p-2 ${!!nextOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
-              onClick={() => !nextOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex + 1)}>
-            </i>
-            <span>
-              {/* <br /> */}
-            </span>
-          </h4> : ''
-        </div>
-        <div className="overflow relative">
-          <div
-            className="transition-transform duration-300 ease-in-out flex"
-            style={{ transform: `translateX(calc(-${practicingWordIndex * 80}% + 10%))` }}
-          >
-            {
-              wordCollection?.keywords.map((keyword, crrIndex) => {
-                return (
-                  <div
-                    style={{ minHeight: '130px', flexShrink: 0, width: '80%', transform: `${practicingWordIndex === crrIndex ? 'scale(1.15)' : ''}` }}
-                    className="headline-1 cursor-pointer p-4 paper text-yellowishorange flex flex-col justify-around items-center"
-                    onClick={() => set_isShowingDefinitions(!isShowingDefinitions)}
-                  >
-                    {!isShowingDefinitions ?
-                      <>
-                        <h1>
-                          {keyword?.the_word}
-                        </h1>
-                        <code className="block text-center" >{keyword?.romanized}</code>
-                      </>
-                      :
-                      <>
-                        <h4>
-                          {keyword?.meaning || currentWordInfo?.shortDefinition}
-                        </h4>
-                      </>
-                    }
-                  </div>
-                )
-              })
-            }
-          </div>
-          {wordCollection && practicingWordIndex > 0 &&
-            <i onClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(practicingWordIndex - 1))} className="fa-solid fa-chevron-left absolute p-2 py-11 left-0 top-1/2 transform -translate-y-1/2 text-gray"></i>
-          }
-          {wordCollection && practicingWordIndex < wordCollection.keywords.length - 1 &&
-            <i onClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(practicingWordIndex + 1))} className="fa-solid fa-chevron-right absolute p-2 py-11 right-0 top-1/2 transform -translate-y-1/2 text-gray"></i>
+      <div className="page-container bg-video text-gray-100 relative min-h-screen">
+        <GoBackButton />
+        <div className="VideoContainer">
+          {
+            !!currentAvailableOccurancesLength && (
+              currentOccuranceTypeIsYoutube ?
+                <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                :
+                <VideojsInited
+                  // autoPlay={playingOccuranceIndex !== 0}
+                  videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                  startTime={currentPlayingOccurance?.startTime / 1000}
+                />
+            )
           }
         </div>
-        {/* <div className="m-2 text-center">
-          <h3 className="text-lg text-dark-yellowishorange">
-            {currentWordInfo?.shortDescription}
-          </h3>
-        </div> */}
+        <WordCarousel
+          list={wordList}
+          activeIndex={practicingWordIndex}
+          currentWordInfo={currentWordInfo}
+          onLeftClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(practicingWordIndex - 1))}
+          onRightClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(practicingWordIndex + 1))}
+        />
+        <OccuranceButtons
+          playingOccuranceIndex={playingOccuranceIndex}
+          currentAvailableOccurancesLength={currentAvailableOccurancesLength}
+          set_playingOccuranceIndex={set_playingOccuranceIndex}
+        />
       </div>
     </ErrorBoundary>
   );
 };
 
-function useWordColletionWordInfos(list, paramWord) {
-  const [wordCollection, set_wordCollection] = useState()
+const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
+  'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).data.results[0]?.keywords || [],
+  'video': async (listName) => (await api().get(`/movie_words/${listName}?without_user_words=true`)).data,
+  // 'playlist': requestPlaylistWords,
+  // 'userList': requestUserList,
+}
+
+export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */ ) {
+  const [wordList, set_wordList] = useState([])
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
   const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
+  console.log('wordInfos', wordInfos)
 
-  const request_wordOccurances = async (the_word) => {
-    try {
-      const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`)).data;
-      // console.log("wordData", wordData);
-      if (wordData.length) {
-        return wordData
-      }
-    } catch (err) {
-      console.log("err", err);
-    }
-  };
-
-  const requestWords = async () => {
-    const wordCollection = (await api('').get(`/wordCollections?title=${list}`)).data.results[0];
-    set_wordCollection(wordCollection)
-    set_practicingWordIndex(wordCollection.keywords.reduce((previousIndex, item, currentIndex) => item.the_word === paramWord ? currentIndex : previousIndex, 0))
-    const new_wordInfos = {}
-    const new_wordOccurancesMap = {}
-    await Promise.all(wordCollection.keywords.map(async (keyword) => {
-      const response = await api().get(`/wordInfos?the_word=${keyword.the_word}`);
-
-      if (!new_wordInfos[keyword.the_word]) {
-        new_wordInfos[keyword.the_word] = response?.data?.results[0]
-      }
-
-      const newOccurances = await request_wordOccurances(keyword.the_word)
-      // console.log('newOccurances', newOccurances)
-      if (newOccurances?.length) {
-        new_wordOccurancesMap[keyword.the_word] = newOccurances;
-      }
-    }))
+  const getWordInfos = async () => {
+    // const wordList = await requestWordCollectionWords(listName)
+    const getWordsList = WORDS_FETCH_FUNCTION_BY_LISTTYPE[listType] || WORDS_FETCH_FUNCTION_BY_LISTTYPE['wordCollection']
+    const wordList = await getWordsList(listName)
+    const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList)
+    const practicingWordIndex = wordList?.reduce((previousIndex, item, currentIndex) => item.the_word === initialWord ? currentIndex : previousIndex, 0)
+    set_wordList(wordList)
+    set_practicingWordIndex(practicingWordIndex)
     set_wordOccurancesMap(new_wordOccurancesMap)
-    set_wordInfos(new_wordInfos)
+    set_wordInfos(new_wordInfosMap)
   }
-  useEffect(() => {
-    requestWords()
-  }, [list])
-  const currentWord = wordCollection?.keywords[practicingWordIndex]?.the_word || list[practicingWordIndex] || paramWord
+
+  useEffect(async () => {
+    if (listName) {
+      getWordInfos()
+    }
+  }, [listName])
+  const currentWord = wordList[practicingWordIndex]?.the_word || initialWord
   const currentWordInfo = wordInfos[currentWord]
   const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
   const currentAvailableOccurancesLength = currentWordOccurances?.length
-  return { wordInfos, wordCollection, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
+  console.log('currentWordInfo', currentWordInfo)
+  return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
 }
 
-async function checkResourceExists(url) {
-  return fetch(url, { method: 'HEAD' })
-    .then(response => {
-      if (response.ok) {
-        // Resource exists (status code 200-299)
-        return true;
-      } else if (response.status === 404) {
-        // Resource does not exist
-        return false;
-      } else {
-        // Some other status code
-        throw new Error(`HTTP status ${response.status}`);
-      }
-    })
-    .catch(error => {
-      console.error('Error checking resource:', error);
-      return false;
-    });
+async function requestWordInfosAndOccurancesMap(list) {
+  const new_wordInfosMap = {}
+  const new_wordOccurancesMap = {}
+  await Promise.all(list.map(async (keyword) => {
+    const the_word = typeof keyword === 'string' ? keyword : keyword?.the_word
+    const response = await api().get(`/wordInfos?the_word=${the_word}`);
+
+    if (!new_wordInfosMap[the_word]) {
+      new_wordInfosMap[the_word] = response?.data?.results[0]
+    }
+
+    const newOccurances = await request_wordOccurances(the_word)
+    console.log('newOccurances', newOccurances)
+    if (newOccurances?.length) {
+      new_wordOccurancesMap[the_word] = newOccurances;
+    }
+  }))
+
+  return { new_wordInfosMap, new_wordOccurancesMap }
 }
+
+async function request_wordOccurances(the_word) {
+  try {
+    const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`)).data;
+    // console.log("wordData", wordData);
+    if (wordData?.length) {
+      return wordData
+    }
+  } catch (err) {
+    console.log("err", err);
+  }
+};
 
 export default Quiz;

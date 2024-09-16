@@ -246,13 +246,13 @@ function getContentType(extension) {
   }
 }
 
-app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
+app.get("/movie_words/:mediaTitle", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
-    const { parsedSubtitleId } = req.params;
+    const { mediaTitle } = req.params;
     console.log(
       "fetching movie words for user_id: " + user_id,
-      "parsedSubtitleId: " + parsedSubtitleId
+      "mediaTitle: " + mediaTitle
     );
     let user;
 
@@ -262,8 +262,9 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
     const userWords = user?.words || [];
     let movieWords;
     try {
-      console.log("parsedSubtitleId requested", parsedSubtitleId);
-      const movieSubtitle = await subtitles_model.findById(parsedSubtitleId);
+      console.log("mediaTitle requested", mediaTitle);
+      const movieSubtitle = await subtitles_model.findOne({ mediaTitle, translateLang: { $exists: false } });
+      console.log('movieSubtitle', movieSubtitle)
       movieWords = movieSubtitle.subtitles.reduce(
         (acc, item) => acc.concat(item.usedWords),
         []
@@ -296,9 +297,10 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
 app.post("/self_words", requireAuth, async (req, res) => {
   try {
     const { language } = req.query;
+    const { learninglang } = req.headers;
     const User = users_model;
     const _id = req.userId;
-    const wordListKey = language ? `${language}_words` : "words";
+    const wordListKey = learninglang || language ? `${learninglang || language}_words` : "words";
 
     const updatedWordOrWordsArray = req.body;
     // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
