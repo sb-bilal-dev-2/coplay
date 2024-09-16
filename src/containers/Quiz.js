@@ -58,7 +58,7 @@ export const WordCarousel = ({list, activeIndex, currentWordInfo, onLeftClick, o
               {!isShowingDefinitions ?
                 <>
                   <h1>
-                    {keyword?.the_word}
+                    {keyword?.the_word || typeof keyword === 'string' && keyword}
                   </h1>
                   <code className="block text-center" >{currentWordInfo?.pronounciation || keyword?.romanized}</code>
                 </>
@@ -218,7 +218,7 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
       set_practicingWordIndex(new_practicingWordIndex)
     }
   }, [initialWord, wordList])
-  const currentWord = wordList[practicingWordIndex]?.the_word || initialWord
+  const currentWord = (typeof wordList[practicingWordIndex] === 'string' ? wordList[practicingWordIndex] : wordList[practicingWordIndex]?.the_word) || initialWord
   const currentWordInfo = wordInfos[currentWord]
   const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
   const currentAvailableOccurancesLength = currentWordOccurances?.length
