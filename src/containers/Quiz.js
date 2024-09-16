@@ -200,19 +200,24 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
     // const wordList = await requestWordCollectionWords(listName)
     const getWordsList = WORDS_FETCH_FUNCTION_BY_LISTTYPE[listType] || WORDS_FETCH_FUNCTION_BY_LISTTYPE['wordCollection']
     const wordList = await getWordsList(listName)
-    const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList)
-    const practicingWordIndex = wordList?.reduce((previousIndex, item, currentIndex) => item.the_word === initialWord ? currentIndex : previousIndex, 0)
+    const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
     set_wordList(wordList)
-    set_practicingWordIndex(practicingWordIndex)
     set_wordOccurancesMap(new_wordOccurancesMap)
     set_wordInfos(new_wordInfosMap)
   }
 
-  useEffect(async () => {
+  useEffect(() => {
     if (listName) {
       getWordInfos()
     }
-  }, [listName])
+  }, [listName, practicingWordIndex])
+
+  useEffect(() => {
+    if (initialWord) {
+      const new_practicingWordIndex = wordList?.reduce((previousIndex, item, currentIndex) => item.the_word === initialWord ? currentIndex : previousIndex, 0)
+      set_practicingWordIndex(new_practicingWordIndex)
+    }
+  }, [initialWord, wordList])
   const currentWord = wordList[practicingWordIndex]?.the_word || initialWord
   const currentWordInfo = wordInfos[currentWord]
   const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
@@ -221,21 +226,23 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
 }
 
-async function requestWordInfosAndOccurancesMap(list) {
-  const new_wordInfosMap = {}
-  const new_wordOccurancesMap = {}
-  await Promise.all(list.map(async (keyword) => {
-    const the_word = typeof keyword === 'string' ? keyword : keyword?.the_word
-    const response = await api().get(`/wordInfos?the_word=${the_word}`);
-
-    if (!new_wordInfosMap[the_word]) {
-      new_wordInfosMap[the_word] = response?.data?.results[0]
-    }
-
-    const newOccurances = await request_wordOccurances(the_word)
-    console.log('newOccurances', newOccurances)
-    if (newOccurances?.length) {
-      new_wordOccurancesMap[the_word] = newOccurances;
+async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousOccurancesMap, activeIndex) {
+  const new_wordInfosMap = previousInfoMap || {}
+  const new_wordOccurancesMap = previousOccurancesMap || {}
+  await Promise.all(list.map(async (keyword, index) => {
+    if (Math.abs(index - activeIndex) < 3) {
+      const the_word = typeof keyword === 'string' ? keyword : keyword?.the_word
+      const response = await api().get(`/wordInfos?the_word=${the_word}`);
+  
+      if (!new_wordInfosMap[the_word]) {
+        new_wordInfosMap[the_word] = response?.data?.results[0]
+      }
+  
+      const newOccurances = await request_wordOccurances(the_word)
+      console.log('newOccurances', newOccurances)
+      if (newOccurances?.length) {
+        new_wordOccurancesMap[the_word] = newOccurances;
+      }
     }
   }))
 
