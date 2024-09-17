@@ -264,12 +264,12 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
     try {
       console.log("mediaTitle requested", mediaTitle);
       const movieSubtitle = await subtitles_model.findOne({ mediaTitle, translateLang: { $exists: false } });
-      console.log('movieSubtitle', movieSubtitle)
+
       movieWords = movieSubtitle.subtitles.reduce(
-        (acc, item) => acc.concat(item.usedWords),
+        (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime }))),
         []
       );
-
+      console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
       console.error("Could not fetch words: ", err.code, err.message);
@@ -280,15 +280,15 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
       {}
     );
     const movieWordsWithoutUserWords = movieWords.filter(
-      (item) => item && !Number(item) && !userWordsMap[item]
+      (item) => item && !Number(item) && !userWordsMap[item.the_word]
     );
-    const movieWordsUnduplicated = Object.keys(
+    const movieWordsUnduplicated = Object.values(
       movieWordsWithoutUserWords.reduce(
-        (acc, item) => ((acc[item] = item), acc),
+        (acc, item) => ((acc[item.the_word] = item), acc),
         {}
       )
     );
-    res.status(200).send(movieWordsUnduplicated);
+    res.status(200).send(movieWordsUnduplicated.sort((a, b) => a.startTime - b.startTime));
   } catch (err) {
     res.status(500).send(err.message);
   }

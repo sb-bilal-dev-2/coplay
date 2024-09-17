@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Videojs from "./Videojs";
 
-const VideojsInited = ({ videoSrc, startTime }) => {
+const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
     // const videoRef = useRef();
     const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
     const playerRef = useRef(null);
@@ -39,6 +39,12 @@ const VideojsInited = ({ videoSrc, startTime }) => {
         player.on('dispose', () => {
             console.log('player will dispose');
         });
+
+        player.on('timeupdate', () => {
+            if (onTimeUpdate && typeof onTimeUpdate === 'function') {
+                onTimeUpdate(player.currentTime())
+            }
+        })
     };
 
     async function playVideo() {

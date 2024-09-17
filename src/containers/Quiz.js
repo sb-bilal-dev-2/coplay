@@ -41,7 +41,6 @@ export const GoBackButton = () => {
 
 export const WordCarousel = ({list, activeIndex, currentWordInfo, onLeftClick, onRightClick}) => {
   const [isShowingDefinitions, set_isShowingDefinitions] = useState();
-  console.log('list', list)
   return (
     <div className="overflow relative py-2">
       <div

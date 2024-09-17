@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
@@ -16,28 +16,8 @@ import VideojsInited from "../../components/VideojsInited";
 import { GoBackButton, WordCarousel, useWordColletionWordInfos } from "../Quiz";
 
 const MoviePage = () => {
-  const { t } = useTranslation();
   const { title } = useParams();
-  const { user: userIdAndEmail } = useAuthentication();
   const [currentVideoInfo, set_currentVideoInfo] = useState({});
-
-  const userId = userIdAndEmail?.id;
-
-  // const requestUserInfo = async () => {
-  //   try {
-  //     const response = await axios(`${BASE_SERVER_URL}/users/${userId}`);
-  //     const newUserInfo = response.data;
-  //     console.log("newUserInfo", newUserInfo);
-  //   } catch (err) {
-  //     console.log("ITEM GET ERROR: ", err);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (userId) {
-  //     requestUserInfo();
-  //   }
-  // }, [userId]);
   const requestMovieInfo = async () => {
     try {
       const response = await axios(
@@ -53,7 +33,8 @@ const MoviePage = () => {
 
   const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
   console.log('title', title)
-  const { wordList, practicingWordIndex: activeWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(title, undefined, 'video')
+  const newTitle = useMemo(() => title, [title]);
+  const { wordList, practicingWordIndex: activeWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(newTitle, undefined, 'video')
 
   useEffect(() => {
     requestMovieInfo();
@@ -72,6 +53,10 @@ const MoviePage = () => {
   // const currentPlayingOccurance = currentWordOccurances[playingOccuranceIndex]
   // const startTimeInSeconds = currentPlayingOccurance?.startTime / 1000
   const startTimeInSeconds = 0
+  const [currentTime, set_currentTime] = useState(0)
+  const handleTimeUpdate = useCallback((currentTime) => set_currentTime(currentTime))
+  const closestWordInList = wordList.findIndex(i => i.startTime / 1000 > currentTime)
+  console.log('closestWordInList', closestWordInList)
   return (
     <div className="page-container bg-video text-gray-100 relative min-h-screen">
       <GoBackButton />
@@ -86,18 +71,18 @@ const MoviePage = () => {
             <VideojsInited
               // autoPlay={playingOccuranceIndex !== 0}
               videoSrc={`${BASE_SERVER_URL}/movie?name=${title}`}
-              startTime={startTimeInSeconds}
+              // startTime={startTimeInSeconds}
+              // onTimeUpdate={handleTimeUpdate}F
             />
         }
       </div>
       <WordCarousel
-          list={wordList}
-          activeIndex={activeWordIndex}
-          currentWordInfo={currentWordInfo}
-          onLeftClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(activeWordIndex - 1))}
-          onRightClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(activeWordIndex + 1))}
-        />
-
+        list={wordList}
+        activeIndex={closestWordInList}
+        currentWordInfo={currentWordInfo}
+        onLeftClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(activeWordIndex - 1))}
+        onRightClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(activeWordIndex + 1))}
+      />
     </div>
   );
 };
