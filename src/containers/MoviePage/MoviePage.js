@@ -72,7 +72,7 @@ const MoviePage = () => {
               // autoPlay={playingOccuranceIndex !== 0}
               videoSrc={`${BASE_SERVER_URL}/movie?name=${title}`}
               // startTime={startTimeInSeconds}
-              // onTimeUpdate={handleTimeUpdate}F
+              onTimeUpdate={handleTimeUpdate}
             />
         }
       </div>

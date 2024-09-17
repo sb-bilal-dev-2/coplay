@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Videojs from "./Videojs";
+import throttle from "../throttle";
 
 const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
     // const videoRef = useRef();
     const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
     const playerRef = useRef(null);
-
-    const videoJsOptions = {
+    // console.log('log 3', videoSrc, startTime, onTimeUpdate)
+    const videoJsOptions = useMemo(() => ({
         controls: true,
         autoplay: true,
         preload: 'auto',
@@ -19,10 +20,12 @@ const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
             nativeControlsForTouch: false,
         },
         playsinline: true,
-    };
+    }), videoSrc);
+    const throttledTimeUpdate = throttle(() => onTimeUpdate(playerRef.current.currentTime()), 200)
 
     const handlePlayerReady = (player) => {
         playerRef.current = player;
+        console.log('log 1')
         set_isLoadedMetadata(true);
         try {
             console.log("occurances[playingOccuranceIndex].startTime", startTime);
@@ -42,7 +45,7 @@ const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
 
         player.on('timeupdate', () => {
             if (onTimeUpdate && typeof onTimeUpdate === 'function') {
-                onTimeUpdate(player.currentTime())
+                throttledTimeUpdate()
             }
         })
     };
