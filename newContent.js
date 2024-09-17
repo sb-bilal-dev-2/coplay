@@ -1,5 +1,5 @@
-const { prepareSubtitleTranslations } = require('./openaiTranslateSubtitlesRecoursive.js')
-const { parseUsedWords } = require('./parseUsedWords.js');
+const { translateSubtitlesAndStoreToDB } = require('./openaiTranslateSubtitlesRecoursive.js')
+const { addVttToDB } = require('./addVttToDB.js');
 // Runs for all new content if those don't have processed files
 const movies_model = require('./schemas/movies').movies_model;
 
@@ -9,6 +9,19 @@ const movies_model = require('./schemas/movies').movies_model;
  * Stores movie info in the Database.
  */
 const MAIN_LANGUAGES = ['uz', 'ru', 'en', 'tr']
+
+/**
+ * to add vtt subtitles of videos to db of the given language
+ * 
+ * SAMPLE USAGE:
+ * 
+ * node newContent.js --mediaLang en
+ * 
+ * SAMPLE USAGE single video: 
+ *   
+ * node newContent.js --title kungfu_panda_3
+ */
+
 
 newContentCLI()
 
@@ -27,7 +40,7 @@ async function parseAndTranslate_single(mediaInfo, translateLanguages) {
         if (!mediaInfo.parsedSubtitleId) {
             console.log('Will parse subtitle for the title: ' + mediaInfo.title)
 
-            parsedWords = await parseUsedWords(mediaInfo)
+            parsedWords = await addVttToDB(mediaInfo)
         }
         const translatedMap = {}
         mediaInfo?.subtitleInfos?.forEach(item => { translatedMap[item.translateLang] = true })
@@ -35,7 +48,7 @@ async function parseAndTranslate_single(mediaInfo, translateLanguages) {
         console.log('Translating languages: ', translateLanguages)
         if (translateLanguages) {
             await Promise.all((translateLanguages.length ? translateLanguages : MAIN_LANGUAGES).filter(item => !translatedMap[item] && item !== mediaInfo.mediaLang).map(translateLang => {
-                return prepareSubtitleTranslations(contentFolder = './files/movieFiles', mediaInfo, translateLang, parsedWords)
+                return translateSubtitlesAndStoreToDB('./files/movieFiles', mediaInfo, translateLang, parsedWords)
             }))
         }    
     } catch(error) {

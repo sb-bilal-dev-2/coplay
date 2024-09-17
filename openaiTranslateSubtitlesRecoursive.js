@@ -91,7 +91,7 @@ REAL INPUT JSON
 
 const ELIGIBLE_CHAT_GPT_TRANSLATIONS = ['ru', 'tr', 'kr', 'zh-CN']
 
-async function prepareSubtitleTranslations(
+async function translateSubtitlesAndStoreToDB(
   contentFolder = './files/movieFiles',
   mediaInfo,
   translateLanguage = '',
@@ -99,7 +99,7 @@ async function prepareSubtitleTranslations(
 ) {
   const isPromptingOpenAI = ELIGIBLE_CHAT_GPT_TRANSLATIONS.includes(translateLanguage)
   if (!mediaInfo) {
-    console.error('mediaInfo missing at prepareSubtitleTranslations')
+    console.error('mediaInfo missing at translateSubtitlesAndStoreToDB')
   }
   console.log(`Translating to ${translateLanguage} title: ${mediaInfo.title} `)
   try {
@@ -294,5 +294,5 @@ async function wait(ms) {
 }
 
 module.exports = {
-  prepareSubtitleTranslations
+  translateSubtitlesAndStoreToDB
 }

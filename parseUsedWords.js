@@ -13,7 +13,7 @@ const { get_languageWords } = require('./newLanguages')
 
 initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
-async function parseUsedWords(mediaInfo) {
+async function addVttToDB(mediaInfo) {
     const mediaLang = mediaInfo.mediaLang;
     console.log('Media Lang: ' + mediaLang)
     const allLanguageWords = await get_languageWords(mediaLang)
@@ -95,4 +95,4 @@ function degausser(input) {
     return input.replace(/<[^>]*>/g, '');
 }
 
-module.exports = { parseUsedWords, degausser }
+module.exports = { addVttToDB, degausser }
