@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 const useCustomScroll = (isHorizontal = false) => {
+  const DELTA_THRESHOLD = 20
   const containerRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
   const [velocity, setVelocity] = useState({ x: 0, y: 0 });
   const [direction, setDirection] = useState('');
-  const [firedX, setFiredX] = useState(false);
-  const [firedY, setFiredY] = useState(false);
+  const [lastDeltaX, set_lastDeltaX] = useState(0);
+  const [lastDeltaY, set_lastDeltaY] = useState(0);
+  const [translateX, set_translateX] = useState(0)
+  const [translateY, set_translateY] = useState(0)
 
   const lastMoveTime = useRef(0);
 
@@ -15,13 +18,33 @@ const useCustomScroll = (isHorizontal = false) => {
     const container = containerRef.current;
     const newElementToScrollTo = container.children[index]
     if (container && newElementToScrollTo) {
+      const newScrollPosition = isHorizontal ? newElementToScrollTo.offsetLeft : newElementToScrollTo.offsetTop
       container.scrollTo({
-        [isHorizontal ? 'left' : 'top']: isHorizontal ? newElementToScrollTo.offsetLeft : newElementToScrollTo.offsetTop,
+        [isHorizontal ? 'left' : 'top']: newScrollPosition,
         behavior: 'smooth'
       });
+      if (isHorizontal) {
+        set_translateX(newScrollPosition)
+      } else {
+        set_translateY(newScrollPosition)
+      }
+      console.log('log 1')
       setCurrentIndex(index);
     }
   }, []);
+
+  const scrollToNext = useCallback(() => {
+    if (containerRef.current && currentIndex < containerRef.current.children.length - 1) {
+      scrollTo(currentIndex + 1);
+      console.log('log 2')
+    }
+  }, [currentIndex, scrollTo]);
+
+  const scrollToPrevious = useCallback(() => {
+    if (containerRef.current && currentIndex > 0) {
+      scrollTo(currentIndex - 1);
+    }
+  }, [currentIndex, scrollTo]);
 
   const handleTouchStart = useCallback((event) => {
     const touch = event.touches[0];
@@ -44,8 +67,10 @@ const useCustomScroll = (isHorizontal = false) => {
       const velocityY = Math.abs(deltaY) / timeElapsed;
 
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        set_lastDeltaX(deltaX);
         setDirection(deltaX > 0 ? 'right' : 'left');
       } else {
+        set_lastDeltaY(deltaY);
         setDirection(deltaY > 0 ? 'down' : 'up');
       }
 
@@ -58,9 +83,10 @@ const useCustomScroll = (isHorizontal = false) => {
   const handleTouchEnd = useCallback(() => {
     const currentVelocityX = velocity.x;
     const currentVelocityY = velocity.y;
+    set_lastDeltaX(0);
+    set_lastDeltaY(0);
 
     if (currentVelocityX > 0.1 || currentVelocityY > 0.1) {
-      alert('log 1 ' + direction)
       console.log(`SCROLL VELOCITY! VelocityX: ${currentVelocityX.toFixed(2)} px/s, VelocityY: ${currentVelocityY.toFixed(2)} px/s. Direction: ${direction}`);
       if (direction === 'left' || direction === 'up') {
         scrollToNext();
@@ -77,7 +103,7 @@ const useCustomScroll = (isHorizontal = false) => {
   const handleScrollEnd = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
-    
+
     const containerSize = isHorizontal ? container.clientWidth : container.clientHeight;
     const scrollOffset = isHorizontal ? container.scrollLeft : container.scrollTop;
     console.log('containerSize', scrollOffset)
@@ -118,18 +144,18 @@ const useCustomScroll = (isHorizontal = false) => {
     }
 
     if (isHorizontal) {
-      if (!firedX && !firedY && Math.abs(wheelDeltaX) > 25) {
-        setFiredX(true);
+      if (!lastDeltaX && !lastDeltaY && Math.abs(wheelDeltaX) > DELTA_THRESHOLD) {
+        set_lastDeltaX(wheelDeltaX);
         console.log(`Horizontal Scroll Direction: ${wheelDirection}. DeltaX: ${wheelDeltaX}`);
         if (wheelDirection === 'left') {
           scrollToNext();
         } else if (wheelDirection === 'right') {
           scrollToPrevious();
         }
-      }  
+      }
     } else {
-      if (!firedX && !firedY && Math.abs(wheelDeltaY) > 25) {
-        setFiredY(true);
+      if (!lastDeltaX && !lastDeltaY && Math.abs(wheelDeltaY) > DELTA_THRESHOLD) {
+        set_lastDeltaY(wheelDeltaY);
         if (wheelDirection === 'down') {
           scrollToNext();
         } else if (wheelDirection === 'up') {
@@ -140,19 +166,19 @@ const useCustomScroll = (isHorizontal = false) => {
     }
 
     if (Math.abs(wheelDeltaX) < 4) {
-      setFiredX(false);
-      if (isHorizontal) {
-        handleScrollEnd()
-      }
+      set_lastDeltaX(0);
+      // if (isHorizontal) {
+      //   handleScrollEnd()
+      // }
     }
 
     if (Math.abs(wheelDeltaY) < 4) {
-      setFiredY(false);
-      if (!isHorizontal) {
-        handleScrollEnd()
-      }
+      set_lastDeltaY(0);
+      // if (!isHorizontal) {
+      //   handleScrollEnd()
+      // }
     }
-  }, [firedX, firedY]);
+  }, [lastDeltaX, lastDeltaY]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -171,165 +197,43 @@ const useCustomScroll = (isHorizontal = false) => {
     }
   }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel]);
 
-  const scrollToNext = useCallback(() => {
-    if (containerRef.current && currentIndex < containerRef.current.children.length - 1) {
-      scrollTo(currentIndex + 1);
-    }
-  }, [currentIndex, scrollTo]);
+  const lastIndex = containerRef.current?.children.length === currentIndex + 1;
+  const scrollingNegativeIndex = !currentIndex && lastDeltaY > 0
+  let obstacleBounceTranslate = isHorizontal ? translateX : translateY
+  const lastDelta = isHorizontal ? lastDeltaX : lastDeltaY
+  if (lastIndex) {
+    obstacleBounceTranslate -= lastDelta * 2
+  } else if (scrollingNegativeIndex) {
+    obstacleBounceTranslate = obstacleBounceTranslate + lastDelta * 2
+  }
+  const transformTranslate = `translate${isHorizontal ? 'X' : 'Y'}(${scrollingNegativeIndex ? '' : '-'}${obstacleBounceTranslate}px)` // e.g. translateX(-400px)
 
-  const scrollToPrevious = useCallback(() => {
-    if (containerRef.current && currentIndex > 0) {
-      scrollTo(currentIndex - 1);
-    }
-  }, [currentIndex, scrollTo]);
-
-  return { containerRef, currentIndex, scrollToNext, scrollToPrevious };
+  return { containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
 
 const ShortsList = ({ items }) => {
-  const { containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll();
-  console.log('currentIndex', currentIndex)
-  const containerStyle = {
-    overflow: 'auto',
-    maxHeight: '100vh'
-    // width: '100%',
-    // height: isHorizontal ? '100vh' : 'auto',
-    // display: 'flex',
-    // flexDirection: isHorizontal ? 'row' : 'column',
-    // overflowX: isHorizontal ? 'auto' : 'hidden',
-    // overflowY: isHorizontal ? 'hidden' : 'auto',
-  };
-
-  const itemStyle = {
-    // flexShrink: 0,
-    // width: isHorizontal ? '100%' : 'auto',
-    borderBottom: '1px solid red',
-    height: '100vh',
-  };
-  // const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
-  // const [velocity, setVelocity] = useState({ x: 0, y: 0 });
-  // const [direction, setDirection] = useState('');
+  const { containerRef, currentIndex, scrollToNext, scrollToPrevious, transformTranslate } = useCustomScroll();
   
-  // const lastMoveTime = useRef(0);
-
-  // const handleTouchStart = (event) => {
-  //   const touch = event.touches[0];
-  //   const currentTime = Date.now();
-
-  //   setLastTouchPosition({ x: touch.clientX, y: touch.clientY });
-  //   lastMoveTime.current = currentTime;
-  //   setVelocity({ x: 0, y: 0 }); // Reset velocity
-  //   setDirection(''); // Reset direction
-  // };
-
-  // const handleTouchMove = (event) => {
-  //   const touch = event.touches[0];
-  //   const currentTime = Date.now();
-
-  //   const deltaX = touch.clientX - lastTouchPosition.x;
-  //   const deltaY = touch.clientY - lastTouchPosition.y;
-
-  //   const timeElapsed = currentTime - lastMoveTime.current; // Time in seconds
-
-  //   if (timeElapsed > 50) {
-  //     const velocityX = Math.abs(deltaX) / timeElapsed;
-  //     const velocityY = Math.abs(deltaY) / timeElapsed;
-
-  //     // Set the direction based on deltaX and deltaY
-  //     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-  //       setDirection(deltaX > 0 ? 'right' : 'left');
-  //     } else {
-  //       setDirection(deltaY > 0 ? 'down' : 'up');
-  //     }
-
-  //     // Update velocity and last position
-  //     setVelocity({ x: velocityX, y: velocityY });
-  //     setLastTouchPosition({ x: touch.clientX, y: touch.clientY });
-  //     lastMoveTime.current = currentTime;
-  //   }
-  // };
-
-  // const handleTouchEnd = () => {
-  //   const currentVelocityX = velocity.x;
-  //   const currentVelocityY = velocity.y;
-
-  //   console.log('Scroll direction:', direction);
-    
-  //   // If the velocity in the last 100ms is low, consider it as no scroll
-  //   if (currentVelocityX > 0.1 || currentVelocityY > 0.1) {
-  //     alert(`SCROLL VELOCITY! VelocityX: ${currentVelocityX.toFixed(2)} px/s, VelocityY: ${currentVelocityY.toFixed(2)} px/s. Direction: ${direction}`);
-  //   } else {
-  //     alert('No significant scroll detected.');
-  //   }
-  // };
-  // const [firedX, setFiredX] = useState(false);
-  // const [firedY, setFiredY] = useState(false);
-  
-  // const handleWheel = (event) => {
-  //   const { wheelDeltaX, wheelDeltaY } = event.nativeEvent;
-  
-  //   let direction = '';
-  //   console.log('wheelDeltaY', wheelDeltaY)
-  //   // Determine the direction based on wheelDeltaX and wheelDeltaY
-  //   if (Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
-  //     direction = wheelDeltaX > 0 ? 'right' : 'left';
-  //   } else {
-  //     direction = wheelDeltaY > 0 ? 'up' : 'down';
-  //   }
-  //   // console.log('firedX', firedX)
-  //   // console.log('wheelDeltaX', wheelDeltaX)
-  //   // Check if horizontal scroll deltas are significant and not already fired
-  //   if (!firedX && !firedY && Math.abs(wheelDeltaX) > 25) {
-  //     setFiredX(true); // Mark the horizontal scroll event as fired
-  //     console.log(`Horizontal Scroll Direction: ${direction}. DeltaX: ${wheelDeltaX} ${firedY} ${firedX}`);
-  //   }
-  
-  //   // Check if vertical scroll deltas are significant and not already fired
-  //   if (!firedX && !firedY && Math.abs(wheelDeltaY) > 25) {
-  //     setFiredY(true); // Mark the vertical scroll event as fired
-  //     console.log(`Vertical Scroll Direction: ${direction}. DeltaY: ${wheelDeltaY} ${firedY} ${firedX}`);
-  //   }
-  
-  //   // Check if scroll has stopped (both deltas near zero)
-  //   if (Math.abs(wheelDeltaX) < 4 && Math.abs(wheelDeltaY) < 4) {
-  //     console.log('set fired false')
-  //     // Reset the fired states when the scroll has stopped
-  //     setFiredX(false);
-  //     setFiredY(false);
-  //   }
-  
-  //   // // Store the last scroll deltas for comparison (optional)
-  //   // lastWheelDelta.current = { x: wheelDeltaX, y: wheelDeltaY };
-  // };
-
   return (
-    <div style={{ overflow: 'hidden', maxHeight: '100vh' }}>
-      {/* <div
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-        onWheel={handleWheel}
-      >
-        scroll on me! {touchStart.x} {touchStart.y} {lastTouchPosition.x} {lastTouchPosition.y}
-      </div> */}
-
-      <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
-      <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button>
-      <div ref={containerRef} style={containerStyle}
-            // onTouchStart={handleTouchStart}
-            // onTouchMove={handleTouchMove}
-            // onTouchEnd={handleTouchEnd}
-            //   onWheel={handleWheel}
-      
-      >
-        {items.map((item, index) => (
-          <div key={index} style={itemStyle}>
-            {/* Your short content here */}
-            <h2>{item.title}</h2>
-            <p>{item.description}</p>
-          </div>
-        ))}
+    <div style={{ maxHeight: '80vh', overflow: 'hidden' }}>
+      {/* <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
+      <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button> */}
+      <div style={{ maxHeight: '80vh', overflow: 'hidden' }}>
+        <div ref={containerRef} style={{
+          height: '100%',
+          overflow: 'hidden',
+          transition: 'all 0.5s ease-in-out',
+          // transform: `translateY(-${currentIndex * 100}vh)`
+          transform: transformTranslate
+        }}>
+          {items.map((item, index) => (
+            <div key={index} style={{ borderBottom: '1px solid red', height: '80vh', }}>
+              <h2>{item.title}</h2>
+              <p>{item.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

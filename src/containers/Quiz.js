@@ -124,7 +124,20 @@ export const OccuranceButtons = ({ playingOccuranceIndex, currentAvailableOccura
 }
 
 const Quiz = () => {
+  useBodyOverflowHidden()
+
   return <ShortsList items={MOCK_SHORTS_ITEMS()} />
+}
+
+function useBodyOverflowHidden() {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+
+    // increment(2)
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [])
 }
 
 const Quiz_STASH = () => {
@@ -134,7 +147,8 @@ const Quiz_STASH = () => {
   const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(listName, paramWord)
   const currentPlayingOccurance = currentWordOccurances[playingOccuranceIndex]
   const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
-
+  useBodyOverflowHidden()
+  
   // const { containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll()
 
   return (
