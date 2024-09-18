@@ -14,8 +14,7 @@ sudo apt install certbot
 
 ### Use python-certbot to get https certificate and autoinstall
 
-certbot certonly -d example.com -d www.example.com
-certbot certonly -d app.example.com -d api.example.com
+certbot certonly -d coplay.live -d www.coplay.live
 
 This should ask you to choose plugins e.g. (apache/nginx)
 

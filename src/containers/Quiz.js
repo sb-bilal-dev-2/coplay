@@ -10,6 +10,7 @@ import { sortByLearningState } from "../helper/sortByLearningState";
 import YoutubePlayer from "../components/YoutubePlayer";
 import ErrorBoundary from "./ErrorBoundary";
 import VideojsInited from "../components/VideojsInited";
+import ShortsList from "../components/useCustomScroll";
 
 function useTelegramWebApp() {
   let telegramApp = window.Telegram.WebApp
@@ -50,6 +51,7 @@ export const WordCarousel = ({list, activeIndex, currentWordInfo, onLeftClick, o
         {list?.map((keyword, index) => {
           return (
             <div
+              key={keyword?.the_word}
               style={{ minHeight: '130px', flexShrink: 0, width: '80%', transform: `${activeIndex === index ? 'scale(1.15)' : ''}` }}
               className="headline-1 cursor-pointer p-4 paper text-yellowishorange flex flex-col justify-around items-center"
               onClick={() => set_isShowingDefinitions(!isShowingDefinitions)}
@@ -122,30 +124,19 @@ export const OccuranceButtons = ({ playingOccuranceIndex, currentAvailableOccura
 }
 
 const Quiz = () => {
+  return <ShortsList items={MOCK_SHORTS_ITEMS()} />
+}
+
+const Quiz_STASH = () => {
   const { } = useTelegramWebApp()
   const { list: listName, word: paramWord } = useParams();
   const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
   const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(listName, paramWord)
-
-  // const [postUserWords] = usePost()
-  // const updateRepeatCount = async (pWord) => {
-  //   const usersPracticingWord = pWord || practicingWordInfos[practicingWordIndex]
-  //   if (!usersPracticingWord?.repeatCount) {
-  //     usersPracticingWord.repeatCount = 0
-  //   }
-  //   usersPracticingWord.repeatCount += 1;
-  //   usersPracticingWord.repeatTime = Date.now();
-  //   postUserWords('/self_words', [usersPracticingWord])
-  // }
-  // console.log('currentWord', currentWord)
-  // console.log('currentWordInfo', currentWordInfo)
-  // console.log('practicingWordIndex', practicingWordIndex)
-  // console.log('wordCollection', wordCollection)
-  // console.log('currentWordOccurances', currentWordOccurances)
-  console.log('currentWordInfo', currentWordInfo)
-
   const currentPlayingOccurance = currentWordOccurances[playingOccuranceIndex]
   const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
+
+  // const { containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll()
+
   return (
     <ErrorBoundary>
       <div className="page-container bg-video text-gray-100 relative min-h-screen">
@@ -259,5 +250,87 @@ async function request_wordOccurances(the_word) {
     console.log("err", err);
   }
 };
+
+function MOCK_SHORTS_ITEMS() {
+  return [
+    {
+      id: 1,
+      title: "Amazing Sunset",
+      description: "Breathtaking view of the sun setting over the ocean.",
+      type: "image",
+      content: "/api/placeholder/800/600",
+      likes: 1500,
+      comments: 230
+    },
+    {
+      id: 2,
+      title: "Quick Healthy Breakfast",
+      description: "How to make a nutritious breakfast in under 5 minutes.",
+      type: "video",
+      content: "/api/placeholder/800/600",
+      duration: "00:59",
+      views: 50000,
+      likes: 3200
+    },
+    {
+      id: 3,
+      title: "Funny Cat Moment",
+      description: "Watch this cat's hilarious reaction to a cucumber!",
+      type: "gif",
+      content: "/api/placeholder/800/600",
+      likes: 10000,
+      shares: 5000
+    },
+    {
+      id: 4,
+      title: "Daily Motivation",
+      description: "Start your day with this inspiring quote.",
+      type: "text",
+      content: "The only way to do great work is to love what you do. - Steve Jobs",
+      backgroundColor: "#FFD700",
+      fontColor: "#000000",
+      likes: 2000
+    },
+    {
+      id: 5,
+      title: "Quick Workout Routine",
+      description: "5-minute HIIT workout you can do anywhere.",
+      type: "video",
+      content: "/api/placeholder/800/600",
+      duration: "05:00",
+      views: 75000,
+      likes: 4800
+    },
+    {
+      id: 6,
+      title: "Beautiful Nature Scene",
+      description: "Serene forest landscape with a gentle stream.",
+      type: "image",
+      content: "/api/placeholder/800/600",
+      likes: 3500,
+      comments: 420
+    },
+    {
+      id: 7,
+      title: "Tech Tip of the Day",
+      description: "Learn this keyboard shortcut to boost your productivity!",
+      type: "text",
+      content: "Press Ctrl + Shift + T to reopen closed tabs in most browsers.",
+      backgroundColor: "#4682B4",
+      fontColor: "#FFFFFF",
+      likes: 1200
+    },
+    {
+      id: 8,
+      title: "Cute Puppy Playtime",
+      description: "Watch these adorable puppies play in the park.",
+      type: "video",
+      content: "/api/placeholder/800/600",
+      duration: "01:30",
+      views: 100000,
+      likes: 8500
+    }
+  ];
+}
 
 export default Quiz;
