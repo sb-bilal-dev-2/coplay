@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+// import { motion } from 'framer-motion'
 
 const useCustomScroll = (isHorizontal = false) => {
   const DELTA_THRESHOLD = 20
@@ -67,10 +68,14 @@ const useCustomScroll = (isHorizontal = false) => {
       const velocityY = Math.abs(deltaY) / timeElapsed;
 
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        set_lastDeltaX(deltaX);
+        if (Math.abs(deltaX) > DELTA_THRESHOLD) {
+          set_lastDeltaX(deltaX);
+        }
         setDirection(deltaX > 0 ? 'right' : 'left');
       } else {
-        set_lastDeltaY(deltaY);
+        if (Math.abs(deltaY) > DELTA_THRESHOLD) {
+          set_lastDeltaY(deltaY);
+        }
         setDirection(deltaY > 0 ? 'down' : 'up');
       }
 
@@ -165,20 +170,24 @@ const useCustomScroll = (isHorizontal = false) => {
       }
     }
 
-    if (Math.abs(wheelDeltaX) < 4) {
+    const lastIndex = containerRef.current?.children.length === currentIndex;
+    const scrollingNegativeIndex = !currentIndex && lastDeltaY > 0
+    const scrollOverflow = lastIndex || scrollingNegativeIndex
+
+    if (Math.abs(wheelDeltaX) < 4 || (scrollOverflow && Math.abs(lastDeltaX) > Math.abs(wheelDeltaX + DELTA_THRESHOLD))) {
       set_lastDeltaX(0);
       // if (isHorizontal) {
       //   handleScrollEnd()
       // }
     }
 
-    if (Math.abs(wheelDeltaY) < 4) {
+    if (Math.abs(wheelDeltaY) < 4 || (scrollOverflow && Math.abs(lastDeltaY) > Math.abs(wheelDeltaY + DELTA_THRESHOLD))) {
       set_lastDeltaY(0);
       // if (!isHorizontal) {
       //   handleScrollEnd()
       // }
     }
-  }, [lastDeltaX, lastDeltaY]);
+  }, [lastDeltaX, lastDeltaY, currentIndex]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -202,9 +211,9 @@ const useCustomScroll = (isHorizontal = false) => {
   let obstacleBounceTranslate = isHorizontal ? translateX : translateY
   const lastDelta = isHorizontal ? lastDeltaX : lastDeltaY
   if (lastIndex) {
-    obstacleBounceTranslate -= lastDelta * 2
+    obstacleBounceTranslate -= lastDelta
   } else if (scrollingNegativeIndex) {
-    obstacleBounceTranslate = obstacleBounceTranslate + lastDelta * 2
+    obstacleBounceTranslate = obstacleBounceTranslate + lastDelta
   }
   const transformTranslate = `translate${isHorizontal ? 'X' : 'Y'}(${scrollingNegativeIndex ? '' : '-'}${obstacleBounceTranslate}px)` // e.g. translateX(-400px)
 
@@ -214,25 +223,32 @@ const useCustomScroll = (isHorizontal = false) => {
 
 const ShortsList = ({ items }) => {
   const { containerRef, currentIndex, scrollToNext, scrollToPrevious, transformTranslate } = useCustomScroll();
-  
+
   return (
-    <div style={{ maxHeight: '80vh', overflow: 'hidden' }}>
+    <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
       {/* <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
       <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button> */}
-      <div style={{ maxHeight: '80vh', overflow: 'hidden' }}>
-        <div ref={containerRef} style={{
-          height: '100%',
-          overflow: 'hidden',
-          transition: 'all 0.5s ease-in-out',
+      <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
+        {/* <motion.div */}
+        <div
+          ref={containerRef}
+          style={{
+            height: '100%',
+            overflow: 'hidden',
+          transition: 'all 0.3s ease-in',
           // transform: `translateY(-${currentIndex * 100}vh)`
-          transform: transformTranslate
-        }}>
+            transform: transformTranslate
+          }}
+          // animate={{ y: obstacleBounceTranslate }}
+          // transition={{ duration: 0.5 }}
+        >
           {items.map((item, index) => (
-            <div key={index} style={{ borderBottom: '1px solid red', height: '80vh', }}>
+            <div key={index} style={{ borderBottom: '1px solid red', height: '100vh', }}>
               <h2>{item.title}</h2>
               <p>{item.description}</p>
             </div>
           ))}
+        {/* </motion.div> */}
         </div>
       </div>
     </div>
