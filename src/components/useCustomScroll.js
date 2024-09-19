@@ -16,6 +16,8 @@ const useCustomScroll = (isHorizontal = false) => {
   const lastMoveTime = useRef(0);
 
   const delta = useRef(0)
+  const scrollDelta = useRef(0)
+  const scrollMuted = Math.abs(scrollDelta.current) > 200
 
   const scrollTo = useCallback((index) => {
     const container = containerRef.current;
@@ -153,7 +155,15 @@ const useCustomScroll = (isHorizontal = false) => {
       wheelDirection = wheelDeltaY > 0 ? 'up' : 'down';
     }
 
+    // const wheelDelta = isHorizontal ? wheelDeltaX : wheelDeltaY
+
+    setLastTouchPosition({ x: wheelDeltaX, y: wheelDeltaY })
+
+    if (!scrollMuted) {
+      scrollDelta.current += isHorizontal ? wheelDeltaX : wheelDeltaY
+    }
     if (isHorizontal) {
+
       if (!lastDeltaX && !lastDeltaY && Math.abs(wheelDeltaX) > DELTA_THRESHOLD) {
         set_lastDeltaX(wheelDeltaX);
         console.log(`Horizontal Scroll Direction: ${wheelDirection}. DeltaX: ${wheelDeltaX}`);
@@ -185,6 +195,10 @@ const useCustomScroll = (isHorizontal = false) => {
       //   handleScrollEnd()
       // }
     }
+
+    if ((Math.abs(wheelDeltaY) < 4 && !isHorizontal) || Math.abs(wheelDeltaX) < 4 && isHorizontal) {
+      scrollDelta.current = 0;
+    } 
 
     if (Math.abs(wheelDeltaY) < 4 || (scrollOverflow && Math.abs(lastDeltaY) > Math.abs(wheelDeltaY + DELTA_THRESHOLD))) {
       set_lastDeltaY(0);
@@ -221,8 +235,13 @@ const useCustomScroll = (isHorizontal = false) => {
     obstacleBounceTranslate = obstacleBounceTranslate + lastDelta
   }
   const transformTranslate = `translate${isHorizontal ? 'X' : 'Y'}(${scrollingNegativeIndex ? '' : '-'}${obstacleBounceTranslate}px)` // e.g. translateX(-400px)
+  console.log('ff', scrollDelta.current)
+  let scrollDeltaAdapted = Math.abs(scrollDelta.current) > 10 ? 100 : 0
 
-  return { delta: delta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
+  if (scrollDelta.current < 0) scrollDeltaAdapted = -scrollDeltaAdapted
+  if (scrollMuted) scrollDeltaAdapted = 0
+  console.log('scrollMuted', scrollMuted)
+  return { delta: delta.current + scrollDeltaAdapted, scrollDelta: scrollDelta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
 
@@ -231,9 +250,9 @@ const ShortsList = ({ items }) => {
 
   return (
     <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
-      <div className='absolute'>{delta}</div>
-      {/* <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
-      <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button> */}
+      {/* <div className='absolute'>{delta}</div> */}
+      <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
+      <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button>
       <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
         <motion.div
           // <div
