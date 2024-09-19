@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-// import { motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 const useCustomScroll = (isHorizontal = false) => {
-  const DELTA_THRESHOLD = 20
+  const DELTA_THRESHOLD = 15
   const containerRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
@@ -14,6 +14,8 @@ const useCustomScroll = (isHorizontal = false) => {
   const [translateY, set_translateY] = useState(0)
 
   const lastMoveTime = useRef(0);
+
+  const delta = useRef(0)
 
   const scrollTo = useCallback((index) => {
     const container = containerRef.current;
@@ -61,6 +63,8 @@ const useCustomScroll = (isHorizontal = false) => {
     const currentTime = Date.now();
     const deltaX = touch.clientX - lastTouchPosition.x;
     const deltaY = touch.clientY - lastTouchPosition.y;
+
+    delta.current += isHorizontal ? deltaX : deltaY;
     const timeElapsed = currentTime - lastMoveTime.current;
 
     if (timeElapsed > 50) {
@@ -89,6 +93,7 @@ const useCustomScroll = (isHorizontal = false) => {
     const currentVelocityX = velocity.x;
     const currentVelocityY = velocity.y;
     set_lastDeltaX(0);
+    delta.current = 0;
     set_lastDeltaY(0);
 
     if (currentVelocityX > 0.1 || currentVelocityY > 0.1) {
@@ -217,30 +222,31 @@ const useCustomScroll = (isHorizontal = false) => {
   }
   const transformTranslate = `translate${isHorizontal ? 'X' : 'Y'}(${scrollingNegativeIndex ? '' : '-'}${obstacleBounceTranslate}px)` // e.g. translateX(-400px)
 
-  return { containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
+  return { delta: delta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
 
 const ShortsList = ({ items }) => {
-  const { containerRef, currentIndex, scrollToNext, scrollToPrevious, transformTranslate } = useCustomScroll();
+  const { delta, translateY, containerRef, currentIndex, scrollToNext, scrollToPrevious, transformTranslate } = useCustomScroll();
 
   return (
     <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
+      <div className='absolute'>{delta}</div>
       {/* <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
       <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button> */}
       <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
-        {/* <motion.div */}
-        <div
+        <motion.div
+          // <div
           ref={containerRef}
           style={{
             height: '100%',
             overflow: 'hidden',
-          transition: 'all 0.3s ease-in',
-          // transform: `translateY(-${currentIndex * 100}vh)`
-            transform: transformTranslate
+            // transition: 'all 0.4s ease-in',
+            // transform: transformTranslate,
           }}
-          // animate={{ y: obstacleBounceTranslate }}
-          // transition={{ duration: 0.5 }}
+          transition={{ type: "just", damping: 200, stiffness: 500 }}
+          animate={{ y: delta - translateY }}
+        // transition={{ duration: 0.5 }}
         >
           {items.map((item, index) => (
             <div key={index} style={{ borderBottom: '1px solid red', height: '100vh', }}>
@@ -248,8 +254,8 @@ const ShortsList = ({ items }) => {
               <p>{item.description}</p>
             </div>
           ))}
-        {/* </motion.div> */}
-        </div>
+        </motion.div>
+        {/* </div> */}
       </div>
     </div>
   );
