@@ -5,7 +5,13 @@ import { useThrottle } from '@uidotdev/usehooks';
 const useCustomScroll = (isHorizontal = false) => {
   const DELTA_THRESHOLD = 15
   const containerRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex_] = useState(0);
+  const setCurrentIndexDisabledTimeout = useRef()
+  const setCurrentIndex = useCallback((index) => {
+    setCurrentIndex_(index)
+    setCurrentIndexDisabledTimeout.current = setTimeout(() => { setCurrentIndexDisabledTimeout.current = null }, 1000)
+  })
+  console.log('setCurrentIndexDisabledTimeout.current', setCurrentIndexDisabledTimeout.current)
   const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
   const [velocity, setVelocity] = useState({ x: 0, y: 0 });
   const [direction, setDirection] = useState('');
@@ -34,7 +40,7 @@ const useCustomScroll = (isHorizontal = false) => {
       } else {
         set_translateY(newScrollPosition)
       }
-      console.log('log 1')
+
       setCurrentIndex(index);
     }
   }, []);
@@ -42,7 +48,6 @@ const useCustomScroll = (isHorizontal = false) => {
   const scrollToNext = useCallback(() => {
     if (containerRef.current && currentIndex < containerRef.current.children.length - 1) {
       scrollTo(currentIndex + 1);
-      console.log('log 2')
     }
   }, [currentIndex, scrollTo]);
 
@@ -100,7 +105,6 @@ const useCustomScroll = (isHorizontal = false) => {
     set_lastDeltaY(0);
 
     if (currentVelocityX > 0.1 || currentVelocityY > 0.1) {
-      console.log(`SCROLL VELOCITY! VelocityX: ${currentVelocityX.toFixed(2)} px/s, VelocityY: ${currentVelocityY.toFixed(2)} px/s. Direction: ${direction}`);
       if (direction === 'left' || direction === 'up') {
         scrollToNext();
       } else if (direction === 'right' || direction === 'down') {
@@ -108,8 +112,6 @@ const useCustomScroll = (isHorizontal = false) => {
       } else {
         scrollTo(currentIndex)
       }
-    } else {
-      console.log('No significant scroll detected.');
     }
   }, [velocity, direction]);
 
@@ -119,7 +121,6 @@ const useCustomScroll = (isHorizontal = false) => {
 
     const containerSize = isHorizontal ? container.clientWidth : container.clientHeight;
     const scrollOffset = isHorizontal ? container.scrollLeft : container.scrollTop;
-    console.log('containerSize', scrollOffset)
     const itemSize = containerSize; // Assuming each item takes full width
 
     const currentItemIndex = Math.round(scrollOffset / itemSize);
@@ -185,7 +186,6 @@ const useCustomScroll = (isHorizontal = false) => {
 
       if (!lastDeltaX && !lastDeltaY && Math.abs(wheelDeltaX) > DELTA_THRESHOLD) {
         set_lastDeltaX(wheelDeltaX);
-        console.log(`Horizontal Scroll Direction: ${wheelDirection}. DeltaX: ${wheelDeltaX}`);
         if (wheelDirection === 'left') {
           scrollToNext();
         } else if (wheelDirection === 'right') {
@@ -200,7 +200,6 @@ const useCustomScroll = (isHorizontal = false) => {
         } else if (wheelDirection === 'up') {
           scrollToPrevious();
         }
-        console.log(`Vertical Scroll Direction: ${wheelDirection}. DeltaY: ${wheelDeltaY}`);
       }
     }
 
@@ -217,7 +216,7 @@ const useCustomScroll = (isHorizontal = false) => {
 
     if ((Math.abs(wheelDeltaY) < 4 && !isHorizontal) || Math.abs(wheelDeltaX) < 4 && isHorizontal) {
       scrollDelta.current = 0;
-    } 
+    }
 
     if (Math.abs(wheelDeltaY) < 4 || (scrollOverflow && Math.abs(lastDeltaY) > Math.abs(wheelDeltaY + DELTA_THRESHOLD))) {
       set_lastDeltaY(0);
@@ -259,7 +258,8 @@ const useCustomScroll = (isHorizontal = false) => {
 
   if (scrollDelta.current < 0) scrollDeltaAdapted = -scrollDeltaAdapted
   if (scrollMuted) scrollDeltaAdapted = 0
-  const scrollDeltaAdapted_ = useThrottle(scrollDeltaAdapted, 350)
+  const throttledScrollDelta = useThrottle(scrollDeltaAdapted, 350)
+  const scrollDeltaAdapted_ = !!setCurrentIndexDisabledTimeout.current ? 0 : throttledScrollDelta
   return { delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
