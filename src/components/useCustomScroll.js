@@ -8,6 +8,7 @@ const useCustomScroll = (isHorizontal = false) => {
   const AFTER_SET_INDEX_EFFECT = 1000
   const SCROLL_MUTE_ON_OVERSCROLL_THRESHOLD = 200
   const PIXEL_MOVE_ON_DELTA_EFFECT = 30
+  const RESET_SCROLL_ON_DEFECTIVE_SCROLL = 600
 
   const containerRef = useRef(null);
   const [currentIndex, setCurrentIndex_] = useState(0);
@@ -177,7 +178,7 @@ const useCustomScroll = (isHorizontal = false) => {
           }
           clearTimeout(wheelEndTimeout.current)
           wheelEndTimeout.current = null
-        }, 600)
+        }, RESET_SCROLL_ON_DEFECTIVE_SCROLL)
       }
     }
     // const wheelDelta = isHorizontal ? wheelDeltaX : wheelDeltaY
