@@ -4,12 +4,17 @@ import { useThrottle } from '@uidotdev/usehooks';
 
 const useCustomScroll = (isHorizontal = false) => {
   const DELTA_THRESHOLD = 15
+  const THROTTLE_DELTACHANGE_EFFECT = 270
+  const AFTER_SET_INDEX_EFFECT = 1000
+  const SCROLL_MUTE_ON_OVERSCROLL_THRESHOLD = 200
+  const PIXEL_MOVE_ON_DELTA_EFFECT = 30
+
   const containerRef = useRef(null);
   const [currentIndex, setCurrentIndex_] = useState(0);
   const setCurrentIndexDisabledTimeout = useRef()
   const setCurrentIndex = useCallback((index) => {
     setCurrentIndex_(index)
-    setCurrentIndexDisabledTimeout.current = setTimeout(() => { setCurrentIndexDisabledTimeout.current = null }, 1000)
+    setCurrentIndexDisabledTimeout.current = setTimeout(() => { setCurrentIndexDisabledTimeout.current = null }, AFTER_SET_INDEX_EFFECT)
   })
   console.log('setCurrentIndexDisabledTimeout.current', setCurrentIndexDisabledTimeout.current)
   const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
@@ -24,7 +29,7 @@ const useCustomScroll = (isHorizontal = false) => {
 
   const delta = useRef(0)
   const scrollDelta = useRef(0)
-  const scrollMuted = Math.abs(scrollDelta.current) > 200
+  const scrollMuted = Math.abs(scrollDelta.current) > SCROLL_MUTE_ON_OVERSCROLL_THRESHOLD
 
   const scrollTo = useCallback((index) => {
     const container = containerRef.current;
@@ -160,7 +165,7 @@ const useCustomScroll = (isHorizontal = false) => {
       wheelDirection = wheelDeltaY > 0 ? 'up' : 'down';
     }
 
-    if (scrollDelta.current !== 0 && Math.abs(scrollDelta.current) < 200) {
+    if (scrollDelta.current !== 0 && Math.abs(scrollDelta.current) < SCROLL_MUTE_ON_OVERSCROLL_THRESHOLD) {
       const currentTime = Date.now()
       const timeDiff = currentTime - last_wheelEndTimeoutStart.current
       if (timeDiff > 50 || !last_wheelEndTimeoutStart.current) {
@@ -254,12 +259,13 @@ const useCustomScroll = (isHorizontal = false) => {
   }
   const transformTranslate = `translate${isHorizontal ? 'X' : 'Y'}(${scrollingNegativeIndex ? '' : '-'}${obstacleBounceTranslate}px)` // e.g. translateX(-400px)
 
-  let scrollDeltaAdapted = Math.abs(scrollDelta.current) > 10 ? 30 : 0
+  let scrollDeltaAdapted = Math.abs(scrollDelta.current) > 10 ? PIXEL_MOVE_ON_DELTA_EFFECT : 0
 
-  if (scrollDelta.current < 0) scrollDeltaAdapted = -scrollDeltaAdapted
+  if (scrollDelta.current < 0) scrollDeltaAdapted = -PIXEL_MOVE_ON_DELTA_EFFECT
   if (scrollMuted) scrollDeltaAdapted = 0
-  const throttledScrollDelta = useThrottle(scrollDeltaAdapted, 350)
+  const throttledScrollDelta = useThrottle(scrollDeltaAdapted, THROTTLE_DELTACHANGE_EFFECT)
   const scrollDeltaAdapted_ = !!setCurrentIndexDisabledTimeout.current ? 0 : throttledScrollDelta
+  console.log('scrollDeltaAdapted_', scrollDeltaAdapted_)
   return { delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
