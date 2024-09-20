@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion'
+import { useThrottle } from '@uidotdev/usehooks';
 
 const useCustomScroll = (isHorizontal = false) => {
   const DELTA_THRESHOLD = 15
@@ -253,13 +254,13 @@ const useCustomScroll = (isHorizontal = false) => {
     obstacleBounceTranslate = obstacleBounceTranslate + lastDelta
   }
   const transformTranslate = `translate${isHorizontal ? 'X' : 'Y'}(${scrollingNegativeIndex ? '' : '-'}${obstacleBounceTranslate}px)` // e.g. translateX(-400px)
-  console.log('ff', scrollDelta.current)
-  let scrollDeltaAdapted = Math.abs(scrollDelta.current) > 10 ? 100 : 0
+
+  let scrollDeltaAdapted = Math.abs(scrollDelta.current) > 10 ? 30 : 0
 
   if (scrollDelta.current < 0) scrollDeltaAdapted = -scrollDeltaAdapted
   if (scrollMuted) scrollDeltaAdapted = 0
-  console.log('scrollMuted', scrollMuted)
-  return { delta: delta.current + scrollDeltaAdapted, scrollDelta: scrollDelta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
+  const scrollDeltaAdapted_ = useThrottle(scrollDeltaAdapted, 350)
+  return { delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
 
