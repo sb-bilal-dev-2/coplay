@@ -145,6 +145,9 @@ const useCustomScroll = (isHorizontal = false) => {
     }
   }, [currentIndex, scrollTo]);
 
+  const wheelEndTimeout = useRef()
+  const last_wheelEndTimeoutStart = useRef()
+
   const handleWheel = useCallback((event) => {
     const { wheelDeltaX, wheelDeltaY } = event;
 
@@ -155,6 +158,21 @@ const useCustomScroll = (isHorizontal = false) => {
       wheelDirection = wheelDeltaY > 0 ? 'up' : 'down';
     }
 
+    if (scrollDelta.current !== 0 && Math.abs(scrollDelta.current) < 200) {
+      const currentTime = Date.now()
+      const timeDiff = currentTime - last_wheelEndTimeoutStart.current
+      if (timeDiff > 50 || !last_wheelEndTimeoutStart.current) {
+        last_wheelEndTimeoutStart.current = currentTime
+        wheelEndTimeout.current = setTimeout(() => {
+          if (scrollDelta.current !== 0) {
+            scrollDelta.current = 0
+            setLastTouchPosition({ x: wheelDeltaX, y: wheelDeltaY })
+          }
+          clearTimeout(wheelEndTimeout.current)
+          wheelEndTimeout.current = null
+        }, 600)
+      }
+    }
     // const wheelDelta = isHorizontal ? wheelDeltaX : wheelDeltaY
 
     setLastTouchPosition({ x: wheelDeltaX, y: wheelDeltaY })
