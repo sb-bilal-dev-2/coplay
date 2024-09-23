@@ -1,9 +1,29 @@
 
-#vjs_video_3 {
-    /* margin-top: 160px; */
-    height: 50vh !important;
+.VideoContainer div[data-vjs-player="true"] > div > video-js {
+    height: 90vh !important;
     padding-top: 0 !important;
     overflow-y: hidden;
+    border-radius: 15px;
+    box-sizing: border-box;
+
+    @media (max-width: 700px) {
+        border-radius: 0;
+    }
+}
+
+.VideoContainer {
+    width: 500px;
+    margin: auto;
+    height: 92vh;
+    margin-bottom: 1vh;
+    padding-top: 1vh;
+    @media (max-width: 700px) {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+    }
 }
 
 .QuizMain video {

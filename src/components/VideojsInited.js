@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Videojs from "./Videojs";
 import throttle from "../throttle";
 
-const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
+const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }) => {
     // const videoRef = useRef();
     const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
     const playerRef = useRef(null);
     // console.log('log 3', videoSrc, startTime, onTimeUpdate)
     const videoJsOptions = useMemo(() => ({
         controls: true,
-        autoplay: true,
+        autoplay: autoplay,
         preload: 'auto',
         fluid: true,
         sources: [{
@@ -51,7 +51,7 @@ const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
     };
 
     async function playVideo() {
-        console.log('play next')
+        console.log('play next', startTime)
         try {
             await playerRef.current.currentTime(startTime)
             await playerRef.current.play()
@@ -60,11 +60,25 @@ const VideojsInited = ({ videoSrc, startTime, onTimeUpdate }) => {
         }
     }
 
-    useEffect(() => {
-        if (isLoadedMetadata) {
-            playVideo()
+    async function pauseVideo() {
+        try {
+            await playerRef.current.pause()
+        } catch (error) {
+            console.log('PLAY ERROR', error)
         }
-    }, [startTime, isLoadedMetadata])
+    }
+
+    useEffect(() => {
+        // if (isLoadedMetadata) {
+        //     playVideo()
+        // }
+        if (isActive) {
+            console.log('isActive', isActive)
+            playVideo()
+        } else {
+            pauseVideo()
+        }
+    }, [startTime, isLoadedMetadata, isActive])
 
     return (
         <Videojs options={videoJsOptions} onReady={handlePlayerReady} />

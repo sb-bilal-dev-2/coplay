@@ -2,12 +2,17 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion'
 import { useThrottle } from '@uidotdev/usehooks';
 
-const useCustomScroll = (isHorizontal = false) => {
-  const DELTA_THRESHOLD = 15
+const useCustomScroll = (options = {}) => {
+  const {
+    isHorizontal = false,
+    pixelMoveOnDelta = 60,
+    deltaThreshold = 20
+  } = options
+  const DELTA_THRESHOLD = deltaThreshold
   const THROTTLE_DELTACHANGE_EFFECT = 270
   const AFTER_SET_INDEX_EFFECT = 1000
   const SCROLL_MUTE_ON_OVERSCROLL_THRESHOLD = 200
-  const PIXEL_MOVE_ON_DELTA_EFFECT = 30
+  const PIXEL_MOVE_ON_DELTA_EFFECT = pixelMoveOnDelta
   const RESET_SCROLL_ON_DEFECTIVE_SCROLL = 600
 
   const containerRef = useRef(null);
@@ -267,31 +272,29 @@ const useCustomScroll = (isHorizontal = false) => {
   const throttledScrollDelta = useThrottle(scrollDeltaAdapted, THROTTLE_DELTACHANGE_EFFECT)
   const scrollDeltaAdapted_ = !!setCurrentIndexDisabledTimeout.current ? 0 : throttledScrollDelta
   console.log('scrollDeltaAdapted_', scrollDeltaAdapted_)
-  return { delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, containerRef, currentIndex, scrollToNext, scrollToPrevious, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
+  const translate = (delta.current + scrollDeltaAdapted_) - (isHorizontal ? translateX : translateY)
+  return {
+    translate, containerRef, currentIndex, scrollToNext, scrollToPrevious,
+    delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 
 
-const ShortsList = ({ items }) => {
-  const { delta, translateY, containerRef, currentIndex, scrollToNext, scrollToPrevious, transformTranslate } = useCustomScroll();
+const SAMPLE_USAGE = ({ items }) => {
+  const { translate, containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll();
 
   return (
     <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
-      {/* <div className='absolute'>{delta}</div> */}
       <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
       <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button>
       <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
         <motion.div
-          // <div
           ref={containerRef}
           style={{
             height: '100%',
             overflow: 'hidden',
-            // transition: 'all 0.4s ease-in',
-            // transform: transformTranslate,
           }}
           transition={{ type: "just", damping: 200, stiffness: 500 }}
-          animate={{ y: delta - translateY }}
-        // transition={{ duration: 0.5 }}
+          animate={{ y: translate }}
         >
           {items.map((item, index) => (
             <div key={index} style={{ borderBottom: '1px solid red', height: '100vh', }}>
@@ -300,10 +303,9 @@ const ShortsList = ({ items }) => {
             </div>
           ))}
         </motion.div>
-        {/* </div> */}
       </div>
     </div>
   );
 };
 
-export default ShortsList;
+export default useCustomScroll;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
+import { motion } from 'framer-motion';
 import api from "../api";
 import "./Quiz.css";
 import { BASE_SERVER_URL } from "../api";
@@ -10,7 +11,7 @@ import { sortByLearningState } from "../helper/sortByLearningState";
 import YoutubePlayer from "../components/YoutubePlayer";
 import ErrorBoundary from "./ErrorBoundary";
 import VideojsInited from "../components/VideojsInited";
-import ShortsList from "../components/useCustomScroll";
+import useCustomScroll from "../components/useCustomScroll";
 
 function useTelegramWebApp() {
   let telegramApp = window.Telegram.WebApp
@@ -33,14 +34,14 @@ export const GoBackButton = () => {
 
   return (<button
     onClick={() => navigate(-1)}
-    className="absolute z-10 top-4 left-4 text-white cursor-pointer"
+    className="absolute z-10 top-4 left-4 text-gray cursor-pointer"
   >
     <i className="fa fa-arrow-left" aria-hidden="true"></i>
   </button>
   )
 }
 
-export const WordCarousel = ({list, activeIndex, currentWordInfo, onLeftClick, onRightClick}) => {
+export const WordCarousel = ({ list, activeIndex, currentWordInfo, onLeftClick, onRightClick }) => {
   const [isShowingDefinitions, set_isShowingDefinitions] = useState();
   return (
     <div className="overflow relative py-2">
@@ -123,37 +124,88 @@ export const OccuranceButtons = ({ playingOccuranceIndex, currentAvailableOccura
   )
 }
 
-const Quiz = () => {
+const ShortsContainer = ({ items }) => {
+  const { translate, containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll()
+  console.log('items')
   useBodyOverflowHidden()
 
-  return <ShortsList items={MOCK_SHORTS_ITEMS()} />
+  return (
+    <div style={{ maxHeight: '100vh', overflow: 'hidden' }}>
+      {/* <button onClick={scrollToPrevious} disabled={currentIndex === 0}>Previous</button>
+      <button onClick={scrollToNext} disabled={currentIndex === items.length - 1}>Next</button> */}
+      <motion.div
+        ref={containerRef}
+        style={{
+          height: '100%',
+          overflow: 'hidden'
+        }}
+        transition={{ type: "just", damping: 200, stiffness: 500 }}
+        animate={{ y: translate }}
+      >
+        {items.map((item) => {
+          return (
+            <div className="VideoContainer" key={item.id}>
+              {item.renderItem(currentIndex)}
+            </div>
+          )
+        })}
+      </motion.div>
+    </div>
+  )
 }
 
-function useBodyOverflowHidden() {
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-
-    // increment(2)
-    return () => {
-      document.body.style.overflow = 'auto'
-    }
-  }, [])
-}
-
-const Quiz_STASH = () => {
+const Quiz = () => {
   const { } = useTelegramWebApp()
   const { list: listName, word: paramWord } = useParams();
-  const [playingOccuranceIndex, set_playingOccuranceIndex] = useState(0);
-  const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength } = useWordColletionWordInfos(listName, paramWord)
-  const currentPlayingOccurance = currentWordOccurances[playingOccuranceIndex]
-  const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
-  useBodyOverflowHidden()
-  
-  // const { containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll()
+  const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
+  const { translate, containerRef: wordsContainer, currentIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
 
   return (
     <ErrorBoundary>
-      <div className="page-container bg-video text-gray-100 relative min-h-screen">
+      <GoBackButton />
+      <div style={{ overflow: 'hidden', width: '100vw' }}>
+        <motion.div
+          ref={wordsContainer}
+          style={{ display: 'flex', position: 'absolute' }}
+          transition={{ type: "just", damping: 200, stiffness: 500 }}
+          animate={{ x: translate }}
+        >
+          {wordList.map((item) => (
+            <div style={{ paddingLeft: 10, paddingRight: 10, flexShrink: 0, borderLeft: '1px solid gray' }}>{item.the_word}</div>
+          ))}
+        </motion.div>
+        <motion.div
+          transition={{ type: "just", damping: 200, stiffness: 500 }}
+          animate={{ x: translate }}
+        >
+          <ShortsContainer items={currentWordOccurances.map((item, index) => {
+            const currentPlayingOccurance = item
+            const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
+
+            return {
+              id: item.id, renderItem: (activeOccuranceIndex) => (console.log('activeOccuranceIndex', activeOccuranceIndex),
+                <>
+                  {
+                    !!currentAvailableOccurancesLength && (
+                      currentOccuranceTypeIsYoutube ?
+                        <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                        :
+                        <VideojsInited
+                          isActive={activeOccuranceIndex === index}
+                          autoPlay={false}
+                          videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                          startTime={currentPlayingOccurance?.startTime / 1000}
+                        />
+                    )
+                  }
+                </>
+              )
+            }
+          })}
+          />
+        </motion.div>
+      </div>
+      {/* <div className="page-container bg-video text-gray-100 relative min-h-screen">
         <GoBackButton />
         <div className="VideoContainer">
           {
@@ -181,10 +233,21 @@ const Quiz_STASH = () => {
           currentAvailableOccurancesLength={currentAvailableOccurancesLength}
           set_playingOccuranceIndex={set_playingOccuranceIndex}
         />
-      </div>
+      </div> */}
     </ErrorBoundary>
   );
 };
+
+function useBodyOverflowHidden() {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+
+    // increment(2)
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [])
+}
 
 const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
   'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).data.results[0]?.keywords || [],
@@ -193,7 +256,7 @@ const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
   // 'userList': requestUserList,
 }
 
-export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */ ) {
+export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */) {
   const [wordList, set_wordList] = useState([])
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
@@ -237,11 +300,11 @@ async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousO
     if (Math.abs(index - activeIndex) < 3) {
       const the_word = typeof keyword === 'string' ? keyword : keyword?.the_word
       const response = await api().get(`/wordInfos?the_word=${the_word}`);
-  
+
       if (!new_wordInfosMap[the_word]) {
         new_wordInfosMap[the_word] = response?.data?.results[0]
       }
-  
+
       const newOccurances = await request_wordOccurances(the_word)
       console.log('newOccurances', newOccurances)
       if (newOccurances?.length) {
@@ -264,87 +327,5 @@ async function request_wordOccurances(the_word) {
     console.log("err", err);
   }
 };
-
-function MOCK_SHORTS_ITEMS() {
-  return [
-    {
-      id: 1,
-      title: "Amazing Sunset",
-      description: "Breathtaking view of the sun setting over the ocean.",
-      type: "image",
-      content: "/api/placeholder/800/600",
-      likes: 1500,
-      comments: 230
-    },
-    {
-      id: 2,
-      title: "Quick Healthy Breakfast",
-      description: "How to make a nutritious breakfast in under 5 minutes.",
-      type: "video",
-      content: "/api/placeholder/800/600",
-      duration: "00:59",
-      views: 50000,
-      likes: 3200
-    },
-    {
-      id: 3,
-      title: "Funny Cat Moment",
-      description: "Watch this cat's hilarious reaction to a cucumber!",
-      type: "gif",
-      content: "/api/placeholder/800/600",
-      likes: 10000,
-      shares: 5000
-    },
-    {
-      id: 4,
-      title: "Daily Motivation",
-      description: "Start your day with this inspiring quote.",
-      type: "text",
-      content: "The only way to do great work is to love what you do. - Steve Jobs",
-      backgroundColor: "#FFD700",
-      fontColor: "#000000",
-      likes: 2000
-    },
-    {
-      id: 5,
-      title: "Quick Workout Routine",
-      description: "5-minute HIIT workout you can do anywhere.",
-      type: "video",
-      content: "/api/placeholder/800/600",
-      duration: "05:00",
-      views: 75000,
-      likes: 4800
-    },
-    {
-      id: 6,
-      title: "Beautiful Nature Scene",
-      description: "Serene forest landscape with a gentle stream.",
-      type: "image",
-      content: "/api/placeholder/800/600",
-      likes: 3500,
-      comments: 420
-    },
-    {
-      id: 7,
-      title: "Tech Tip of the Day",
-      description: "Learn this keyboard shortcut to boost your productivity!",
-      type: "text",
-      content: "Press Ctrl + Shift + T to reopen closed tabs in most browsers.",
-      backgroundColor: "#4682B4",
-      fontColor: "#FFFFFF",
-      likes: 1200
-    },
-    {
-      id: 8,
-      title: "Cute Puppy Playtime",
-      description: "Watch these adorable puppies play in the park.",
-      type: "video",
-      content: "/api/placeholder/800/600",
-      duration: "01:30",
-      views: 100000,
-      likes: 8500
-    }
-  ];
-}
 
 export default Quiz;
