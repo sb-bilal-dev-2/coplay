@@ -34,7 +34,7 @@ export const GoBackButton = () => {
 
   return (<button
     onClick={() => navigate(-1)}
-    className="absolute z-10 top-4 left-4 text-gray cursor-pointer"
+    className="absolute z-10 top-4 left-4 text-yellowishorange cursor-pointer"
   >
     <i className="fa fa-arrow-left" aria-hidden="true"></i>
   </button>
@@ -171,7 +171,7 @@ const Quiz = () => {
           animate={{ x: translate }}
         >
           {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item) => (
-            <div style={{ paddingLeft: 10, paddingRight: 10, flexShrink: 0, borderLeft: '1px solid gray' }}>{item.the_word}</div>
+            <div style={{ paddingLeft: 10, paddingRight: 10, flexShrink: 0, borderLeft: '1px solid orange' }}>{item.the_word}</div>
           ))}
           <div></div>
         </motion.div>
