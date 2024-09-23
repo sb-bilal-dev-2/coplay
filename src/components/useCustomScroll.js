@@ -22,7 +22,7 @@ const useCustomScroll = (options = {}) => {
     setCurrentIndex_(index)
     setCurrentIndexDisabledTimeout.current = setTimeout(() => { setCurrentIndexDisabledTimeout.current = null }, AFTER_SET_INDEX_EFFECT)
   })
-  console.log('setCurrentIndexDisabledTimeout.current', setCurrentIndexDisabledTimeout.current)
+  // console.log('setCurrentIndexDisabledTimeout.current', setCurrentIndexDisabledTimeout.current)
   const [lastTouchPosition, setLastTouchPosition] = useState({ x: 0, y: 0 });
   const [velocity, setVelocity] = useState({ x: 0, y: 0 });
   const [direction, setDirection] = useState('');
@@ -271,10 +271,10 @@ const useCustomScroll = (options = {}) => {
   if (scrollMuted) scrollDeltaAdapted = 0
   const throttledScrollDelta = useThrottle(scrollDeltaAdapted, THROTTLE_DELTACHANGE_EFFECT)
   const scrollDeltaAdapted_ = !!setCurrentIndexDisabledTimeout.current ? 0 : throttledScrollDelta
-  console.log('scrollDeltaAdapted_', scrollDeltaAdapted_)
+  // console.log('scrollDeltaAdapted_', scrollDeltaAdapted_)
   const translate = (delta.current + scrollDeltaAdapted_) - (isHorizontal ? translateX : translateY)
   return {
-    translate, containerRef, currentIndex, scrollToNext, scrollToPrevious,
+    translate, containerRef, currentIndex, scrollToNext, scrollToPrevious, setCurrentIndex,
     delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 

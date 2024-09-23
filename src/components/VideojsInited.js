@@ -29,7 +29,8 @@ const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }
         set_isLoadedMetadata(true);
         try {
             console.log("occurances[playingOccuranceIndex].startTime", startTime);
-            player.currentTime(startTime);
+            // player.currentTime(startTime);
+            
         } catch (error) {
             console.error('onLoadedMetadata error: ', error);
         }
@@ -54,7 +55,9 @@ const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }
         console.log('play next', startTime)
         try {
             await playerRef.current.currentTime(startTime)
-            await playerRef.current.play()
+            if (sessionStorage.getItem('userInteracted')) {
+                await playerRef.current.play()
+            }
         } catch (error) {
             console.log('PLAY ERROR', error)
         }
@@ -72,10 +75,14 @@ const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }
         // if (isLoadedMetadata) {
         //     playVideo()
         // }
-        if (isActive) {
+        if (isActive && isLoadedMetadata) {
             console.log('isActive', isActive)
-            playVideo()
-        } else {
+            // setTimeout(() => {
+                playVideo()
+            // }, 500)
+        }
+
+        if (!isActive) {
             pauseVideo()
         }
     }, [startTime, isLoadedMetadata, isActive])

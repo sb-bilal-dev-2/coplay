@@ -3,13 +3,33 @@
     height: 90vh !important;
     padding-top: 0 !important;
     overflow-y: hidden;
-    border-radius: 15px;
+    border-radius: 2px;
     box-sizing: border-box;
 
     @media (max-width: 700px) {
         border-radius: 0;
     }
 }
+
+/** VIDEO CONTROLS */
+
+.video-js .vjs-picture-in-picture-control {
+    display: none;
+}
+
+.video-js .vjs-control-bar {
+    background-color: (62 48 57 / 49%);
+}
+
+.video-js .vjs-fullscreen-control, .video-js .vjs-progress-control, .video-js .vjs-volume-panel, .video-js .vjs-play-control {
+    color: rgb(255, 0, 0);
+}
+
+.vjs-error .vjs-error-display .vjs-modal-dialog-content {
+    padding-top: 160px;
+}
+
+/***/
 
 .VideoContainer {
     width: 500px;

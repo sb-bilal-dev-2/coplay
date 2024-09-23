@@ -99,7 +99,7 @@ app.get('/processWordInfos', async (req, res) => {
 
 app.get('/wordInfoLemma', async (req, res) => {
   let { the_word, mainLang } = req.query;
-  const { learninglanguage } = req.headers; 
+  const { learninglanguage } = req.headers;
   console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
   try {
     const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
@@ -192,6 +192,12 @@ app.get("/movie", (req, res) => {
     req.query.name,
     req.query.quality
   );
+
+  if (!videoPath) {
+    console.error("VIDEOFILE NOT FOUND: " + req.query.name)
+    // return res.status(404)
+  }
+
   // console.log(req.query.name)
   // console.log('videoPath', videoPath)
   const videoStat = fs.statSync(videoPath);
@@ -311,9 +317,9 @@ app.post("/self_words", requireAuth, async (req, res) => {
     const updatedWordsMap = !Array.isArray(updatedWordOrWordsArray)
       ? [updatedWordOrWordsArray]
       : updatedWordOrWordsArray.reduce(
-          (acc, item) => ((acc[item.the_word] = item), acc),
-          {}
-        );
+        (acc, item) => ((acc[item.the_word] = item), acc),
+        {}
+      );
     console.log("updatedWordsMap", updatedWordsMap);
     const userWords = user[wordListKey] || [];
     console.log("userWords.length", userWords.length);

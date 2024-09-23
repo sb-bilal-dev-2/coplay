@@ -126,7 +126,7 @@ export const OccuranceButtons = ({ playingOccuranceIndex, currentAvailableOccura
 
 const ShortsContainer = ({ items }) => {
   const { translate, containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll()
-  console.log('items')
+
   useBodyOverflowHidden()
 
   return (
@@ -157,55 +157,75 @@ const ShortsContainer = ({ items }) => {
 const Quiz = () => {
   const { } = useTelegramWebApp()
   const { list: listName, word: paramWord } = useParams();
-  const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
-  console.log('wordList', wordList, currentWordOccurances)
-  const { translate, containerRef: wordsContainer, currentIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
+  const { wordList, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
+  // console.log('wordList', wordList, currentWordOccurances)
+  const { translate, containerRef: wordsContainer, currentIndex: playingWordIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord, setCurrentIndex } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
+
+  useEffect(() => set_practicingWordIndex(playingWordIndex), [playingWordIndex])
 
   return (
     <ErrorBoundary>
       <GoBackButton />
+      <div style={{ margin: 'auto', position: 'relative', width: 500 }}>
+        <div style={{ position: 'absolute', overflow: 'hidden', top: currentWordOccurances.length <= 1 ? '68px' : '84px', color: 'white', zIndex: '10' }}>
+          <motion.div
+            ref={wordsContainer}
+            style={{ display: 'flex', margin: '0 60px' }}
+            transition={{ type: "just", damping: 200, stiffness: 500 }}
+            animate={{ x: translate + 30 }}
+          >
+            {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item, wordIndex) => (
+              <div
+                // animate={{ }}
+                onClick={() => { setCurrentIndex(wordIndex) }}
+                style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px' }}>
+                {item.the_word}
+                <motion.div
+                  animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}
+                  style={{
+                    position: 'absolute', bottom: 0, left: 0, borderBottom: '1px solid orangered'
+                  }}
+                ></motion.div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+      <div style={{ overflow: 'hidden', width: '500px', margin: 'auto', transform: currentWordOccurances.length <= 1 && 'translateY(-50px)' }}>
         <motion.div
-          ref={wordsContainer}
-          style={{ display: 'flex', width: 500, margin: 'auto' }}
           transition={{ type: "just", damping: 200, stiffness: 500 }}
-          animate={{ x: translate }}
+          style={{ x: -(playingWordIndex * 500), width: 500, margin: 'auto', display: 'flex' }}
+        // animate={{ x: -(playingWordIndex * 500) }}
         >
-          {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item) => (
-            <div style={{ paddingLeft: 10, paddingRight: 10, flexShrink: 0, borderLeft: '1px solid orange' }}>{item.the_word}</div>
-          ))}
-          <div></div>
-        </motion.div>
-      <div style={{ overflow: 'hidden', width: '500px', margin: 'auto' }}>
-        <motion.div
-          transition={{ type: "just", damping: 200, stiffness: 500 }}
-          style={{ width: 500, margin: 'auto', display: 'flex' }}
-          animate={{ x: -(currentIndex * 500) }}
-        >
-          {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item) => {
+          {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
             return (
               <div style={{ flexShrink: 0 }}>
-                <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((item, index) => {
-                  const currentPlayingOccurance = item
+                <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
+                  const currentPlayingOccurance = occuranceItem
                   const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
 
                   return {
-                    id: item.id, renderItem: (activeOccuranceIndex) => (console.log('activeOccuranceIndex', activeOccuranceIndex),
-                      <>
-                        {
-                          (
-                            currentOccuranceTypeIsYoutube ?
-                              <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
-                              :
-                              <VideojsInited
-                                isActive={activeOccuranceIndex === index}
-                                autoPlay={false}
-                                videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
-                                startTime={currentPlayingOccurance?.startTime / 1000}
-                              />
-                          )
-                        }
-                      </>
-                    )
+                    id: occuranceItem.id, renderItem: (activeOccuranceIndex) => {
+                      // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+                      const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+
+                      return (
+                        <div style={{ width: '100%', background: 'black', height: '90vh' }}>
+                          {!hidden &&
+                            (
+                              currentOccuranceTypeIsYoutube ?
+                                <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                                :
+                                <VideojsInited
+                                  isActive={activeOccuranceIndex === occuranceIndex}
+                                  videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                                  startTime={currentPlayingOccurance?.startTime / 1000}
+                                />
+                            )
+                          }
+                        </div>
+                      )
+                    }
                   }
                 })}
                 />
