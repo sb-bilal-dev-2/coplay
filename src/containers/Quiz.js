@@ -166,11 +166,11 @@ const Quiz = () => {
   return (
     <ErrorBoundary>
       <GoBackButton />
-      <div style={{ margin: '0 auto', position: 'relative', width: 500 }}>
+      <div className="MainContainer">
         <div style={{ position: 'absolute', overflow: 'hidden', top: '84px', color: 'white', zIndex: '10' }}>
           <motion.div
             ref={wordsContainer}
-            style={{ display: 'flex', margin: '0 60px' }}
+            style={{ display: 'flex', padding: '0 60px', paddingRight: 240 }}
             transition={{ type: "just", damping: 200, stiffness: 400 }}
             animate={{ x: translate + 30 }}
           >
@@ -183,7 +183,7 @@ const Quiz = () => {
                 <motion.div
                   animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}
                   style={{
-                    position: 'absolute', bottom: 0, left: 0, borderBottom: '1px solid orangered'
+                    position: 'absolute', bottom: 0, left: 0, borderBottom: '1px solid orangered', margin: 'auto'
                   }}
                 ></motion.div>
               </div>
@@ -193,7 +193,7 @@ const Quiz = () => {
         <div style={{ overflow: 'hidden' }}>
           <motion.div
             transition={{ type: "easyIn", damping: 200, stiffness: 400 }}
-            style={{ x: -(playingWordIndex * 100) + '%', width: 500, margin: 'auto', display: 'flex', opacity: 0 }}
+            style={{ x: -(playingWordIndex * 100) + '%', margin: 'auto', display: 'flex', opacity: 0 }}
             animate={{ opacity: 1 }}
           >
             {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
@@ -209,20 +209,17 @@ const Quiz = () => {
                         const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
 
                         return (
-                          <div style={{ width: '100%', background: 'black', height: '90vh' }}>
-                            {!hidden &&
-                              (
-                                currentOccuranceTypeIsYoutube ?
-                                  <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
-                                  :
-                                  <VideojsInited
-                                    isActive={activeOccuranceIndex === occuranceIndex}
-                                    videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
-                                    startTime={currentPlayingOccurance?.startTime / 1000}
-                                  />
-                              )
-                            }
-                          </div>
+                          !hidden &&
+                          (
+                            currentOccuranceTypeIsYoutube ?
+                              <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                              :
+                              <VideojsInited
+                                isActive={activeOccuranceIndex === occuranceIndex}
+                                videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                                startTime={currentPlayingOccurance?.startTime / 1000}
+                              />
+                          )
                         )
                       }
                     }
