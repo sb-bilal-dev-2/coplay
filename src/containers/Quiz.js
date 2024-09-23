@@ -139,7 +139,7 @@ const ShortsContainer = ({ items }) => {
           height: '100%',
           overflow: 'hidden'
         }}
-        transition={{ type: "just", damping: 200, stiffness: 500 }}
+        transition={{ type: "just", damping: 200, stiffness: 400 }}
         animate={{ y: translate }}
       >
         {items.map((item) => {
@@ -166,12 +166,12 @@ const Quiz = () => {
   return (
     <ErrorBoundary>
       <GoBackButton />
-      <div style={{ margin: 'auto', position: 'relative', width: 500 }}>
-        <div style={{ position: 'absolute', overflow: 'hidden', top: currentWordOccurances.length <= 1 ? '68px' : '84px', color: 'white', zIndex: '10' }}>
+      <div style={{ margin: '0 auto', position: 'relative', width: 500 }}>
+        <div style={{ position: 'absolute', overflow: 'hidden', top: '84px', color: 'white', zIndex: '10' }}>
           <motion.div
             ref={wordsContainer}
             style={{ display: 'flex', margin: '0 60px' }}
-            transition={{ type: "just", damping: 200, stiffness: 500 }}
+            transition={{ type: "just", damping: 200, stiffness: 400 }}
             animate={{ x: translate + 30 }}
           >
             {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item, wordIndex) => (
@@ -190,50 +190,50 @@ const Quiz = () => {
             ))}
           </motion.div>
         </div>
-      </div>
-      <div style={{ overflow: 'hidden', width: '500px', margin: 'auto', transform: currentWordOccurances.length <= 1 && 'translateY(-50px)' }}>
-        <motion.div
-          transition={{ type: "just", damping: 200, stiffness: 500 }}
-          style={{ x: -(playingWordIndex * 500), width: 500, margin: 'auto', display: 'flex' }}
-        // animate={{ x: -(playingWordIndex * 500) }}
-        >
-          {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
-            return (
-              <div style={{ flexShrink: 0 }}>
-                <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
-                  const currentPlayingOccurance = occuranceItem
-                  const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
+        <div style={{ overflow: 'hidden' }}>
+          <motion.div
+            transition={{ type: "easyIn", damping: 200, stiffness: 400 }}
+            style={{ x: -(playingWordIndex * 100) + '%', width: 500, margin: 'auto', display: 'flex', opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
+              return (
+                <div style={{ flexShrink: 0 }}>
+                  <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
+                    const currentPlayingOccurance = occuranceItem
+                    const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
 
-                  return {
-                    id: occuranceItem.id, renderItem: (activeOccuranceIndex) => {
-                      // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-                      const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+                    return {
+                      id: occuranceItem.id, renderItem: (activeOccuranceIndex) => {
+                        // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+                        const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
 
-                      return (
-                        <div style={{ width: '100%', background: 'black', height: '90vh' }}>
-                          {!hidden &&
-                            (
-                              currentOccuranceTypeIsYoutube ?
-                                <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
-                                :
-                                <VideojsInited
-                                  isActive={activeOccuranceIndex === occuranceIndex}
-                                  videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
-                                  startTime={currentPlayingOccurance?.startTime / 1000}
-                                />
-                            )
-                          }
-                        </div>
-                      )
+                        return (
+                          <div style={{ width: '100%', background: 'black', height: '90vh' }}>
+                            {!hidden &&
+                              (
+                                currentOccuranceTypeIsYoutube ?
+                                  <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                                  :
+                                  <VideojsInited
+                                    isActive={activeOccuranceIndex === occuranceIndex}
+                                    videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                                    startTime={currentPlayingOccurance?.startTime / 1000}
+                                  />
+                              )
+                            }
+                          </div>
+                        )
+                      }
                     }
-                  }
-                })}
-                />
-              </div>
+                  })}
+                  />
+                </div>
 
-            )
-          })}
-        </motion.div>
+              )
+            })}
+          </motion.div>
+        </div>
       </div>
       {/* <div className="page-container bg-video text-gray-100 relative min-h-screen">
         <GoBackButton />
