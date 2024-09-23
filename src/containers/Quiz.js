@@ -158,51 +158,61 @@ const Quiz = () => {
   const { } = useTelegramWebApp()
   const { list: listName, word: paramWord } = useParams();
   const { wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
+  console.log('wordList', wordList, currentWordOccurances)
   const { translate, containerRef: wordsContainer, currentIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
 
   return (
     <ErrorBoundary>
       <GoBackButton />
-      <div style={{ overflow: 'hidden', width: '100vw' }}>
         <motion.div
           ref={wordsContainer}
-          style={{ display: 'flex', position: 'absolute' }}
+          style={{ display: 'flex', width: 500, margin: 'auto' }}
           transition={{ type: "just", damping: 200, stiffness: 500 }}
           animate={{ x: translate }}
         >
-          {wordList.map((item) => (
+          {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item) => (
             <div style={{ paddingLeft: 10, paddingRight: 10, flexShrink: 0, borderLeft: '1px solid gray' }}>{item.the_word}</div>
           ))}
+          <div></div>
         </motion.div>
+      <div style={{ overflow: 'hidden', width: '500px', margin: 'auto' }}>
         <motion.div
           transition={{ type: "just", damping: 200, stiffness: 500 }}
-          animate={{ x: translate }}
+          style={{ width: 500, margin: 'auto', display: 'flex' }}
+          animate={{ x: -(currentIndex * 500) }}
         >
-          <ShortsContainer items={currentWordOccurances.map((item, index) => {
-            const currentPlayingOccurance = item
-            const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
+          {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item) => {
+            return (
+              <div style={{ flexShrink: 0 }}>
+                <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((item, index) => {
+                  const currentPlayingOccurance = item
+                  const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
 
-            return {
-              id: item.id, renderItem: (activeOccuranceIndex) => (console.log('activeOccuranceIndex', activeOccuranceIndex),
-                <>
-                  {
-                    !!currentAvailableOccurancesLength && (
-                      currentOccuranceTypeIsYoutube ?
-                        <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
-                        :
-                        <VideojsInited
-                          isActive={activeOccuranceIndex === index}
-                          autoPlay={false}
-                          videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
-                          startTime={currentPlayingOccurance?.startTime / 1000}
-                        />
+                  return {
+                    id: item.id, renderItem: (activeOccuranceIndex) => (console.log('activeOccuranceIndex', activeOccuranceIndex),
+                      <>
+                        {
+                          (
+                            currentOccuranceTypeIsYoutube ?
+                              <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                              :
+                              <VideojsInited
+                                isActive={activeOccuranceIndex === index}
+                                autoPlay={false}
+                                videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                                startTime={currentPlayingOccurance?.startTime / 1000}
+                              />
+                          )
+                        }
+                      </>
                     )
                   }
-                </>
-              )
-            }
+                })}
+                />
+              </div>
+
+            )
           })}
-          />
         </motion.div>
       </div>
       {/* <div className="page-container bg-video text-gray-100 relative min-h-screen">
@@ -266,11 +276,15 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const getWordInfos = async () => {
     // const wordList = await requestWordCollectionWords(listName)
     const getWordsList = WORDS_FETCH_FUNCTION_BY_LISTTYPE[listType] || WORDS_FETCH_FUNCTION_BY_LISTTYPE['wordCollection']
-    const wordList = await getWordsList(listName)
-    const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
-    set_wordList(wordList)
-    set_wordOccurancesMap(new_wordOccurancesMap)
-    set_wordInfos(new_wordInfosMap)
+    try {
+      const wordList = await getWordsList(listName)
+      const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
+      set_wordList(wordList)
+      set_wordOccurancesMap(new_wordOccurancesMap)
+      set_wordInfos(new_wordInfosMap)
+    } catch (err) {
+
+    }
   }
 
   useEffect(() => {
