@@ -274,7 +274,7 @@ const useCustomScroll = (options = {}) => {
   // console.log('scrollDeltaAdapted_', scrollDeltaAdapted_)
   const translate = (delta.current + scrollDeltaAdapted_) - (isHorizontal ? translateX : translateY)
   return {
-    translate, containerRef, currentIndex, scrollToNext, scrollToPrevious, setCurrentIndex,
+    translate, containerRef, currentIndex, scrollToNext, scrollToPrevious, scrollTo,
     delta: delta.current + scrollDeltaAdapted_, scrollDelta: scrollDelta.current, translateX, translateY, lastDeltaX, lastDeltaY, transformTranslate };
 };
 

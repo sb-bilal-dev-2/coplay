@@ -13,7 +13,7 @@ import { usePremiumStatus } from "../../helper/usePremiumStatus";
 import DashVideoPlayer from "../../components/DashVideoPlayer";
 import YoutubePlayer from "../../components/YoutubePlayer";
 import VideojsInited from "../../components/VideojsInited";
-import { GoBackButton, ShortsColumns, WordCarousel, WordsScroll, useWordColletionWordInfos } from "../Quiz";
+import { GoBackButton, ShortVideo, ShortsColumns, WordCarousel, WordsScroll, useWordColletionWordInfos } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
 
 const MoviePage = () => {
@@ -22,14 +22,23 @@ const MoviePage = () => {
   const isPremium = usePremiumStatus();
   // const { list: listName, word: paramWord } = useParams();
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
-  // console.log('wordList', wordList, currentWordOccurances)
+  console.log('wordList', wordList, currentWordOccurances)
+  const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
 
   return (
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
         <WordsScroll wordList={wordList} set_practicingWordIndex={set_practicingWordIndex} />
-        <ShortsColumns playingWordIndex={playingWordIndex} wordList={wordList} currentWordOccurances={currentWordOccurances} />
+        <ShortsColumns
+          forceRenderFirstItem={(activeIndex) => (
+            <div className="VideoContainer">
+              <ShortVideo onTimeUpdate={(currentTime) => {}} mediaTitle={title} startTime={(currentWordStartTime || 0) / 1000} isActive={activeIndex === 0} />
+            </div>
+          )}
+          wordsIndex={playingWordIndex}
+          wordList={wordList}
+          currentWordOccurances={currentWordOccurances.filter((item) => item?.mediaTitle !== title && item?.startTime !== currentWordStartTime)} />
       </div>
     </ErrorBoundary>
   );
