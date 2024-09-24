@@ -43,6 +43,8 @@
     margin: 0 auto;
     position: relative;
     width: 500px;
+    overflow: hidden;
+
     @media (max-width: 600px) {
         width: 100vw;
     }

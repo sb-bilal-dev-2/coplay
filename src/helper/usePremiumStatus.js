@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import useAuthentication from "../containers/Authentication.util";
 
-export const usePremiumStatus = (premiumExpireDate) => {
+export const usePremiumStatus = () => {
   const [isExpired, setIsExpired] = useState(false);
+  const { user: premiumExpireDate } = useAuthentication();
 
   const checkPremiumExpired = () => {
     const currentDate = Date.now();

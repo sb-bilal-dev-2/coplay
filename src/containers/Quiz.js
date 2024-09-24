@@ -41,89 +41,6 @@ export const GoBackButton = () => {
   )
 }
 
-export const WordCarousel = ({ list, activeIndex, currentWordInfo, onLeftClick, onRightClick }) => {
-  const [isShowingDefinitions, set_isShowingDefinitions] = useState();
-  return (
-    <div className="overflow relative py-2">
-      <div
-        className="transition-transform duration-300 ease-in-out flex"
-        style={{ transform: `translateX(calc(-${activeIndex * 80}% + 10%))` }}
-      >
-        {list?.map((keyword, index) => {
-          return (
-            <div
-              key={keyword?.the_word}
-              style={{ minHeight: '130px', flexShrink: 0, width: '80%', transform: `${activeIndex === index ? 'scale(1.15)' : ''}` }}
-              className="headline-1 cursor-pointer p-4 paper text-yellowishorange flex flex-col justify-around items-center"
-              onClick={() => set_isShowingDefinitions(!isShowingDefinitions)}
-            >
-              {!isShowingDefinitions ?
-                <>
-                  <h1>
-                    {keyword?.the_word || typeof keyword === 'string' && keyword}
-                  </h1>
-                  <code className="block text-center" >{currentWordInfo?.pronounciation || keyword?.romanized}</code>
-                </>
-                :
-                <>
-                  {/* <h4>
-                    {keyword?.meaning}
-                  </h4> */}
-                  <h4>
-                    {currentWordInfo?.shortDefinition || keyword?.meaning}
-                  </h4>
-                </>
-              }
-            </div>
-          )
-        })
-        }
-      </div>
-      {!!list?.length && activeIndex > 0 &&
-        <i
-          onClick={onLeftClick}
-          className="fa-solid fa-chevron-left absolute p-2 py-11 left-0 top-1/2 transform -translate-y-1/2 text-gray" j
-        />
-      }
-      {!!list?.length && activeIndex < list.length - 1 &&
-        <i
-          onClick={onRightClick}
-          className="fa-solid fa-chevron-right absolute p-2 py-11 right-0 top-1/2 transform -translate-y-1/2 text-gray"
-        />
-      }
-    </div>
-  )
-}
-
-export const OccuranceButtons = ({ playingOccuranceIndex, currentAvailableOccurancesLength, set_playingOccuranceIndex }) => {
-  const prevOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex <= 0;
-  const nextOccButtonDisabled = !currentAvailableOccurancesLength || playingOccuranceIndex >= currentAvailableOccurancesLength - 1;
-
-
-  return (
-    <div className="py-12">
-      <h4>
-        <i
-          className={`fa-solid fa-backward-step p-2 ${!!prevOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
-          onClick={() => !prevOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex - 1)}>
-        </i>
-        <span className="select-none">
-          {playingOccuranceIndex + 1}/{currentAvailableOccurancesLength}
-
-        </span>
-        <i
-          className={`fa-solid fa-forward-step p-2 ${!!nextOccButtonDisabled ? 'opacity-50' : 'cursor-pointer'}`}
-          onClick={() => !nextOccButtonDisabled && set_playingOccuranceIndex(playingOccuranceIndex + 1)}>
-        </i>
-        <span>
-          {/* <br /> */}
-        </span>
-      </h4>
-    </div>
-
-  )
-}
-
 const ShortsContainer = ({ items }) => {
   const { translate, containerRef, currentIndex, scrollToNext, scrollToPrevious } = useCustomScroll()
 
@@ -154,113 +71,95 @@ const ShortsContainer = ({ items }) => {
   )
 }
 
-const Quiz = () => {
-  const { } = useTelegramWebApp()
-  const { list: listName, word: paramWord } = useParams();
-  const { wordList, set_practicingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
-  // console.log('wordList', wordList, currentWordOccurances)
+export const ShortsColumns = ({ playingWordIndex, wordList, currentWordOccurances }) => {
+  return (
+    <motion.div
+      transition={{ type: "easyIn", damping: 200, stiffness: 400 }}
+      style={{ x: -(playingWordIndex * 100) + '%', margin: 'auto', display: 'flex', opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
+        return (
+          <div style={{ flexShrink: 0 }}>
+            <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
+              const currentPlayingOccurance = occuranceItem
+              const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
+
+              return {
+                id: occuranceItem.id, renderItem: (activeOccuranceIndex) => {
+                  // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+                  const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+
+                  return (
+                    !hidden &&
+                    (
+                      currentOccuranceTypeIsYoutube ?
+                        <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
+                        :
+                        <VideojsInited
+                          isActive={activeOccuranceIndex === occuranceIndex}
+                          videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
+                          startTime={currentPlayingOccurance?.startTime / 1000}
+                        />
+                    )
+                  )
+                }
+              }
+            })}
+            />
+          </div>
+
+        )
+      })}
+    </motion.div>
+  )
+}
+
+export const WordsScroll = ({ wordList, set_practicingWordIndex }) => {
   const { translate, containerRef: wordsContainer, currentIndex: playingWordIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord, setCurrentIndex } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
 
   useEffect(() => set_practicingWordIndex(playingWordIndex), [playingWordIndex])
 
   return (
+    <div style={{ position: 'absolute', overflow: 'hidden', top: '84px', color: 'white', zIndex: '10' }}>
+      <motion.div
+        ref={wordsContainer}
+        style={{ display: 'flex', padding: '0 60px', paddingRight: 240 }}
+        transition={{ type: "just", damping: 200, stiffness: 400 }}
+        animate={{ x: translate + 60 }}
+      >
+        {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item, wordIndex) => (
+          <div
+            // animate={{ }}
+            onClick={() => { setCurrentIndex(wordIndex) }}
+            style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px' }}>
+            {item.the_word}
+            <motion.div
+              animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}
+              style={{
+                position: 'absolute', bottom: 0, left: 0, borderBottom: '1px solid orangered', margin: 'auto'
+              }}
+            ></motion.div>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
+const Quiz = () => {
+  const { } = useTelegramWebApp()
+  const { list: listName, word: paramWord } = useParams();
+  const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
+  // console.log('wordList', wordList, currentWordOccurances)
+
+  return (
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <div style={{ position: 'absolute', overflow: 'hidden', top: '84px', color: 'white', zIndex: '10' }}>
-          <motion.div
-            ref={wordsContainer}
-            style={{ display: 'flex', padding: '0 60px', paddingRight: 240 }}
-            transition={{ type: "just", damping: 200, stiffness: 400 }}
-            animate={{ x: translate + 30 }}
-          >
-            {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item, wordIndex) => (
-              <div
-                // animate={{ }}
-                onClick={() => { setCurrentIndex(wordIndex) }}
-                style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px' }}>
-                {item.the_word}
-                <motion.div
-                  animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}
-                  style={{
-                    position: 'absolute', bottom: 0, left: 0, borderBottom: '1px solid orangered', margin: 'auto'
-                  }}
-                ></motion.div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-        <div style={{ overflow: 'hidden' }}>
-          <motion.div
-            transition={{ type: "easyIn", damping: 200, stiffness: 400 }}
-            style={{ x: -(playingWordIndex * 100) + '%', margin: 'auto', display: 'flex', opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
-              return (
-                <div style={{ flexShrink: 0 }}>
-                  <ShortsContainer items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
-                    const currentPlayingOccurance = occuranceItem
-                    const currentOccuranceTypeIsYoutube = currentPlayingOccurance?.mediaSrc?.includes('youtube.com')
-
-                    return {
-                      id: occuranceItem.id, renderItem: (activeOccuranceIndex) => {
-                        // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-                        const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-
-                        return (
-                          !hidden &&
-                          (
-                            currentOccuranceTypeIsYoutube ?
-                              <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
-                              :
-                              <VideojsInited
-                                isActive={activeOccuranceIndex === occuranceIndex}
-                                videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
-                                startTime={currentPlayingOccurance?.startTime / 1000}
-                              />
-                          )
-                        )
-                      }
-                    }
-                  })}
-                  />
-                </div>
-
-              )
-            })}
-          </motion.div>
-        </div>
+        <WordsScroll wordList={wordList} set_practicingWordIndex={set_practicingWordIndex} />
+        <ShortsColumns playingWordIndex={playingWordIndex} wordList={wordList} currentWordOccurances={currentWordOccurances} />
       </div>
-      {/* <div className="page-container bg-video text-gray-100 relative min-h-screen">
-        <GoBackButton />
-        <div className="VideoContainer">
-          {
-            !!currentAvailableOccurancesLength && (
-              currentOccuranceTypeIsYoutube ?
-                <YoutubePlayer videoIdOrUrl={currentPlayingOccurance?.mediaSrc} />
-                :
-                <VideojsInited
-                  // autoPlay={playingOccuranceIndex !== 0}
-                  videoSrc={`${BASE_SERVER_URL}/movie?name=${currentPlayingOccurance?.mediaTitle}`}
-                  startTime={currentPlayingOccurance?.startTime / 1000}
-                />
-            )
-          }
-        </div>
-        <WordCarousel
-          list={wordList}
-          activeIndex={practicingWordIndex}
-          currentWordInfo={currentWordInfo}
-          onLeftClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(practicingWordIndex - 1))}
-          onRightClick={() => (set_playingOccuranceIndex(0), set_practicingWordIndex(practicingWordIndex + 1))}
-        />
-        <OccuranceButtons
-          playingOccuranceIndex={playingOccuranceIndex}
-          currentAvailableOccurancesLength={currentAvailableOccurancesLength}
-          set_playingOccuranceIndex={set_playingOccuranceIndex}
-        />
-      </div> */}
     </ErrorBoundary>
   );
 };
