@@ -24,6 +24,24 @@ const MoviePage = () => {
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
   console.log('wordList', wordList, currentWordOccurances)
   const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
+  // const [forcedWordIndex, set_forcedWordIndex] = useState(0)
+  const [currentTime, set_currentTime] = useState(0)
+  const handleTimeUpdate = useCallback((new_currentTime) => {
+    console.log('wordList.length', wordList.length)
+    set_currentTime(new_currentTime)
+  }, [wordList])
+
+  useEffect(() => {
+    for (let ii = 0; ii < wordList.length; ii++) {
+      const item = wordList[ii];
+      console.log('currentTime', currentTime)
+      if (item.startTime > currentTime * 1000) {
+        console.log('forcingIndex', ii, currentTime)
+        // set_forcedWordIndex(ii - 1)
+        return
+      }
+    }
+  }, [currentTime])
 
   return (
     <ErrorBoundary>
@@ -33,7 +51,11 @@ const MoviePage = () => {
         <ShortsColumns
           forceRenderFirstItem={(activeIndex) => (
             <div className="VideoContainer">
-              <ShortVideo onTimeUpdate={(currentTime) => {}} mediaTitle={title} startTime={(currentWordStartTime || 0) / 1000} isActive={activeIndex === 0} />
+              <ShortVideo
+                onTimeUpdate={handleTimeUpdate}
+                mediaTitle={title}
+                startTime={(currentWordStartTime || 0) / 1000}
+                isActive={activeIndex === 0} />
             </div>
           )}
           wordsIndex={playingWordIndex}

@@ -139,11 +139,19 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
   )
 }
 
-export const WordsScroll = ({ wordList, set_practicingWordIndex }) => {
+export const WordsScroll = ({ wordList, set_practicingWordIndex, forcedIndex }) => {
   const { translate, containerRef: wordsContainer, currentIndex: playingWordIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord, scrollTo } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
 
-  useEffect(() => set_practicingWordIndex(playingWordIndex), [playingWordIndex])
-
+  useEffect(() => {
+    if (forcedIndex !== playingWordIndex) {
+      set_practicingWordIndex(playingWordIndex)
+    }
+  }, [playingWordIndex])
+  useEffect(() => {
+    if (forcedIndex !== undefined && forcedIndex !== playingWordIndex) {
+      scrollTo(forcedIndex)
+    }
+  }, [forcedIndex])
   return (
     <div style={{ position: 'absolute', overflow: 'hidden', top: '84px', color: 'white', zIndex: '10' }}>
       <motion.div
