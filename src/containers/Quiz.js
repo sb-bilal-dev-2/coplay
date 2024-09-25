@@ -59,7 +59,7 @@ const ShortsContainer = ({ items, forceRenderFirstItem, wordsIndex }) => {
         transition={{ type: "just", damping: 200, stiffness: 400 }}
         animate={{ y: translate }}
       >
-        {forceRenderFirstItem(currentIndex)}
+        {forceRenderFirstItem && forceRenderFirstItem(currentIndex)}
         {items.map((item) => {
           return (
             <div className="VideoContainer" key={item?.id}>
@@ -88,7 +88,6 @@ export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) =>
   } else {
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
-  console.log('startTime 1', startTime)
   return (
     isYoutubeVideo ?
       <YoutubePlayer
@@ -164,7 +163,7 @@ export const WordsScroll = ({ wordList, set_practicingWordIndex, forcedIndex }) 
           <div
             // animate={{ }}
             onClick={() => { scrollTo(wordIndex) }}
-            style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px' }}>
+            style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px', borderBottom: wordIndex !== playingWordIndex ? '1px solid gray' : '' }}>
             {item.the_word}
             <motion.div
               animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}

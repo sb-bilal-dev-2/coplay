@@ -22,32 +22,15 @@ const MoviePage = () => {
   const isPremium = usePremiumStatus();
   // const { list: listName, word: paramWord } = useParams();
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
-  console.log('wordList', wordList, currentWordOccurances)
-  const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
-  // const [forcedWordIndex, set_forcedWordIndex] = useState(0)
-  const [currentTime, set_currentTime] = useState(0)
-  const handleTimeUpdate = useCallback((new_currentTime) => {
-    console.log('wordList.length', wordList.length)
-    set_currentTime(new_currentTime)
-  }, [wordList])
 
-  useEffect(() => {
-    for (let ii = 0; ii < wordList.length; ii++) {
-      const item = wordList[ii];
-      console.log('currentTime', currentTime)
-      if (item.startTime > currentTime * 1000) {
-        console.log('forcingIndex', ii, currentTime)
-        // set_forcedWordIndex(ii - 1)
-        return
-      }
-    }
-  }, [currentTime])
+  const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
+  const { forcedWordIndex, handleTimeUpdate } = useHandleTimeUpdate(wordList)
 
   return (
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} set_practicingWordIndex={set_practicingWordIndex} />
+        <WordsScroll wordList={wordList} set_practicingWordIndex={set_practicingWordIndex} forcedIndex={forcedWordIndex} />
         <ShortsColumns
           forceRenderFirstItem={(activeIndex) => (
             <div className="VideoContainer">
@@ -88,6 +71,28 @@ function useMovieInfo(title) {
   }, [title]);
 
   return currentVideoInfo
+}
+
+function useHandleTimeUpdate(list) {
+    const [forcedWordIndex, set_forcedWordIndex] = useState(0)
+    const [currentTime, set_currentTime] = useState(0)
+    const handleTimeUpdate = useCallback((new_currentTime) => {
+      set_currentTime(new_currentTime)
+    }, [list])
+  
+    useEffect(() => {
+      for (let ii = 0; ii < list.length; ii++) {
+        const item = list[ii];
+        console.log('currentTime', currentTime)
+        if (item.startTime > currentTime * 1000) {
+          console.log('forcingIndex', ii, currentTime)
+          set_forcedWordIndex(ii - 1)
+          return
+        }
+      }
+    }, [currentTime, list])
+  
+    return { handleTimeUpdate, currentTime, forcedWordIndex }
 }
 
 export default MoviePage;
