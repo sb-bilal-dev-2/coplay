@@ -73,13 +73,14 @@
   transform: translateY(-50%);
   color: #fff;
   border: none;
-  width: 24px;
+  width: 40px;
   height: calc(100% - 32px);
   cursor: pointer;
   font-size: 18px;
   z-index: 100;
   opacity: 0.3;
   font-weight: bolder;
+  user-select: none;
 }
 
 .scroll-button:hover {

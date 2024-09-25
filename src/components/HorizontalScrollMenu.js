@@ -9,28 +9,37 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
   const [hasScrolledEnd, setHasScrolledEnd] = useState(false);
   const [hasScrolledStart, setHasScrolledStart] = useState(false);
   const handleScrolled = createDebouncedFunction(() => {
-    console.log(
-      scrollRef?.current?.offsetWidth,
-      scrollRef?.current?.scrollLeft,
-      scrollRef?.current?.scrollWidth
-    );
+    // console.log(
+    //   scrollRef?.current?.offsetWidth,
+    //   scrollRef?.current?.scrollLeft,
+    //   scrollRef?.current?.scrollWidth
+    // );
     const newHasScrolledEnd =
       Math.ceil(
         scrollRef?.current?.offsetWidth + scrollRef?.current?.scrollLeft
-      ) === scrollRef?.current?.scrollWidth;
+      ) >= scrollRef?.current?.scrollWidth;
     setHasScrolledEnd(newHasScrolledEnd);
-    setHasScrolledStart(!scrollRef?.current?.scrollLeft);
+    setHasScrolledStart(!scrollRef?.current?.scrollLeft || scrollRef?.current?.scrollLeft < 0);
   }, 50);
   useEffect(() => {
     handleScrolled();
   }, []);
-  const handleScrollClick = createDebouncedFunction((directionRight) => {
+  const handleScrollClick = createDebouncedFunction(async (directionRight) => {
     if (scrollRef.current) {
       let left = scrollRef?.current?.offsetWidth - 80;
       if (!directionRight) {
         left = -left;
       }
-      scrollRef.current.scrollBy({
+      const currentPosition = scrollRef?.current?.scrollLeft
+      const nextPos = currentPosition + left
+      if (nextPos < 0) {
+        left = -currentPosition;
+      } 
+      const containerWidth = scrollRef?.current?.scrollWidth - scrollRef?.current?.offsetWidth
+      if (nextPos > containerWidth) {
+        left = containerWidth - currentPosition;
+      }
+      await scrollRef.current.scrollBy({
         left,
         behavior: "smooth",
       });
