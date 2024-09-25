@@ -163,7 +163,7 @@ export const WordsScroll = ({ wordList, set_practicingWordIndex, forcedIndex }) 
           <div
             // animate={{ }}
             onClick={() => { scrollTo(wordIndex) }}
-            style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px', borderBottom: wordIndex !== playingWordIndex ? '1px solid gray' : '' }}>
+            style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px', borderBottom: wordIndex !== playingWordIndex ? '1px solid #8080809e' : '' }}>
             {item.the_word}
             <motion.div
               animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}

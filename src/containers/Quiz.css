@@ -22,11 +22,11 @@
 }
 
 .video-js .vjs-fullscreen-control, .video-js .vjs-progress-control, .video-js .vjs-volume-panel, .video-js .vjs-play-control {
-    color: rgba(255, 0, 0, 0.95);
+    color: rgba(255, 60, 0, 0.95);
 }
 
 .video-js .vjs-play-progress {
-    background-color: rgba(255, 0, 0, 0.95);
+    background-color: rgba(255, 60, 0, 0.95);
 }
 
 .vjs-error .vjs-error-display .vjs-modal-dialog-content {
