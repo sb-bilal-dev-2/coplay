@@ -3,6 +3,8 @@ import "./HorizontalScrollMenu.css";
 import { createDebouncedFunction } from "../debounce";
 import { Link } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
+import VideojsInited from "./VideojsInited";
+import { ShortVideo } from "../containers/Quiz";
 
 const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
   const scrollRef = useRef(null);
@@ -17,9 +19,9 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
     const newHasScrolledEnd =
       Math.ceil(
         scrollRef?.current?.offsetWidth + scrollRef?.current?.scrollLeft
-      ) >= scrollRef?.current?.scrollWidth;
+      ) >= scrollRef?.current?.scrollWidth - 200;
     setHasScrolledEnd(newHasScrolledEnd);
-    setHasScrolledStart(!scrollRef?.current?.scrollLeft || scrollRef?.current?.scrollLeft < 0);
+    setHasScrolledStart(!scrollRef?.current?.scrollLeft || scrollRef?.current?.scrollLeft < 200);
   }, 50);
   useEffect(() => {
     handleScrolled();
@@ -34,7 +36,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
       const nextPos = currentPosition + left
       if (nextPos < 0) {
         left = -currentPosition;
-      } 
+      }
       const containerWidth = scrollRef?.current?.scrollWidth - scrollRef?.current?.offsetWidth
       if (nextPos > containerWidth) {
         left = containerWidth - currentPosition;
@@ -45,6 +47,9 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
       });
     }
   }, 50);
+
+  const [hoveringItemId, setHoveringItemId] = useState()
+
   return (
     <div className="horizontal-scroll-menu">
       {!hasScrolledStart && (
@@ -60,24 +65,32 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
         </button>
       )}
       <ul className="menu-list" ref={scrollRef} onScroll={handleScrolled}>
-        {items?.map(({ _id, label, title, posterUrl, poster, isPremium }) => (
-          <Link
-            className={`list-card ${verticalCard ? "verticalCard" : ""}`}
-            to={[baseRoute, title].join("/")}
-            style={{
-              backgroundImage: `url('${
-                posterUrl ||
-                poster ||
-                `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
-              }')` + `, url('${
-                posterUrl ||
-                poster ||
-                `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
-              }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
-            }}
-          >
-            {/* TODO: Refactor if project needs premium */}
-            {/* {isPremium ? (
+        {items?.map(({ _id, label, title, posterUrl, poster, isPremium }) =>  (
+          <li>
+            <Link
+              onMouseEnter={() => setHoveringItemId(_id)}
+              onMouseLeave={() => setHoveringItemId('')}
+              className={`list-card ${verticalCard ? "verticalCard" : ""}`}
+              to={[baseRoute, title].join("/")}
+              style={{
+                backgroundImage: `url('${posterUrl ||
+                  poster ||
+                  `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
+                  }')` + `, url('${posterUrl ||
+                  poster ||
+                  `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
+                  }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
+              }}
+            >
+              {hoveringItemId === _id &&
+                <ShortVideo
+                  isActive={hoveringItemId === _id}
+                  mediaTitle={title}
+                  startTime={100}
+                />
+              }
+              {/* TODO: Refactor if project needs premium */}
+              {/* {isPremium ? (
               <span
                 className="font-bold  bg-white rounded-full text-center text-sm relative mb-0.5 float-right"
                 style={{ width: "30px", height: "30px", lineHeight: "2" }}
@@ -86,8 +99,9 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
               </span>
             ) : null} */}
 
-            <div className="list-card__title">{label || title}</div>
-          </Link>
+              <div className="list-card__title">{label || title}</div>
+            </Link>
+          </li>
         ))}
       </ul>
       {!hasScrolledEnd && items?.length !== 1 && (

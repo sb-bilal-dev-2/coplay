@@ -37,6 +37,10 @@
     display: none;
 }
 
+.video-js .vjs-modal-dialog {
+    overflow: hidden;
+}
+
 /***/
 
 .MainContainer {
