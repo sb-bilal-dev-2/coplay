@@ -43,7 +43,7 @@ const Authentication = () => {
         telegramLogin(userId, telegramChatId, () => navigate("/"));
       }
 
-      if(username) {
+      if (username) {
         telegramAuth(username, telegramChatId, () => navigate("/"));
       }
     }
@@ -86,18 +86,17 @@ const Authentication = () => {
   };
 
   const renderSignUpForm = () => (
-    <div className="flex flex-col items-center">
-      <form className="flex flex-col items-center" onSubmit={handleSignUp}>
+    <div className="form-container flex flex-col items-center">
+      <form className="flex flex-col items-center m-auto" onSubmit={handleSignUp}>
         {/* <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "username") && 'input-error'} input mb-2`} placeholder="Username" type="text" name="username" value={formData.username || ''} onChange={handleInputChange} />
       </label> */}
         <label>
           <input
-            className={`${
-              Array.isArray(error) &&
+            className={`${Array.isArray(error) &&
               !!error.find((err) => err.name === "email") &&
               "input-error"
-            } input mb-2`}
+              } input mb-2`}
             placeholder="Email"
             type="email"
             name="email"
@@ -107,11 +106,10 @@ const Authentication = () => {
         </label>
         <label>
           <input
-            className={`${
-              Array.isArray(error) &&
+            className={`${Array.isArray(error) &&
               !!error.find((err) => err.name === "password") &&
               "input-error"
-            } input mb-2`}
+              } input mb-2`}
             placeholder="Password"
             type="password"
             name="password"
@@ -121,11 +119,10 @@ const Authentication = () => {
         </label>
         <label>
           <input
-            className={`${
-              Array.isArray(error) &&
+            className={`${Array.isArray(error) &&
               !!error.find((err) => err.name === "passwordRepeat") &&
               "input-error"
-            } input mb-2`}
+              } input mb-2`}
             placeholder="Repeat Password"
             type="password"
             name="passwordRepeat"
@@ -133,7 +130,7 @@ const Authentication = () => {
             onChange={handleInputChange}
           />
         </label>
-        <p className="mt-2">
+        <p className="my-2">
           Already have an account? <Link to="/auth/login">Login</Link>
         </p>
         <SecondaryButton
@@ -144,22 +141,21 @@ const Authentication = () => {
         />
       </form>
       <GoogleAuth />
-      <TelegramAuth/>
+      <TelegramAuth />
     </div>
   );
 
   const renderConfirmSignUpForm = () => (
-    <form className="flex flex-col items-center" onSubmit={handleConfirmSignUp}>
+    <form className="form-container flex flex-col items-center" onSubmit={handleConfirmSignUp}>
       {/* <label>
         <input className={`${Array.isArray(error) && !!error.find((err) => err.name === "email") && 'input-error'} input mb-2`} placeholder="Email" type="email" name="email" value={formData.email || ''} onChange={handleInputChange} />
       </label> */}
       <label>
         <input
-          className={`${
-            Array.isArray(error) &&
+          className={`${Array.isArray(error) &&
             !!error.find((err) => err.name === "code") &&
             "input-error"
-          } input mb-2`}
+            } input mb-2`}
           placeholder="Verification Code"
           type="text"
           name="code"
@@ -167,7 +163,7 @@ const Authentication = () => {
           onChange={handleInputChange}
         />
       </label>
-      <button type="submit" disabled={isLoading} onClick={resendCode}>
+      <button className="inversed__button" type="submit" disabled={isLoading} onClick={resendCode}>
         Resend code
       </button>
       <SecondaryButton
@@ -180,18 +176,17 @@ const Authentication = () => {
   );
 
   const renderLoginForm = () => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center form-container">
       <form className="flex flex-col items-center" onSubmit={handleLogin}>
-        <p className="mt-2 text-center text-white">
+        <p className="my-2 text-center">
           Don't have an account? <Link to="/auth/signup">Sign up</Link>
         </p>
         <label>
           <input
-            className={`${
-              Array.isArray(error) &&
+            className={`${Array.isArray(error) &&
               !!error.find((err) => err.name === "email") &&
               "input-error"
-            } input mb-2`}
+              } input mb-2`}
             placeholder="Username or Email"
             type="text"
             name="email"
@@ -201,11 +196,10 @@ const Authentication = () => {
         </label>
         <label>
           <input
-            className={`${
-              Array.isArray(error) &&
+            className={`${Array.isArray(error) &&
               !!error.find((err) => err.name === "password") &&
               "input-error"
-            } input mb-2`}
+              } input mb-2`}
             placeholder="Password"
             type="password"
             name="password"
@@ -213,7 +207,7 @@ const Authentication = () => {
             onChange={handleInputChange}
           />
         </label>
-        <p className="mt-2 text-center text-white">
+        <p className="my-2 text-center text-white">
           Forgot the password? <Link to="/auth/forgot">Reset</Link>
         </p>
         <SecondaryButton
@@ -229,44 +223,53 @@ const Authentication = () => {
   );
 
   const renderForgotPasswordForm = () => (
-    <form
-      className="flex flex-col items-center"
-      onSubmit={handleForgotPassword}
-    >
-      <label>
-        <input
-          className={`${
-            Array.isArray(error) &&
-            !!error.find((err) => err.name === "email") &&
-            "input-error"
-          } input mb-2`}
-          placeholder="Email or Username"
-          type="text"
-          name="email"
-          value={formData.email || ""}
-          onChange={handleInputChange}
-        />
-      </label>
-      <div>
-        <button type="submit" disabled={isLoading}>
+    <div className="form-container">
+      <form
+        className="flex flex-col items-center"
+        onSubmit={handleForgotPassword}
+      >
+        <label>
+          <input
+            className={`${Array.isArray(error) &&
+              !!error.find((err) => err.name === "email") &&
+              "input-error"
+              } input mb-2`}
+            placeholder="Email or Username"
+            type="text"
+            name="email"
+            value={formData.email || ""}
+            onChange={handleInputChange}
+          />
+        </label>
+        {/* <div> */}
+        <button className="inversed__button" disabled={isLoading}>
           Send a code
         </button>
-        <button onClick={() => navigate(`/auth/reset?login=${formData.email}`)}>
-          Enter the code
+        <SecondaryButton
+          wShrink
+          onClick={() => navigate(`/auth/reset?login=${formData.email}`)}
+          title="Enter the code"
+          type="submit"
+          disabled={isLoading}
+          button
+        />
+        <button >
+
         </button>
-      </div>
-    </form>
+        {/* </div> */}
+      </form>
+    </div>
+
   );
 
   const renderResetPasswordForm = () => (
-    <form className="flex flex-col items-center" onSubmit={handleResetPassword}>
+    <form className="flex flex-col items-center form-container" onSubmit={handleResetPassword}>
       <label>
         <input
-          className={`${
-            Array.isArray(error) &&
+          className={`${Array.isArray(error) &&
             !!error.find((err) => err.name === "email") &&
             "input-error"
-          } input mb-2`}
+            } input mb-2`}
           placeholder="Email or Username"
           type="text"
           name="email"
@@ -276,11 +279,10 @@ const Authentication = () => {
       </label>
       <label>
         <input
-          className={`${
-            Array.isArray(error) &&
+          className={`${Array.isArray(error) &&
             !!error.find((err) => err.name === "code") &&
             "input-error"
-          } input mb-2`}
+            } input mb-2`}
           placeholder="Verification Code"
           type="text"
           name="code"
@@ -290,11 +292,10 @@ const Authentication = () => {
       </label>
       <label>
         <input
-          className={`${
-            Array.isArray(error) &&
+          className={`${Array.isArray(error) &&
             !!error.find((err) => err.name === "password") &&
             "input-error"
-          } input mb-2`}
+            } input mb-2`}
           placeholder="New Password"
           type="password"
           name="password"
@@ -304,11 +305,10 @@ const Authentication = () => {
       </label>
       <label>
         <input
-          className={`${
-            Array.isArray(error) &&
+          className={`${Array.isArray(error) &&
             !!error.find((err) => err.name === "passwordRepeat") &&
             "input-error"
-          } input mb-2`}
+            } input mb-2`}
           placeholder="New Password"
           type="password"
           name="passwordRepeat"
@@ -322,17 +322,17 @@ const Authentication = () => {
     </form>
   );
   const renderMainAuth = () => (
-    <div className="Authentication-co section bg-secondary min-h-screen">
+    <div className="Authentication-co color-primary section bg-primary min-h-screen">
       <div className="section-container pt-20">
         {Array.isArray(error) ? (
           error.map((err) => (
-            <p key={err.name} className="text-center text-red-500">
-              <b>{err.message}</b>
+            <p key={err.name} className="my-2 text-center text-red-500">
+              {err.message}
             </p>
           ))
         ) : (
-          <p className="text-center text-red-500">
-            <b>{(error && error.message) || error}</b>
+          <p className="my-2 text-center text-red-500">
+            {(error && error.message) || error}
           </p>
         )}
         {screen === "signup" && renderSignUpForm()}

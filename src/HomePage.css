@@ -1,10 +1,19 @@
 
 .home-page {
+    padding-top: 64px;
     color: #222;
+    background-color: #fff6ff;
 
     h1 {
         text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
     }
+}
+
+.home-page__title {
+    font-size: 24px;
+    text-align: left;
+    padding-left: 40px;
+    color: rgba(255, 60, 0, 0.95) !important;
 }
 
 .home-page .section h2 {

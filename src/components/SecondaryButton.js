@@ -7,7 +7,7 @@ export default function SecondaryButton({ title, path, button, isLoading, type }
       <button
         type={type}
         disabled={isLoading}
-        class="relative px-10 py-3 font-medium text-white transition duration-300 bg-green-400 rounded-md hover:bg-green-500 ease mr-4 "
+        class="relative px-10 py-3 w-full font-medium text-white transition duration-300 bg-green-400 rounded-md hover:bg-green-500 ease my-2"
       >
         <span class="absolute bottom-0 left-0 h-full">
           <svg
@@ -45,7 +45,7 @@ export default function SecondaryButton({ title, path, button, isLoading, type }
   return (
     <Link
       to={path}
-      class="relative px-10 py-3 font-medium text-white transition duration-300 bg-green-400 rounded-md hover:bg-green-500 ease mr-4"
+      class="relative px-10 py-3 font-medium text-white transition duration-300 bg-green-400 rounded-md hover:bg-green-500 ease"
     >
       <span class="absolute bottom-0 left-0 h-full">
         <svg

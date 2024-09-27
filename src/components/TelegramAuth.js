@@ -10,7 +10,7 @@ const TelegramAuth = () => {
    };
 
   return (
-    <button className="flex" onClick={() => auth()}>
+    <button className="flex telegram-auth-button align-center" onClick={() => auth()}>
       <img src="/tg-bot-img.png" width={30} height={30} alt="tg-bot-img" />
       <b className="text-white px-1">{t("sign in with Telegram")}</b>
     </button>

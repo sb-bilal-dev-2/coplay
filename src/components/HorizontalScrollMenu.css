@@ -11,9 +11,9 @@
   overflow-x: auto;
   white-space: nowrap;
   position: relative;
-  padding: 8px;
   margin: 0;
   display: flex;
+  padding: 8px 36px;
 }
 
 .menu-list li {
@@ -39,24 +39,31 @@
 .list-card {
   max-width: calc(100vw - 32px);
   float: left;
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 240px;
   width: 340px;
-  background-color: silver;
   user-select: "none";
   cursor: pointer;
+  font-weight: bold;
+  color: white;
+  /* text-shadow: 1px 1px 1px black; */
+}
+
+.list-card > .list-card__image {
   background-position: center;
   background-size: cover;
   filter: brightness(0.95);
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 1px black;
+  flex: 1;
 }
 
 .list-card__title {
   overflow-x: hidden;
   margin: 10px;
+  text-align: left;
   text-overflow: ellipsis;
+  color: #222;
+  font-weight: bold;
 }
 
 .verticalCard {

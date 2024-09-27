@@ -72,23 +72,25 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
               onMouseLeave={() => setHoveringItemId('')}
               className={`list-card ${verticalCard ? "verticalCard" : ""}`}
               to={[baseRoute, title].join("/")}
-              style={{
-                backgroundImage: `url('${posterUrl ||
-                  poster ||
-                  `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
-                  }')` + `, url('${posterUrl ||
-                  poster ||
-                  `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
-                  }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
-              }}
             >
-              {hoveringItemId === _id &&
-                <ShortVideo
-                  isActive={hoveringItemId === _id}
-                  mediaTitle={title}
-                  startTime={100}
-                />
-              }
+              
+                <div className="list-card__image" style={{
+                  backgroundImage: `url('${posterUrl ||
+                    poster ||
+                    `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
+                    }')` + `, url('${posterUrl ||
+                    poster ||
+                    `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
+                    }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
+                }}>
+                  {hoveringItemId === _id &&
+                    <ShortVideo
+                    isActive={hoveringItemId === _id}
+                    mediaTitle={title}
+                    startTime={100}
+                  />
+                  }
+                </div>
               {/* TODO: Refactor if project needs premium */}
               {/* {isPremium ? (
               <span
@@ -99,7 +101,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
               </span>
             ) : null} */}
 
-              <div className="list-card__title">{label || title}</div>
+              <p className="list-card__title">{label || title}</p>
             </Link>
           </li>
         ))}

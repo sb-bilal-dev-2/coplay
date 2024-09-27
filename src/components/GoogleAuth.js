@@ -1,6 +1,6 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import api from "../api";
-import {updateUser} from "../store"
+import { updateUser } from "../store"
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 
@@ -11,7 +11,7 @@ import { useNavigate } from "react-router";
 export const GoogleAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const loginAuth = useGoogleLogin({
     onSuccess: async (credentialResponse) => {
       console.log("Login Success:", credentialResponse);
@@ -37,18 +37,16 @@ export const GoogleAuth = () => {
   });
 
   return (
-    <div className="google_login">
-      <button
-        onClick={() => loginAuth()}
-        className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
-        <img
-          className="w-5 h-5 mr-2"
-          src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-          alt="Google logo"
-        />
-        Sign in with Google
-      </button>{" "}
-    </div>
+    <button
+      onClick={() => loginAuth()}
+      className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
+      <img
+        className="w-5 h-5 mr-2"
+        src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+        alt="Google logo"
+      />
+      Google
+    </button>
   );
 };
