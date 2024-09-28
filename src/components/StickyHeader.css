@@ -99,6 +99,14 @@
   outline: none;
 }
 
+.searchInputContainer .fa-times {
+  padding: 6px 8px;
+  border-radius: 16px;
+  &:hover {
+    background: rgba(100, 100, 100, 0.3);
+  }
+}
+
 .search-button {
   position: fixed;
   top: 10px;
