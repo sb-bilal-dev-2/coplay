@@ -99,7 +99,7 @@
   outline: none;
 }
 
-.searchInputContainer .fa-times {
+.fa-times {
   padding: 6px 8px;
   border-radius: 16px;
   &:hover {
@@ -120,6 +120,7 @@
 }
 
 .search-container {
+  padding-top: 100px;
   position: fixed;
   top: -100%;
   left: 0;
@@ -127,7 +128,6 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.932);
   color: white;
-  display: flex;
   justify-content: center;
   align-items: center;
   transition: top 0.5s;

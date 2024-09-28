@@ -24,14 +24,15 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 
   const { items: videoItems, getItems: getVideos } =
     useDynamicReducer("movies");
-  const { getItems: getWordCollections } = useDynamicReducer("wordCollections");
+  const { items: wordCollections, getItems: getWordCollections } = useDynamicReducer("wordCollections");
 
   const filterByLabel = (items) => {
     return items?.filter((item) =>
-      item?.label.toLowerCase().startsWith(search.toLowerCase())
+      item?.label?.toLowerCase().startsWith(search.toLowerCase()) || item?.title?.toLowerCase().includes(search.toLowerCase())
     );
   };
   const filteredVideos = filterByLabel(videoItems)
+  const filtered_wordCollections = filterByLabel(wordCollections)
 
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
@@ -70,8 +71,14 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                   <i className="fas fa-times"></i>
                 </button>
                 <div className={`search-container ${searching ? "show" : ""}`}>
+                  <h3>Vidoes</h3>
                   {!!filteredVideos.length &&
                     <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
+                  }
+                  <h3>Collections</h3>
+                  {!!filtered_wordCollections.length && 
+                    <HorizontalScrollMenu items={filtered_wordCollections} baseRoute={"quiz"} />
+                
                   }
                 </div>
               </div>
