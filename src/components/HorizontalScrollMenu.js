@@ -52,7 +52,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
 
   return (
     <div className="horizontal-scroll-menu">
-      {!hasScrolledStart && (
+      {/* {!hasScrolledStart && (
         <button
           style={{
             background:
@@ -63,7 +63,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
         >
           {"<"}
         </button>
-      )}
+      )} */}
       <ul className="menu-list" ref={scrollRef} onScroll={handleScrolled}>
         {items?.map(({ _id, label, title, posterUrl, poster, isPremium }) =>  (
           <li>
@@ -106,7 +106,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
           </li>
         ))}
       </ul>
-      {!hasScrolledEnd && items?.length !== 1 && (
+      {/* {!hasScrolledEnd && items?.length !== 1 && (
         <button
           style={{
             background:
@@ -117,7 +117,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
         >
           {">"}
         </button>
-      )}
+      )} */}
     </div>
   );
 };

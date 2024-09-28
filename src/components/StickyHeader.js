@@ -10,6 +10,7 @@ import { useDynamicReducer } from "../dynamicReducer";
 import { googleLogout } from "@react-oauth/google";
 import api from "../api";
 import { useSelector } from "react-redux";
+import HorizontalScrollMenu from "./HorizontalScrollMenu";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -20,19 +21,17 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState("");
   // useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
-  const handleNavMenuToggle = () => setIsNavMenuVisible(!isNavMenuVisible);
 
   const { items: videoItems, getItems: getVideos } =
     useDynamicReducer("movies");
   const { getItems: getWordCollections } = useDynamicReducer("wordCollections");
-  const movies = videoItems?.filter((item) => item.category !== "Music");
-  const clips = videoItems?.filter((item) => item.category === "Music");
 
   const filterByLabel = (items) => {
-    return items?.filter((movie) =>
-      movie?.label.toLowerCase().startsWith(search.toLowerCase())
+    return items?.filter((item) =>
+      item?.label.toLowerCase().startsWith(search.toLowerCase())
     );
   };
+  const filteredVideos = filterByLabel(videoItems)
 
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
@@ -40,9 +39,8 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 
   return (
     <header
-      className={`sticky-header ${
-        isSticky || searching ? "nav-menu-visible" : ""
-      } ${type}`}
+      className={`sticky-header ${isSticky || searching ? "nav-menu-visible" : ""
+        } ${type}`}
     >
       <Link to="/" className="relative min-h-max min-w-max">
         <img
@@ -55,7 +53,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
         {!authPage && (
           <>
             {searching ? (
-              <div className="searchInputContainer">
+              <div className="searchInputContainer mr-2">
                 <input
                   value={search}
                   autoFocus
@@ -72,57 +70,9 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                   <i className="fas fa-times"></i>
                 </button>
                 <div className={`search-container ${searching ? "show" : ""}`}>
-                  <div className="search-box">
-                    {filterByLabel(clips)?.length > 0 ? (
-                      <h1>{t("movies")}</h1>
-                    ) : null}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
-                      {filterByLabel(movies)?.length > 0
-                        ? filterByLabel(movies)?.map(
-                            ({ _id, label, title }) => (
-                              <Link
-                                className="list-card"
-                                to={["movie", title].join("/")}
-                                style={{
-                                  backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
-                                }}
-                              >
-                                <li className="list-none	" key={_id}>
-                                  {label}
-                                </li>
-                              </Link>
-                            )
-                          )
-                        : null}
-                    </div>
-                    {filterByLabel(clips)?.length > 0 ? (
-                      <h1>{t("music")}</h1>
-                    ) : null}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
-                      {filterByLabel(clips)?.length > 0
-                        ? filterByLabel(clips)?.map(({ _id, label, title }) => (
-                            <Link
-                              className="list-card"
-                              to={["clip", title].join("/")}
-                              style={{
-                                backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
-                              }}
-                            >
-                              <li key={_id} className="list-none	">
-                                {label}
-                              </li>
-                            </Link>
-                          ))
-                        : null}
-                    </div>
-                    <div>
-                      {filterByLabel(movies)?.length +
-                        filterByLabel(clips)?.length ===
-                      0 ? (
-                        <h1>{t("nothing found")}</h1>
-                      ) : null}
-                    </div>
-                  </div>
+                  {!!filteredVideos.length &&
+                    <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
+                  }
                 </div>
               </div>
             ) : (
@@ -150,9 +100,13 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               afterLangChange={() => (getVideos(), getWordCollections())}
             />
 
-            <div className="user-menu" onClick={handleNavMenuToggle}>
+            <div className="user-menu">
               {loggedIn ? (
-                <div className="flex">
+                <div className="flex items-center">
+                  <Link to="/my_list" className="relative">
+                    {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
+                    <i class="fa-brands fa-font-awesome m-2 text-xl" />
+                  </Link>
                   <UserNav
                     setIsNavMenuVisible={setIsNavMenuVisible}
                     isNavMenuVisible={isNavMenuVisible}
@@ -191,7 +145,7 @@ function getPlaceholderUrl(firstLetter) {
   return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
 }
 
-const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
+const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const { t } = useTranslation();
   const { user: userIdAndEmail } = useAuthentication();
   const userEmail = userIdAndEmail?.email || "";
@@ -236,21 +190,15 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
   };
 
   return (
-    <>
-      <img class="h-8 ml-4" src={avatarPath} alt="User avatar placeholder" />
+    <div ref={outsideNavClickWrapperRef}>
+      <img class="h-8 ml-4" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
       {isNavMenuVisible && (
-        <ul className="nav-menu" ref={outsideNavClickWrapperRef}>
+        <ul className="nav-menu">
           <li>
             {" "}
             <Link to="/account">
               <i class="fa-solid fa-user text-gray-400 m-2" />
               <b>{t("account")}</b>
-            </Link>
-          </li>
-          <li>
-            <Link to="/my_list">
-              <i class="fa-solid fa-book text-gray-400  m-2" />
-              <b>{t("my list")}</b>
             </Link>
           </li>
           <li>
@@ -285,7 +233,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
           </li> */}
         </ul>
       )}
-    </>
+    </div>
   );
 };
 

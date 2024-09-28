@@ -55,6 +55,8 @@
   background-size: cover;
   filter: brightness(0.95);
   flex: 1;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .list-card__title {

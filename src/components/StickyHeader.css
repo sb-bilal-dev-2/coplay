@@ -95,7 +95,7 @@
 
 .searchInputContainer input {
   background: transparent;
-  border-bottom: 2px solid silver;
+  border-bottom: 2px solid var(--color-primary);
   outline: none;
 }
 
@@ -125,6 +125,10 @@
   transition: top 0.5s;
   z-index: 9999;
   overflow-y: scroll;
+}
+
+.search-container p {
+  color: rgb(255, 255, 248);
 }
 
 .search-container.show {

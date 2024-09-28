@@ -26,6 +26,14 @@ const HomePage = () => {
       <StickyHeader />
       {/* <Hero /> */}
       <div className="">
+        <h2 className="home-page__title">{"Coplay Journey"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+      </div>
+      <div className="">
+        <h2 className="home-page__title">{"Coplay Journey"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+      </div>
+      <div className="">
         <h2 className="home-page__title">{"Watch Again"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
