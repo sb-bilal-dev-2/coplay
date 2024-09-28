@@ -141,7 +141,6 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
               src={selectedOption.flag}
               className="w-6 h-6 rounded-full mr-1"
             />
-            <i class="fas fa-chevron-down float-right px-1 text-sm"></i>
           </div>
         ) : (
           "Choose language"
