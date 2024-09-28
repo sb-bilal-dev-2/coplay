@@ -53,16 +53,25 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       <div class="flex items-center">
         {!authPage && (
           <>
-            {searching ? (
-              <div className="searchInputContainer mr-2">
-                <input
-                  value={search}
-                  autoFocus
-                  ref={outsideSearchClickWrapperRef}
-                  onChange={(ev) => setSearch(ev.target.value)}
-                />
+            <div
+              className="searchInputContainer relative px-1"
+            >
+              <button
+                className="text-gray-150 mx-2 pointer absolute"
+                onClick={() => !searching && setSearching(!searching)}
+              >
+                <i className={`fas fa-search ${!searching ? 'text-gray-200' : ''}`}></i>
+              </button>
+              <input
+                onClick={() => setSearching(true)}
+                value={search}
+                autoFocus
+                ref={outsideSearchClickWrapperRef}
+                onChange={(ev) => setSearch(ev.target.value)}
+              />
+              {!!searching &&
                 <button
-                  className="text-gray-150 float-right pointer"
+                  className="close-search-button text-gray-150 float-right pointer absolute"
                   onClick={() => {
                     setSearching(!searching);
                     setSearch("");
@@ -70,26 +79,19 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 >
                   <i className="fas fa-times"></i>
                 </button>
-                <div className={`search-container ${searching ? "show" : ""}`}>
-                  <h3>Vidoes</h3>
-                  {!!filteredVideos.length &&
-                    <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
-                  }
-                  <h3>Collections</h3>
-                  {!!filtered_wordCollections.length && 
-                    <HorizontalScrollMenu items={filtered_wordCollections} baseRoute={"quiz"} />
-                
-                  }
-                </div>
+              }
+              <div className={`search-container ${searching ? "show" : ""}`}>
+                <h3>Vidoes</h3>
+                {!!filteredVideos.length &&
+                  <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
+                }
+                <h3>Collections</h3>
+                {!!filtered_wordCollections.length &&
+                  <HorizontalScrollMenu items={filtered_wordCollections} baseRoute={"quiz"} />
+
+                }
               </div>
-            ) : (
-              <button
-                className="text-gray-150 mr-4 ml-6 pointer"
-                onClick={() => setSearching(!searching)}
-              >
-                <i className="fas fa-search"></i>
-              </button>
-            )}
+            </div>
             {/* 
             //TODO: return if buy premium is needed
             {!isPricePage ? (

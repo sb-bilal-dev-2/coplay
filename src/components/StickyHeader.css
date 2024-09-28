@@ -93,10 +93,29 @@
   }
 }
 
+.searchInputContainer .close-search-button {
+  right: 4px;
+}
+
+.searchInputContainer .fa-search {
+  font-size: 12px;
+}
+
 .searchInputContainer input {
-  background: transparent;
-  border-bottom: 2px solid var(--color-primary);
+  width: 35vw;
+  max-width: 200px;
+  padding-left: 40px;
   outline: none;
+  background: transparent;
+  border: 1px solid var(--color-white);
+  border-radius: 16px;
+  opacity: 0.5;
+}
+
+.searchInputContainer input:focus {
+  opacity: 1;
+  box-sizing: border;
+  border: 2px solid var(--color-primary);
 }
 
 .fa-times {
