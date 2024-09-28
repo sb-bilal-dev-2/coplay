@@ -99,6 +99,8 @@
 
 .searchInputContainer .fa-search {
   font-size: 12px;
+  pointer-events: none;
+  top: 6px;
 }
 
 .searchInputContainer input {

@@ -20,7 +20,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const isSticky = useSticky();
   const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState("");
-  // useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
+  useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
 
   const { items: videoItems, getItems: getVideos } =
     useDynamicReducer("movies");
@@ -37,6 +37,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
   const learningLanguage = localStorage.getItem("learningLanguage");
+  const closeButtonRef = useRef(null)
 
   return (
     <header
@@ -56,21 +57,17 @@ const StickyHeader = ({ type = "primary", authPage }) => {
             <div
               className="searchInputContainer relative px-1"
             >
-              <button
-                className="text-gray-150 mx-2 pointer absolute"
-                onClick={() => !searching && setSearching(!searching)}
-              >
-                <i className={`fas fa-search ${!searching ? 'text-gray-200' : ''}`}></i>
-              </button>
+              <i className={`fas fa-search absolute px-2 ${!searching ? 'text-gray-200' : ''}`}></i>
               <input
+                onKeyDown={(event) => event.code === 'Escape' && (setSearching(false), outsideSearchClickWrapperRef.current?.blur())}
                 onClick={() => setSearching(true)}
                 value={search}
-                autoFocus
                 ref={outsideSearchClickWrapperRef}
                 onChange={(ev) => setSearch(ev.target.value)}
               />
               {!!searching &&
                 <button
+                  ref={closeButtonRef}
                   className="close-search-button text-gray-150 float-right pointer absolute"
                   onClick={() => {
                     setSearching(!searching);
@@ -200,7 +197,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <div ref={outsideNavClickWrapperRef}>
-      <img class="h-8 ml-4" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
+      <img class="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
       {isNavMenuVisible && (
         <ul className="nav-menu">
           <li>
