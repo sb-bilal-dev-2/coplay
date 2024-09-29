@@ -30,7 +30,7 @@ const MoviePage = () => {
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} set_practicingWordIndex={set_practicingWordIndex} forcedIndex={forcedWordIndex} />
+        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={forcedWordIndex} />
         <ShortsColumns
           forceRenderFirstItem={(activeIndex) => (
             <div className="VideoContainer">

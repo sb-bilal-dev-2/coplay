@@ -70,6 +70,10 @@
     }
 }
 
+.MainContainer .BarsSmall {
+    position: 'absolute';
+}
+
 .QuizMain video {
     /* object-fit: cover; */
 }
@@ -124,3 +128,33 @@
     opacity: 0;
     background-color: rgba(0, 0, 0, 0) !important;
 }
+
+.scroll-list {
+    scroll-snap-type: x mandatory;
+    padding: 0 40px;
+}
+
+.scroll-list__item {
+    scroll-snap-align: center;
+}
+
+.scroll-list-container__right-bar {
+    padding: 4px 10px;
+    background: linear-gradient(-90deg, black, black, black, transparent)
+}
+
+/* @media (min-width: 468px) { */
+    /* Webkit browsers (Chrome, Safari) */
+    .scroll-list::-webkit-scrollbar {
+      width: 1px; /* Width of the scrollbar */
+    }
+  
+    .scroll-list::-webkit-scrollbar-thumb {
+      background-color: transparent; /* Color of the scrollbar thumb */
+    }
+  
+    .scroll-list::-webkit-scrollbar-track {
+      background-color: transparent; /* Color of the scrollbar track */
+    }
+  /* } */
+  

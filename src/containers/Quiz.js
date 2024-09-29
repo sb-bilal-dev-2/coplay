@@ -4,14 +4,12 @@ import { motion } from 'framer-motion';
 import api from "../api";
 import "./Quiz.css";
 import { BASE_SERVER_URL } from "../api";
-import classNames from "classnames";
-import { Link, useNavigate } from "react-router-dom";
-import { usePost } from './usePost';
-import { sortByLearningState } from "../helper/sortByLearningState";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YoutubePlayer from "../components/YoutubePlayer";
 import ErrorBoundary from "./ErrorBoundary";
 import VideojsInited from "../components/VideojsInited";
 import useCustomScroll from "../components/useCustomScroll";
+import BarsSmall from "../components/BarsSmall";
 
 function useTelegramWebApp() {
   let telegramApp = window.Telegram.WebApp
@@ -106,7 +104,7 @@ export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) =>
   )
 }
 
-export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wordsIndex }) => {
+export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wordsIndex, set_practicingWordIndex }) => {
   return (
     // <motion.div
     //   transition={{ type: "easyIn", damping: 200, stiffness: 400 }}
@@ -116,64 +114,91 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
     //   {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((wordItem, wordIndex) => {
     //     return (
     //       <div style={{ flexShrink: 0 }}>
-    <ShortsContainer wordsIndex={wordsIndex} forceRenderFirstItem={forceRenderFirstItem} items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
-      const currentPlayingOccurance = occuranceItem
-      if (forceRenderFirstItem) { ++occuranceIndex }
+    <ShortsContainer
+      wordsIndex={wordsIndex}
+      forceRenderFirstItem={forceRenderFirstItem}
+      items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
+        const currentPlayingOccurance = occuranceItem
+        if (forceRenderFirstItem) { ++occuranceIndex }
 
-      return {
-        id: occuranceItem?.id, renderItem: (activeOccuranceIndex) => {
-          // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-          // const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-          const hidden = activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex
-          // if (occuranceIndex === 0) return;
-          return !hidden && <ShortVideo
-            isActive={activeOccuranceIndex === occuranceIndex}
-            mediaTitle={currentPlayingOccurance?.mediaTitle}
-            startTime={currentPlayingOccurance?.startTime / 1000}
-          />
+        return {
+          id: occuranceItem?.id, renderItem: (activeOccuranceIndex) => {
+            // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+            // const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
+            const hidden = activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex
+            // if (occuranceIndex === 0) return;
+            return !hidden && <ShortVideo
+              isActive={activeOccuranceIndex === occuranceIndex}
+              mediaTitle={currentPlayingOccurance?.mediaTitle}
+              startTime={currentPlayingOccurance?.startTime / 1000}
+            />
+          }
         }
-      }
-    })}
+      })}
     />
   )
 }
 
-export const WordsScroll = ({ wordList, set_practicingWordIndex, forcedIndex }) => {
-  const { translate, containerRef: wordsContainer, currentIndex: playingWordIndex, scrollToNext: scrollToNextWord, scrollToPrevious: scrollToPrevWord, scrollTo } = useCustomScroll({ isHorizontal: true, pixelMoveOnDelta: 20, deltaThreshold: 30 })
+export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
+  const scrollRef = useRef(null);
+  const [currentIndex, set_currentIndex] = useState(0)
+
+  const handleItemClick = (newIndex) => {
+    set_currentIndex(newIndex)
+    onIndexUpdate(newIndex)
+  }
+
+  const scrollToIndex = (index) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const items = container.children;
+      if (items[index]) {
+        const item = items[index];
+        const itemWidth = item.offsetWidth;
+        const containerWidth = container.offsetWidth;
+
+        // Calculate the scroll position to center the item
+        const scrollPosition = item.offsetLeft - (containerWidth / 2) + (itemWidth / 2);
+
+        container.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+  useEffect(() => {
+    scrollToIndex(currentIndex)
+  }, [currentIndex])
 
   useEffect(() => {
-    if (forcedIndex !== playingWordIndex) {
-      set_practicingWordIndex(playingWordIndex)
-    }
-  }, [playingWordIndex])
-  useEffect(() => {
-    if (forcedIndex !== undefined && forcedIndex !== playingWordIndex) {
-      scrollTo(forcedIndex)
+    if (forcedIndex !== currentIndex) {
+      set_currentIndex(forcedIndex)
     }
   }, [forcedIndex])
+
   return (
-    <div style={{ position: 'absolute', overflow: 'hidden', top: '84px', color: 'white', zIndex: '10' }}>
-      <motion.div
-        ref={wordsContainer}
-        style={{ display: 'flex', padding: '0 60px', paddingRight: 240 }}
-        transition={{ type: "just", damping: 200, stiffness: 400 }}
-        animate={{ x: translate + 60 }}
-      >
-        {(wordList.length ? wordList : [{ the_word: '____' }, { the_word: '____' }]).map((item, wordIndex) => (
-          <div
-            // animate={{ }}
-            onClick={() => { scrollTo(wordIndex) }}
-            style={{ cursor: 'pointer', position: 'relative', padding: '5px 10px', borderBottom: wordIndex !== playingWordIndex ? '1px solid #8080809e' : '' }}>
-            {item.the_word}
-            <motion.div
-              animate={{ height: '100%', width: wordIndex === playingWordIndex ? '100%' : '0%', backgroundColor: wordIndex === playingWordIndex ? '#f9e7db5e' : 'transparent' }}
+    <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
+      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll absolute top-0">
+        {wordList?.map((item, index) => {
+          console.log('forcedIndex', index, currentIndex)
+          return (
+            <div
+              className="scroll-list__item px-4 py-2 cursor-pointer"
               style={{
-                position: 'absolute', bottom: 0, left: 0, borderBottom: '1px solid orangered', margin: 'auto'
+                borderBottom: currentIndex === index && '2px solid orangered',
+                backgroundColor: currentIndex === index && '#f9e7db5e',
+                height: '50px',
               }}
-            ></motion.div>
-          </div>
-        ))}
-      </motion.div>
+              onClick={() => handleItemClick(index)}>
+              {item.the_word}
+            </div>
+          )
+        })}
+      </div>
+      <div className="scroll-list-container__right-bar pt-1 absolute right-0">
+        <BarsSmall />
+      </div>
     </div>
   )
 }
@@ -181,15 +206,21 @@ export const WordsScroll = ({ wordList, set_practicingWordIndex, forcedIndex }) 
 const Quiz = () => {
   const { } = useTelegramWebApp()
   const { list: listName, word: paramWord } = useParams();
-  const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord)
+  let [searchParams] = useSearchParams();
+  const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord, searchParams.get('listType'), searchParams)
   // console.log('wordList', wordList, currentWordOccurances)
 
   return (
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} set_practicingWordIndex={set_practicingWordIndex} />
-        <ShortsColumns wordList={wordList} currentWordOccurances={currentWordOccurances} wordsIndex={playingWordIndex} />
+        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} />
+        <ShortsColumns
+          wordList={wordList}
+          currentWordOccurances={currentWordOccurances}
+          wordsIndex={playingWordIndex}
+          set_practicingWordIndex={set_practicingWordIndex}
+        />
       </div>
     </ErrorBoundary>
   );
@@ -209,6 +240,11 @@ function useBodyOverflowHidden() {
 const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
   'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).data.results[0]?.keywords || [],
   'video': async (listName) => (await api().get(`/movie_words/${listName}?without_user_words=true`)).data,
+  'self_words': async (listName) => {
+    const wordList = (await api().get(`/self_words/${listName}`)).data
+
+    return wordList;
+  }
   // 'playlist': requestPlaylistWords,
   // 'userList': requestUserList,
 }
@@ -218,7 +254,6 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
   const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
-  console.log('wordInfos', wordInfos)
 
   const getWordInfos = async () => {
     // const wordList = await requestWordCollectionWords(listName)

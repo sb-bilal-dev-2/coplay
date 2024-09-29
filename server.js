@@ -19,6 +19,7 @@ const { promptWordInfos, processTranslations } = require('./promptWordInfos');
 const { gTranslate } = require('./gTranslate');
 const { users_model } = require('./schemas/users');
 const { wordCollections_model } = require('./schemas/wordCollections');
+const { sortByLearningState } = require('./src/helper/sortByLearningState');
 
 writeDevelopmentIPAddress();
 
@@ -348,6 +349,37 @@ app.post("/self_words", requireAuth, async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
+app.get("/self_words/:listType", requireAuth, async (req, res) => {
+  const User = users_model;
+
+  try {
+    console.log("REQUEST With User: ", req.userId);
+
+    // Here, req.user will contain the user information extracted from the token.
+    // You can use this information to retrieve the user from your database.
+    const user = await User.findOne({ _id: req.userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const { listType } = req.params;
+
+    // Return user information (you can customize what data you want to send back)
+    let userWordsByType = [];
+    const userWords = user.words
+    console.log('userWords', userWords)
+
+    const userLists = sortByLearningState(userWords)
+    userWordsByType = userLists[listType + 'List']
+
+    res.status(200).json(userWordsByType);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+})
 
 app.get("/subtitles_v2", async (req, res) => {
   const { subtitleId } = req.query;

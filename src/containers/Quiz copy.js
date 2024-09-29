@@ -6,7 +6,6 @@ import { BASE_SERVER_URL } from "../api";
 import classNames from "classnames";
 import { Link, useNavigate } from "react-router-dom";
 import { usePost } from './usePost';
-import { sortByLearningState } from "../helper/sortByLearningState";
 
 const PLAYING_OCCURANCE_LIMIT = 5;
 

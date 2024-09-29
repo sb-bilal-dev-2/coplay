@@ -109,7 +109,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
             <div className="user-menu">
               {loggedIn ? (
                 <div className="flex items-center">
-                  <Link to="/my_list" className="relative">
+                  <Link to="/quiz/repeating?listType=self_words" className="relative">
                     {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
                     <i class="fa-brands fa-font-awesome m-2 text-xl" />
                   </Link>
