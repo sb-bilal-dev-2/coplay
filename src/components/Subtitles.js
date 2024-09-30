@@ -4,7 +4,6 @@ import Tooltip from "./Tooltip";
 import { createDebouncedFunction } from "../debounce";
 import classNames from "classnames";
 import api from "../api";
-// import ScrollAnimation from "react-animate-on-scroll";
 
 const Subtitles = ({
   subtitleId,

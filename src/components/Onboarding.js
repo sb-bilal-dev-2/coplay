@@ -15,7 +15,7 @@ export default function Onboarding() {
   const { i18n, t } = useTranslation();
   const [step, setStep] = useState(0);
   const { user: userIdAndEmail } = useAuthentication();
-  const { getUserWords } = useRequestUserWordLists();
+  const { updateUserData } = useRequestUserWordLists();
   const { putItems } = useRequests("users");
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
@@ -25,7 +25,7 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (!user) {
-      getUserWords();
+      updateUserData();
     }
   }, []);
 

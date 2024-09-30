@@ -1,16 +1,33 @@
 /* FORM */
+
+.form-container {
+    width: 100%;
+    max-width: 260px;
+    margin: auto;
+}
+
+.form-container form {
+    width: 100%;
+}
+
+.form-container form label {
+    width: 100%;
+    padding: 0 16px;
+}
+
 .Authentication-co form {
-    color: seashell;
+    color: var(--color-secondary);
 }
 
 .Authentication-co form p {
     font-size: 0.8rem;
+    color: #333;
 }
 
 .Authentication-co form a {
     font-weight: bold;
     font-size: 0.8rem;
-    color: antiquewhite;
+    color: var(--color-primary);
     text-decoration: underline;
 }
 
@@ -18,8 +35,21 @@
     opacity: 0.9;
 }
 
+.Authentication-co form .inversed__button {
+    margin: auto;
+    color: var(--color-primary);
+    background-color: transparent;
+    padding: 8px 16px;
+    font-weight: bolder;
+    font-size: 1.05rem;
+}
+
 .Authentication-co form button {
-    color: antiquewhite;
+    /* background-color: var(--color-primary); */
+    background: rgba(52,211,153,var(--tw-bg-opacity));
+    color: white;
+    border-radius: 4px;
+    margin: 4px;
     padding: 8px 16px;
     font-weight: bolder;
     font-size: 1.05rem;
@@ -35,24 +65,32 @@
 
 /* INPUT */
 .Authentication-co .input {
+    width: 100%;
     padding: 8px 1px;
     border-top: 1px solid transparent;
     /* without this input shifts 1px on focus */
-    border-bottom: 1px solid rgba(255, 245, 238, 0.8);
     background-color: transparent;
-}
-
-.Authentication-co .input::placeholder {
-    color: rgba(255, 245, 238, 0.8);
-}
-
-.Authentication-co .input:focus {
     outline: none;
-    border: 1px solid rgba(255, 245, 238, 0.8);
+    border: 1px solid var(--color-secondary);
     border-radius: 4px;
     padding: 8px;
 }
 
+.Authentication-co .input::placeholder {
+    color: var(--color-secondary);
+    filter: brightness(0.8);
+}
+
 .Authentication-co .input-error {
     border-bottom: 1px solid red;
+}
+
+.telegram-auth-button {
+    background: #24A1DE;
+    padding: 4px;
+    width: 100%;
+    justify-content: center;
+    border-radius: 5px;
+    margin: 10px auto;
+    align-items: center;
 }

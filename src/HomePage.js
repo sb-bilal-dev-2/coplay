@@ -24,24 +24,44 @@ const HomePage = () => {
       <PWAInstall />
       <Onboarding/>
       <StickyHeader />
-      <Hero />
-      <div className="section bg-gray-900">
-        <h2>{t("movies")}</h2>
+      {/* <Hero /> */}
+      <div className="">
+        <h2 className="home-page__title">{"Coplay Journey"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
-      <div className="section bg-gray-900">
-        <h2>{t("music")}</h2>
-        <HorizontalScrollMenu items={clips} baseRoute={"movie"} />
+      <div className="">
+        <h2 className="home-page__title">{"Coplay Journey"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
-      <div className="section bg-gray-900">
-        <h2>{t("words collections")}</h2>
+      <div className="">
+        <h2 className="home-page__title">{"Watch Again"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+      </div>
+      <div className="">
+        <h2 className="home-page__title">{"C1"}</h2>
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
           verticalCard
         />
       </div>
-      <Footer />
+      <div className="">
+        <h2 className="home-page__title">{"C2 Phrases"}</h2>
+        <HorizontalScrollMenu
+          items={wordCollections}
+          baseRoute="quiz"
+          verticalCard
+        />
+      </div>
+      <div className="">
+        <h2 className="home-page__title">{t("movies")}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+      </div>
+      <div className="">
+        <h2 className="home-page__title">{t("music")}</h2>
+        <HorizontalScrollMenu items={clips} baseRoute={"movie"} />
+      </div>
+      {/* <Footer /> */}
     </div>
   );
 };

@@ -1,9 +1,77 @@
 
-#vjs_video_3 {
-    /* margin-top: 160px; */
-    height: 50vh !important;
+.VideoContainer div[data-vjs-player="true"] > div > video-js {
+    height: 90vh !important;
     padding-top: 0 !important;
     overflow-y: hidden;
+    border-radius: 2px;
+    box-sizing: border-box;
+
+    @media (max-width: 700px) {
+        border-radius: 0;
+    }
+}
+
+/** VIDEO CONTROLS */
+
+.video-js .vjs-picture-in-picture-control {
+    display: none;
+}
+
+.video-js .vjs-control-bar {
+    background-color: transparent;
+}
+
+.video-js .vjs-fullscreen-control, .video-js .vjs-progress-control, .video-js .vjs-volume-panel, .video-js .vjs-play-control {
+    color: rgba(255, 60, 0, 0.95);
+}
+
+.video-js .vjs-play-progress {
+    background-color: rgba(255, 60, 0, 0.95);
+}
+
+.vjs-error .vjs-error-display .vjs-modal-dialog-content {
+    padding-top: 160px;
+}
+
+.video-js .vjs-big-play-button {
+    display: none;
+}
+
+.video-js .vjs-modal-dialog {
+    overflow: hidden;
+}
+
+/***/
+
+.MainContainer {
+    margin: 0 auto;
+    position: relative;
+    width: 500px;
+    overflow: hidden;
+
+    @media (max-width: 600px) {
+        width: 100vw;
+    }
+}
+
+.VideoContainer {
+    width: 500px;
+    margin: auto;
+    height: 92vh;
+    margin-bottom: 1vh;
+    padding-top: 1vh;
+    background: black;
+    @media (max-width: 600px) {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+    }
+}
+
+.MainContainer .BarsSmall {
+    position: 'absolute';
 }
 
 .QuizMain video {
@@ -60,3 +128,33 @@
     opacity: 0;
     background-color: rgba(0, 0, 0, 0) !important;
 }
+
+.scroll-list {
+    scroll-snap-type: x mandatory;
+    padding: 0 40px;
+}
+
+.scroll-list__item {
+    scroll-snap-align: center;
+}
+
+.scroll-list-container__right-bar {
+    padding: 4px 10px;
+    background: linear-gradient(-90deg, black, black, black, transparent)
+}
+
+/* @media (min-width: 468px) { */
+    /* Webkit browsers (Chrome, Safari) */
+    .scroll-list::-webkit-scrollbar {
+      width: 1px; /* Width of the scrollbar */
+    }
+  
+    .scroll-list::-webkit-scrollbar-thumb {
+      background-color: transparent; /* Color of the scrollbar thumb */
+    }
+  
+    .scroll-list::-webkit-scrollbar-track {
+      background-color: transparent; /* Color of the scrollbar track */
+    }
+  /* } */
+  

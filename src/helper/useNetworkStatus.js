@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 
-function useNetworkStatus() {
+function useNetworkStatus(handleBackOnline) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    if (typeof handleBackOnline === 'function') {
+      handleBackOnline()
+    }
+  },[isOnline, showAlert, handleBackOnline])
 
   useEffect(() => {
     const handleOnline = () => {

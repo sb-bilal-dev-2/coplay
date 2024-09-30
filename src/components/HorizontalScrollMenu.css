@@ -7,12 +7,18 @@
 
 .menu-list {
   width: 100%;
+  scroll-snap-type: x mandatory;
   overflow-x: auto;
   white-space: nowrap;
   position: relative;
-  padding: 8px;
   margin: 0;
   display: flex;
+  padding: 8px 36px;
+}
+
+.menu-list li {
+  scroll-snap-align: start;
+  padding-left: 24px;
 }
 
 @media (min-width: 468px) {
@@ -33,25 +39,33 @@
 .list-card {
   max-width: calc(100vw - 32px);
   float: left;
-  display: block;
-  flex: 1 0 160px;
+  display: flex;
+  flex-direction: column;
   height: 240px;
-  margin: 8px;
-  background-color: silver;
-  padding: 8px 16px;
+  width: 340px;
   user-select: "none";
   cursor: pointer;
+  font-weight: bold;
+  color: white;
+  /* text-shadow: 1px 1px 1px black; */
+}
+
+.list-card > .list-card__image {
   background-position: center;
   background-size: cover;
   filter: brightness(0.95);
-  font-weight: bold;
-  color: white;
-  text-shadow: 1px 1px 1px black;
+  flex: 1;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .list-card__title {
   overflow-x: hidden;
+  margin: 10px;
+  text-align: left;
   text-overflow: ellipsis;
+  color: #222;
+  font-weight: bold;
 }
 
 .verticalCard {
@@ -73,13 +87,13 @@
   transform: translateY(-50%);
   color: #fff;
   border: none;
-  width: 24px;
-  height: calc(100% - 32px);
+  width: 40px;
   cursor: pointer;
   font-size: 18px;
   z-index: 100;
   opacity: 0.3;
   font-weight: bolder;
+  user-select: none;
 }
 
 .scroll-button:hover {
@@ -88,8 +102,10 @@
 
 .scroll-button:first-child {
   left: 0;
+  height: 100%;
 }
 
 .scroll-button:last-child {
+  height: 100%;
   right: 0;
 }

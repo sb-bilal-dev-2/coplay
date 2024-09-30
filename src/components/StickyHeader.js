@@ -10,6 +10,7 @@ import { useDynamicReducer } from "../dynamicReducer";
 import { googleLogout } from "@react-oauth/google";
 import api from "../api";
 import { useSelector } from "react-redux";
+import HorizontalScrollMenu from "./HorizontalScrollMenu";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -19,30 +20,29 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const isSticky = useSticky();
   const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState("");
-  // useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
-  const handleNavMenuToggle = () => setIsNavMenuVisible(!isNavMenuVisible);
+  useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
 
   const { items: videoItems, getItems: getVideos } =
     useDynamicReducer("movies");
-  const { getItems: getWordCollections } = useDynamicReducer("wordCollections");
-  const movies = videoItems?.filter((item) => item.category !== "Music");
-  const clips = videoItems?.filter((item) => item.category === "Music");
+  const { items: wordCollections, getItems: getWordCollections } = useDynamicReducer("wordCollections");
 
   const filterByLabel = (items) => {
-    return items?.filter((movie) =>
-      movie?.label.toLowerCase().startsWith(search.toLowerCase())
+    return items?.filter((item) =>
+      item?.label?.toLowerCase().startsWith(search.toLowerCase()) || item?.title?.toLowerCase().includes(search.toLowerCase())
     );
   };
+  const filteredVideos = filterByLabel(videoItems)
+  const filtered_wordCollections = filterByLabel(wordCollections)
 
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
   const learningLanguage = localStorage.getItem("learningLanguage");
+  const closeButtonRef = useRef(null)
 
   return (
     <header
-      className={`sticky-header ${
-        isSticky || searching ? "nav-menu-visible" : ""
-      } ${type}`}
+      className={`sticky-header ${isSticky || searching ? "nav-menu-visible" : ""
+        } ${type}`}
     >
       <Link to="/" className="relative min-h-max min-w-max">
         <img
@@ -54,16 +54,21 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       <div class="flex items-center">
         {!authPage && (
           <>
-            {searching ? (
-              <div className="searchInputContainer">
-                <input
-                  value={search}
-                  autoFocus
-                  ref={outsideSearchClickWrapperRef}
-                  onChange={(ev) => setSearch(ev.target.value)}
-                />
+            <div
+              className="searchInputContainer relative px-1"
+            >
+              <i className={`fas fa-search absolute px-2 ${!searching ? 'text-gray-200' : ''}`}></i>
+              <input
+                onKeyDown={(event) => event.code === 'Escape' && (setSearching(false), outsideSearchClickWrapperRef.current?.blur())}
+                onClick={() => setSearching(true)}
+                value={search}
+                ref={outsideSearchClickWrapperRef}
+                onChange={(ev) => setSearch(ev.target.value)}
+              />
+              {!!searching &&
                 <button
-                  className="text-gray-150 float-right pointer"
+                  ref={closeButtonRef}
+                  className="close-search-button text-gray-150 float-right pointer absolute"
                   onClick={() => {
                     setSearching(!searching);
                     setSearch("");
@@ -71,68 +76,19 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 >
                   <i className="fas fa-times"></i>
                 </button>
-                <div className={`search-container ${searching ? "show" : ""}`}>
-                  <div className="search-box">
-                    {filterByLabel(clips)?.length > 0 ? (
-                      <h1>{t("movies")}</h1>
-                    ) : null}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
-                      {filterByLabel(movies)?.length > 0
-                        ? filterByLabel(movies)?.map(
-                            ({ _id, label, title }) => (
-                              <Link
-                                className="list-card"
-                                to={["movie", title].join("/")}
-                                style={{
-                                  backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
-                                }}
-                              >
-                                <li className="list-none	" key={_id}>
-                                  {label}
-                                </li>
-                              </Link>
-                            )
-                          )
-                        : null}
-                    </div>
-                    {filterByLabel(clips)?.length > 0 ? (
-                      <h1>{t("music")}</h1>
-                    ) : null}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
-                      {filterByLabel(clips)?.length > 0
-                        ? filterByLabel(clips)?.map(({ _id, label, title }) => (
-                            <Link
-                              className="list-card"
-                              to={["clip", title].join("/")}
-                              style={{
-                                backgroundImage: `url('${BASE_SERVER_URL}/${"movie"}Files/${title}.jpg')`,
-                              }}
-                            >
-                              <li key={_id} className="list-none	">
-                                {label}
-                              </li>
-                            </Link>
-                          ))
-                        : null}
-                    </div>
-                    <div>
-                      {filterByLabel(movies)?.length +
-                        filterByLabel(clips)?.length ===
-                      0 ? (
-                        <h1>{t("nothing found")}</h1>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
+              }
+              <div className={`search-container ${searching ? "show" : ""}`}>
+                <h3>Vidoes</h3>
+                {!!filteredVideos.length &&
+                  <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
+                }
+                <h3>Collections</h3>
+                {!!filtered_wordCollections.length &&
+                  <HorizontalScrollMenu items={filtered_wordCollections} baseRoute={"quiz"} />
+
+                }
               </div>
-            ) : (
-              <button
-                className="text-gray-150 mr-4 ml-6 pointer"
-                onClick={() => setSearching(!searching)}
-              >
-                <i className="fas fa-search"></i>
-              </button>
-            )}
+            </div>
             {/* 
             //TODO: return if buy premium is needed
             {!isPricePage ? (
@@ -150,9 +106,13 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               afterLangChange={() => (getVideos(), getWordCollections())}
             />
 
-            <div className="user-menu" onClick={handleNavMenuToggle}>
+            <div className="user-menu">
               {loggedIn ? (
-                <div className="flex">
+                <div className="flex items-center">
+                  <Link to="/quiz/repeating?listType=self_words" className="relative">
+                    {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
+                    <i class="fa-brands fa-font-awesome m-2 text-xl" />
+                  </Link>
                   <UserNav
                     setIsNavMenuVisible={setIsNavMenuVisible}
                     isNavMenuVisible={isNavMenuVisible}
@@ -191,7 +151,7 @@ function getPlaceholderUrl(firstLetter) {
   return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
 }
 
-const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
+const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const { t } = useTranslation();
   const { user: userIdAndEmail } = useAuthentication();
   const userEmail = userIdAndEmail?.email || "";
@@ -236,21 +196,15 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
   };
 
   return (
-    <>
-      <img class="h-8 ml-4" src={avatarPath} alt="User avatar placeholder" />
+    <div ref={outsideNavClickWrapperRef}>
+      <img class="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
       {isNavMenuVisible && (
-        <ul className="nav-menu" ref={outsideNavClickWrapperRef}>
+        <ul className="nav-menu">
           <li>
             {" "}
             <Link to="/account">
               <i class="fa-solid fa-user text-gray-400 m-2" />
               <b>{t("account")}</b>
-            </Link>
-          </li>
-          <li>
-            <Link to="/my_list">
-              <i class="fa-solid fa-book text-gray-400  m-2" />
-              <b>{t("my list")}</b>
             </Link>
           </li>
           <li>
@@ -285,7 +239,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible, setShowTgModal }) => {
           </li> */}
         </ul>
       )}
-    </>
+    </div>
   );
 };
 

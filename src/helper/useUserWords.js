@@ -5,33 +5,39 @@ import { updateUser } from "../store";
 import { redirect } from "react-router";
 import { sortByLearningState } from "./sortByLearningState";
 
+export const fetchUserData = async () => {
+  if (localStorage.getItem('token')) {
+    try {
+      const userResponse = await api().get("/get-user?allProps=1");
+
+      return userResponse.data
+    } catch (err) {
+      if (err.message === "Request failed with status code 403") {
+        localStorage.removeItem("token");
+        redirect("/");
+      }
+      console.log("err", err);
+    }  
+  }
+};
+
 export function useRequestUserWordLists(cancelRequest) {
-  const dispatch = useDispatch();
   const { repeatingList, learningList, learnedList } = useSelector((state) =>
     sortByLearningState(state.user.user?.words)
   );
 
-  const getUserWords = async () => {
+  const dispatch = useDispatch();
+  const updateUserData = async () => {
     if (localStorage.getItem('token')) {
-      try {
-        const userProps = await api().get("/get-user?allProps=1");
-        console.log("userProps", userProps);
-        dispatch(updateUser(userProps?.data));
-      } catch (err) {
-        if (err.message === "Request failed with status code 403") {
-          localStorage.removeItem("token");
-          redirect("/");
-        }
-        console.log("err", err);
-      }  
+        dispatch(updateUser(fetchUserData()));
     }
   };
 
   useEffect(() => {
     if (!cancelRequest) {
-      getUserWords();
+      updateUserData();
     }
   }, []);
 
-  return { learnedList, learningList, repeatingList, getUserWords };
+  return { learnedList, learningList, repeatingList, updateUserData };
 }

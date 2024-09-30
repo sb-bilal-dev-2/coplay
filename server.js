@@ -19,6 +19,7 @@ const { promptWordInfos, processTranslations } = require('./promptWordInfos');
 const { gTranslate } = require('./gTranslate');
 const { users_model } = require('./schemas/users');
 const { wordCollections_model } = require('./schemas/wordCollections');
+const { sortByLearningState } = require('./src/helper/sortByLearningState');
 
 writeDevelopmentIPAddress();
 
@@ -99,7 +100,7 @@ app.get('/processWordInfos', async (req, res) => {
 
 app.get('/wordInfoLemma', async (req, res) => {
   let { the_word, mainLang } = req.query;
-  const { learninglanguage } = req.headers; 
+  const { learninglanguage } = req.headers;
   console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
   try {
     const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
@@ -192,6 +193,12 @@ app.get("/movie", (req, res) => {
     req.query.name,
     req.query.quality
   );
+
+  if (!videoPath) {
+    console.error("VIDEOFILE NOT FOUND: " + req.query.name)
+    // return res.status(404)
+  }
+
   // console.log(req.query.name)
   // console.log('videoPath', videoPath)
   const videoStat = fs.statSync(videoPath);
@@ -246,13 +253,13 @@ function getContentType(extension) {
   }
 }
 
-app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
+app.get("/movie_words/:mediaTitle", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
-    const { parsedSubtitleId } = req.params;
+    const { mediaTitle } = req.params;
     console.log(
       "fetching movie words for user_id: " + user_id,
-      "parsedSubtitleId: " + parsedSubtitleId
+      "mediaTitle: " + mediaTitle
     );
     let user;
 
@@ -262,13 +269,14 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
     const userWords = user?.words || [];
     let movieWords;
     try {
-      console.log("parsedSubtitleId requested", parsedSubtitleId);
-      const movieSubtitle = await subtitles_model.findById(parsedSubtitleId);
+      console.log("mediaTitle requested", mediaTitle);
+      const movieSubtitle = await subtitles_model.findOne({ mediaTitle, translateLang: { $exists: false } });
+
       movieWords = movieSubtitle.subtitles.reduce(
-        (acc, item) => acc.concat(item.usedWords),
+        (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime }))),
         []
       );
-
+      console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
       console.error("Could not fetch words: ", err.code, err.message);
@@ -279,15 +287,15 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
       {}
     );
     const movieWordsWithoutUserWords = movieWords.filter(
-      (item) => item && !Number(item) && !userWordsMap[item]
+      (item) => item && !Number(item) && !userWordsMap[item.the_word]
     );
-    const movieWordsUnduplicated = Object.keys(
+    const movieWordsUnduplicated = Object.values(
       movieWordsWithoutUserWords.reduce(
-        (acc, item) => ((acc[item] = item), acc),
+        (acc, item) => ((acc[item.the_word] = item), acc),
         {}
       )
     );
-    res.status(200).send(movieWordsUnduplicated);
+    res.status(200).send(movieWordsUnduplicated.sort((a, b) => a.startTime - b.startTime));
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -296,9 +304,10 @@ app.get("/movie_words/:parsedSubtitleId", async (req, res) => {
 app.post("/self_words", requireAuth, async (req, res) => {
   try {
     const { language } = req.query;
+    const { learninglang } = req.headers;
     const User = users_model;
     const _id = req.userId;
-    const wordListKey = language ? `${language}_words` : "words";
+    const wordListKey = learninglang || language ? `${learninglang || language}_words` : "words";
 
     const updatedWordOrWordsArray = req.body;
     // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
@@ -309,9 +318,9 @@ app.post("/self_words", requireAuth, async (req, res) => {
     const updatedWordsMap = !Array.isArray(updatedWordOrWordsArray)
       ? [updatedWordOrWordsArray]
       : updatedWordOrWordsArray.reduce(
-          (acc, item) => ((acc[item.the_word] = item), acc),
-          {}
-        );
+        (acc, item) => ((acc[item.the_word] = item), acc),
+        {}
+      );
     console.log("updatedWordsMap", updatedWordsMap);
     const userWords = user[wordListKey] || [];
     console.log("userWords.length", userWords.length);
@@ -340,6 +349,37 @@ app.post("/self_words", requireAuth, async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
+app.get("/self_words/:listType", requireAuth, async (req, res) => {
+  const User = users_model;
+
+  try {
+    console.log("REQUEST With User: ", req.userId);
+
+    // Here, req.user will contain the user information extracted from the token.
+    // You can use this information to retrieve the user from your database.
+    const user = await User.findOne({ _id: req.userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const { listType } = req.params;
+
+    // Return user information (you can customize what data you want to send back)
+    let userWordsByType = [];
+    const userWords = user.words
+    console.log('userWords', userWords)
+
+    const userLists = sortByLearningState(userWords)
+    userWordsByType = userLists[listType + 'List']
+
+    res.status(200).json(userWordsByType);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+})
 
 app.get("/subtitles_v2", async (req, res) => {
   const { subtitleId } = req.query;

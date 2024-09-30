@@ -6,6 +6,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  --color-primary: rgba(255, 60, 0, 0.95);
+  --color-secondary: #ffa75e;
+  --color-white: #fff6ff;
 }
 
 html {
@@ -135,8 +139,12 @@ input:-webkit-autofill:active {
   }
 }
 
+.color-primary {
+  color: var(--color-primary);
+}
+
 .bg-primary {
-  background-color: #fdfdfd;
+  background-color: #fff6ff;
 }
 
 .bg-secondary {
@@ -186,7 +194,7 @@ input:-webkit-autofill:active {
 }
 
 .text-yellowishorange {
-  color: #ffa75e;
+  color: var(--color-secondary);
 }
 
 .text-dark-yellowishorange {
@@ -227,7 +235,3 @@ input:-webkit-autofill:active {
     display: none;
   }
 } */
-
-.google_login {
-  padding: 15px;
-}
