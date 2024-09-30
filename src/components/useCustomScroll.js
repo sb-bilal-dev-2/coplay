@@ -6,7 +6,9 @@ const useCustomScroll = (options = {}) => {
   const {
     isHorizontal = false,
     pixelMoveOnDelta = 60,
-    deltaThreshold = 20
+    deltaThreshold = 20,
+    onSwipeLeft,
+    onSwipeRight
   } = options
   const DELTA_THRESHOLD = deltaThreshold
   const THROTTLE_DELTACHANGE_EFFECT = 270
@@ -94,12 +96,17 @@ const useCustomScroll = (options = {}) => {
         if (Math.abs(deltaX) > DELTA_THRESHOLD) {
           set_lastDeltaX(deltaX);
         }
-        setDirection(deltaX > 0 ? 'right' : 'left');
+        if (!direction.length) {
+          setDirection(deltaX > 0 ? 'right' : 'left');
+        }
       } else {
         if (Math.abs(deltaY) > DELTA_THRESHOLD) {
           set_lastDeltaY(deltaY);
         }
-        setDirection(deltaY > 0 ? 'down' : 'up');
+
+        if (!direction.length) {
+          setDirection(deltaY > 0 ? 'down' : 'up');
+        }
       }
 
       setVelocity({ x: velocityX, y: velocityY });
@@ -115,15 +122,30 @@ const useCustomScroll = (options = {}) => {
     delta.current = 0;
     set_lastDeltaY(0);
 
-    if (currentVelocityX > 0.1 || currentVelocityY > 0.1) {
-      if (direction === 'left' || direction === 'up') {
+    console.log('direction', direction)
+
+    if (currentVelocityX > 0.1) {
+      if (direction === 'up') {
         scrollToNext();
-      } else if (direction === 'right' || direction === 'down') {
+      } else if (direction === 'down') {
         scrollToPrevious();
       } else {
         scrollTo(currentIndex)
       }
     }
+
+
+    // if (currentVelocityY > 0.1) {
+      if (direction === 'left') {
+        if (onSwipeLeft && typeof onSwipeLeft === 'function') {
+          onSwipeLeft()
+        }
+      } else if (direction === 'right') {
+        if (onSwipeRight && typeof onSwipeRight === 'function') {
+          onSwipeRight()
+        }
+      }
+    // }
   }, [velocity, direction]);
 
   const handleScrollEnd = useCallback(() => {
