@@ -38,7 +38,7 @@ export const WatchAgainIcon = () => {
 
 export const BarsWatchAgain = () => {
   return (
-      <div className="-ml-1 -mt-1">
+      <div className="-ml-1 -mt-1" style={{ transform: 'scale(1.1)'}}>
           <BarsSmallMultiple />
           <div className="absolute right-0" style={{ transform: 'scale(0.75)', bottom: '4.5px' }}>
             <WatchAgainIcon />
