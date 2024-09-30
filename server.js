@@ -466,6 +466,7 @@ createFileRoute(app, "movieFiles");
 createFileRoute(app, "clipFiles");
 createCRUDEndpoints("users");
 createCRUDEndpoints("movies");
+createCRUDEndpoints("playList");
 // createCRUDEndpoints('subtitles');
 // createCRUDEndpoints('clips');
 // createCRUDEndpoints('quizzes');
