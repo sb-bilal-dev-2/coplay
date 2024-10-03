@@ -32,15 +32,15 @@ export const GoBackButton = () => {
 
   return (<button
     onClick={() => navigate(-1)}
-    className="absolute z-10 top-4 left-4 text-yellowishorange cursor-pointer"
+    className="absolute z-50 top-4 left-4 text-yellowishorange cursor-pointer"
   >
     <i className="fa fa-arrow-left" aria-hidden="true"></i>
   </button>
   )
 }
 
-const ShortsContainer = ({ items, forceRenderFirstItem, wordsIndex }) => {
-  const { translate, containerRef, currentIndex, scrollTo } = useCustomScroll()
+const ShortsContainer = ({ items, forceRenderFirstItem, wordsIndex, onSwipeLeft, onSwipeRight }) => {
+  const { translate, containerRef, currentIndex, scrollTo } = useCustomScroll({ onSwipeLeft, onSwipeRight })
 
   useEffect(() => scrollTo(0), [wordsIndex])
 
@@ -117,6 +117,8 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
     <ShortsContainer
       wordsIndex={wordsIndex}
       forceRenderFirstItem={forceRenderFirstItem}
+      onSwipeLeft={() => set_practicingWordIndex(wordsIndex + 1)}
+      onSwipeRight={() => !!wordsIndex && set_practicingWordIndex(wordsIndex - 1)}
       items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
         const currentPlayingOccurance = occuranceItem
         if (forceRenderFirstItem) { ++occuranceIndex }
@@ -181,7 +183,6 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
     <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
       <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll absolute top-0">
         {wordList?.map((item, index) => {
-          console.log('forcedIndex', index, currentIndex)
           return (
             <div
               className="scroll-list__item px-4 py-2 cursor-pointer"
@@ -214,7 +215,7 @@ const Quiz = () => {
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} />
+        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
         <ShortsColumns
           wordList={wordList}
           currentWordOccurances={currentWordOccurances}
@@ -285,7 +286,7 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const currentWordInfo = wordInfos[currentWord]
   const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
   const currentAvailableOccurancesLength = currentWordOccurances?.length
-  console.log('currentWordInfo', currentWordInfo)
+  // console.log('currentWordInfo', currentWordInfo)
   return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
 }
 

@@ -24,13 +24,13 @@ const MoviePage = () => {
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
 
   const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
-  const { forcedWordIndex, handleTimeUpdate } = useHandleTimeUpdate(wordList)
+  const { handleTimeUpdate } = useHandleTimeUpdate(wordList, playingWordIndex, set_practicingWordIndex)
 
   return (
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={forcedWordIndex} />
+        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
         <ShortsColumns
           forceRenderFirstItem={(activeIndex) => (
             <div className="VideoContainer">
@@ -42,6 +42,7 @@ const MoviePage = () => {
             </div>
           )}
           wordsIndex={playingWordIndex}
+          set_practicingWordIndex={set_practicingWordIndex}
           wordList={wordList}
           currentWordOccurances={currentWordOccurances.filter((item) => item?.mediaTitle !== title && item?.startTime !== currentWordStartTime)} />
       </div>
@@ -64,8 +65,6 @@ function useMovieInfo(title) {
     }
   };
 
-  console.log('title', title)
-
   useEffect(() => {
     requestMovieInfo();
   }, [title]);
@@ -73,26 +72,25 @@ function useMovieInfo(title) {
   return currentVideoInfo
 }
 
-function useHandleTimeUpdate(list) {
-    const [forcedWordIndex, set_forcedWordIndex] = useState(0)
+function useHandleTimeUpdate(list, forcedWordIndex, set_forcedWordIndex) {
     const [currentTime, set_currentTime] = useState(0)
     const handleTimeUpdate = useCallback((new_currentTime) => {
       set_currentTime(new_currentTime)
     }, [list])
   
     useEffect(() => {
+      let breaked = false;
+
       for (let ii = 0; ii < list.length; ii++) {
         const item = list[ii];
-        console.log('currentTime', currentTime)
-        if (item.startTime > currentTime * 1000) {
-          console.log('forcingIndex', ii, currentTime)
+        if (!breaked && item.startTime > currentTime * 1000) {
           set_forcedWordIndex(ii - 1)
-          return
+          breaked = true;
         }
       }
     }, [currentTime, list])
   
-    return { handleTimeUpdate, currentTime, forcedWordIndex }
+    return { handleTimeUpdate, currentTime, forcedWordIndex, set_forcedWordIndex }
 }
 
 export default MoviePage;
