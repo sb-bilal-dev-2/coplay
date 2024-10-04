@@ -24,7 +24,7 @@ const MoviePage = () => {
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
 
   const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
-  const { handleTimeUpdate } = useHandleTimeUpdate(wordList, playingWordIndex, set_practicingWordIndex)
+  const { handleTimeUpdate, currentTime } = useHandleTimeUpdate(wordList, playingWordIndex, set_practicingWordIndex)
 
   return (
     <ErrorBoundary>
@@ -44,7 +44,9 @@ const MoviePage = () => {
           wordsIndex={playingWordIndex}
           set_practicingWordIndex={set_practicingWordIndex}
           wordList={wordList}
-          currentWordOccurances={currentWordOccurances.filter((item) => item?.mediaTitle !== title && item?.startTime !== currentWordStartTime)} />
+          // currentWordOccurances={currentWordOccurances.filter((item) => item?.mediaTitle !== title && item?.startTime !== currentWordStartTime)}
+          currentWordOccurances={[]}
+        />
       </div>
     </ErrorBoundary>
   );

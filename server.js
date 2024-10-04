@@ -194,6 +194,8 @@ app.get("/movie", (req, res) => {
     req.query.quality
   );
 
+  console.log('videoPath end', videoPath)
+
   if (!videoPath) {
     console.error("VIDEOFILE NOT FOUND: " + req.query.name)
     // return res.status(404)
@@ -202,8 +204,15 @@ app.get("/movie", (req, res) => {
   // console.log(req.query.name)
   // console.log('videoPath', videoPath)
   const videoStat = fs.statSync(videoPath);
+  console.log('videoStat', videoStat)
+
   const fileSize = videoStat.size;
   const rangeRequest = req.headers.range;
+  console.log('rangeRequest', rangeRequest)
+
+  if (!fileSize) {
+    return res.status(500).send('Requested File is Broken. Size: ' + fileSize)
+  }
 
   if (rangeRequest) {
     const ranges = range(fileSize, rangeRequest);
@@ -276,7 +285,7 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
         (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime }))),
         []
       );
-      console.log('movieWords', movieWords)
+      // console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
     } catch (err) {
       console.error("Could not fetch words: ", err.code, err.message);
@@ -382,25 +391,30 @@ app.get("/self_words/:listType", requireAuth, async (req, res) => {
 })
 
 app.get("/subtitles_v2", async (req, res) => {
-  const { subtitleId } = req.query;
+  const { subtitleId, mediaTitle, translateLang } = req.query;
   console.log("SUBTITLES requested id", subtitleId);
-  let { mediaLang = "en", translateLang, mediaId, name } = req.query;
   let subtitleInfo;
   try {
-    if (subtitleId) {
-      subtitleInfo = await subtitles_model.findById(subtitleId);
-      console.log("SUBTITLE RESPINDING: ", subtitleInfo?._id);
-    } else {
-      subtitleInfo = await subtitles_model.findOne({
-        mediaTitle: name,
-        mediaLang,
-        translateLang,
-      });
+    const query = {}
+
+    if (!translateLang) {
+      query.translateLang = { $exists: false }
     }
+
+    if (subtitleId) {
+      query._id = subtitleId
+    }
+
+    if (mediaTitle) {
+      query.mediaTitle = mediaTitle
+    }
+
+    console.log('query', query)
+    subtitleInfo = await subtitles_model.findOne(query);
+    res.send(subtitleInfo.subtitles);
   } catch (err) {
     res.status(500).send(err.message);
   }
-  res.send(subtitleInfo.subtitles);
 });
 
 app.get("/subtitles", async (req, res) => {
@@ -523,6 +537,7 @@ const QUALITY_OPTIONS = ["1080.ultra", "1080", "760", "480", "360", "240"];
 
 function getHighestExistingQualityPathForTitle(title, chosenQuality) {
   if (chosenQuality) {
+    console.log('chosenQuality', chosenQuality)
     return path.join(
       __dirname,
       "files",
@@ -538,6 +553,8 @@ function getHighestExistingQualityPathForTitle(title, chosenQuality) {
       "movieFiles",
       `${title}.${QUALITY_OPTIONS[index]}.mp4`
     );
+    console.log('videoPath' + index, videoPath)
+
     if (fs.existsSync(videoPath)) {
       return videoPath;
     }

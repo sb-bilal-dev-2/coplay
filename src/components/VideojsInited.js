@@ -76,7 +76,6 @@ const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }
         //     playVideo()
         // }
         if (isActive && isLoadedMetadata) {
-            console.log('isActive', isActive)
             // setTimeout(() => {
                 playVideo()
             // }, 500)

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { motion } from 'framer-motion';
 import api from "../api";
@@ -10,6 +10,8 @@ import ErrorBoundary from "./ErrorBoundary";
 import VideojsInited from "../components/VideojsInited";
 import useCustomScroll from "../components/useCustomScroll";
 import BarsSmall from "../components/BarsSmall";
+import DraggableResizableComponent from "../components/DraggableResizableComponent";
+
 
 function useTelegramWebApp() {
   let telegramApp = window.Telegram.WebApp
@@ -86,21 +88,167 @@ export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) =>
   } else {
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
+
+  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, startTime)
+  const updateCurrentTime = () => {}
+  // console.log('currentSubtitleIndex', currentSubtitleIndex, startTime)
+
   return (
-    isYoutubeVideo ?
-      <YoutubePlayer
-        isActive={isActive}
-        videoIdOrUrl={mediaSrc}
-        startTime={startTime}
-        onTimeUpdate={onTimeUpdate}
-      />
-      :
-      <VideojsInited
-        onTimeUpdate={onTimeUpdate}
-        isActive={isActive}
-        videoSrc={mediaSrc}
-        startTime={startTime}
-      />
+    <div className="ShortVideo">
+      {isYoutubeVideo ?
+        <YoutubePlayer
+          isActive={isActive}
+          videoIdOrUrl={mediaSrc}
+          startTime={startTime}
+          onTimeUpdate={onTimeUpdate}
+        />
+        :
+        <VideojsInited
+          onTimeUpdate={onTimeUpdate}
+          isActive={isActive}
+          videoSrc={mediaSrc}
+          startTime={startTime}
+        />
+      }
+      <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} updateCurrentTime={updateCurrentTime} />
+    </div>
+  )
+}
+
+function useSubtitles(mediaTitle, currentTime, translateLang) {
+  const [subtitles, setSubtitles] = useState([])
+  const [currentSubtitleIndex, set_currentSubtitleIndex] = useState()
+
+  async function requestMainSubtitleByTitle() {
+    try {
+      translateLang = translateLang?.length ? '&translateLang=' + translateLang : ''
+      const response = await api().get(`/subtitles_v2?mediaTitle=${mediaTitle}` + translateLang)
+      setSubtitles(response.data)
+    } catch (err) {
+    }
+  }
+
+  const getSubtitleIndexFromCurrentTime = useCallback(() => {    
+    const currentTimeInMS = currentTime * 1000
+    const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
+    console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, currentTime, subtitles.length)
+    return new_currentSubtitleIndex - 1
+  }, [currentTime, subtitles])
+
+  useEffect(() => {
+    requestMainSubtitleByTitle()
+  }, [mediaTitle, translateLang])
+
+  useEffect(() => {
+    const new_currentIndex = getSubtitleIndexFromCurrentTime()
+    if (new_currentIndex !== currentSubtitleIndex) {
+      set_currentSubtitleIndex(new_currentIndex)
+    }
+  }, [subtitles, currentTime])
+
+  return [subtitles, currentSubtitleIndex]
+}
+
+const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
+  const scrollRef = useRef(null);
+  const [currentIndex, set_currentIndex] = useState(0)
+
+  const handleItemClick = (newIndex) => {
+    set_currentIndex(newIndex)
+    console.log('newIndex', newIndex)
+    if (updateCurrentTime) {
+      const newItem = subtitles[newIndex]
+      if (newItem?.startTime) {
+        updateCurrentTime(newItem?.startTime)
+      }
+    }
+  }
+
+  const scrollToIndex = (index) => {
+    if (scrollRef.current) {
+      const container = scrollRef.current;
+      const items = container.children;
+      if (items[index]) {
+        const item = items[index];
+        const itemWidth = item.offsetHeight;
+        const containerWidth = container.offsetHeight;
+
+        // Calculate the scroll position to center the item
+        const scrollPosition = item.offsetTop - (containerWidth / 2) + (itemWidth / 2);
+
+        container.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+  useEffect(() => {
+    scrollToIndex(currentIndex)
+  }, [currentIndex])
+
+  const handleWheel = useCallback((event) => {
+    event.stopPropagation();
+  }, [])
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.addEventListener('wheel', handleWheel)
+      scrollRef.current.addEventListener('scroll', handleWheel)
+    }
+
+    return () => {
+      if (scrollRef.current) {
+        scrollRef.current.removeEventListener('wheel', handleWheel);
+        scrollRef.current.removeEventListener('scroll', handleWheel);
+      }
+    }
+  }, [scrollRef.current])
+
+  useEffect(() => {
+    if (forcedIndex !== currentIndex) {
+      set_currentIndex(forcedIndex)
+    }
+  }, [forcedIndex])
+
+  return (
+    // <DraggableResizableComponent>
+    <div
+      ref={scrollRef}
+      className="absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
+      style={{
+        background: '#0000004d',
+        height: '120px',
+        width: '50vw',
+        minWidth: '280px',
+        scrollSnapType: 'y mandatory',
+        boxShadow: '1px 1px 5px 5px #0000004d',
+        color: 'white'
+      }}
+    >
+      {subtitles?.map((subtitleLine, lineIndex) => {
+        return (
+          <div
+            style={{
+              scrollSnapAlign: 'center',
+              transition: '0.125s ease-in',
+              opacity: lineIndex === forcedIndex ? '1' : '0.8',
+            }}
+            className="flex items-center"
+          >
+            <i
+              className="fa fa-play text-xs cursor-pointer hover:text-red-500 p-1"
+              style={{ fontSize: '0.6em', display: 'block', transition: '0.125s ease-in' }}
+              onClick={() => handleItemClick(lineIndex)}
+            ></i><b className="ml-1" style={{ 
+              transform: lineIndex === forcedIndex ? 'scale(1.02)' : 'scale(1)',
+              transition: '0.125s ease-in'
+            }}>{subtitleLine.text}</b>
+          </div>
+        )
+      })}
+    </div>
+    // </DraggableResizableComponent>
   )
 }
 
@@ -119,10 +267,10 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
       forceRenderFirstItem={forceRenderFirstItem}
       onSwipeLeft={() => set_practicingWordIndex(wordsIndex + 1)}
       onSwipeRight={() => !!wordsIndex && set_practicingWordIndex(wordsIndex - 1)}
-      items={(currentWordOccurances.length ? currentWordOccurances : [{ mediaSrc: '' }]).map((occuranceItem, occuranceIndex) => {
+      items={(currentWordOccurances.length ? currentWordOccurances : []).map((occuranceItem, occuranceIndex) => {
         const currentPlayingOccurance = occuranceItem
         if (forceRenderFirstItem) { ++occuranceIndex }
-
+        // console.log('currentPlayingOccurance', currentPlayingOccurance)
         return {
           id: occuranceItem?.id, renderItem: (activeOccuranceIndex) => {
             // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
@@ -210,7 +358,7 @@ const Quiz = () => {
   let [searchParams] = useSearchParams();
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord, searchParams.get('listType'), searchParams)
   // console.log('wordList', wordList, currentWordOccurances)
-
+  // const [subtitles] = useSubtitles('kung_fu_panda_3')
   return (
     <ErrorBoundary>
       <GoBackButton />
@@ -222,6 +370,7 @@ const Quiz = () => {
           wordsIndex={playingWordIndex}
           set_practicingWordIndex={set_practicingWordIndex}
         />
+        {/* <ScrollingSubtitles subtitles={subtitles} /> */}
       </div>
     </ErrorBoundary>
   );
@@ -303,7 +452,7 @@ async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousO
       }
 
       const newOccurances = await request_wordOccurances(the_word)
-      console.log('newOccurances', newOccurances)
+
       if (newOccurances?.length) {
         new_wordOccurancesMap[the_word] = newOccurances;
       }

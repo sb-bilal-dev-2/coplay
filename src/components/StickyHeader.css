@@ -64,12 +64,12 @@
 
 .user-menu {
   cursor: pointer;
+  margin-right: 10px;
 
   img {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    margin-right: 10px;
   }
 
   .nav-menu {
@@ -85,6 +85,11 @@
     li {
       cursor: pointer;
       padding: 3px 5px;
+
+      i {
+        width: 18px;
+        height: 18px;
+      }
 
       &:hover {
         text-decoration: underline;

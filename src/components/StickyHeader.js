@@ -216,8 +216,9 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
           </li>
           {!isTelegramConnected && (
             <li className="list-none">
-              <button className="flex" onClick={() => generateConnectionCode()}>
+              <button className="flex items-center" onClick={() => generateConnectionCode()}>
                 <img
+                  className="mr-1"
                   src="/tg-bot-img.png"
                   width={30}
                   height={30}
