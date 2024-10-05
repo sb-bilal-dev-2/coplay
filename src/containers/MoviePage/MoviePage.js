@@ -24,7 +24,8 @@ const MoviePage = () => {
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
 
   const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
-  const { handleTimeUpdate, currentTime } = useHandleTimeUpdate(wordList, playingWordIndex, set_practicingWordIndex)
+  const forcedCurrentTimeChange = (currentWordStartTime || 0) / 1000
+  // const { handleTimeUpdate, currentTime } = useHandleTimeUpdate(wordList, playingWordIndex, set_practicingWordIndex)
 
   return (
     <ErrorBoundary>
@@ -35,9 +36,9 @@ const MoviePage = () => {
           forceRenderFirstItem={(activeIndex) => (
             <div className="VideoContainer">
               <ShortVideo
-                onTimeUpdate={handleTimeUpdate}
+                // onTimeUpdate={handleTimeUpdate}
                 mediaTitle={title}
-                startTime={(currentWordStartTime || 0) / 1000}
+                forcedCurrentTimeChange={forcedCurrentTimeChange}
                 isActive={activeIndex === 0} />
             </div>
           )}

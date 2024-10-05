@@ -34,7 +34,7 @@ export const GoBackButton = () => {
 
   return (<button
     onClick={() => navigate(-1)}
-    className="absolute z-50 top-4 left-4 text-yellowishorange cursor-pointer"
+    className="absolute z-50 top-4 left-4 text-gray-200 cursor-pointer"
   >
     <i className="fa fa-arrow-left" aria-hidden="true"></i>
   </button>
@@ -79,7 +79,8 @@ const extractYoutubeId = title => {
   return ''
 }
 
-export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) => {
+export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate }) => {
+  // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
   const isYoutubeVideo = mediaTitle && mediaTitle?.includes('YOUTUBE_ID[')
   let mediaSrc = ''
 
@@ -89,9 +90,13 @@ export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) =>
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
 
-  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, startTime)
-  const updateCurrentTime = () => {}
-  // console.log('currentSubtitleIndex', currentSubtitleIndex, startTime)
+  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, forcedCurrentTimeChange)
+  
+  // useEffect(() => {
+  //   set_inner_forcedTimeChange(inner_forcedCurrentTimeChange)
+  // }, forcedCurrentTimeChange)
+
+  // console.log('currentSubtitleIndex', currentSubtitleIndex, forcedCurrentTimeChange)
 
   return (
     <div className="ShortVideo">
@@ -99,7 +104,8 @@ export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) =>
         <YoutubePlayer
           isActive={isActive}
           videoIdOrUrl={mediaSrc}
-          startTime={startTime}
+          // startTime={inner_forcedCurrentTimeChange}
+          startTime={forcedCurrentTimeChange}
           onTimeUpdate={onTimeUpdate}
         />
         :
@@ -107,10 +113,11 @@ export const ShortVideo = ({ isActive, mediaTitle, startTime, onTimeUpdate }) =>
           onTimeUpdate={onTimeUpdate}
           isActive={isActive}
           videoSrc={mediaSrc}
-          startTime={startTime}
+          // startTime={inner_forcedCurrentTimeChange}
+          startTime={forcedCurrentTimeChange}
         />
       }
-      <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} updateCurrentTime={updateCurrentTime} />
+      <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} />
     </div>
   )
 }
@@ -280,7 +287,7 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
             return !hidden && <ShortVideo
               isActive={activeOccuranceIndex === occuranceIndex}
               mediaTitle={currentPlayingOccurance?.mediaTitle}
-              startTime={currentPlayingOccurance?.startTime / 1000}
+              forcedCurrentTimeChange={currentPlayingOccurance?.startTime / 1000}
             />
           }
         }
@@ -333,10 +340,12 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
         {wordList?.map((item, index) => {
           return (
             <div
-              className="scroll-list__item px-4 py-2 cursor-pointer"
+              className="scroll-list__item px-1 mx-2 py-2 cursor-pointer"
               style={{
                 borderBottom: currentIndex === index && '2px solid orangered',
-                backgroundColor: currentIndex === index && '#f9e7db5e',
+                // backgroundColor: currentIndex === index && '#f9e7db5e',
+                color: currentIndex === index && 'orangered',
+                fontWeight: currentIndex === index && 'bolder',
                 height: '50px',
               }}
               onClick={() => handleItemClick(index)}>

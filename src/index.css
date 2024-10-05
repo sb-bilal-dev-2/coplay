@@ -12,6 +12,10 @@
   --color-white: #fff6ff;
 }
 
+.color-primary {
+  color: var(--color-primary)
+}
+
 html {
   height: -webkit-fill-available;
 }

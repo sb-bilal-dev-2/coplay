@@ -137,6 +137,7 @@
 
 .scroll-list__item {
     scroll-snap-align: center;
+    padding-top: 15px;
 }
 
 .scroll-list-container__right-bar {

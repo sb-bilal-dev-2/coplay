@@ -87,7 +87,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, verticalCard }) => {
                     <ShortVideo
                     isActive={hoveringItemId === _id}
                     mediaTitle={title}
-                    startTime={100}
+                    forcedCurrentTimeChange={100}
                   />
                   }
                 </div>
