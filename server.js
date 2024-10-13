@@ -34,6 +34,7 @@ app.use(
 const port =
   (process.argv.includes("--8080") && 8080) ||
   (process.argv.includes("--5000") && 5000) ||
+  (process.argv.includes("--3000") && 3000) ||
   9090;
 const { createCRUDEndpoints } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)

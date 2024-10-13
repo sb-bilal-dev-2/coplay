@@ -63,7 +63,8 @@
     "ytdl-core": "4.11.5"
   },
   "scripts": {
-    "start": "NODE_ENV=production react-scripts start --host 0.0.0.0",
+    "start-test": "NODE_ENV=production react-scripts start --host 0.0.0.0",
+    "start": "serve -s build",
     "dev": "react-scripts start --host 0.0.0.0",
     "build": "react-scripts build",
     "test": "react-scripts test",
