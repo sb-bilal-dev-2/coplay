@@ -80,11 +80,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               }
               <div className={`search-container ${searching ? "show" : ""}`}>
                 <h3>Vidoes</h3>
-                {!!filteredVideos.length &&
+                {!!filteredVideos?.length &&
                   <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
                 }
                 <h3>Collections</h3>
-                {!!filtered_wordCollections.length &&
+                {!!filtered_wordCollections?.length &&
                   <HorizontalScrollMenu items={filtered_wordCollections} baseRoute={"quiz"} />
 
                 }
