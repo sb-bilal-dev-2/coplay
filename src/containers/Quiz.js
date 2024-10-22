@@ -79,7 +79,15 @@ const extractYoutubeId = title => {
   return ''
 }
 
-export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate }) => {
+const Subtitles = ({ mediaTitle, forcedCurrentTimeChange }) => {
+  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, forcedCurrentTimeChange)
+
+  return (
+    <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} />
+  )
+}
+
+export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles }) => {
   // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
   const isYoutubeVideo = mediaTitle && mediaTitle?.includes('YOUTUBE_ID[')
   let mediaSrc = ''
@@ -90,7 +98,6 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
 
-  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, forcedCurrentTimeChange)
   
   // useEffect(() => {
   //   set_inner_forcedTimeChange(inner_forcedCurrentTimeChange)
@@ -117,7 +124,9 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
           startTime={forcedCurrentTimeChange}
         />
       }
-      <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} />
+      {!hideSubtitles && (
+        <Subtitles mediaTitle={mediaTitle} forcedCurrentTimeChange={forcedCurrentTimeChange} />
+      )}
     </div>
   )
 }
@@ -213,7 +222,7 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
   }, [scrollRef.current])
 
   useEffect(() => {
-    if (forcedIndex !== currentIndex) {
+    if (forcedIndex !== undefined && forcedIndex !== currentIndex) {
       set_currentIndex(forcedIndex)
     }
   }, [forcedIndex])
@@ -224,13 +233,13 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
       ref={scrollRef}
       className="absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
       style={{
-        background: '#0000004d',
         height: '120px',
         width: '50vw',
         minWidth: '280px',
         scrollSnapType: 'y mandatory',
-        boxShadow: '1px 1px 5px 5px #0000004d',
-        color: 'white'
+        color: 'white',
+        boxShadow: '1px 1px 5px 5px #0000001f',
+        background: '#0000001f',
       }}
     >
       {subtitles?.map((subtitleLine, lineIndex) => {
@@ -239,7 +248,7 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
             style={{
               scrollSnapAlign: 'center',
               transition: '0.125s ease-in',
-              opacity: lineIndex === forcedIndex ? '1' : '0.8',
+              opacity: lineIndex === forcedIndex ? '1' : '0.9',
             }}
             className="flex items-center"
           >
@@ -329,7 +338,7 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
   }, [currentIndex])
 
   useEffect(() => {
-    if (forcedIndex !== currentIndex) {
+    if (forcedIndex !== undefined && forcedIndex !== currentIndex) {
       set_currentIndex(forcedIndex)
     }
   }, [forcedIndex])
@@ -354,7 +363,7 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
           )
         })}
       </div>
-      <div className="scroll-list-container__right-bar pt-1 absolute right-0">
+      <div className="scroll-list-container__right-bar pt-1 absolute right-0 top-2">
         <BarsSmall />
       </div>
     </div>

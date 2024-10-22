@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
-import HorizontalScrollMenu from "./components/HorizontalScrollMenu";
+import HorizontalScrollMenu, { TagsScroll } from "./components/HorizontalScrollMenu";
 import StickyHeader from "./components/StickyHeader";
 import Footer from "./components/Footer";
 import { BASE_SERVER_URL } from "./api";
@@ -25,17 +25,18 @@ const HomePage = () => {
       <Onboarding/>
       <StickyHeader />
       {/* <Hero /> */}
+      <TagsScroll firstSticky onIndexUpdate={(newTagIndex) => console.log('newTagIndex', newTagIndex)} />
       <div className="">
         <h2 className="home-page__title">{"Coplay Journey"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
+      </div>
+      <div className="">
+        <h2 className="home-page__title">{"Popular"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
       <div className="">
-        <h2 className="home-page__title">{"Coplay Journey"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
-      </div>
-      <div className="">
-        <h2 className="home-page__title">{"Watch Again"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+        <h2 className="home-page__title">{"Beginner"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
       </div>
       <div className="">
         <h2 className="home-page__title">{"C1"}</h2>
