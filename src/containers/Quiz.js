@@ -11,6 +11,7 @@ import VideojsInited from "../components/VideojsInited";
 import useCustomScroll from "../components/useCustomScroll";
 import BarsSmall from "../components/BarsSmall";
 import DraggableResizableComponent from "../components/DraggableResizableComponent";
+import { degausser } from "../utils/degausser";
 
 
 function useTelegramWebApp() {
@@ -79,12 +80,11 @@ const extractYoutubeId = title => {
   return ''
 }
 
-const Subtitles = ({ mediaTitle, forcedCurrentTimeChange }) => {
-  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, forcedCurrentTimeChange)
-
-  return (
-    <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} />
-  )
+const getSubtitleIndexFromCurrentTime = (subtitleTime, subtitles) => {
+  const currentTimeInMS = subtitleTime * 1000
+  const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
+  console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, subtitleTime, subtitles.length)
+  return new_currentSubtitleIndex - 1
 }
 
 export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles }) => {
@@ -98,42 +98,35 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
 
-  
-  // useEffect(() => {
-  //   set_inner_forcedTimeChange(inner_forcedCurrentTimeChange)
-  // }, forcedCurrentTimeChange)
+  const [subtitleTime, set_subtitleTime] = useState(0)
+  const [subtitles] = useSubtitles(mediaTitle)
 
-  // console.log('currentSubtitleIndex', currentSubtitleIndex, forcedCurrentTimeChange)
+  const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
+
+  const handleTimeUpdate = (newTime) => {
+    if (onTimeUpdate) { onTimeUpdate() }
+
+    set_subtitleTime(newTime)
+  }
 
   return (
     <div className="ShortVideo">
-      {isYoutubeVideo ?
-        <YoutubePlayer
-          isActive={isActive}
-          videoIdOrUrl={mediaSrc}
-          // startTime={inner_forcedCurrentTimeChange}
-          startTime={forcedCurrentTimeChange}
-          onTimeUpdate={onTimeUpdate}
-        />
-        :
-        <VideojsInited
-          onTimeUpdate={onTimeUpdate}
-          isActive={isActive}
-          videoSrc={mediaSrc}
-          // startTime={inner_forcedCurrentTimeChange}
-          startTime={forcedCurrentTimeChange}
-        />
-      }
+      <VideojsInited
+        onTimeUpdate={handleTimeUpdate}
+        isActive={isActive}
+        videoSrc={mediaSrc}
+        startTime={forcedCurrentTimeChange}
+        isYoutubeVideo={isYoutubeVideo}
+      />
       {!hideSubtitles && (
-        <Subtitles mediaTitle={mediaTitle} forcedCurrentTimeChange={forcedCurrentTimeChange} />
+        <ScrollingSubtitles subtitles={subtitles} setCurrentTime={set_subtitleTime} currentIndex={subtitleIndex} />
       )}
     </div>
   )
 }
 
-function useSubtitles(mediaTitle, currentTime, translateLang) {
+function useSubtitles(mediaTitle, translateLang) {
   const [subtitles, setSubtitles] = useState([])
-  const [currentSubtitleIndex, set_currentSubtitleIndex] = useState()
 
   async function requestMainSubtitleByTitle() {
     try {
@@ -144,38 +137,22 @@ function useSubtitles(mediaTitle, currentTime, translateLang) {
     }
   }
 
-  const getSubtitleIndexFromCurrentTime = useCallback(() => {    
-    const currentTimeInMS = currentTime * 1000
-    const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
-    console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, currentTime, subtitles.length)
-    return new_currentSubtitleIndex - 1
-  }, [currentTime, subtitles])
-
   useEffect(() => {
     requestMainSubtitleByTitle()
   }, [mediaTitle, translateLang])
 
-  useEffect(() => {
-    const new_currentIndex = getSubtitleIndexFromCurrentTime()
-    if (new_currentIndex !== currentSubtitleIndex) {
-      set_currentSubtitleIndex(new_currentIndex)
-    }
-  }, [subtitles, currentTime])
-
-  return [subtitles, currentSubtitleIndex]
+  return [subtitles]
 }
 
-const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
+const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
   const scrollRef = useRef(null);
-  const [currentIndex, set_currentIndex] = useState(0)
 
   const handleItemClick = (newIndex) => {
-    set_currentIndex(newIndex)
     console.log('newIndex', newIndex)
-    if (updateCurrentTime) {
+    if (setCurrentTime) {
       const newItem = subtitles[newIndex]
       if (newItem?.startTime) {
-        updateCurrentTime(newItem?.startTime)
+        setCurrentTime(newItem?.startTime)
       }
     }
   }
@@ -221,11 +198,6 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
     }
   }, [scrollRef.current])
 
-  useEffect(() => {
-    if (forcedIndex !== undefined && forcedIndex !== currentIndex) {
-      set_currentIndex(forcedIndex)
-    }
-  }, [forcedIndex])
 
   return (
     // <DraggableResizableComponent>
@@ -235,7 +207,7 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
       style={{
         height: '120px',
         width: '50vw',
-        minWidth: '280px',
+        minWidth: '140px',
         scrollSnapType: 'y mandatory',
         color: 'white',
         boxShadow: '1px 1px 5px 5px #0000001f',
@@ -248,18 +220,19 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
             style={{
               scrollSnapAlign: 'center',
               transition: '0.125s ease-in',
-              opacity: lineIndex === forcedIndex ? '1' : '0.9',
+              opacity: lineIndex === currentIndex ? '1' : '0.9',
             }}
             className="flex items-center"
           >
-            <i
+            {/* <i
               className="fa fa-play text-xs cursor-pointer hover:text-red-500 p-1"
               style={{ fontSize: '0.6em', display: 'block', transition: '0.125s ease-in' }}
               onClick={() => handleItemClick(lineIndex)}
-            ></i><b className="ml-1" style={{ 
-              transform: lineIndex === forcedIndex ? 'scale(1.02)' : 'scale(1)',
+            ></i> */}
+            <b className="ml-1" style={{
+              fontWeight: lineIndex === currentIndex ? 'bold' : 'normal',
               transition: '0.125s ease-in'
-            }}>{subtitleLine.text}</b>
+            }}>{degausser(subtitleLine.text)}</b>
           </div>
         )
       })}

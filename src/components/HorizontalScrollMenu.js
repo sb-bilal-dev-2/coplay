@@ -67,7 +67,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' })
         </button>
       )} */}
       <ul className="menu-list" ref={scrollRef} onScroll={handleScrolled}>
-        {items?.map(({ _id, label, title, posterUrl }) => (
+        {items?.map(({ _id, label, title, posterUrl, youtubeUrl, thumbnail }) => (
           <li
             onMouseEnter={() => setHoveringItemId(_id)}
             onMouseLeave={() => setHoveringItemId('')}
@@ -79,6 +79,8 @@ const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' })
               posterUrl={posterUrl}
               baseRoute={baseRoute}
               hoveringItemId={hoveringItemId}
+              youtubeUrl={youtubeUrl}
+              thumbnail={thumbnail}
               card_className={card_className}
             />
           </li>
@@ -107,6 +109,8 @@ export const HorizontalScrollMenuCardMain = ({
   posterUrl,
   baseRoute,
   hoveringItemId,
+  youtubeUrl,
+  thumbnail,
   card_className
 }) => {
   return (
@@ -117,11 +121,9 @@ export const HorizontalScrollMenuCardMain = ({
       <div className="list-card__image" style={{
         backgroundImage: `url('${posterUrl ||
           `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
-          }')` + `, url('${posterUrl ||
-          `${BASE_SERVER_URL}/${baseRoute}Files/${title}.webp`
-          }')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
+          }')` + `, url('${thumbnail}')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
       }}>
-        {hoveringItemId === _id ?
+        {youtubeUrl?.length || hoveringItemId === _id ?
           <ShortVideo
             isActive={hoveringItemId === _id}
             mediaTitle={title}
@@ -129,7 +131,7 @@ export const HorizontalScrollMenuCardMain = ({
             showSubtitles={hoveringItemId === _id}
           />
           :
-          (
+          (!youtubeUrl &&
             <VideoFrame time={1000} videoSrc={BASE_SERVER_URL + "/movie?name=" + title} />
           )
         }
@@ -188,11 +190,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
   return (
     <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
       {firstSticky && (
-        <div style={{
-          marginRight: '-40px',
-          marginLeft: '40px',
-          zIndex: 30,
-        }}>
+        <div className="tags-first-sticky">
           <div
             key={tags[0]}
             className="px-3 mx-1 py-1 cursor-pointer select-none"
@@ -226,10 +224,10 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
                 // color: currentIndex === index ? 'orangered' : '#333',
                 // padding: '4px',
                 fontWeight: 'bolder',
-                background: currentIndex === index ? 'black' : 'rgb(255 248 238)',
+                background: currentIndex === index ? 'black' : 'rgb(255 255 255)',
                 color: currentIndex === index ? 'white' : '#423531',
                 borderRadius: '8px',
-                border: '1px solid rgb(255 235 222)',
+                border: '1px solid rgb(255 164 104)',
               }}
               onClick={() => handleItemClick(index)}>
               {item}
@@ -237,7 +235,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
           )
         })}
       </div>
-      <div className="pt-1 absolute right-0" style={{ background: '#fff6ff', padding: '2px 16px' }}>
+      <div className="tags-bar pt-1 absolute right-0">
         <BarsSmall barsColor="#666" />
       </div>
     </div>

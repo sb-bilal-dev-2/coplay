@@ -135,11 +135,16 @@ div[data-vjs-player="true"] > div > video-js {
 .scroll-list {
     scroll-snap-type: x mandatory;
     padding: 0 40px;
+    
+    @media (max-width: 600px) {
+        padding: 0 10px;
+    }
 }
 
 .scroll-list__item {
     scroll-snap-align: center;
     padding-top: 15px;
+    white-space: nowrap;
 }
 
 .scroll-list-container__right-bar {

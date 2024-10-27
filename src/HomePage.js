@@ -27,23 +27,23 @@ const HomePage = () => {
       {/* <Hero /> */}
       <TagsScroll firstSticky onIndexUpdate={(newTagIndex) => console.log('newTagIndex', newTagIndex)} />
       <div className="">
-        <h2 className="home-page__title">{"Coplay Journey"}</h2>
+        <h2 className="home-page__title">{"Popular Phrase Lists"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
       </div>
       <div className="">
-        <h2 className="home-page__title">{"Popular"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+        <h2 className="home-page__title">{"Lessons"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
       </div>
       <div className="">
-        <h2 className="home-page__title">{"Beginner"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
+        <h2 className="home-page__title">{"Word Lists"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
       <div className="">
         <h2 className="home-page__title">{"C1"}</h2>
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
-          verticalCard
+          card_className="horizontal" 
         />
       </div>
       <div className="">
@@ -51,16 +51,16 @@ const HomePage = () => {
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
-          verticalCard
+          card_className="horizontal" 
         />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("movies")}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("music")}</h2>
-        <HorizontalScrollMenu items={clips} baseRoute={"movie"} />
+        <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="horizontal" />
       </div>
       {/* <Footer /> */}
     </div>

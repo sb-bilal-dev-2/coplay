@@ -5,6 +5,26 @@
   position: relative;
 }
 
+.tags-first-sticky {
+  margin-right: -40px;
+  margin-left: 40px;
+  z-index: 30;
+  
+  @media (max-width: 600px) {
+    margin-right: -10px;
+    margin-left: 10px;    
+  }
+}
+
+.tags-bar {
+  background: #fff6ff;
+  padding: 2px 16px;
+
+  @media (max-width: 600px) {
+    padding: 2px 4px;
+  }
+}
+
 .menu-list {
   width: 100%;
   scroll-snap-type: x mandatory;
@@ -13,11 +33,11 @@
   position: relative;
   margin: 0;
   display: flex;
-  padding: 8px 10px;
+  padding: 6px 4px 0px 4px;
 
   .vertical {
     max-width: calc(100vw - 32px);
-    height: 340px;
+    height: 380px;
     width: 240px;
   }
   
@@ -30,6 +50,7 @@
   .list {
     overflow: visible;
     position: relative;
+    margin-top: 6px;
   }
 
   .list::after {
@@ -58,19 +79,20 @@
 
 .menu-list li {
   scroll-snap-align: start;
-  padding-left: 24px;
-
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 @media (max-width: 600px) {
   .menu-list {
     li {
-      padding-left: 12px;
+      padding-left: 6px;
+      padding-right: 6px;
     }
 
     .vertical {
       max-width: calc(100vw - 8px);
-      height: 260px;
+      height: 280px;
       width: 160px;
     }
     
