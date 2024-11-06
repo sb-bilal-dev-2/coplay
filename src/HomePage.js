@@ -10,6 +10,7 @@ import Onboarding from "./components/Onboarding";
 import PWAInstall from "./components/PWAInstall";
 import { useSelector } from "react-redux";
 import { useDynamicReducer } from "./dynamicReducer";
+import InfiniteScroll from "./components/InfiniteScroll";
 
 const HomePage = () => {
   const { items: videos } = useDynamicReducer("movies");
@@ -61,6 +62,9 @@ const HomePage = () => {
       <div className="">
         <h2 className="home-page__title">{t("music")}</h2>
         <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="horizontal" />
+      </div>
+      <div className="">
+        {/* <InfiniteScroll /> */}
       </div>
       {/* <Footer /> */}
     </div>

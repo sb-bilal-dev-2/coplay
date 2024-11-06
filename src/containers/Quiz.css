@@ -132,6 +132,21 @@ div[data-vjs-player="true"] > div > video-js {
     background-color: rgba(0, 0, 0, 0) !important;
 }
 
+.scrollsub-container {
+    height: 120px;
+    min-width: 100px;
+    width: 50%;
+    scroll-snap-type: y mandatory;
+    color: white;
+    box-shadow: 1px 1px 5px 5px #0000001f;
+    background: #0000001f;
+
+    @media (max-width: 600px) {
+        /* min-width: 300px; */
+        width: 70%;
+    }
+}
+
 .scroll-list {
     scroll-snap-type: x mandatory;
     padding: 0 40px;

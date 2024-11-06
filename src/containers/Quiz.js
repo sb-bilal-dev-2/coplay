@@ -203,16 +203,7 @@ const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
     // <DraggableResizableComponent>
     <div
       ref={scrollRef}
-      className="absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
-      style={{
-        height: '120px',
-        width: '50vw',
-        minWidth: '140px',
-        scrollSnapType: 'y mandatory',
-        color: 'white',
-        boxShadow: '1px 1px 5px 5px #0000001f',
-        background: '#0000001f',
-      }}
+      className="scrollsub-container absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
     >
       {subtitles?.map((subtitleLine, lineIndex) => {
         return (
@@ -354,7 +345,9 @@ const Quiz = () => {
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+        <div className="absolute z-20 w-full" style={{ bottom: '10vh' }}>
+          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+        </div>
         <ShortsColumns
           wordList={wordList}
           currentWordOccurances={currentWordOccurances}

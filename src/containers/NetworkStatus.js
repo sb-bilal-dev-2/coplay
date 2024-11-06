@@ -11,7 +11,7 @@ export function NetworkAlert() {
           (isOnline && showAlert) || !isOnline
             ? ` ${isOnline ? "bg-green-400" : "bg-red-400"}  z-50 opacity-100`
             : "opacity-0"
-        } fixed top-14 left-1/2 transform -translate-x-1/2 flex items-center text-white px-4 py-2 rounded shadow-lg`}
+        } fixed bottom-0 left-1/2 transform -translate-x-1/2 flex w-full items-center text-white px-4 py-2 shadow-lg`}
       >
         <i className="fas fa-exclamation-triangle mr-2"></i>
         <span className="text-white">
