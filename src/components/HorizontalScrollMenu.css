@@ -79,15 +79,21 @@
 
 .menu-list li {
   scroll-snap-align: start;
-  padding-left: 12px;
-  padding-right: 12px;
+  /* padding-left: 12px;
+  padding-right: 12px; */
+  
+  .full {
+    width: 600px;
+    height: 400px;
+    flex-grow: 1;
+  }
 }
 
 @media (max-width: 600px) {
   .menu-list {
     li {
-      padding-left: 6px;
-      padding-right: 6px;
+      /* padding-left: 6px;
+      padding-right: 6px; */
     }
 
     .vertical {
@@ -100,6 +106,11 @@
       max-width: calc(100vw - 8px);
       height: 180px;
       width: 240px;
+    }
+
+    .full {
+      width: 100%;
+      height: 280px;
     }
   }
 }

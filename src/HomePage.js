@@ -61,7 +61,7 @@ const HomePage = () => {
       </div>
       <div className="">
         <h2 className="home-page__title">{t("music")}</h2>
-        <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="horizontal" />
+        <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
       </div>
       <div className="">
         {/* <InfiniteScroll /> */}

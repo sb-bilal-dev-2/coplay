@@ -71,6 +71,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' })
           <li
             onMouseEnter={() => setHoveringItemId(_id)}
             onMouseLeave={() => setHoveringItemId('')}
+            className="w-full"
           >
             <HorizontalScrollMenuCardMain
               _id={_id}
