@@ -11,6 +11,7 @@ import VideojsInited from "../components/VideojsInited";
 import useCustomScroll from "../components/useCustomScroll";
 import BarsSmall from "../components/BarsSmall";
 import DraggableResizableComponent from "../components/DraggableResizableComponent";
+import { degausser } from "../utils/degausser";
 
 
 function useTelegramWebApp() {
@@ -79,7 +80,14 @@ const extractYoutubeId = title => {
   return ''
 }
 
-export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate }) => {
+const getSubtitleIndexFromCurrentTime = (subtitleTime, subtitles) => {
+  const currentTimeInMS = subtitleTime * 1000
+  const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
+  console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, subtitleTime, subtitles.length)
+  return new_currentSubtitleIndex - 1
+}
+
+export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles }) => {
   // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
   const isYoutubeVideo = mediaTitle && mediaTitle?.includes('YOUTUBE_ID[')
   let mediaSrc = ''
@@ -90,41 +98,35 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
 
-  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, forcedCurrentTimeChange)
-  
-  // useEffect(() => {
-  //   set_inner_forcedTimeChange(inner_forcedCurrentTimeChange)
-  // }, forcedCurrentTimeChange)
+  const [subtitleTime, set_subtitleTime] = useState(0)
+  const [subtitles] = useSubtitles(mediaTitle)
 
-  // console.log('currentSubtitleIndex', currentSubtitleIndex, forcedCurrentTimeChange)
+  const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
+
+  const handleTimeUpdate = (newTime) => {
+    if (onTimeUpdate) { onTimeUpdate() }
+
+    set_subtitleTime(newTime)
+  }
 
   return (
     <div className="ShortVideo">
-      {isYoutubeVideo ?
-        <YoutubePlayer
-          isActive={isActive}
-          videoIdOrUrl={mediaSrc}
-          // startTime={inner_forcedCurrentTimeChange}
-          startTime={forcedCurrentTimeChange}
-          onTimeUpdate={onTimeUpdate}
-        />
-        :
-        <VideojsInited
-          onTimeUpdate={onTimeUpdate}
-          isActive={isActive}
-          videoSrc={mediaSrc}
-          // startTime={inner_forcedCurrentTimeChange}
-          startTime={forcedCurrentTimeChange}
-        />
-      }
-      <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} />
+      <VideojsInited
+        onTimeUpdate={handleTimeUpdate}
+        isActive={isActive}
+        videoSrc={mediaSrc}
+        startTime={forcedCurrentTimeChange}
+        isYoutubeVideo={isYoutubeVideo}
+      />
+      {!hideSubtitles && (
+        <ScrollingSubtitles subtitles={subtitles} setCurrentTime={set_subtitleTime} currentIndex={subtitleIndex} />
+      )}
     </div>
   )
 }
 
-function useSubtitles(mediaTitle, currentTime, translateLang) {
+function useSubtitles(mediaTitle, translateLang) {
   const [subtitles, setSubtitles] = useState([])
-  const [currentSubtitleIndex, set_currentSubtitleIndex] = useState()
 
   async function requestMainSubtitleByTitle() {
     try {
@@ -135,38 +137,22 @@ function useSubtitles(mediaTitle, currentTime, translateLang) {
     }
   }
 
-  const getSubtitleIndexFromCurrentTime = useCallback(() => {    
-    const currentTimeInMS = currentTime * 1000
-    const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
-    console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, currentTime, subtitles.length)
-    return new_currentSubtitleIndex - 1
-  }, [currentTime, subtitles])
-
   useEffect(() => {
     requestMainSubtitleByTitle()
   }, [mediaTitle, translateLang])
 
-  useEffect(() => {
-    const new_currentIndex = getSubtitleIndexFromCurrentTime()
-    if (new_currentIndex !== currentSubtitleIndex) {
-      set_currentSubtitleIndex(new_currentIndex)
-    }
-  }, [subtitles, currentTime])
-
-  return [subtitles, currentSubtitleIndex]
+  return [subtitles]
 }
 
-const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
+const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
   const scrollRef = useRef(null);
-  const [currentIndex, set_currentIndex] = useState(0)
 
   const handleItemClick = (newIndex) => {
-    set_currentIndex(newIndex)
     console.log('newIndex', newIndex)
-    if (updateCurrentTime) {
+    if (setCurrentTime) {
       const newItem = subtitles[newIndex]
       if (newItem?.startTime) {
-        updateCurrentTime(newItem?.startTime)
+        setCurrentTime(newItem?.startTime)
       }
     }
   }
@@ -212,26 +198,12 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
     }
   }, [scrollRef.current])
 
-  useEffect(() => {
-    if (forcedIndex !== currentIndex) {
-      set_currentIndex(forcedIndex)
-    }
-  }, [forcedIndex])
 
   return (
     // <DraggableResizableComponent>
     <div
       ref={scrollRef}
-      className="absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
-      style={{
-        background: '#0000004d',
-        height: '120px',
-        width: '50vw',
-        minWidth: '280px',
-        scrollSnapType: 'y mandatory',
-        boxShadow: '1px 1px 5px 5px #0000004d',
-        color: 'white'
-      }}
+      className="scrollsub-container absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
     >
       {subtitles?.map((subtitleLine, lineIndex) => {
         return (
@@ -239,18 +211,19 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
             style={{
               scrollSnapAlign: 'center',
               transition: '0.125s ease-in',
-              opacity: lineIndex === forcedIndex ? '1' : '0.8',
+              opacity: lineIndex === currentIndex ? '1' : '0.9',
             }}
             className="flex items-center"
           >
-            <i
+            {/* <i
               className="fa fa-play text-xs cursor-pointer hover:text-red-500 p-1"
               style={{ fontSize: '0.6em', display: 'block', transition: '0.125s ease-in' }}
               onClick={() => handleItemClick(lineIndex)}
-            ></i><b className="ml-1" style={{ 
-              transform: lineIndex === forcedIndex ? 'scale(1.02)' : 'scale(1)',
+            ></i> */}
+            <b className="ml-1" style={{
+              fontWeight: lineIndex === currentIndex ? 'bold' : 'normal',
               transition: '0.125s ease-in'
-            }}>{subtitleLine.text}</b>
+            }}>{degausser(subtitleLine.text)}</b>
           </div>
         )
       })}
@@ -329,7 +302,7 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
   }, [currentIndex])
 
   useEffect(() => {
-    if (forcedIndex !== currentIndex) {
+    if (forcedIndex !== undefined && forcedIndex !== currentIndex) {
       set_currentIndex(forcedIndex)
     }
   }, [forcedIndex])
@@ -354,7 +327,7 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
           )
         })}
       </div>
-      <div className="scroll-list-container__right-bar pt-1 absolute right-0">
+      <div className="scroll-list-container__right-bar pt-1 absolute right-0 top-2">
         <BarsSmall />
       </div>
     </div>
@@ -372,7 +345,9 @@ const Quiz = () => {
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+        <div className="absolute z-20 w-full" style={{ bottom: '10vh' }}>
+          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+        </div>
         <ShortsColumns
           wordList={wordList}
           currentWordOccurances={currentWordOccurances}

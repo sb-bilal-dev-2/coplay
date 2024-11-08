@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react'
 import useRequests from '../useRequests';
 import { useParams } from 'react-router';
+import api from '../api';
 
 const CRUDRoute = () => {
     const { model } = useParams()
@@ -33,8 +34,17 @@ const CRUDRoute = () => {
         putItems(JSON.parse(editingItemRef?.current?.value), () => setEditingItem(''))
     }
 
+    const handleYoutubeUrl = async (input) => {
+        const youtubeVideoId = (input)
+        const videoInfo = await api('/youtube_video/' + youtubeVideoId)
+        return videoInfo
+    }
+
     const handlePutNewItem = () => {
-        putItems(newItemTextarea?.current?.value && JSON.parse(newItemTextarea?.current?.value), () => setEditingItem(''))
+        const input = newItemTextarea?.current?.value
+        const isYoutubeUrl = isValidUrl(input) && input.contains('https://www.youtube.com') || input.contains('https://youtu.be') // https://www.youtube.com/watch?v=2Vv-BfVoq4g
+        const newItemJson = isYoutubeUrl ? handleYoutubeUrl(input) : input.length && JSON.parse(newItemTextarea?.current?.value)
+        putItems(newItemJson, () => setEditingItem(''))
     }
 
     return (
@@ -77,6 +87,18 @@ const CRUDRoute = () => {
             })}
         </div>
     )
+}
+
+export function isValidUrl(string) {
+    let url;
+
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
+    }
+
+    return url.protocol === "http:" || url.protocol === "https:";
 }
 
 export default CRUDRoute;

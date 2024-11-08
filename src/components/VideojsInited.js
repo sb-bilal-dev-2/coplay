@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Videojs from "./Videojs";
 import throttle from "../throttle";
 
-const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }) => {
+const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate, isYoutubeVideo }) => {
     // const videoRef = useRef();
     const [isLoadedMetadata, set_isLoadedMetadata] = useState(false)
     const playerRef = useRef(null);
@@ -14,7 +14,7 @@ const VideojsInited = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate }
         fluid: true,
         sources: [{
             src: videoSrc,
-            type: 'video/mp4'
+            type: isYoutubeVideo ? 'video/youtube' : "video/mp4",
         }],
         html5: {
             nativeControlsForTouch: false,

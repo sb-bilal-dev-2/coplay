@@ -1,6 +1,9 @@
 
-.VideoContainer div[data-vjs-player="true"] > div > video-js {
-    height: 90vh !important;
+.ShortVideo, div[data-vjs-player="true"], div[data-vjs-player="true"] > div {
+    height: 100%;
+}
+
+div[data-vjs-player="true"] > div > video-js {
     padding-top: 0 !important;
     overflow-y: hidden;
     border-radius: 2px;
@@ -64,7 +67,6 @@
     background: black;
     @media (max-width: 600px) {
         width: 100vw;
-        height: 100vh;
         border-radius: 0;
         margin-bottom: 0;
         padding-top: 0;
@@ -130,14 +132,34 @@
     background-color: rgba(0, 0, 0, 0) !important;
 }
 
+.scrollsub-container {
+    height: 120px;
+    min-width: 100px;
+    width: 50%;
+    scroll-snap-type: y mandatory;
+    color: white;
+    box-shadow: 1px 1px 5px 5px #0000001f;
+    background: #0000001f;
+
+    @media (max-width: 600px) {
+        /* min-width: 300px; */
+        width: 70%;
+    }
+}
+
 .scroll-list {
     scroll-snap-type: x mandatory;
     padding: 0 40px;
+    
+    @media (max-width: 600px) {
+        padding: 0 10px;
+    }
 }
 
 .scroll-list__item {
     scroll-snap-align: center;
     padding-top: 15px;
+    white-space: nowrap;
 }
 
 .scroll-list-container__right-bar {

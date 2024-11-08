@@ -5,6 +5,26 @@
   position: relative;
 }
 
+.tags-first-sticky {
+  margin-right: -40px;
+  margin-left: 40px;
+  z-index: 30;
+  
+  @media (max-width: 600px) {
+    margin-right: -10px;
+    margin-left: 10px;    
+  }
+}
+
+.tags-bar {
+  background: #fff6ff;
+  padding: 2px 16px;
+
+  @media (max-width: 600px) {
+    padding: 2px 4px;
+  }
+}
+
 .menu-list {
   width: 100%;
   scroll-snap-type: x mandatory;
@@ -13,12 +33,86 @@
   position: relative;
   margin: 0;
   display: flex;
-  padding: 8px 36px;
+  padding: 6px 4px 0px 4px;
+
+  .vertical {
+    max-width: calc(100vw - 32px);
+    height: 380px;
+    width: 240px;
+  }
+  
+  .horizontal {
+    max-width: calc(100vw - 32px);
+    height: 240px;
+    width: 340px;
+  }
+
+  .list {
+    overflow: visible;
+    position: relative;
+    margin-top: 6px;
+  }
+
+  .list::after {
+    border-radius: 40px 40px 0 0;
+    margin-left: 2.5%;
+    margin-top: -4px;
+    position: absolute;
+    width: 95%;
+    height: 4px;
+    content: '';
+    background: rgb(194 170 0 / 94%);
+    border-top: 1px solid white;
+  }
+
+  .list::before {
+    border-radius: 90px 90px 0 0;
+    margin-left: 5%;
+    margin-top: -6px;
+    position: absolute;
+    width: 90%;
+    height: 6px;
+    content: '';
+    background: rgb(216 184 88);
+  }
 }
 
 .menu-list li {
   scroll-snap-align: start;
-  padding-left: 24px;
+  /* padding-left: 12px;
+  padding-right: 12px; */
+  
+  .full {
+    width: 600px;
+    height: 400px;
+    flex-grow: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .menu-list {
+    li {
+      /* padding-left: 6px;
+      padding-right: 6px; */
+    }
+
+    .vertical {
+      max-width: calc(100vw - 8px);
+      height: 280px;
+      width: 160px;
+    }
+    
+    .horizontal {
+      max-width: calc(100vw - 8px);
+      height: 180px;
+      width: 240px;
+    }
+
+    .full {
+      width: 100%;
+      height: 280px;
+    }
+  }
 }
 
 @media (min-width: 468px) {
@@ -37,12 +131,9 @@
 }
 
 .list-card {
-  max-width: calc(100vw - 32px);
   float: left;
   display: flex;
   flex-direction: column;
-  height: 240px;
-  width: 340px;
   user-select: "none";
   cursor: pointer;
   font-weight: bold;
@@ -66,10 +157,6 @@
   text-overflow: ellipsis;
   color: #222;
   font-weight: bold;
-}
-
-.verticalCard {
-  flex: 1 0 360px;
 }
 
 .list-card:hover {

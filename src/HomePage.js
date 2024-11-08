@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
-import HorizontalScrollMenu from "./components/HorizontalScrollMenu";
+import HorizontalScrollMenu, { TagsScroll } from "./components/HorizontalScrollMenu";
 import StickyHeader from "./components/StickyHeader";
 import Footer from "./components/Footer";
 import { BASE_SERVER_URL } from "./api";
@@ -10,6 +10,7 @@ import Onboarding from "./components/Onboarding";
 import PWAInstall from "./components/PWAInstall";
 import { useSelector } from "react-redux";
 import { useDynamicReducer } from "./dynamicReducer";
+import InfiniteScroll from "./components/InfiniteScroll";
 
 const HomePage = () => {
   const { items: videos } = useDynamicReducer("movies");
@@ -25,16 +26,17 @@ const HomePage = () => {
       <Onboarding/>
       <StickyHeader />
       {/* <Hero /> */}
+      <TagsScroll firstSticky onIndexUpdate={(newTagIndex) => console.log('newTagIndex', newTagIndex)} />
       <div className="">
-        <h2 className="home-page__title">{"Coplay Journey"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+        <h2 className="home-page__title">{"Popular Phrase Lists"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
       </div>
       <div className="">
-        <h2 className="home-page__title">{"Coplay Journey"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+        <h2 className="home-page__title">{"Lessons"}</h2>
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
       </div>
       <div className="">
-        <h2 className="home-page__title">{"Watch Again"}</h2>
+        <h2 className="home-page__title">{"Word Lists"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
       <div className="">
@@ -42,7 +44,7 @@ const HomePage = () => {
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
-          verticalCard
+          card_className="horizontal" 
         />
       </div>
       <div className="">
@@ -50,16 +52,19 @@ const HomePage = () => {
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
-          verticalCard
+          card_className="horizontal" 
         />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("movies")}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("music")}</h2>
-        <HorizontalScrollMenu items={clips} baseRoute={"movie"} />
+        <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
+      </div>
+      <div className="">
+        {/* <InfiniteScroll /> */}
       </div>
       {/* <Footer /> */}
     </div>
