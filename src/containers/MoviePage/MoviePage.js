@@ -31,7 +31,9 @@ const MoviePage = () => {
     <ErrorBoundary>
       <GoBackButton />
       <div className="MainContainer">
-        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+        <div className="absolute z-20 w-full" style={{ }}>
+          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+        </div>
         <ShortsColumns
           forceRenderFirstItem={(activeIndex) => (
             <div className="VideoContainer">
@@ -76,24 +78,24 @@ function useMovieInfo(title) {
 }
 
 function useHandleTimeUpdate(list, forcedWordIndex, set_forcedWordIndex) {
-    const [currentTime, set_currentTime] = useState(0)
-    const handleTimeUpdate = useCallback((new_currentTime) => {
-      set_currentTime(new_currentTime)
-    }, [list])
-  
-    useEffect(() => {
-      let breaked = false;
+  const [currentTime, set_currentTime] = useState(0)
+  const handleTimeUpdate = useCallback((new_currentTime) => {
+    set_currentTime(new_currentTime)
+  }, [list])
 
-      for (let ii = 0; ii < list.length; ii++) {
-        const item = list[ii];
-        if (!breaked && item.startTime > currentTime * 1000) {
-          set_forcedWordIndex(ii - 1)
-          breaked = true;
-        }
+  useEffect(() => {
+    let breaked = false;
+
+    for (let ii = 0; ii < list.length; ii++) {
+      const item = list[ii];
+      if (!breaked && item.startTime > currentTime * 1000) {
+        set_forcedWordIndex(ii - 1)
+        breaked = true;
       }
-    }, [currentTime, list])
-  
-    return { handleTimeUpdate, currentTime, forcedWordIndex, set_forcedWordIndex }
+    }
+  }, [currentTime, list])
+
+  return { handleTimeUpdate, currentTime, forcedWordIndex, set_forcedWordIndex }
 }
 
 export default MoviePage;

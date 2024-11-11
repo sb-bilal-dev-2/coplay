@@ -102,7 +102,7 @@ const IOSInstallInstructions = () => {
     <div className="fixed top-20 left-4 right-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200 max-w-sm mx-auto z-50">
       <p className="text-lg font-semibold mb-3">Install <img src='logo-black.png' className="w-8 h-8 overflow-hidden rounded-full inline" />Coplay App?</p>
       <ol className="list-decimal list-inside mb-4 text-gray-700">
-        <li className="mb-2">Tap the Share button <img src='image.png' className="w-8 h-8 overflow-hidden rounded-full inline" /><br /> in your browser.</li>
+        <li className="mb-2">Tap the <img src='image.png' className="w-8 h-8 overflow-hidden rounded-full inline" /><br /> icon in your search barch.</li>
         <li className="mb-2">Scroll down and tap "Add to Home Screen" <i className="fa fa-plus p-1 rounded border border-2 text-gray-600 border-gray-600"></i></li>
       </ol>
       <button 

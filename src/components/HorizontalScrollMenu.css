@@ -9,10 +9,10 @@
   margin-right: -40px;
   margin-left: 40px;
   z-index: 30;
-  
+
   @media (max-width: 600px) {
     margin-right: -10px;
-    margin-left: 10px;    
+    margin-left: 10px;
   }
 }
 
@@ -40,7 +40,7 @@
     height: 380px;
     width: 240px;
   }
-  
+
   .horizontal {
     max-width: calc(100vw - 32px);
     height: 240px;
@@ -81,7 +81,7 @@
   scroll-snap-align: start;
   /* padding-left: 12px;
   padding-right: 12px; */
-  
+
   .full {
     width: 600px;
     height: 400px;
@@ -94,39 +94,43 @@
     li {
       /* padding-left: 6px;
       padding-right: 6px; */
-    }
 
-    .vertical {
-      max-width: calc(100vw - 8px);
-      height: 280px;
-      width: 160px;
-    }
-    
-    .horizontal {
-      max-width: calc(100vw - 8px);
-      height: 180px;
-      width: 240px;
-    }
+      .vertical {
+        max-width: calc(100vw - 8px);
+        height: 280px;
+        width: 160px;
+      }
 
-    .full {
-      width: 100%;
-      height: 280px;
+      .horizontal {
+        max-width: calc(100vw - 8px);
+        height: 180px;
+        width: 240px;
+      }
+
+      .full {
+        width: 100%;
+        height: 280px;
+      }
     }
   }
 }
 
 @media (min-width: 468px) {
+
   /* Webkit browsers (Chrome, Safari) */
   .menu-list::-webkit-scrollbar {
-    width: 1px; /* Width of the scrollbar */
+    width: 1px;
+    /* Width of the scrollbar */
   }
 
   .menu-list::-webkit-scrollbar-thumb {
-    background-color: transparent; /* Color of the scrollbar thumb */
+    background-color: transparent;
+    /* Color of the scrollbar thumb */
   }
 
   .menu-list::-webkit-scrollbar-track {
-    background-color: transparent; /* Color of the scrollbar track */
+    background-color: transparent;
+    /* Color of the scrollbar track */
   }
 }
 
@@ -141,7 +145,7 @@
   /* text-shadow: 1px 1px 1px black; */
 }
 
-.list-card > .list-card__image {
+.list-card>.list-card__image {
   background-position: center;
   background-size: cover;
   filter: brightness(0.95);

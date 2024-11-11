@@ -308,8 +308,8 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
   }, [forcedIndex])
 
   return (
-    <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
-      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll absolute top-0">
+    <div className="scroll-list-container relative text-white z-20 scroll-main-container flex bg-transparent">
+      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0">
         {wordList?.map((item, index) => {
           return (
             <div
@@ -344,16 +344,18 @@ const Quiz = () => {
   return (
     <ErrorBoundary>
       <GoBackButton />
-      <div className="MainContainer">
-        <div className="absolute z-20 w-full" style={{ bottom: '10vh' }}>
+      <div className="MainContainer" style={{ background: '#222', minHeight: '100vh' }}>
+        <div className="absolute z-20 w-full bg-red" style={{ top: '0' }}>
           <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
         </div>
-        <ShortsColumns
-          wordList={wordList}
-          currentWordOccurances={currentWordOccurances}
-          wordsIndex={playingWordIndex}
-          set_practicingWordIndex={set_practicingWordIndex}
-        />
+        {/* <div style={{  }}> */}
+          <ShortsColumns
+            wordList={wordList}
+            currentWordOccurances={currentWordOccurances}
+            wordsIndex={playingWordIndex}
+            set_practicingWordIndex={set_practicingWordIndex}
+          />  
+        {/* </div> */}
         {/* <ScrollingSubtitles subtitles={subtitles} /> */}
       </div>
     </ErrorBoundary>
@@ -420,6 +422,8 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
   const currentAvailableOccurancesLength = currentWordOccurances?.length
   // console.log('currentWordInfo', currentWordInfo)
+  console.log('wordList', wordList)
+
   return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
 }
 
