@@ -320,6 +320,8 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
                 color: currentIndex === index && 'orangered',
                 fontWeight: currentIndex === index && 'bolder',
                 height: '50px',
+                marginLeft: !index && 30,
+                marginRight: wordList.length - 1 === index && 30
               }}
               onClick={() => handleItemClick(index)}>
               {item.the_word}
@@ -344,18 +346,16 @@ const Quiz = () => {
   return (
     <ErrorBoundary>
       <GoBackButton />
-      <div className="MainContainer" style={{ background: '#222', minHeight: '100vh' }}>
+      <div className="MainContainer" style={{ background: '#000', minHeight: '100vh' }}>
         <div className="absolute z-20 w-full bg-red" style={{ top: '0' }}>
           <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
         </div>
-        {/* <div style={{  }}> */}
-          <ShortsColumns
-            wordList={wordList}
-            currentWordOccurances={currentWordOccurances}
-            wordsIndex={playingWordIndex}
-            set_practicingWordIndex={set_practicingWordIndex}
-          />  
-        {/* </div> */}
+        <ShortsColumns
+          wordList={wordList}
+          currentWordOccurances={currentWordOccurances}
+          wordsIndex={playingWordIndex}
+          set_practicingWordIndex={set_practicingWordIndex}
+        />
         {/* <ScrollingSubtitles subtitles={subtitles} /> */}
       </div>
     </ErrorBoundary>

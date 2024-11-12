@@ -169,7 +169,7 @@ div[data-vjs-player="true"] > div > video-js {
 .scroll-list-container__right-bar {
     /* padding: 4px 10px; */
     /* background: linear-gradient(-90deg, black, black, black, transparent) */
-    background-color: #222;
+    background-color: #000;
 }
 
 /* @media (min-width: 468px) { */

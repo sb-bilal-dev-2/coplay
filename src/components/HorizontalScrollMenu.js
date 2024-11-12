@@ -119,7 +119,7 @@ export const HorizontalScrollMenuCardMain = ({
       className={`list-card ${card_className}`}
       to={[baseRoute, title].join("/")}
     >
-      <div className="list-card__image" style={{
+      <div className="list-card__image mx-1" style={{
         backgroundImage: `url('${posterUrl ||
           `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
           }')` + `, url('${thumbnail}')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
