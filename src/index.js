@@ -29,6 +29,7 @@ import NotFound from "./containers/NotFound";
 import PricePage from "./containers/PricePage";
 import useAuthentication from "./containers/Authentication.util";
 import api from "./api";
+import { ShortVideo } from "./containers/ShortVideo";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -41,6 +42,14 @@ const router = createHashRouter(
         path="/account"
         element={<Account />}
         loader={authenticatedRoute}
+      />
+      <Route
+        exact
+        path="/single"
+        element={<div style={{ width: '100vw', height: 400 }}>
+          <ShortVideo isActive mediaTitle="frozen_2" forcedCurrentTimeChange={1500} hideSubtitles />
+          <video width={300} autoPlay controls height={200}><source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4" /></video>
+        </div>}
       />
       <Route
         exact
@@ -110,7 +119,7 @@ async function authenticatedRoute_moderator() {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (!MODERATOR_EMAIL_LIST[response?.data?.email]) {
+    if (!MODERATOR_EMAIL_LIST[response?.email]) {
       return redirect("/")
     }
   } else {

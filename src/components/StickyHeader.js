@@ -190,7 +190,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
         _Id,
       });
 
-      window.location.href = response.data.telegramLink;
+      window.location.href = response.telegramLink;
     } catch (error) {
       console.error("Error generating connection code:", error);
     }

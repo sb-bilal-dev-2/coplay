@@ -10,7 +10,7 @@ export const fetchUserData = async () => {
     try {
       const userResponse = await api().get("/get-user?allProps=1");
 
-      return userResponse.data
+      return userResponse
     } catch (err) {
       if (err.message === "Request failed with status code 403") {
         localStorage.removeItem("token");

@@ -4,9 +4,9 @@ import { createDebouncedFunction } from "../debounce";
 import { Link } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
 import VideojsInited from "./VideojsInited";
-import { ShortVideo } from "../containers/Quiz";
 import VideoFrame from "./VideoFrame";
 import BarsSmall from "./BarsSmall";
+import { ShortVideo } from "../containers/ShortVideo";
 
 const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' }) => {
   const scrollRef = useRef(null);

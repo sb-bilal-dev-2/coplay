@@ -7,11 +7,11 @@ import { BASE_SERVER_URL } from "../api";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YoutubePlayer from "../components/YoutubePlayer";
 import ErrorBoundary from "./ErrorBoundary";
-import VideojsInited from "../components/VideojsInited";
 import useCustomScroll from "../components/useCustomScroll";
 import BarsSmall from "../components/BarsSmall";
 import DraggableResizableComponent from "../components/DraggableResizableComponent";
 import { degausser } from "../utils/degausser";
+import { ShortVideo } from "./ShortVideo";
 
 
 function useTelegramWebApp() {
@@ -71,77 +71,6 @@ const ShortsContainer = ({ items, forceRenderFirstItem, wordsIndex, onSwipeLeft,
       </motion.div>
     </div>
   )
-}
-
-const extractYoutubeId = title => {
-  if (title = title.split('YOUTUBE_ID[')[1]) {
-    return 'https://www.youtube.com/watch?v=' + title.split(']')[0];
-  }
-  return ''
-}
-
-const getSubtitleIndexFromCurrentTime = (subtitleTime, subtitles) => {
-  const currentTimeInMS = subtitleTime * 1000
-  const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
-  console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, subtitleTime, subtitles.length)
-  return new_currentSubtitleIndex - 1
-}
-
-export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles }) => {
-  // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
-  const isYoutubeVideo = mediaTitle && mediaTitle?.includes('YOUTUBE_ID[')
-  let mediaSrc = ''
-
-  if (isYoutubeVideo) {
-    mediaSrc = extractYoutubeId(mediaTitle)
-  } else {
-    mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
-  }
-
-  const [subtitleTime, set_subtitleTime] = useState(0)
-  const [subtitles] = useSubtitles(mediaTitle)
-
-  const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
-
-  const handleTimeUpdate = (newTime) => {
-    if (onTimeUpdate) { onTimeUpdate() }
-
-    set_subtitleTime(newTime)
-  }
-
-  return (
-    <div className="ShortVideo">
-      <VideojsInited
-        onTimeUpdate={handleTimeUpdate}
-        isActive={isActive}
-        videoSrc={mediaSrc}
-        startTime={forcedCurrentTimeChange}
-        isYoutubeVideo={isYoutubeVideo}
-      />
-      {!hideSubtitles && (
-        <ScrollingSubtitles subtitles={subtitles} setCurrentTime={set_subtitleTime} currentIndex={subtitleIndex} />
-      )}
-    </div>
-  )
-}
-
-function useSubtitles(mediaTitle, translateLang) {
-  const [subtitles, setSubtitles] = useState([])
-
-  async function requestMainSubtitleByTitle() {
-    try {
-      translateLang = translateLang?.length ? '&translateLang=' + translateLang : ''
-      const response = await api().get(`/subtitles_v2?mediaTitle=${mediaTitle}` + translateLang)
-      setSubtitles(response.data)
-    } catch (err) {
-    }
-  }
-
-  useEffect(() => {
-    requestMainSubtitleByTitle()
-  }, [mediaTitle, translateLang])
-
-  return [subtitles]
 }
 
 const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
@@ -309,7 +238,7 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
 
   return (
     <div className="scroll-list-container relative text-white z-20 scroll-main-container flex bg-transparent">
-      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0">
+      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-6">
         {wordList?.map((item, index) => {
           return (
             <div
@@ -321,7 +250,6 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
                 fontWeight: currentIndex === index && 'bolder',
                 height: '50px',
                 marginLeft: !index && 30,
-                marginRight: wordList.length - 1 === index && 30
               }}
               onClick={() => handleItemClick(index)}>
               {item.the_word}
@@ -374,10 +302,10 @@ function useBodyOverflowHidden() {
 }
 
 const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
-  'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).data.results[0]?.keywords || [],
-  'video': async (listName) => (await api().get(`/movie_words/${listName}?without_user_words=true`)).data,
+  'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).results[0]?.keywords || [],
+  'video': async (listName) => (await api().get(`/movie_words/${listName}?without_user_words=true`)),
   'self_words': async (listName) => {
-    const wordList = (await api().get(`/self_words/${listName}`)).data
+    const wordList = (await api().get(`/self_words/${listName}`))
 
     return wordList;
   }
@@ -452,7 +380,7 @@ async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousO
 
 async function request_wordOccurances(the_word) {
   try {
-    const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`)).data;
+    const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`));
     // console.log("wordData", wordData);
     if (wordData?.length) {
       return wordData

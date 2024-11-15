@@ -49,7 +49,7 @@ const Subtitles = ({
       // response = await api().get(`/subtitles?name=${title}${locale ? '&locale=' + locale : ""}`); // Replace with the actual URL of your subtitle file
       // console.log("4" + locale);
 
-      let subtitleText = response.data;
+      let subtitleText = response;
       // const newSubtitles = fromVtt(subtitleText, "ms")
       if (locale !== "en") {
         // console.log("5" + subtitleId);

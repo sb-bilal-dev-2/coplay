@@ -10,11 +10,11 @@ import useAuthentication from "../Authentication.util";
 import SecondaryButton from "../../components/SecondaryButton";
 import { usePremiumStatus } from "../../helper/usePremiumStatus";
 // import VideoPlayer from "./VideoPlayer";
-import DashVideoPlayer from "../../components/DashVideoPlayer";
 import YoutubePlayer from "../../components/YoutubePlayer";
 import VideojsInited from "../../components/VideojsInited";
-import { GoBackButton, ShortVideo, ShortsColumns, WordCarousel, WordsScroll, useWordColletionWordInfos } from "../Quiz";
+import { GoBackButton, ShortsColumns, WordCarousel, WordsScroll, useWordColletionWordInfos } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
+import { ShortVideo } from "../ShortVideo";
 
 const MoviePage = () => {
   const { title } = useParams();

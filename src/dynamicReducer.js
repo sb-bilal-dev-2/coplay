@@ -21,7 +21,8 @@ const createDynamicSlice = (uri) => {
         // params = '?' + new URLSearchParams(query)
       }
       const response = await api().get(`/${uri}` + params);
-      return response.data;
+      console.log('response', response)
+      return response;
     }
   );
 
@@ -29,7 +30,9 @@ const createDynamicSlice = (uri) => {
     `${uri}/putItems`,
     async (data) => {
       const response = await api().put(`/${uri}`, Array.isArray(data) ? data : [data]);
-      return response.data;
+      console.log('response p', response)
+
+      return response;
     }
   );
 
@@ -37,7 +40,7 @@ const createDynamicSlice = (uri) => {
     `${uri}/deleteItem`,
     async (id) => {
       const response = await api().delete(`/${uri}/${id}`);
-      return response.data;
+      return response;
     }
   );
 

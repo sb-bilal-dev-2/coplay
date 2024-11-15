@@ -38,7 +38,7 @@ const Quiz = () => {
 
   const requestLemmaOccurances = async (lemma) => {
     try {
-      const wordData = (await api().get(`/occurances_v2?lemma=${lemma}&limit=5`)).data;
+      const wordData = await api().get(`/occurances_v2?lemma=${lemma}&limit=5`);
       console.log("wordData", wordData);
       if (wordData.length) {
         set_occurances(wordData);
@@ -93,7 +93,7 @@ const Quiz = () => {
     console.log("requesting initials");
     try {
       if (list === "repeating" || list === "learning" || list === "learned") {
-        currentList = (await api().get("/get-user?allProps=1"))?.data
+        currentList = (await api().get("/get-user?allProps=1"))
         ?.words;
         const userWordLists = sortByLearningState(currentList);
         currentList = userWordLists[`${list}List`];

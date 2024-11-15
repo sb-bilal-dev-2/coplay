@@ -10,7 +10,7 @@ export function usePost(handlePostResponse = () => { }) {
     async function post(...args) {
         set_isLoading(true);
         try {
-            const new_data = (await api().post(...args)).data;
+            const new_data = (await api().post(...args));
             handlePostResponse(new_data);
             set_data(new_data);
             return new_data;
