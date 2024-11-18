@@ -9,10 +9,10 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
   useEffect(() => {
     if (isLoaded) {
       console.log('new startTime', startTime)
-      videoRef.current.currentTime = startTime
     }
     try {
       if (isActive && isLoaded) {
+        videoRef.current.currentTime = startTime
         videoRef.current.play().catch(() => {})
       } else {
         if (!videoRef.current.paused) {
