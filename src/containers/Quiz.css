@@ -175,7 +175,8 @@ div[data-vjs-player="true"] > div > video-js {
 /* @media (min-width: 468px) { */
     /* Webkit browsers (Chrome, Safari) */
     .scroll-list::-webkit-scrollbar {
-      width: 1px; /* Width of the scrollbar */
+      width: 0;
+      height: 0;
     }
   
     .scroll-list::-webkit-scrollbar-thumb {

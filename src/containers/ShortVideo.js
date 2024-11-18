@@ -7,9 +7,12 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
   const videoRef = useRef(null)
   const [isLoaded, set_isLoaded] = useState()
   useEffect(() => {
-    if (isActive && isLoaded) {
+    if (isLoaded) {
       console.log('new startTime', startTime)
       videoRef.current.currentTime = startTime
+    }
+    if (isActive && isLoaded) {
+      videoRef.current.play()
     } else {
       if (!videoRef.current.paused) {
         videoRef.current.pause()
@@ -24,9 +27,9 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
     <div style={{ height: '90%' }}>
       <video
         controls
-        autoPlay
+        // autoPlay={isActive}
         ref={videoRef}
-        muted
+        muted={muted}
         onLoadedMetadata={onLoadedMetadata}
         className="w-full"
         playsInline
@@ -83,7 +86,7 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   const videoRef = useRef(null)
   return (
     <div className="ShortVideo">
-      {isActive && (
+      {/* {isActive && ( */}
         <VideoInit
           onTimeUpdate={handleTimeUpdate}
           isActive={isActive}
@@ -91,7 +94,7 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
           startTime={forcedCurrentTimeChange}
           isYoutubeVideo={isYoutubeVideo}
         />
-      )}
+      {/* )} */}
       {/* <VideojsInite
           onTimeUpdate={handleTimeUpdate}
           isActive={isActive}

@@ -184,9 +184,9 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
           id: occuranceItem?.id, renderItem: (activeOccuranceIndex) => {
             // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
             // const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-            const hidden = activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex
+            const currentOrFollowingItem = activeOccuranceIndex === occuranceIndex || activeOccuranceIndex + 1 === occuranceIndex
             // if (occuranceIndex === 0) return;
-            return !hidden && <ShortVideo
+            return currentOrFollowingItem && <ShortVideo
               isActive={activeOccuranceIndex === occuranceIndex}
               mediaTitle={currentPlayingOccurance?.mediaTitle}
               forcedCurrentTimeChange={currentPlayingOccurance?.startTime / 1000}

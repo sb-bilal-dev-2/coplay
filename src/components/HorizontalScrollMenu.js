@@ -132,8 +132,8 @@ export const HorizontalScrollMenuCardMain = ({
             showSubtitles={hoveringItemId === _id}
           />
           :
-          (!youtubeUrl &&
-            <VideoFrame time={1000} videoSrc={BASE_SERVER_URL + "/movie?name=" + title} />
+          (!youtubeUrl && !posterUrl &&
+            <VideoFrame time={1000} title={title} videoSrc={BASE_SERVER_URL + "/movie?name=" + title} />
           )
         }
       </div>
