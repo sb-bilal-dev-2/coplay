@@ -11,12 +11,16 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
       console.log('new startTime', startTime)
       videoRef.current.currentTime = startTime
     }
-    if (isActive && isLoaded) {
-      videoRef.current.play()
-    } else {
-      if (!videoRef.current.paused) {
-        videoRef.current.pause()
+    try {
+      if (isActive && isLoaded) {
+        videoRef.current.play().catch(() => {})
+      } else {
+        if (!videoRef.current.paused) {
+          videoRef.current.pause().catch(() => {})
+        }
       }
+    } catch(error) {
+      console.log('error', error)
     }
   }, [startTime, isActive, isLoaded])
   const onLoadedMetadata = () => {
@@ -24,7 +28,7 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
     set_isLoaded(true)
   }
   return (
-    <div style={{ height: '90%' }}>
+    <div style={{ height: '100%' }}>
       <video
         controls
         // autoPlay={isActive}
@@ -87,13 +91,13 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   return (
     <div className="ShortVideo">
       {/* {isActive && ( */}
-        <VideoInit
-          onTimeUpdate={handleTimeUpdate}
-          isActive={isActive}
-          videoSrc={mediaSrc}
-          startTime={forcedCurrentTimeChange}
-          isYoutubeVideo={isYoutubeVideo}
-        />
+      <VideoInit
+        onTimeUpdate={handleTimeUpdate}
+        isActive={isActive}
+        videoSrc={mediaSrc}
+        startTime={forcedCurrentTimeChange}
+        isYoutubeVideo={isYoutubeVideo}
+      />
       {/* )} */}
       {/* <VideojsInite
           onTimeUpdate={handleTimeUpdate}
