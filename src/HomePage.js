@@ -33,7 +33,7 @@ const HomePage = () => {
       </div>
       <div className="">
         <h2 className="home-page__title">{"Lessons"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
       </div>
       <div className="">
         <h2 className="home-page__title">{"Word Lists"}</h2>
@@ -44,7 +44,7 @@ const HomePage = () => {
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
-          card_className="horizontal" 
+          card_className="horizontal list" 
         />
       </div>
       <div className="">
@@ -52,12 +52,12 @@ const HomePage = () => {
         <HorizontalScrollMenu
           items={wordCollections}
           baseRoute="quiz"
-          card_className="horizontal" 
+          card_className="horizontal list" 
         />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("movies")}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal" />
+        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("music")}</h2>
