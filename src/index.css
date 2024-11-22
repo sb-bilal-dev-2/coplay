@@ -104,6 +104,19 @@ input:-webkit-autofill:active {
   content: "U+26F6";
 }
 
+.bg-icon {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background: rgba(100, 100, 100, 0.3);
+  }
+
+  &:active {
+    background: rgba(150, 150, 150, 0.3);
+  }
+}
+
 /* ICONS END */
 
 /* SHARED CLASSES */

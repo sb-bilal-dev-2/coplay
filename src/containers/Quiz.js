@@ -12,6 +12,7 @@ import BarsSmall from "../components/BarsSmall";
 import DraggableResizableComponent from "../components/DraggableResizableComponent";
 import { degausser } from "../utils/degausser";
 import { ShortVideo } from "./ShortVideo";
+import RelatedVideosDropdown from "./RelatedVideosDropdown";
 
 
 function useTelegramWebApp() {
@@ -236,31 +237,61 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
     }
   }, [forcedIndex])
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const showRecommendations = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div className="scroll-list-container relative text-white z-20 scroll-main-container flex bg-transparent">
-      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-6">
-        {wordList?.map((item, index) => {
-          return (
-            <div
-              className="scroll-list__item px-1 mx-2 py-2 cursor-pointer"
-              style={{
-                borderBottom: currentIndex === index && '2px solid orangered',
-                // backgroundColor: currentIndex === index && '#f9e7db5e',
-                color: currentIndex === index && 'orangered',
-                fontWeight: currentIndex === index && 'bolder',
-                height: '50px',
-                marginLeft: !index && 30,
-              }}
-              onClick={() => handleItemClick(index)}>
-              {item.the_word}
-            </div>
-          )
-        })}
+    <>
+      <RelatedVideosDropdown
+        isOpen={isOpen}
+        closeDropdown={() => setIsOpen(false)}
+        videos={[
+          { title: 'Video 1', url: '/video1' },
+          { title: 'Video 2', url: '/video2' },
+          { title: 'Video 3', url: '/video3' }
+        ]}
+      />
+      <div className="scroll-list-container relative text-white z-20 scroll-main-container flex bg-transparent">
+        <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-6">
+          {wordList?.map((item, index) => {
+            return (
+              <div
+                className="scroll-list__item px-1 mx-2 py-2 cursor-pointer"
+                style={{
+                  borderBottom: currentIndex === index && '2px solid orangered',
+                  // backgroundColor: currentIndex === index && '#f9e7db5e',
+                  color: currentIndex === index && 'orangered',
+                  fontWeight: currentIndex === index && 'bolder',
+                  transform: currentIndex === index && 'scale(1.2)',
+                  height: '50px',
+                  marginLeft: !index && 40,
+                }}
+                onClick={() => handleItemClick(index)}>
+                {item.the_word}
+              </div>
+            )
+          })}
+          <div
+            className="bg-icon scroll-list__item px-3 mx-2 py-2 cursor-pointer"
+            style={{
+              marginLeft: !wordList.length && 40,
+              // borderLeft: wordList.length && '1px solid #333'
+            }}
+            onClick={showRecommendations}
+          >
+            <i className="fa fa-plus"></i>
+          </div>
+        </div>
+        <div
+          className="scroll-list-container__right-bar pt-1 absolute right-0 top-2"
+        >
+          <BarsSmall />
+        </div>
       </div>
-      <div className="scroll-list-container__right-bar pt-1 absolute right-0 top-2">
-        <BarsSmall />
-      </div>
-    </div>
+    </>
   )
 }
 

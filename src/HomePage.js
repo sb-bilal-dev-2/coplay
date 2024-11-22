@@ -11,6 +11,7 @@ import PWAInstall from "./components/PWAInstall";
 import { useSelector } from "react-redux";
 import { useDynamicReducer } from "./dynamicReducer";
 import InfiniteScroll from "./components/InfiniteScroll";
+import { ShortVideo } from "./containers/ShortVideo";
 
 const HomePage = () => {
   const { items: videos } = useDynamicReducer("movies");
@@ -64,7 +65,9 @@ const HomePage = () => {
         <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
       </div>
       <div className="">
-        {/* <InfiniteScroll /> */}
+        <InfiniteScroll item={movies} renderItem={(item) => {
+          return (<ShortVideo mediaTitle={item.title}/>)
+        }} />
       </div>
       {/* <Footer /> */}
     </div>
