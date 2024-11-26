@@ -498,6 +498,7 @@ app.listen(port, () => {
 // });
 
 createFileRoute(app, "movieFiles");
+createFileRoute(app, "images");
 createFileRoute(app, "clipFiles");
 createCRUDEndpoints("users");
 createCRUDEndpoints("movies");
@@ -541,16 +542,44 @@ function createFileRoute(app, folder) {
 
   // Define a route for handling POST requests
   app.post(`/${folder}/:path*`, async (req, res) => {
-    const { path: filePath } = req.params;
-    const fullPath = path.join(`./files/${folder}`, filePath);
-    const { content } = req.body;
+    // const { path: filePath } = req.params;
+    // const fullPath = path.join(`./files/${folder}`, filePath);
+    // const { content } = req.body;
 
+    // try {
+    //   await fsPromises.writeFile(fullPath, content);
+    //   res.send({ success: true, message: "File saved successfully" });
+    // } catch (error) {
+    //   res.status(500).send({ error: "Internal server error" });
+    // }
+    const { folder } = req.params;
+    const { path: filePath } = req.params;
+    const fullPath = path.join(`./files/images`, filePath);
+    const { content } = req.body;
+    const userAgent = req.headers['User-Agent']
     try {
-      await fsPromises.writeFile(fullPath, content);
-      res.send({ success: true, message: "File saved successfully" });
+      // Create the directory if it doesn't exist
+      if (userAgent.includes('Safari')) {
+        return res.status(200).send('Cannot save from safari')
+      }
+
+      if (fs.existsSync(fullPath)) {
+        return res.status(400).send('File already exists at: ' + fullPath)
+      }
+
+
+      await fsPromises.mkdir(path.dirname(fullPath), { recursive: true });
+      
+      // Convert base64 to buffer and save
+      const imageBuffer = Buffer.from(content, 'base64');
+      await fsPromises.writeFile(fullPath, imageBuffer);
+      
+      res.send({ success: true, message: "Image saved successfully" });
     } catch (error) {
-      res.status(500).send({ error: "Internal server error" });
+      console.error('Server error:', error);
+      return res.status(500).send({ error: "Internal server error" });
     }
+  
   });
 }
 
