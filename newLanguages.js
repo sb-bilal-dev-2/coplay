@@ -9,10 +9,8 @@ const { default: mongoose } = require('mongoose');
 const wordInfos = require('./schemas/wordInfos');
 const { gTranslate } = require('./gTranslate');
 const { generateImage, promptAI } = require('./playground/openai');
-const { initCRUDAndDatabase } = require('./serverCRUD');
 const { default: axios } = require('axios');
 
-initCRUDAndDatabase()
 
 // Available word occurances = https://github.com/hermitdave/FrequencyWords/tree/master/content/2018
 const LEARNING_LANGUAGES = ['ko', 'ru', 'en', 'tr', 'zh-CN']

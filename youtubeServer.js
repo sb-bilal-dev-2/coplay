@@ -2,7 +2,6 @@ const ytdl = require('ytdl-core');
 const fs = require('fs')
 const { exec } = require('child_process');
 const { initCRUDAndDatabase } = require('./serverCRUD')
-initCRUDAndDatabase()
 const { movies_model } = require('./schemas/movies')
 const { parseAndTranslate_single } = require('./newContent');
 const { getTranscriptionOfAudio } = require('./playground/openai');
@@ -29,37 +28,46 @@ const { toVtt } = require('subtitles-parser-vtt');
 // ]
 // Example usage
 const videoURL = process.argv[2]?.replaceAll(`'`, ' ').replaceAll(`"`, ' ');
-const mediaLang = process.argv[3];
-const idTitle = process.argv.includes('--idTitle')
-
-
-if (!videoURL) { throw Error('Pass Url as in Example CLI ') }
-if (!mediaLang) { throw Error('Pass media language as in Example CLI ') }
+const mediaLangArg = process.argv[3];
 
 // getVideoInfoAndStore(videoURL)
-processYoutubeVideo()
-async function processYoutubeVideo() {
-    console.log('processing video: ' + videoURL)
-    await downloadYouTubeVideo(videoURL)
-    const mediaInfo = await getVideoInfoAndStore(videoURL)
-    await getTranscriptionAndStoreAsVtt(mediaInfo)
-    await parseAndTranslate_single(mediaInfo)
+// getVideoInfo(videoURL)
+if (videoURL && mediaLangArg) {
+    // initCRUDAndDatabase()
+    // processYoutubeVideo(videoURL, mediaLangArg)
+}
+
+async function processYoutubeVideo(url, mediaLang) {
+    if (!url) { throw Error('Pass Url as in Example CLI ') }
+    if (!mediaLang) { throw Error('Pass media language as in Example CLI ') }
+
+    console.log('processYoutubeVideo: ' + url)
+    const mediaInfo = await getVideoInfoAndStore(url, mediaLang)
+    console.log('processYoutubeVideo: new title', mediaInfo.title)
+    try {
+        // await downloadYouTubeVideo(url)
+        // await getTranscriptionAndStoreAsVtt(mediaInfo, mediaLang)
+        await parseAndTranslate_single(mediaInfo)
+    } catch(err) {
+        console.log('err', err)
+    }
 }
 
 // Function to get video information
-async function getVideoInfoAndStore(url) {
+async function getVideoInfoAndStore(url, mediaLang) {
     let adjustedInfo;
     try {
         const { videoDetails } = await ytdl.getInfo(url);
-        const title = idTitle ? videoDetails.videoId : videoDetails.title + '_' + videoDetails.videoId
+        const title = videoDetails.title + 'YOUTUBE_ID[' + videoDetails.videoId + ']'
         adjustedInfo = {
             title,
-            mediaLang,
+            mediaLang: mediaLang || mediaLangArg,
             label: videoDetails.title,
             category: videoDetails.category,
             keywords: videoDetails.keywords,
             isShortsEligible: videoDetails.isShortsEligible,
             youtubeUrl: videoDetails.video_url,
+            thumbnail: videoDetails.thumbnails[videoDetails.thumbnails.length]
             // youtubeDetails: videoDetails,
         }
         console.log('adjustedInfo', adjustedInfo)
@@ -77,15 +85,27 @@ async function getVideoInfoAndStore(url) {
         throw error;
     }
 }
+
+async function getVideoInfo(url) {
+    try {
+        const { videoDetails } = await ytdl.getInfo(url);
+        console.log('videoDetails', videoDetails)
+        return videoDetails
+    } catch(err) {
+        console.log('videoDetails error', error)
+    }
+}
+
+// yt-dlp -f mp4 --write-sub --all-subs -o './files/movieFiles/%(title)sYOUTUBE_ID[%(id)s].%(ext)s' --no-check-certificate 'https://www.youtube.com/watch?v=2Vv-BfVoq4g'
 async function downloadYouTubeVideo(url) {
     // audio download test 
     try {
-        const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.%(ext)s' --no-check-certificate '${url}'`;
+        const video_command = `yt-dlp -f mp4 --write-thumbnail --write-sub --all-subs -o './files/movieFiles/%(title)s_%(id)s.%(ext)s' --no-check-certificate '${url}'`;
         await executeCli(video_command)
             .then((message) => console.log('Video Download successful:', message))
             .catch((error) => console.error('Video Download failed:', error))
     
-        const audio_command = `yt-dlp -f bestaudio -o './files/movieFiles/${idTitle ? '' : '%(title)s_'}%(id)s.mp3' --no-check-certificate '${url}'`;
+        const audio_command = `yt-dlp -f bestaudio -o './files/movieFiles/%(title)s_%(id)s.mp3' --no-check-certificate '${url}'`;
         await executeCli(audio_command)
             .then((message) => console.log('Audio Download successful:', message))
             .catch((error) => console.error('Audio Download failed:', error))
@@ -112,8 +132,8 @@ function executeCli(command) {
     });
 }
 
-async function getTranscriptionAndStoreAsVtt(mediaInfo) {
-    const vttPath = path.resolve(`files/movieFiles/${mediaInfo.title}.${mediaInfo.mediaLang}.vtt`)
+async function getTranscriptionAndStoreAsVtt(mediaInfo, mediaLang) {
+    const vttPath = path.resolve(`files/movieFiles/${mediaInfo.title}.${mediaInfo.mediaLang || mediaLang}.vtt`)
     const isMissingVtt = !fs.existsSync(path.resolve(vttPath))
     if (isMissingVtt) {
         const transcription = await getTranscriptionOfAudio(path.resolve(`files/movieFiles/${mediaInfo.title}.mp3`))
@@ -121,4 +141,9 @@ async function getTranscriptionAndStoreAsVtt(mediaInfo) {
         const newSubtitiles = transcription.segments.map(({ start, end, text, id }) => ({ startTime: start * 1000, endTime: end * 1000, text, id }))
         fs.writeFileSync(vttPath, toVtt(newSubtitiles))
     }
+}
+
+module.exports = {
+    processYoutubeVideo,
+    getVideoInfoAndStore
 }

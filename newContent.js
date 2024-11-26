@@ -1,5 +1,5 @@
 const { translateSubtitlesAndStoreToDB } = require('./openaiTranslateSubtitlesRecoursive.js')
-const { addVttToDB } = require('./addVttToDB.js');
+const { addVttToDB } = require('./parseUsedWords.js');
 // Runs for all new content if those don't have processed files
 const movies_model = require('./schemas/movies').movies_model;
 

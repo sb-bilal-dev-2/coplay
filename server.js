@@ -20,6 +20,7 @@ const { gTranslate } = require('./gTranslate');
 const { users_model } = require('./schemas/users');
 const { wordCollections_model } = require('./schemas/wordCollections');
 const { sortByLearningState } = require('./src/helper/sortByLearningState');
+const { processYoutubeVideo } = require('./youtubeServer');
 
 writeDevelopmentIPAddress();
 
@@ -44,6 +45,25 @@ app.get("/hello_world", (req, res) => {
 
   res.send("Welcome!");
 });
+
+app.get("/youtube_video", async (req, res) => {
+  const { mediaLang } = req.query;
+  const ids = req.query.ids.split(',')
+  console.log('loop processYoutubeVideo(): ' + ids)
+  console.log('mediaLang', mediaLang)
+  const results = []
+  for (let id of ids) {
+    try {
+      const result = await processYoutubeVideo('https://www.youtube.com/watch?v=' + id, mediaLang)
+      results.push(result)
+    } catch(err) {
+      results.push(err)
+    }
+  }
+
+  res.status(200).send(results)
+  // const 
+})
 
 app.get("/occurances_v2", async (req, res) => {
   const word = req.query.lemma;

@@ -5,13 +5,11 @@ const splitUsedWords = require('./splitUsedWords');
 // const englishWords50k = require('./wordsResearchData/en50kAndLemmasReviewed.json')
 // const en_5kLemmas = require('./wordsResearchData/en_5kLemmas.json')
 // const ultimateLemmaInfoMap = require('./wordsResearchData/en50kLemmaInfoMapped.json')
-const { initCRUDAndDatabase } = require('./serverCRUD');
 const { subtitles_model } = require('./schemas/subtitles')
 const { movies_model } = require('./schemas/movies')
 const { get_languageWords } = require('./newLanguages')
 // const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 
-initCRUDAndDatabase() // Need DB access to fetch word inflictions (variations) 
 
 async function addVttToDB(mediaInfo) {
     const mediaLang = mediaInfo.mediaLang;
