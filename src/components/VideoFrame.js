@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { BASE_SERVER_URL } from '../api';
+import api, { BASE_SERVER_URL } from '../api';
 
 const VideoFrameVideo = ({ time, videoSrc }) => {
   const videoRef = useRef(null);
@@ -22,9 +22,13 @@ const VideoFrameVideo = ({ time, videoSrc }) => {
         const videoHeight = video.videoHeight;
         ctx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, canvas.width, canvas.height);
 
-        // setTimeout(() => {
-          saveCanvasImage(canvas, videoSrc + time)
-        // }, 3000)
+        setTimeout(() => {
+          try {
+            saveCanvasImage(canvas, videoSrc + time)
+          } catch {
+
+          }
+        }, 10)
       };
     }
   };
@@ -50,7 +54,15 @@ const VideoFrameVideo = ({ time, videoSrc }) => {
 
   return (
     <div>
-      <video crossorigin="anonymous" style={{ display: 'none' }} ref={videoRef} width="640" height="360" controls>
+      <video
+        crossorigin="anonymous"
+        style={{ display: 'none' }}
+        ref={videoRef}
+        width="640"
+        height="360"
+        muted
+        controls
+      >
         <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
@@ -82,8 +94,41 @@ const VideoFrame = ({ time, videoSrc, title }) => {
         set_error(error)
       }}
       />
-    :
+    : 
     <VideoFrameVideo time={time} videoSrc={videoSrc}  />
+}
+
+export const VideoFrameForWord = ({ word }) => {
+  const [firstOccurance, set_firstOccurance] = useState(null)
+ 
+  async function request_wordOccurances(the_word) {
+    try {
+      const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=1`));
+      
+      console.log("word", word);
+      console.log("wordData", wordData);
+      if (wordData?.length) {
+        if (wordData && wordData[0]) {
+          set_firstOccurance(wordData[0])
+        }    
+      }
+      
+    } catch (err) {
+      console.log("err", err);
+    }
+  };
+  
+  useEffect(() => {
+    request_wordOccurances(word)
+  }, [word])
+  console.log('firstOccurance',firstOccurance)
+  if (firstOccurance) {
+    return <VideoFrame
+      videoSrc={`${BASE_SERVER_URL}/movie?name=${firstOccurance.mediaTitle}`}
+      title={firstOccurance.mediaTitle}
+      time={firstOccurance.startTime / 1000}
+    />
+  }
 }
 
 async function saveCanvasImage(canvas, fileName) {

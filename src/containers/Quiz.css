@@ -3,6 +3,9 @@
     background: #222;
     position: fixed !important;
     height: 100%;
+    transform: translateX(calc(-50%));
+    /* position: absolute !important; */
+    left: 50%;
 }
 
 .ShortVideo, div[data-vjs-player="true"], div[data-vjs-player="true"] > div {
@@ -198,7 +201,7 @@ div[data-vjs-player="true"] > div > video-js {
     position: absolute;
     height: 100vh;
     height: 100dvh;
-    width: 100vh;
+    width: 100%;
     background: rgba(0, 0, 0, 0.3);
     color: aliceblue;
     z-index: 40;
@@ -206,7 +209,7 @@ div[data-vjs-player="true"] > div > video-js {
 
 .RelatedVideosMenu {
     margin: 0 4px;
-    width: calc(100vw - 8px);
+    width: calc(100% - 8px);
     background: rgb(49, 49, 49);
     border-radius: 16px 16px 0 0;
     position: absolute;

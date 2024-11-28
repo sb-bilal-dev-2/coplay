@@ -4,70 +4,18 @@ import { createDebouncedFunction } from "../debounce";
 import { Link } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
 import VideojsInited from "./VideojsInited";
-import VideoFrame from "./VideoFrame";
+import VideoFrame, { VideoFrameForWord } from "./VideoFrame";
 import BarsSmall from "./BarsSmall";
 import { ShortVideo } from "../containers/ShortVideo";
 
 const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' }) => {
   const scrollRef = useRef(null);
-  const [hasScrolledEnd, setHasScrolledEnd] = useState(false);
-  const [hasScrolledStart, setHasScrolledStart] = useState(false);
-  const handleScrolled = createDebouncedFunction(() => {
-    // console.log(
-    //   scrollRef?.current?.offsetWidth,
-    //   scrollRef?.current?.scrollLeft,
-    //   scrollRef?.current?.scrollWidth
-    // );
-    const newHasScrolledEnd =
-      Math.ceil(
-        scrollRef?.current?.offsetWidth + scrollRef?.current?.scrollLeft
-      ) >= scrollRef?.current?.scrollWidth - 200;
-    setHasScrolledEnd(newHasScrolledEnd);
-    setHasScrolledStart(!scrollRef?.current?.scrollLeft || scrollRef?.current?.scrollLeft < 200);
-  }, 50);
-  useEffect(() => {
-    handleScrolled();
-  }, []);
-  const handleScrollClick = createDebouncedFunction(async (directionRight) => {
-    if (scrollRef.current) {
-      let left = scrollRef?.current?.offsetWidth - 80;
-      if (!directionRight) {
-        left = -left;
-      }
-      const currentPosition = scrollRef?.current?.scrollLeft
-      const nextPos = currentPosition + left
-      if (nextPos < 0) {
-        left = -currentPosition;
-      }
-      const containerWidth = scrollRef?.current?.scrollWidth - scrollRef?.current?.offsetWidth
-      if (nextPos > containerWidth) {
-        left = containerWidth - currentPosition;
-      }
-      await scrollRef.current.scrollBy({
-        left,
-        behavior: "smooth",
-      });
-    }
-  }, 50);
-
   const [hoveringItemId, setHoveringItemId] = useState()
 
   return (
     <div className="horizontal-scroll-menu">
-      {/* {!hasScrolledStart && (
-        <button
-          style={{
-            background:
-              "linear-gradient(-90deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7))",
-          }}
-          className="scroll-button"
-          onClick={() => handleScrollClick()}
-        >
-          {"<"}
-        </button>
-      )} */}
-      <ul className="menu-list" ref={scrollRef} onScroll={handleScrolled}>
-        {items?.map(({ _id, label, title, posterUrl, youtubeUrl, thumbnail }) => (
+      <ul className="menu-list" ref={scrollRef}>
+        {items?.map(({ _id, label, title, posterUrl, youtubeUrl, thumbnail, keywords }) => (
           <li
             onMouseEnter={() => setHoveringItemId(_id)}
             onMouseLeave={() => setHoveringItemId('')}
@@ -83,22 +31,11 @@ const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' })
               youtubeUrl={youtubeUrl}
               thumbnail={thumbnail}
               card_className={card_className}
+              word={keywords && keywords[0]?.the_word}
             />
           </li>
         ))}
       </ul>
-      {/* {!hasScrolledEnd && items?.length !== 1 && (
-        <button
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7))",
-          }}
-          className="scroll-button"
-          onClick={() => handleScrollClick(true)}
-        >
-          {">"}
-        </button>
-      )} */}
     </div>
   );
 };
@@ -112,8 +49,23 @@ export const HorizontalScrollMenuCardMain = ({
   hoveringItemId,
   youtubeUrl,
   thumbnail,
-  card_className
+  card_className,
+  word
 }) => {
+  const renderVideoFrame = () => {
+    if (baseRoute === 'quiz') {
+      return <VideoFrameForWord word={word} />
+    } else {
+      return (
+        <VideoFrame
+          time={900}
+          title={title}
+          videoSrc={BASE_SERVER_URL + "/movie?name=" + title}
+        />
+      )
+    }
+  }
+
   return (
     <Link
       className={`list-card ${card_className}`}
@@ -124,18 +76,18 @@ export const HorizontalScrollMenuCardMain = ({
           `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
           }')` + `, url('${thumbnail}')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
       }}>
-        {youtubeUrl?.length || hoveringItemId === _id ?
+        {/* TODO: Implement hover play video */}
+        {youtubeUrl?.length &&
           <ShortVideo
             isActive={hoveringItemId === _id}
             mediaTitle={title}
             forcedCurrentTimeChange={100}
             showSubtitles={hoveringItemId === _id}
           />
-          :
-          (!youtubeUrl && !posterUrl &&
-            <VideoFrame time={1000} title={title} videoSrc={BASE_SERVER_URL + "/movie?name=" + title} />
-          )
         }
+        {(!youtubeUrl && !posterUrl &&
+          renderVideoFrame()
+        )}
       </div>
       <p className="list-card__title">{label || title}</p>
     </Link>

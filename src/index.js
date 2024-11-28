@@ -30,6 +30,7 @@ import PricePage from "./containers/PricePage";
 import useAuthentication from "./containers/Authentication.util";
 import api from "./api";
 import { ShortVideo } from "./containers/ShortVideo";
+import VideoFrame, { VideoFrameForWord } from "./components/VideoFrame";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -47,8 +48,16 @@ const router = createHashRouter(
         exact
         path="/single"
         element={<div style={{ width: '100vw', height: 400 }}>
-          <ShortVideo isActive mediaTitle="frozen_2" forcedCurrentTimeChange={1500} hideSubtitles />
-          <video width={300} autoPlay controls height={200}><source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4" /></video>
+          <div style={{ width: '600px', height: '200px'}}>
+            {/* <VideoFrame
+              time={700}
+              title={'frozen_2'}
+              videoSrc={'https://api.coplay.live/api' + "/movie?name=" + 'frozen_2'}
+            /> */}
+            <VideoFrameForWord word={'hello'}/>
+          </div>
+          {/* <ShortVideo isActive mediaTitle="frozen_2" forcedCurrentTimeChange={1500} hideSubtitles /> */}
+          {/* <video width={300} autoPlay controls height={200}><source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4" /></video> */}
         </div>}
       />
       <Route

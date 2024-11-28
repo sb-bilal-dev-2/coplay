@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ShortVideo } from '../containers/ShortVideo';
+import { VideoFrameForWord } from './VideoFrame';
+import { Link } from 'react-router-dom';
+import api from '../api';
 
 const InfiniteScroll = ({
   items: initialItems = [],
@@ -14,7 +17,7 @@ const InfiniteScroll = ({
 }) => {
   const [items, setItems] = useState(initialItems);
   const loaderRef = useRef(null);
-  
+
   // Update items when initialItems prop changes
   useEffect(() => {
     setItems(initialItems);
@@ -72,11 +75,11 @@ const InfiniteScroll = ({
       </div>
 
       {externalLoading && (loadingComponent || defaultLoadingComponent)}
-      
+
       {!externalLoading && externalHasMore && (
         <div ref={loaderRef} className="h-10" />
       )}
-      
+
       {!externalHasMore && items.length > 0 && (
         <p className="text-center text-gray-500 py-4">
           {endMessage}
@@ -96,6 +99,7 @@ const ParentComponent = () => {
     setLoading(true);
     try {
       const newItems = await fetchData(page); // Your API call
+      console.log('newItems', newItems)
       setItems(prev => [...prev, ...newItems]);
       setPage(prev => prev + 1);
       setHasMore(newItems.length > 0);
@@ -106,28 +110,49 @@ const ParentComponent = () => {
     }
   };
 
-  const fetchData = () => {
-    return [{ id: 1, title: 'Acoomodations', description: 'description 1' }, { id: 2, title: 'A2 Greetings', description: 'description 2' }]
+  const fetchData = async () => {
+    let wordCollections
+    try {
+      wordCollections = (await api().get('/wordCollections')).results
+    } catch(err) {
+
+    }
+    return wordCollections
+    // keywords = [
+    //   { the_word: 'hello' },
+    //   { the_word: 'other' },
+    //   { the_word: 'consequence' },
+    //   { the_word: 'dust' },
+    //   { the_word: 'hustle' },
+    // ]
+    // return [{ id: 1, title: 'Acoomodations', description: 'description 1', keywords }, { id: 2, title: 'A2 Greetings', description: 'description 2', keywords }]
   }
 
   return (
-    <InfiniteScroll
-      items={items}
-      onLoadMore={loadMore}
-      hasMore={hasMore}
-      loading={loading}
-      renderItem={(item, index) => (
-        <div key={item.id} className='flex'>
-          <div style={{ width: '50vw', height: '80px' }}>
-            <ShortVideo mediaTitle={item.title} />
-          </div>
-          <div className='flex-1 pl-2'>
-            <h5 className='text-left'>{item.title}</h5>
-            <div>Hello, other, consequence, dust, hustle</div>
-          </div>
-        </div>
-      )}
-    />
+    <div className="px-1">
+      <InfiniteScroll
+        items={items}
+        onLoadMore={loadMore}
+        hasMore={hasMore}
+        loading={loading}
+        renderItem={(item, index) => (
+          <Link to={`/quiz/${item.mediaTitle}`}>
+            <div key={item.id} className='flex p-1'>
+              <div style={{ width: '44%', height: '80px' }}>
+                {
+                  item?.keywords && item.keywords[0] &&
+                  <VideoFrameForWord word={item.keywords[0].the_word} />
+                }
+              </div>
+              <div className='flex-1 pl-2'>
+                <h5 className='text-left text-smx'>{item.title}</h5>
+                <div className='text-xs'>{item.keywords.map((keyword) => keyword.the_word).join(', ')}</div>
+              </div>
+            </div>
+          </Link>
+        )}
+      />
+    </div>
   );
 };
 
