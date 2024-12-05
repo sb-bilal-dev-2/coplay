@@ -22,37 +22,98 @@ const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
             onIndexUpdate(activeIndex)
         }
     }, [activeIndex])
-    
-    return (
-        <div
-            ref={horizontalScrollRefs}
-            className="horizontal-carousel no-scrollbar w-full h-[400px] overflow-x-scroll scroll-smooth snap-x snap-mandatory"
-            style={{
-                scrollSnapType: 'x mandatory',
-                display: 'flex',
-                // overscrollBehavior: 'contain'
-            }}
-        >
-            {items?.map((innerItem, subCategoryIndex) => (
+
+    const renderDots = (dots) => {
+        const totalDots = dots?.length;
+        const maxVisibleDots = 5;
+        
+        // Calculate start and end indices for visible dots
+        let startIndex = Math.max(0, Math.min(activeIndex - 2, totalDots - maxVisibleDots));
+        let endIndex = Math.min(startIndex + maxVisibleDots, totalDots);
+        
+        // Create an array of visible dots
+        const visibleDots = dots?.slice(startIndex, endIndex);
+      
+        return (
+          <div className="flex justify-center items-center space-x-2 my-2">
+            {visibleDots?.map((item, index) => {
+              // Calculate the absolute distance from the active dot
+              const absoluteDistance = Math.abs(startIndex + index - activeIndex);
+              
+              // More nuanced scaling approach
+              let scale = 1;
+              let opacity = 1;
+      
+              switch(absoluteDistance) {
+                case 0:  // Active dot
+                  scale = 1;
+                  break;
+                case 1:  // Immediately adjacent dots
+                  scale = 0.9;
+                  break;
+                case 2:  // Outer dots
+                  scale = 0.7;
+                  opacity = 0.8;
+                  break;
+                default:
+                  scale = 0.5;
+                  opacity = 0.6;
+              }
+      
+              return (
                 <div
-                    key={innerItem?.id}
-                    style={{ scrollSnapAlign: 'center' }}
-                    className="min-w-full w-full h-full flex items-center justify-center"
-                >
+                  key={item?.id || `dot-${startIndex + index}`}
+                  className={`
+                    rounded-full transition-all duration-300 ease-in-out
+                    ${startIndex + index === activeIndex
+                      ? 'w-10 h-3 bg-blue-500'
+                      : 'w-3 h-3 bg-gray-300'}
+                  `}
+                  style={{
+                    transform: `scale(${scale})`,
+                    opacity: opacity
+                  }}
+                />
+              )
+            })}
+          </div>
+        )
+      }
+
+    return (
+        <>
+            {renderDots(items)}
+            <div
+                ref={horizontalScrollRefs}
+                className="horizontal-carousel no-scrollbar w-full h-[400px] overflow-x-scroll scroll-smooth snap-x snap-mandatory"
+                style={{
+                    scrollSnapType: 'x mandatory',
+                    display: 'flex',
+                    // overscrollBehavior: 'contain'
+                }}
+            >
+                {items?.map((innerItem, subCategoryIndex) => (
                     <div
-                        className={`
+                        key={innerItem?.id}
+                        style={{ scrollSnapAlign: 'center' }}
+                        className="min-w-full w-full h-full flex items-center justify-center"
+                    >
+                        <div
+                            className={`
     p-4 rounded-lg text-lg 
     ${active && activeIndex === subCategoryIndex
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-200 text-black'}
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-200 text-black'}
   `}
-                    >
-                        {/* {innerItem?.mediaTitle}<br /> */}
-                        {degausser(innerItem?.text)}
+                        >
+                            {/* {innerItem?.mediaTitle}<br /> */}
+                            {degausser(innerItem?.text)}
+                        </div>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
+        </>
+
     )
 }
 
@@ -132,12 +193,12 @@ const WordCollection = () => {
 
                     {currentOccurance?.mediaTitle && !loading &&
                         < ShortVideo
-                        // onTimeUpdate={handleTimeUpdate}
-                        mediaTitle={currentOccurance?.mediaTitle}
-                    forcedCurrentTimeChange={currentOccurance?.startTime / 1000}
-                    isActive
-                    />
-                }
+                            // onTimeUpdate={handleTimeUpdate}
+                            mediaTitle={currentOccurance?.mediaTitle}
+                            forcedCurrentTimeChange={currentOccurance?.startTime / 1000}
+                            isActive
+                        />
+                    }
                 </div>
                 <WordCollectionCarousel
                     items={wordList}
@@ -155,19 +216,19 @@ const WordCollection = () => {
                             setLoading(false)
                         }, 10)
                     }}
-                    // renderItem={(item) => {
-                    //     return (
-                    //         <div>
-                    //             <span>{item.the_word}</span>
-                    //             <span>{item.pronounciation}</span>
-                    //         </div>
-                    //     )
-                    // }}
-                    // renderInnerItem={(innerItem) => {
-                    //     return (
-                    //         <div>{innerItem.mediaTitle}</div>
-                    //     )
-                    // }}
+                // renderItem={(item) => {
+                //     return (
+                //         <div>
+                //             <span>{item.the_word}</span>
+                //             <span>{item.pronounciation}</span>
+                //         </div>
+                //     )
+                // }}
+                // renderInnerItem={(innerItem) => {
+                //     return (
+                //         <div>{innerItem.mediaTitle}</div>
+                //     )
+                // }}
                 />
             </div>
         </>
