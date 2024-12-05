@@ -18,6 +18,8 @@ const HomePage = () => {
   const { items: wordCollections } = useDynamicReducer("wordCollections");
   const movies = videos?.filter(item => item.category !== 'Music');
   const clips = videos?.filter(item => item.category === 'Music');
+  console.log('clips', clips)
+  console.log('movies', movies)
 
   const { t } = useTranslation();
 
@@ -29,36 +31,20 @@ const HomePage = () => {
       {/* <Hero /> */}
       <TagsScroll firstSticky onIndexUpdate={(newTagIndex) => console.log('newTagIndex', newTagIndex)} />
       <div className="">
-        <h2 className="home-page__title">{"Popular Phrase Lists"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
-      </div>
-      <div className="">
         <h2 className="home-page__title">{"Lessons"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
       </div>
       <div className="">
-        <h2 className="home-page__title">{"Word Lists"}</h2>
+        <h2 className="home-page__title">{"Movies"}</h2>
         <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
       </div>
       <div className="">
         <h2 className="home-page__title">{"C1"}</h2>
         <HorizontalScrollMenu
           items={wordCollections}
-          baseRoute="quiz"
+          baseRoute="word_collection"
           card_className="horizontal list" 
         />
-      </div>
-      <div className="">
-        <h2 className="home-page__title">{"C2 Phrases"}</h2>
-        <HorizontalScrollMenu
-          items={wordCollections}
-          baseRoute="quiz"
-          card_className="horizontal list" 
-        />
-      </div>
-      <div className="">
-        <h2 className="home-page__title">{t("movies")}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
       </div>
       <div className="">
         <h2 className="home-page__title">{t("music")}</h2>

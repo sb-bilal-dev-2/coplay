@@ -15,6 +15,7 @@ import VideojsInited from "../../components/VideojsInited";
 import { GoBackButton, ShortsColumns, WordCarousel, WordsScroll, useWordColletionWordInfos } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
 import { ShortVideo } from "../ShortVideo";
+import { FilterDropdown } from "../RelatedVideosDropdown";
 
 const MoviePage = () => {
   const { title } = useParams();
@@ -26,13 +27,31 @@ const MoviePage = () => {
   const currentWordStartTime = (wordList || [])[playingWordIndex]?.startTime
   const forcedCurrentTimeChange = (currentWordStartTime || 0) / 1000
   // const { handleTimeUpdate, currentTime } = useHandleTimeUpdate(wordList, playingWordIndex, set_practicingWordIndex)
+  useEffect(() => {
+    // set_isRelOpen(false)
+    set_isFilterOpen(false)
+  }, [title])
+
+  // const [isRelOpen, set_isRelOpen] = useState(false);
+  const [isFilterOpen, set_isFilterOpen] = useState(false);
 
   return (
     <ErrorBoundary>
       <GoBackButton />
+      <FilterDropdown
+        isOpen={isFilterOpen}
+        closeDropdown={() => set_isFilterOpen(false)}
+        options={[
+          { label: 'Easiest', value: 'Easiest' },
+          { label: 'Hardest', value: 'Hardest' },
+          { label: 'Bookmarks', value: 'Bookmarks' },
+          { label: 'All New', value: 'All New' }
+        ]}
+        onChange={(option) => {}}
+      />
       <div className="MainContainer">
         <div className="absolute z-20 w-full" style={{ }}>
-          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} filterBarClick={() => set_isFilterOpen(true)} />
         </div>
         <ShortsColumns
           forceRenderFirstItem={(activeIndex) => (

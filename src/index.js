@@ -31,6 +31,7 @@ import useAuthentication from "./containers/Authentication.util";
 import api from "./api";
 import { ShortVideo } from "./containers/ShortVideo";
 import VideoFrame, { VideoFrameForWord } from "./components/VideoFrame";
+import WordCollection from "./containers/WordCollection";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -54,7 +55,8 @@ const router = createHashRouter(
               title={'frozen_2'}
               videoSrc={'https://api.coplay.live/api' + "/movie?name=" + 'frozen_2'}
             /> */}
-            <VideoFrameForWord word={'hello'}/>
+            {/* <VideoFrameForWord word={'hello'}/> */}
+            <WordCollection />
           </div>
           {/* <ShortVideo isActive mediaTitle="frozen_2" forcedCurrentTimeChange={1500} hideSubtitles /> */}
           {/* <video width={300} autoPlay controls height={200}><source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4" /></video> */}
@@ -76,6 +78,8 @@ const router = createHashRouter(
         element={<WordsPage />}
         loader={authenticatedRoute}
       />
+      <Route path="word_collection/:list" element={<WordCollection />} />
+      {/* <Route path="word_collection/:list" element={<Quiz />} /> */}
       <Route path="movie/:title" element={<MoviePage />} />
       <Route path="auth/:screen" element={<Authentication />} />
       <Route path="crud/:model" element={<CRUDRoute />} loader={authenticatedRoute_moderator} />

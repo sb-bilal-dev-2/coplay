@@ -6,6 +6,16 @@
   position: relative;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 .tags-first-sticky {
   margin-right: -40px;
   margin-left: 40px;
@@ -38,20 +48,21 @@
   margin-top: 6px;
 
   .vertical {
-    max-width: calc(100vw - 32px);
-    height: 380px;
-    width: 240px;
+    max-width: calc(100vw - 8px);
+    height: 280px;
+    width: 160px;
   }
 
   .horizontal {
-    max-width: calc(100vw - 32px);
-    height: 240px;
-    width: 340px;
+    max-width: calc(100vw - 8px);
+    height: 180px;
+    width: 240px;
   }
 
   .list {
     overflow: visible;
     position: relative;
+    margin-top: 6px;
   }
 
   .list::after {

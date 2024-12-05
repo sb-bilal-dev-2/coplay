@@ -47,12 +47,13 @@ const StickyHeader = ({ type = "primary", authPage }) => {
     >
       <Link to="/" className="relative min-h-max min-w-max">
         <img
-          class="h-14 w-14"
+          className="h-14 w-14"
+          style={{ userSelect: 'none' }}
           src="logo-black.png"
           alt="C Play logo placeholder"
         />
       </Link>
-      <div class="flex items-center">
+      <div className="flex items-center">
         {!authPage && (
           <>
             <div
@@ -109,7 +110,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 
             <div className="user-menu">
               {loggedIn ? (
-                <div className="flex items-center">
+                <div className="flex items-center select-none">
                   <Link to="/quiz/repeating?listType=self_words" className="relative">
                     {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
                     <YourVideosIcon />
@@ -198,19 +199,19 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <div ref={outsideNavClickWrapperRef}>
-      <img class="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
+      <img className="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
       {isNavMenuVisible && (
         <ul className="nav-menu">
           <li>
             {" "}
             <Link to="/account">
-              <i class="fa-solid fa-user text-gray-400 m-2" />
+              <i className="fa-solid fa-user text-gray-400 m-2" />
               <b>{t("account")}</b>
             </Link>
           </li>
           <li>
             <button onClick={handleLogout}>
-              <i class="fa-solid fa-door-open text-gray-400  m-2" />
+              <i className="fa-solid fa-door-open text-gray-400  m-2" />
               <b>{t("sign out")}</b>
             </button>
           </li>

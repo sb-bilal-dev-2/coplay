@@ -7,13 +7,14 @@ import VideojsInited from "./VideojsInited";
 import VideoFrame, { VideoFrameForWord } from "./VideoFrame";
 import BarsSmall from "./BarsSmall";
 import { ShortVideo } from "../containers/ShortVideo";
+import YoutubePlayer from "./YoutubePlayer";
 
 const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' }) => {
   const scrollRef = useRef(null);
   const [hoveringItemId, setHoveringItemId] = useState()
 
   return (
-    <div className="horizontal-scroll-menu">
+    <div className="horizontal-scroll-menu no-scrollbar">
       <ul className="menu-list" ref={scrollRef}>
         {items?.map(({ _id, label, title, posterUrl, youtubeUrl, thumbnail, keywords }) => (
           <li
@@ -53,7 +54,7 @@ export const HorizontalScrollMenuCardMain = ({
   word
 }) => {
   const renderVideoFrame = () => {
-    if (baseRoute === 'quiz') {
+    if (baseRoute === 'word_collection') {
       return <VideoFrameForWord word={word} />
     } else {
       return (
@@ -78,11 +79,9 @@ export const HorizontalScrollMenuCardMain = ({
       }}>
         {/* TODO: Implement hover play video */}
         {youtubeUrl?.length &&
-          <ShortVideo
-            isActive={hoveringItemId === _id}
-            mediaTitle={title}
-            forcedCurrentTimeChange={100}
-            showSubtitles={hoveringItemId === _id}
+          <img
+            className="h-full w-full"
+            src={`https://img.youtube.com/vi/${youtubeUrl.split('v=')[1]}/hqdefault.jpg`}
           />
         }
         {(!youtubeUrl && !posterUrl &&
@@ -94,7 +93,7 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-const TAGS = ['All', 'New', 'Music', 'Books', 'Podcasts', 'Cartoon', 'Phrases', 'Words', 'Series', 'Movies', 'Interactive', 'Courses']
+const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Podcasts', 'Cartoon', 'Series', 'Interactive', 'Courses']
 
 export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);

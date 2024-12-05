@@ -136,7 +136,7 @@ const ParentComponent = () => {
         hasMore={hasMore}
         loading={loading}
         renderItem={(item, index) => (
-          <Link to={`/quiz/${item.mediaTitle}`}>
+          <Link to={`/word_collection/${item.title}`}>
             <div key={item.id} className='flex p-1'>
               <div style={{ width: '44%', height: '80px' }}>
                 {

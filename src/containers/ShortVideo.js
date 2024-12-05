@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import api, { BASE_SERVER_URL } from "../api"
+import YoutubePlayer from "../components/YoutubePlayer"
 // import useMobileDetect from "../helper/useMobileDetect"
 
 
@@ -13,13 +14,13 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
     try {
       if (isActive && isLoaded) {
         videoRef.current.currentTime = startTime
-        videoRef.current.play().catch(() => {})
+        videoRef.current.play().catch(() => { })
       } else {
         if (!videoRef.current.paused) {
-          videoRef.current.pause().catch(() => {})
+          videoRef.current.pause().catch(() => { })
         }
       }
-    } catch(error) {
+    } catch (error) {
       console.log('error', error)
     }
   }, [startTime, isActive, isLoaded])
@@ -91,13 +92,21 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   return (
     <div className="ShortVideo">
       {/* {isActive && ( */}
-      <VideoInit
-        onTimeUpdate={handleTimeUpdate}
-        isActive={isActive}
-        videoSrc={mediaSrc}
-        startTime={forcedCurrentTimeChange}
-        isYoutubeVideo={isYoutubeVideo}
-      />
+      {isYoutubeVideo ?
+        <YoutubePlayer
+          onTimeUpdate={handleTimeUpdate}
+          isActive={isActive}
+          videoIdOrUrl={mediaSrc}
+          startTime={forcedCurrentTimeChange}
+        />
+        :
+        <VideoInit
+          onTimeUpdate={handleTimeUpdate}
+          isActive={isActive}
+          videoSrc={mediaSrc}
+          startTime={forcedCurrentTimeChange}
+        />
+      }
       {/* )} */}
       {/* <VideojsInite
           onTimeUpdate={handleTimeUpdate}

@@ -12,7 +12,7 @@ import BarsSmall from "../components/BarsSmall";
 import DraggableResizableComponent from "../components/DraggableResizableComponent";
 import { degausser } from "../utils/degausser";
 import { ShortVideo } from "./ShortVideo";
-import RelatedVideosDropdown from "./RelatedVideosDropdown";
+import RelatedVideosDropdown, { FilterDropdown } from "./RelatedVideosDropdown";
 
 
 function useTelegramWebApp() {
@@ -36,7 +36,8 @@ export const GoBackButton = () => {
 
   return (<button
     onClick={() => navigate(-1)}
-    className="absolute z-50 top-4 left-4 text-gray-200 cursor-pointer"
+    className="absolute z-50 top-4 left-4 cursor-pointer flex items-center justify-center"
+    style={{ background: 'rgba(55, 55, 55, 0.85)', borderRadius: '30px', height: '30px', width: '30px', color: '#fff' }}
   >
     <i className="fa fa-arrow-left" aria-hidden="true"></i>
   </button>
@@ -199,9 +200,10 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
   )
 }
 
-export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
+export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex, filterBarClick }) => {
   const scrollRef = useRef(null);
   const [currentIndex, set_currentIndex] = useState(0)
+  const { list: title } = useParams()
 
   const handleItemClick = (newIndex) => {
     set_currentIndex(newIndex)
@@ -237,22 +239,18 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
     }
   }, [forcedIndex])
 
-  const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    set_isRelOpen(false)
+  }, [title])
 
-  const showRecommendations = () => {
-    setIsOpen(!isOpen);
-  };
+  const [isRelOpen, set_isRelOpen] = useState(false);
 
   return (
     <>
       <RelatedVideosDropdown
-        isOpen={isOpen}
-        closeDropdown={() => setIsOpen(false)}
-        videos={[
-          { title: 'Video 1', url: '/video1' },
-          { title: 'Video 2', url: '/video2' },
-          { title: 'Video 3', url: '/video3' }
-        ]}
+        isOpen={isRelOpen}
+        closeDropdown={() => set_isRelOpen(false)}
+        videos={[]}
       />
       <div className="scroll-list-container relative text-white z-20 scroll-main-container flex bg-transparent">
         <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-6">
@@ -280,12 +278,13 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
               marginLeft: !wordList.length && 40,
               // borderLeft: wordList.length && '1px solid #333'
             }}
-            onClick={showRecommendations}
+            onClick={() => set_isRelOpen(true)}
           >
             <i className="fa fa-plus"></i>
           </div>
         </div>
         <div
+          onClick={filterBarClick}
           className="scroll-list-container__right-bar pt-1 absolute right-0 top-2"
         >
           <BarsSmall />
@@ -302,12 +301,30 @@ const Quiz = () => {
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord, searchParams.get('listType'), searchParams)
   // console.log('wordList', wordList, currentWordOccurances)
   // const [subtitles] = useSubtitles('kung_fu_panda_3')
+  useEffect(() => {
+    // set_isRelOpen(false)
+    set_isFilterOpen(false)
+  }, [listName])
+
+  // const [isRelOpen, set_isRelOpen] = useState(false);
+  const [isFilterOpen, set_isFilterOpen] = useState(false);
+
   return (
     <ErrorBoundary>
       <GoBackButton />
+      <FilterDropdown
+        isOpen={isFilterOpen}
+        closeDropdown={() => set_isFilterOpen(false)}
+        options={[
+          { label: 'New Bookmarks', value: 'new_words' },
+          { label: 'Old Bookmarks', value: 'old_words' },
+          { label: 'Learned', value: 'all_words' }
+        ]}
+        onChange={(option) => {}}
+      />
       <div className="MainContainer" style={{ background: '#000', minHeight: '100vh' }}>
         <div className="absolute z-20 w-full bg-red" style={{ top: '0' }}>
-          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
+          <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} filterBarClick={() => set_isFilterOpen(true)} />
         </div>
         <ShortsColumns
           wordList={wordList}
@@ -383,7 +400,7 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   // console.log('currentWordInfo', currentWordInfo)
   console.log('wordList', wordList)
 
-  return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
+  return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength, wordOccurancesMap }
 }
 
 async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousOccurancesMap, activeIndex) {
