@@ -95,7 +95,10 @@ const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
                 {items?.map((innerItem, subCategoryIndex) => (
                     <div
                         key={innerItem?.id}
-                        style={{ scrollSnapAlign: 'center' }}
+                        style={{
+                            scrollSnapAlign: 'center',
+                            scrollSnapStop: 'always',
+                        }}
                         className="min-w-full w-full h-full flex items-center justify-center"
                     >
                         <div
@@ -150,6 +153,7 @@ const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIn
                         key={item.the_word}
                         style={{
                             scrollSnapAlign: 'center',
+                            scrollSnapStop: 'always',
                             height: '85%',
                         }}
                     >
