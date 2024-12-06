@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useScrolledItem } from '../utils/useScrolledItem';
 import { ShortVideo } from './ShortVideo';
 import { degausser } from '../utils/degausser';
+import SecondaryButton from '../components/SecondaryButton';
 
 // Sample data - replace with your actual word collections
 
@@ -66,7 +67,7 @@ const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
                   className={`
                     rounded-full transition-all duration-300 ease-in-out
                     ${startIndex + index === activeIndex
-                      ? 'w-10 h-3 bg-blue-500'
+                      ? 'w-10 h-3 bg-indigo-500'
                       : 'w-3 h-3 bg-gray-300'}
                   `}
                   style={{
@@ -105,7 +106,7 @@ const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
                             className={`
     p-4 rounded-lg text-lg 
     ${active && activeIndex === subCategoryIndex
-                                    ? 'bg-blue-500 text-white'
+                                    ? 'bg-indigo-500 text-white'
                                     : 'bg-gray-200 text-black'}
   `}
                         >
@@ -176,6 +177,33 @@ const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIn
                         </div>
                     </div>
                 ))}
+                    <div
+                        style={{
+                            scrollSnapAlign: 'center',
+                            scrollSnapStop: 'always',
+                            height: '85%',
+                        }}
+                    >
+                        <div
+                            className="flex flex-col items-center justify-center relative h-full"
+                            style={{ 
+                                margin: '8px',
+                                border: '2px solid orange',
+                                borderRadius: '12px'
+                            }}
+                        >
+                        <h2 className="text-2xl font-bold mb-4 text-green-500">{'Keep it up!'}</h2>
+                        <div className='grid gap-2'>
+                            <SecondaryButton title={"GET MORE"}></SecondaryButton>
+                        </div>
+                        {/* Horizontal Carousel (Inner) */}
+                        {/* <HorizontalScroll
+                            items={innerItemsMap[item.the_word]}
+                            active={categoryIndex === activeCategory}
+                            onIndexUpdate={onInnerIndexUpdate}
+                        /> */}
+                        </div>
+                    </div>
             </div>
         </div>
     );
