@@ -119,7 +119,7 @@ const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
 
 const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIndexUpdate, renderItems, renderInnerItems }) => {
 
-    const [verticalScrollRef, activeCategory, scrollToCategory] = useScrolledItem('vertical');
+    const [verticalScrollRef, activeCategory, scrollToCategory] = useScrolledItem('vertical', { itemDimention: 85 / 100, itemMargin: 8 });
     console.log('active', activeCategory)
     useEffect(() => {
         if (onIndexUpdate) {
@@ -131,7 +131,9 @@ const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIn
     return (
         <div
             className="w-full overflow-hidden"
-            style={{ height: '60dvh' }}
+            style={{
+                height: '60dvh',
+            }}
         >
             {/* Vertical Carousel (Outer) */}
             <div
@@ -146,9 +148,19 @@ const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIn
                 {items.map((item, categoryIndex) => (
                     <div
                         key={item.the_word}
-                        style={{ scrollSnapAlign: 'center' }}
-                        className="w-full h-full flex flex-col items-center justify-center relative"
+                        style={{
+                            scrollSnapAlign: 'center',
+                            height: '85%',
+                        }}
                     >
+                        <div
+                            className="flex flex-col items-center justify-center relative h-full"
+                            style={{ 
+                                margin: '8px',
+                                border: '2px solid orange',
+                                borderRadius: '12px'
+                            }}
+                        >
                         <h2 className="text-2xl font-bold mb-4">{item.the_word}</h2>
 
                         {/* Horizontal Carousel (Inner) */}
@@ -157,6 +169,7 @@ const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIn
                             active={categoryIndex === activeCategory}
                             onIndexUpdate={onInnerIndexUpdate}
                         />
+                        </div>
                     </div>
                 ))}
             </div>
