@@ -191,16 +191,18 @@ const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIn
                         </div>
                     </div>
                 ))}
-                <div
-                    style={{
-                        scrollSnapAlign: 'center',
-                        scrollSnapStop: 'always',
-                        height: '85%',
-                        marginBottom: '8px'
-                    }}
-                >
-                    {lastItem}
-                </div>
+                {!!items.length &&
+                    <div
+                        style={{
+                            scrollSnapAlign: 'center',
+                            scrollSnapStop: 'always',
+                            height: '85%',
+                            marginBottom: '8px'
+                        }}
+                    >
+                        {lastItem}
+                    </div>
+                }
             </div>
         </div>
     );
