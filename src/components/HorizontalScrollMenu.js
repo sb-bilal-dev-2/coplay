@@ -15,7 +15,7 @@ const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' })
 
   return (
     <div className="horizontal-scroll-menu no-scrollbar">
-      <ul className="menu-list" ref={scrollRef}>
+      <ul className="menu-list no-scrollbar" ref={scrollRef}>
         {items?.map(({ _id, label, title, posterUrl, youtubeUrl, thumbnail, keywords }) => (
           <li
             onMouseEnter={() => setHoveringItemId(_id)}

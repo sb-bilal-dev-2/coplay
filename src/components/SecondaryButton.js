@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function SecondaryButton({ title, path, button, isLoading, type }) {
+export default function SecondaryButton({ title, path, button, isLoading, type, onClick }) {
   if (button) {
     return (
       <button
+        onClick={onClick}
         type={type}
         disabled={isLoading}
         class="relative px-10 py-3 w-full font-medium text-white transition duration-300 bg-green-400 rounded-md hover:bg-green-500 ease my-2"
@@ -23,7 +24,7 @@ export default function SecondaryButton({ title, path, button, isLoading, type }
             ></path>
           </svg>
         </span>
-        <span class="absolute top-0 right-0 w-12 h-full">
+        {/* <span class="absolute top-0 right-0 w-12 h-full">
           <svg
             viewBox="0 0 487 487"
             class="object-cover w-full h-full"
@@ -36,7 +37,7 @@ export default function SecondaryButton({ title, path, button, isLoading, type }
               fill-opacity=".1"
             ></path>
           </svg>
-        </span>
+        </span> */}
         <span class="relative text-white">{title}</span>
       </button>
     );

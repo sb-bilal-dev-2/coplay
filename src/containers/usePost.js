@@ -2,7 +2,7 @@ import { useState } from 'react';
 import api from '../api';
 
 
-export function usePost(handlePostResponse = () => { }) {
+export function usePost(handlePostResponse = () => { }, onerror) {
     const [data, set_data] = useState();
     const [error, set_error] = useState();
     const [isLoading, set_isLoading] = useState();
@@ -16,6 +16,7 @@ export function usePost(handlePostResponse = () => { }) {
             return new_data;
         } catch (error) {
             set_error(error);
+            if (onerror) onerror(error)
         }
         set_isLoading(false);
     }
