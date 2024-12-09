@@ -46,9 +46,23 @@ app.get("/hello_world", (req, res) => {
   res.send("Welcome!");
 });
 
+// async function getYoutubeSubtitles(youtubeId) {
+//   return (await fetch('https://subtitle.to/https://www.youtube.com/watch?v=' + youtubeId)).json()
+// }
+
 app.get("/youtube_video", async (req, res) => {
   const { mediaLang } = req.query;
   const ids = req.query.ids.split(',')
+
+  // let subtitles = []
+
+  // subtitles = Promise.all(ids.map((id) => {
+  //   return getYoutubeSubtitles(id)
+  // }).catch(() => {}))
+
+  if (!ids) {
+    res.status(200).send("Sample request: https://api.coplay.live/api/youtube_video?mediaLang=en&ids=L0MK7qz13bU")
+  }
   console.log('loop processYoutubeVideo(): ' + ids)
   console.log('mediaLang', mediaLang)
   const results = []
@@ -56,7 +70,7 @@ app.get("/youtube_video", async (req, res) => {
     try {
       const result = await processYoutubeVideo('https://www.youtube.com/watch?v=' + id, mediaLang)
       results.push(result)
-    } catch(err) {
+    } catch (err) {
       results.push(err)
     }
   }
@@ -303,7 +317,7 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
       const movieSubtitle = await subtitles_model.findOne({ mediaTitle, translateLang: { $exists: false } });
 
       movieWords = movieSubtitle.subtitles.reduce(
-        (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime }))),
+        (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime, endTime: item.endTime }))),
         []
       );
       // console.log('movieWords', movieWords)
@@ -569,17 +583,17 @@ function createFileRoute(app, folder) {
 
 
       await fsPromises.mkdir(path.dirname(fullPath), { recursive: true });
-      
+
       // Convert base64 to buffer and save
       const imageBuffer = Buffer.from(content, 'base64');
       await fsPromises.writeFile(fullPath, imageBuffer);
-      
+
       res.send({ success: true, message: "Image saved successfully" });
     } catch (error) {
       console.error('Server error:', error);
       return res.status(500).send({ error: "Internal server error" });
     }
-  
+
   });
 }
 
