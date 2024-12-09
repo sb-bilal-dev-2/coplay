@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./HorizontalScrollMenu.css";
-import { createDebouncedFunction } from "../debounce";
 import { Link } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
 import VideojsInited from "./VideojsInited";
@@ -93,7 +92,8 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Podcasts', 'Cartoon', 'Series', 'Interactive', 'Courses']
+const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Cartoon', 'Series', 'Courses']
+// const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Podcasts', 'Cartoon', 'Series', 'Interactive', 'Courses']
 
 export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);

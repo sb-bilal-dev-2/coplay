@@ -8,7 +8,12 @@
     left: 50%;
 }
 
-.ShortVideo, div[data-vjs-player="true"], div[data-vjs-player="true"] > div {
+.ShortVideo {
+    flex: 1;
+    height: 100%;
+}
+
+div[data-vjs-player="true"], div[data-vjs-player="true"] > div {
     height: 100%;
 }
 

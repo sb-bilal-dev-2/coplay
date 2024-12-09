@@ -36,6 +36,9 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
         ref={videoRef}
         muted={muted}
         onLoadedMetadata={onLoadedMetadata}
+        onTimeUpdate={() => {
+          onTimeUpdate(videoRef.current)
+        }}
         className="w-full"
         playsInline
         webkit-playsinline="true"
@@ -84,7 +87,7 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   // const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
 
   const handleTimeUpdate = (newTime) => {
-    if (onTimeUpdate) { onTimeUpdate() }
+    if (onTimeUpdate) { onTimeUpdate(newTime) }
 
     set_subtitleTime(newTime)
   }
@@ -107,28 +110,6 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
           startTime={forcedCurrentTimeChange}
         />
       }
-      {/* )} */}
-      {/* <VideojsInite
-          onTimeUpdate={handleTimeUpdate}
-          isActive={isActive}
-          videoSrc={mediaSrc}
-          startTime={forcedCurrentTimeChange}
-          isYoutubeVideo={isYoutubeVideo}
-        /> */}
-
-      {/* {isActive && (
-        <video
-          controls
-          className="w-full"
-          ref={videoRef}
-        >
-          <source src={mediaSrc} type="video/mp4" />
-        </video>
-      )} */}
-
-      {/* {!hideSubtitles && (
-          <ScrollingSubtitles subtitles={subtitles} setCurrentTime={set_subtitleTime} currentIndex={subtitleIndex} />
-        )} */}
     </div>
   )
 }

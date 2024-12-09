@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 export const useScrolledItem = (type = 'vertical', options = {}) => {
   const {
     debounceTime = 50,
-    itemDimention = 1
+    itemDimention = 1,
   } = options;
 
   const [activeIndex, setActiveIndex] = useState(0);

@@ -89,7 +89,7 @@ const InfiniteScroll = ({
   );
 };
 
-const ParentComponent = () => {
+const ComposedInfiniteScroll = ({ requestData }) => {
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -113,19 +113,15 @@ const ParentComponent = () => {
   const fetchData = async () => {
     let wordCollections
     try {
-      wordCollections = (await api().get('/wordCollections')).results
+      if (requestData) {
+        wordCollections = await requestData()
+      } else {
+        wordCollections = (await api().get('/wordCollections')).results
+      }
     } catch(err) {
 
     }
     return wordCollections
-    // keywords = [
-    //   { the_word: 'hello' },
-    //   { the_word: 'other' },
-    //   { the_word: 'consequence' },
-    //   { the_word: 'dust' },
-    //   { the_word: 'hustle' },
-    // ]
-    // return [{ id: 1, title: 'Acoomodations', description: 'description 1', keywords }, { id: 2, title: 'A2 Greetings', description: 'description 2', keywords }]
   }
 
   return (
@@ -156,4 +152,46 @@ const ParentComponent = () => {
   );
 };
 
-export default ParentComponent;
+export const InfiniteScrollWordCollection = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/wordCollections')).results}/>
+  )
+}
+
+export const InfiniteScrollMovies = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/movies')).results}/>
+  )
+}
+
+export const InfiniteScrollMusic = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/music')).results}/>
+  )
+}
+
+export const InfiniteScrollWords = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/words')).results}/>
+  )
+}
+
+export const InfiniteScrollPhrases = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/phrases')).results}/>
+  )
+}
+
+export const InfiniteScrollCartoons = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/cartoons')).results}/>
+  )
+}
+
+export const InfiniteScrollSeries = () => {
+  return (
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/series')).results}/>
+  )
+}
+
+export default InfiniteScrollWordCollection;
