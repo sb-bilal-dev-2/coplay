@@ -4,7 +4,7 @@ import { GoBackButton, useWordColletionWordInfos } from './Quiz';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ShortVideo } from './ShortVideo';
 import SecondaryButton from '../components/SecondaryButton';
-import RelatedVideosDropdown, { FilterDropdown } from './RelatedVideosDropdown';
+import RelatedVideosDropdown, { FilterDropdown, WordInfoDropdown } from './RelatedVideosDropdown';
 import { usePost } from './usePost';
 import api from '../api';
 import { WordCollectionCarousel } from './WordCollectionCarousel';
@@ -16,6 +16,8 @@ const WordCollection = () => {
     const { list: listName, word: paramWord } = useParams();
     const [occuranceIndex, set_occuranceIndex] = useState()
     let [searchParams] = useSearchParams();
+    const [settingsOpen, set_settingsOpen] = useState(false)
+    const [feed, set_feed] = useState('youtube')
     const { wordOccurancesMap, wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord, searchParams.get('listType'), searchParams)
     const [loading, setLoading] = useState(false)
     // console.log('wordList', wordList)
@@ -27,8 +29,10 @@ const WordCollection = () => {
     useEffect(() => {
         set_isRelOpen(false)
         set_isFilterOpen(false)
+        set_currentWord('')
     }, [listName])
 
+    const [currentWord, set_currentWord] = useState('')
     const [isRelOpen, set_isRelOpen] = useState(false);
     const [isFilterOpen, set_isFilterOpen] = useState(false);
     const [bookmarkedAll, set_bookmarkedAll] = useState(false);
@@ -74,6 +78,11 @@ const WordCollection = () => {
     return (
         <>
             <GoBackButton />
+            <WordInfoDropdown 
+                isOpen={currentWord}
+                closeDropdown={() => set_currentWord('')}
+                the_word={currentWord}
+            />
             <FilterDropdown
                 isOpen={isFilterOpen}
                 closeDropdown={() => set_isFilterOpen(false)}
@@ -104,6 +113,29 @@ const WordCollection = () => {
                     }
                 </div>
 
+                <div
+                    className="flex absolute right-0 z-10 transition-all duration-150 ease-in-out"
+                    style={{
+                        color: 'silver',
+                        background: 'white',
+                        borderRadius: '0 0 0 16px',
+                        borderLeft: '2px solid orange',
+                        borderBottom: '2px solid orange',
+                        marginBottom: '-1px',
+                        transform: settingsOpen ? 'translateX(54px)' : 'translateX(2px)'
+                    }}
+                >
+                    <button onClick={() => set_settingsOpen(!settingsOpen)}><i className='fa-solid fa-ellipsis-vertical p-1.5 text-gray-600'></i></button>
+                    <div style={{ borderLeft: '1px solid silver' }} className='flex pr-2'>
+                        <button onClick={() => set_feed('youtube')}>
+                            <i className="p-0.5 fa-brands fa-youtube" style={{ color: feed === 'youtube' && 'red' }}></i>
+                            {/* <span style={{ color: 'red' }}>1/25</span> */}
+                        </button>
+                        <button onClick={() => set_feed('movies')}>
+                            <i className="p-0.5 fa-solid fa-clapperboard" style={{ color: feed !== 'youtube' && 'rgb(0, 80, 130)' }}></i>
+                        </button>
+                    </div>
+                </div>
                 <WordCollectionCarousel
                     items={wordList}
                     lastItem={(

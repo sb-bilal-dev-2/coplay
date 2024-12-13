@@ -44,12 +44,16 @@ button {
   filter: brightness(0.96);
 }
 
+img {
+  user-select: none;
+}
+
 button:hover {
   filter: brightness(1.1);
 }
 
 button:active {
-  transform: scale(0.95);
+  transform: scale(0.90);
 }
 
 html,

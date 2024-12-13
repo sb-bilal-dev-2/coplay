@@ -50,7 +50,6 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
           type="video/mp4"
         />
       </video>
-      {/* <VideoPlayer title="kung_fu_panda_3" /> */}
     </div>
   )
 }
@@ -82,9 +81,9 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   }
 
   const [subtitleTime, set_subtitleTime] = useState(0)
-  // const [subtitles] = useSubtitles(mediaTitle)
+  const [subtitles] = useSubtitles(mediaTitle)
 
-  // const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
+  const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
 
   const handleTimeUpdate = (newTime) => {
     if (onTimeUpdate) { onTimeUpdate(newTime) }

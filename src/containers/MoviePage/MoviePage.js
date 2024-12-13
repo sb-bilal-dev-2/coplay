@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -9,9 +8,25 @@ import { usePremiumStatus } from "../../helper/usePremiumStatus";
 import { GoBackButton, useWordColletionWordInfos } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
 import { ShortVideo } from "../ShortVideo";
-import { FilterDropdown } from "../RelatedVideosDropdown";
-import { useScrolledItem } from "../../utils/useScrolledItem";
+import { FilterDropdown, WordInfoDropdown } from "../RelatedVideosDropdown";
 import { createDebouncedFunction, debounce } from "../../debounce";
+import { useDispatch } from "react-redux";
+import { selectText } from "../../store";
+
+export const InformedText = ({ text }) => {
+  const parsedTextList = text.split(' ')
+  const dispatch = useDispatch()
+
+  return (
+    <>
+      {parsedTextList.map((textPart) => {
+        return <span onClick={() => {
+          dispatch(selectText(textPart, { fullText: text }))
+        }}>{textPart}</span>
+      })}
+    </>
+  )
+}
 
 export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, scrollActive = true }) => {
   const scrollRef = useRef(null);
@@ -68,9 +83,9 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, scroll
               lineHeight: '1'
             }}
           >
-            {item.the_word}<br />
+            <InformedText text={item.the_word} /><br />
             <button
-              className="text-xs"
+              className="text-xs select-none"
               onClick={() => {
                 changeIndex(index)
                 if (onTimeClick) {
@@ -114,24 +129,22 @@ const MoviePage = () => {
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   // const { list: listName, word: paramWord } = useParams();
   const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
-
+  
+  const [currentWord, set_currentWord] = useState('')
   useEffect(() => {
     // set_isRelOpen(false)
+    set_currentWord('')
     set_isFilterOpen(false)
   }, [title])
 
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
   const handleTimeUpdate = (videoRef) => {
     const newTime = videoRef.currentTime * 1000
-    console.log('newTime', newTime)
     const searchWordListTime = (list) => {
-      console.log('list', list)
       return list.findIndex(item => newTime > item.startTime && newTime < item.endTime)
     }
 
     const foundItem = searchWordListTime(wordList)
-    console.log('foundItem', foundItem)
-
     if (foundItem !== -1) {
       set_forcedActiveWordIndex(foundItem)
     } else {
@@ -141,9 +154,16 @@ const MoviePage = () => {
   // const [isRelOpen, set_isRelOpen] = useState(false);
   const [isFilterOpen, set_isFilterOpen] = useState(false);
 
+
   return (
     <ErrorBoundary>
       <GoBackButton />
+
+      <WordInfoDropdown
+        isOpen={currentWord}
+        closeDropdown={() => set_currentWord('')}
+        the_word={currentWord}
+      />
       <FilterDropdown
         isOpen={isFilterOpen}
         closeDropdown={() => set_isFilterOpen(false)}

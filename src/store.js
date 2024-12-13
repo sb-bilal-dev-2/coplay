@@ -2,14 +2,19 @@ import { configureStore } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import { dynamicReducers } from './dynamicReducer'
 
-const initialState = {
+const user_store = {
     count: 0,
     user: null,
 }
 
-export const userSlice = createSlice({
+const wordInfo_store = {
+    selected_text: '',
+    selectedWordInfo: {},
+}
+
+export const user_slice = createSlice({
     name: 'user',
-    initialState,
+    initialState: user_store,
     reducers: {
         updateUser: (state, action) => {
             state.user = action.payload
@@ -21,13 +26,26 @@ export const userSlice = createSlice({
         }
     },
 })
+export const { updateUser, updateGivenUserValues } = user_slice.actions
 
-// Action creators are generated for each case reducer function
-export const { updateUser, updateGivenUserValues } = userSlice.actions
+export const wordInfo_slice = createSlice({
+    name: 'wordInfo',
+    initialState: wordInfo_store,
+    reducers: {
+        selectText: (state, action) => {
+            state.selected_text = action.payload
+        },
+        selectedWordInfo: (state, action) => {
+            state.selectedWordInfo = action.payload
+        },
+    },
+})
+export const { selectText, selectedWordInfo } = wordInfo_slice.actions
 
 export const store = configureStore({
     reducer: {
-        user: userSlice.reducer,
+        user: user_slice.reducer,
+        wordInfo: wordInfo_slice.reducer,
         ...dynamicReducers,
         // ...dynamicReducers
     },

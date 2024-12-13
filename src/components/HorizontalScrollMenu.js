@@ -2,11 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "./HorizontalScrollMenu.css";
 import { Link } from "react-router-dom";
 import { BASE_SERVER_URL } from "../api";
-import VideojsInited from "./VideojsInited";
 import VideoFrame, { VideoFrameForWord } from "./VideoFrame";
 import BarsSmall from "./BarsSmall";
-import { ShortVideo } from "../containers/ShortVideo";
-import YoutubePlayer from "./YoutubePlayer";
 
 const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' }) => {
   const scrollRef = useRef(null);
@@ -99,9 +96,9 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
   const scrollRef = useRef(null);
   const [currentIndex, set_currentIndex] = useState(0)
 
-  const handleItemClick = (newIndex) => {
+  const handleItemClick = (item, newIndex) => {
     set_currentIndex(newIndex)
-    onIndexUpdate(newIndex)
+    onIndexUpdate(item, newIndex)
   }
 
   const scrollToIndex = (index) => {
@@ -156,7 +153,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
               borderRadius: '8px',
               border: '1px solid rgb(100 100 100)',
             }}
-            onClick={() => handleItemClick(0)}
+            onClick={() => handleItemClick(tags[0], 0)}
           >
             {tags[0]}
           </div>
@@ -181,7 +178,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
                 borderRadius: '8px',
                 border: '1px solid rgb(255 164 104)',
               }}
-              onClick={() => handleItemClick(index)}>
+              onClick={() => handleItemClick(item, index)}>
               {item}
             </div>
           )

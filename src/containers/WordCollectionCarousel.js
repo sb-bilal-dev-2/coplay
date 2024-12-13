@@ -61,16 +61,22 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
                         <div
                             key={item?.id || `dot-${startIndex + index}`}
                             className={`
-                    rounded-full transition-all duration-300 ease-in-out
+                    relative rounded-full transition-all duration-300 ease-in-out
                     ${startIndex + index === activeIndex
-                                    ? 'w-10 h-3 bg-indigo-500'
+                                    ? 'w-5 h-3 bg-indigo-500'
                                     : 'w-3 h-3 bg-gray-300'}
                   `}
                             style={{
                                 transform: `scale(${scale})`,
                                 opacity: opacity
                             }}
-                        />
+                        >
+                            {startIndex + index === activeIndex && (
+                                <button className="absolute" style={{ fontSize: "8px", color: 'white', padding: '1.5px 7px'}}>
+                                    <i className="fa-solid fa-play"></i>
+                                </button>
+                            )}
+                        </div>
                     )
                 })}
             </div>

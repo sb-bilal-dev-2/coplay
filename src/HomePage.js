@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import HorizontalScrollMenu, { TagsScroll } from "./components/HorizontalScrollMenu";
@@ -20,41 +20,62 @@ const HomePage = () => {
   const clips = videos?.filter(item => item.category === 'Music');
   console.log('clips', clips)
   console.log('movies', movies)
+  const [category, set_category] = useState('All')
 
   const { t } = useTranslation();
 
   return (
     <div className="page-container home-page" id="home">
       <PWAInstall />
-      <Onboarding/>
+      <Onboarding />
       <StickyHeader />
       {/* <Hero /> */}
-      <TagsScroll firstSticky onIndexUpdate={(newTagIndex) => console.log('newTagIndex', newTagIndex)} />
-      <div className="">
-        <h2 className="home-page__title">{"Lessons"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
-      </div>
-      <div className="">
-        <h2 className="home-page__title">{"Movies"}</h2>
-        <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
-      </div>
-      <div className="">
-        <h2 className="home-page__title">{"C1"}</h2>
-        <HorizontalScrollMenu
-          items={wordCollections}
-          baseRoute="word_collection"
-          card_className="horizontal list" 
-        />
-      </div>
-      <div className="">
-        <h2 className="home-page__title">{t("music")}</h2>
-        <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
-      </div>
-      <div className="">
-        <InfiniteScroll item={movies} renderItem={(item) => {
-          return (<ShortVideo mediaTitle={item.title}/>)
-        }} />
-      </div>
+      <TagsScroll firstSticky onIndexUpdate={(item) => set_category(item)} />
+      {category === 'All' && (
+        <>
+          <div className="">
+            <h2 className="home-page__title">{"Lessons"}</h2>
+            <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
+          </div>
+          <div className="">
+            <h2 className="home-page__title">{"Movies"}</h2>
+            <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
+          </div>
+          <div className="">
+            <h2 className="home-page__title">{"C1"}</h2>
+            <HorizontalScrollMenu
+              items={wordCollections}
+              baseRoute="word_collection"
+              card_className="horizontal list"
+            />
+          </div>
+          <div className="">
+            <h2 className="home-page__title">{t("music")}</h2>
+            <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
+          </div>
+          <div className="">
+            <InfiniteScroll item={movies} />
+          </div>
+        </>
+      )}
+      {category === 'Phrases' && (
+        <InfiniteScroll item={movies} />
+      )}
+      {category === 'Music' && (
+        <InfiniteScroll item={clips} />
+      )}
+      {category === 'Words' && (
+        <InfiniteScroll item={movies} />
+      )}
+      {category === 'Cartoons' && (
+        <InfiniteScroll item={movies} />
+      )}
+      {category === 'Series' && (
+        <InfiniteScroll item={movies} />
+      )}
+      {category === 'Courses' && (
+        <InfiniteScroll item={movies} />
+      )}
       {/* <Footer /> */}
     </div>
   );

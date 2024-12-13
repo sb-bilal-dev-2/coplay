@@ -215,13 +215,17 @@ div[data-vjs-player="true"] > div > video-js {
 .RelatedVideosMenu {
     margin: 0 4px;
     width: calc(100% - 8px);
-    background: rgb(49, 49, 49);
+    background: rgb(244, 242, 250);
     border-radius: 16px 16px 0 0;
     position: absolute;
     bottom: 0;
     height: 80dvh;
 
     * {
-        color: #fff !important;
+        color: #fff;
+    }
+
+    h4 {
+        color: #e08c6b;
     }
 }

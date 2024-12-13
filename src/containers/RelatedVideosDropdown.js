@@ -1,7 +1,13 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useOutsideAlerter } from '../components/useOutsideAlerter';
-import InfiniteScroll from '../components/InfiniteScroll';
+import InfiniteScroll, { InfiniteScrollOccurrences } from '../components/InfiniteScroll';
+import ComposedInfiniteScroll from '../components/InfiniteScroll';
+import api from '../api';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectText } from '../store';
+import { ShortVideo } from './ShortVideo';
+import { degausser } from '../utils/degausser';
 
 const RelatedVideosDropdown = ({ videos, isOpen, closeDropdown }) => {
   const outsideClickElementRef = useRef()
@@ -102,6 +108,79 @@ export const FilterDropdown = ({ videos, isOpen, closeDropdown, options }) => {
               title="Select an Option"
               onChange={handleChange}
             />
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export const WordInfoDropdown = ({ the_word, closeDropdown }) => {
+  const dispatch = useDispatch()
+  const selected_text = useSelector((state) => state.wordInfo.selected_text)
+  const [wordInfo, setWordInfo] = useState()
+  const [wordOccurrence, set_wordOccurrence] = useState()
+  console.log('wordOccurrence', wordOccurrence)
+  const outsideClickElementRef = useRef()
+  console.log('selected_text', selected_text)
+  const isOpen = !!selected_text.length
+  useOutsideAlerter(outsideClickElementRef, () => dispatch(selectText('')))
+  const requestWordInfo = async () => {
+    try {
+      const newWordInfo = (await api().get(`/wordInfoLemma?mainLang=${'en'}&the_word=` + selected_text))
+      console.log('newWordInfo', newWordInfo)
+      setWordInfo(newWordInfo)
+    } catch (err) {
+
+    }
+  }
+  const requestWordOccurrences = async (selected_text) => {
+    try {
+      const newWordOccurrence = (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`))
+      set_wordOccurrence(newWordOccurrence)
+    } catch (err) {
+
+    }
+  }
+
+  useEffect(() => {
+    requestWordInfo(selected_text)
+    requestWordOccurrences(selected_text)
+  }, [selected_text])
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="RelatedVideosBackdrop"
+        >
+          <div
+            className="RelatedVideosMenu px-4 pt-4 overflow-scroll"
+            ref={outsideClickElementRef}
+          >
+            <h4 className="text-left">{selected_text}</h4>
+            <p>{wordInfo?.description}</p>
+            <p>{wordInfo?.pronounciation}</p>
+            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+              <ComposedInfiniteScroll
+                requestData={async () => (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`))}
+                renderItem={(item) => (console.log('item', item),
+                  <div key={item.id} className='flex p-1'>
+                    <div style={{ width: '44%', height: '80px' }}>
+                      <ShortVideo
+                        mediaTitle={item.mediaTitle}
+                        forcedCurrentTimeChange={item.startTime}
+                        isActive
+                      />
+                    </div>
+                    <div className='flex-1 pl-2' style={{ color: '#333'}}>
+                      <h5 className='text-left text-smx' style={{ color: '#333'}}>{item.mediaTitle}</h5>
+                      <div className='text-xs' style={{ color: '#333'}}>{degausser(item.text)}</div>
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
           </div>
         </div>
       )}

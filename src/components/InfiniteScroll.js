@@ -89,7 +89,7 @@ const InfiniteScroll = ({
   );
 };
 
-const ComposedInfiniteScroll = ({ requestData }) => {
+const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -100,6 +100,10 @@ const ComposedInfiniteScroll = ({ requestData }) => {
     try {
       const newItems = await fetchData(page); // Your API call
       console.log('newItems', newItems)
+      if (items.find((item) => item.id === newItems[0].id)) {
+        setHasMore(false)
+        return;
+      }
       setItems(prev => [...prev, ...newItems]);
       setPage(prev => prev + 1);
       setHasMore(newItems.length > 0);
@@ -118,7 +122,7 @@ const ComposedInfiniteScroll = ({ requestData }) => {
       } else {
         wordCollections = (await api().get('/wordCollections')).results
       }
-    } catch(err) {
+    } catch (err) {
 
     }
     return wordCollections
@@ -131,22 +135,28 @@ const ComposedInfiniteScroll = ({ requestData }) => {
         onLoadMore={loadMore}
         hasMore={hasMore}
         loading={loading}
-        renderItem={(item, index) => (
-          <Link to={`/word_collection/${item.title}`}>
-            <div key={item.id} className='flex p-1'>
-              <div style={{ width: '44%', height: '80px' }}>
-                {
-                  item?.keywords && item.keywords[0] &&
-                  <VideoFrameForWord word={item.keywords[0].the_word} />
-                }
-              </div>
-              <div className='flex-1 pl-2'>
-                <h5 className='text-left text-smx'>{item.title}</h5>
-                <div className='text-xs'>{item.keywords.map((keyword) => keyword.the_word).join(', ')}</div>
-              </div>
-            </div>
-          </Link>
-        )}
+        renderItem={(item) => {
+          if (renderItem) {
+            return renderItem(item)
+          } else {
+            return (
+              <Link to={`/word_collection/${item.title}`}>
+                <div key={item.id} className='flex p-1'>
+                  <div style={{ width: '44%', height: '80px' }}>
+                    {
+                      item?.keywords && item.keywords[0] &&
+                      <VideoFrameForWord word={item.keywords[0].the_word} />
+                    }
+                  </div>
+                  <div className='flex-1 pl-2'>
+                    <h5 className='text-left text-smx'>{item.title}</h5>
+                    <div className='text-xs'>{item.keywords.map((keyword) => keyword.the_word).join(', ')}</div>
+                  </div>
+                </div>
+              </Link>
+            )
+          }
+        }}
       />
     </div>
   );
@@ -154,44 +164,45 @@ const ComposedInfiniteScroll = ({ requestData }) => {
 
 export const InfiniteScrollWordCollection = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/wordCollections')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/wordCollections')).results} />
   )
 }
 
 export const InfiniteScrollMovies = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/movies')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/movies')).results} />
   )
 }
 
 export const InfiniteScrollMusic = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/music')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/music')).results} />
   )
 }
 
 export const InfiniteScrollWords = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/words')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/words')).results} />
   )
 }
 
 export const InfiniteScrollPhrases = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/phrases')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/phrases')).results} />
   )
 }
 
 export const InfiniteScrollCartoons = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/cartoons')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/cartoons')).results} />
   )
 }
 
 export const InfiniteScrollSeries = () => {
   return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/series')).results}/>
+    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/series')).results} />
   )
 }
 
-export default InfiniteScrollWordCollection;
+
+export default ComposedInfiniteScroll;

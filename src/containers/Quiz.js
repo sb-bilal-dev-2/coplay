@@ -467,11 +467,12 @@ const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
   // 'userList': requestUserList,
 }
 
-export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */) {
+export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */, youtube) {
   const [wordList, set_wordList] = useState([])
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
   const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
+  const [y_wordOccurancesMap, set_y_wordOccurancesMap] = useState({})
 
   const getWordInfos = async () => {
     // const wordList = await requestWordCollectionWords(listName)
@@ -479,6 +480,15 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
     try {
       const wordList = await getWordsList(listName)
       const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
+
+      Object.keys(new_wordOccurancesMap).forEach((key) => {
+        const item = new_wordOccurancesMap[key]
+        console.log('item', item)
+        // if (item.length < 5 && !y_wordOccurancesMap[key]) {
+        //   const newOne = y_wordOccurancesMap[key] = searchFilmotSubtitles({ query: '"key"' })
+        //   set_y_wordOccurancesMap({ ...y_wordOccurancesMap, ...newOne })
+        // }
+      })
       set_wordList(wordList)
       set_wordOccurancesMap(new_wordOccurancesMap)
       set_wordInfos(new_wordInfosMap)
