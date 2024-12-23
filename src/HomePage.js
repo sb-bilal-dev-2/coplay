@@ -106,8 +106,6 @@ const HomePage = () => {
           requestData={async () => (await api().get('/rec?category=Cartoon'))}
           renderItem={(item, isActive) => {
             console.log('item', item)
-            console.log('item', item)
-
             return (
               <div id={item.id}>
                 {item.mediaTitle}
