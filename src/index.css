@@ -113,15 +113,23 @@ input:-webkit-autofill:active {
 }
 
 .bg-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 30px;
+  border-radius: 20px;
   cursor: pointer;
   user-select: none;
+  background: rgba(50, 50, 50, 0.8);
 
   &:hover {
-    background: rgba(100, 100, 100, 0.3);
+    opacity: 0.95;
   }
 
   &:active {
-    background: rgba(150, 150, 150, 0.3);
+    opacity: 0.9;
+    filter: brightness(1.1);
   }
 }
 

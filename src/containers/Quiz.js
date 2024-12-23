@@ -374,7 +374,7 @@ const Quiz = () => {
           />
 
           <div>
-              <div style={{ width: '100%', height: '40dvh', background: '#111' }}>
+              <div style={{ width: '100%', height: '60dvh', background: '#111' }}>
 
                   {currentOccurance?.mediaTitle && !loading &&
                       <ShortVideo
@@ -456,12 +456,17 @@ function useBodyOverflowHidden() {
 }
 
 const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
-  'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).results[0]?.keywords || [],
-  'video': async (listName) => (await api().get(`/movie_words/${listName}?without_user_words=true`)),
+  'wordCollection': async (listName) => {
+    const list = (await api('').get(`/wordCollections?title=${listName}`)).results[0]?.keywords || []
+    return { list }
+  },
+  'video': async (listName) => {
+    const list = (await api().get(`/movie_words/${listName}?without_user_words=true`))
+    return { list }
+  },
   'self_words': async (listName) => {
-    const wordList = (await api().get(`/self_words/${listName}`))
-
-    return wordList;
+    const list = (await api().get(`/self_words/${listName}`))
+    return { list };
   }
   // 'playlist': requestPlaylistWords,
   // 'userList': requestUserList,
@@ -472,13 +477,14 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
   const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
-  const [y_wordOccurancesMap, set_y_wordOccurancesMap] = useState({})
+  const [sort, set_sort] =  useState('time') // easiest | hardest
+  const [filter, set_filter] = useState('') // other | beginner | c1
 
   const getWordInfos = async () => {
     // const wordList = await requestWordCollectionWords(listName)
     const getWordsList = WORDS_FETCH_FUNCTION_BY_LISTTYPE[listType] || WORDS_FETCH_FUNCTION_BY_LISTTYPE['wordCollection']
     try {
-      const wordList = await getWordsList(listName)
+      const { list: wordList, filters, subtitle } = await getWordsList(listName, filter, sort)
       const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
 
       Object.keys(new_wordOccurancesMap).forEach((key) => {

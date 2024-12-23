@@ -28,7 +28,7 @@ export const InformedText = ({ text }) => {
   )
 }
 
-export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, scrollActive = true }) => {
+export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = true }) => {
   const scrollRef = useRef(null);
   const [activeIndex, set_activeIndex] = useState(Infinity)
   const scrollToIndex = (index) => {
@@ -58,7 +58,7 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, scroll
   useEffect(() => {
     console.log('forcedIndexChange', forcedIndexChange)
 
-    if (scrollActive) {
+    if (autoScroll) {
       changeIndex(forcedIndexChange)
     } else {
       set_activeIndex(forcedIndexChange)
@@ -127,8 +127,8 @@ const MoviePage = () => {
   const movieInfo = useMovieInfo(title);
   const isPremium = usePremiumStatus();
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
-  // const { list: listName, word: paramWord } = useParams();
-  const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
+  const [isFilterOpen, set_isFilterOpen] = useState(false);
+  const { wordList, set_filter, set_sort, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
   
   const [currentWord, set_currentWord] = useState('')
   useEffect(() => {
@@ -152,7 +152,6 @@ const MoviePage = () => {
     }
   }
   // const [isRelOpen, set_isRelOpen] = useState(false);
-  const [isFilterOpen, set_isFilterOpen] = useState(false);
 
 
   return (
@@ -184,8 +183,10 @@ const MoviePage = () => {
             isActive
           />
         </div>
+        <button onClick={() => set_isFilterOpen(!isFilterOpen)} className="bg-icon absolute bottom-2 right-0"><i className="fa-solid fa-filter text-gray-100"></i></button>
         <HorizontalScroll
           items={wordList}
+          autoScroll={true}
           forcedIndexChange={forcedActiveWordIndex}
           onTimeClick={(newTime) => {
             // change the current time of the video

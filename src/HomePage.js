@@ -3,12 +3,10 @@ import { Link } from "react-router-dom";
 import "./HomePage.css";
 import HorizontalScrollMenu, { TagsScroll } from "./components/HorizontalScrollMenu";
 import StickyHeader from "./components/StickyHeader";
-import Footer from "./components/Footer";
-import { BASE_SERVER_URL } from "./api";
+import api, { BASE_SERVER_URL } from "./api";
 import { useTranslation } from "react-i18next";
 import Onboarding from "./components/Onboarding";
 import PWAInstall from "./components/PWAInstall";
-import { useSelector } from "react-redux";
 import { useDynamicReducer } from "./dynamicReducer";
 import InfiniteScroll from "./components/InfiniteScroll";
 import { ShortVideo } from "./containers/ShortVideo";
@@ -59,22 +57,100 @@ const HomePage = () => {
         </>
       )}
       {category === 'Phrases' && (
-        <InfiniteScroll item={movies} />
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Phrases'))}
+          renderItem={(item) => {
+            console.log('item', item)
+            return (
+              <div id={item.id}>
+                <p>{item.the_word}</p>
+                <p>{item.pronounciation}</p>
+                <p>{item.translation}</p>
+              </div>
+            )
+          }}
+        />
       )}
       {category === 'Music' && (
-        <InfiniteScroll item={clips} />
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Music'))}
+          renderItem={(item, isActive) => {
+            return (
+              <div id={item.id}>
+                {item.mediaTitle}
+                <ShortVideo
+                  mediaTitle={item.mediaTitle}
+                  isActive={isActive}
+                />
+              </div>
+            )
+          }}
+        />
       )}
       {category === 'Words' && (
-        <InfiniteScroll item={movies} />
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Words'))}
+          renderItem={(item) => {
+            return (
+              <div id={item.id}>
+                <p>{item.the_word}</p>
+                <p>{item.pronounciation}</p>
+                <p>{item.translation}</p>
+              </div>
+            )
+          }}
+        />
       )}
-      {category === 'Cartoons' && (
-        <InfiniteScroll item={movies} />
+      {category === 'Cartoon' && (
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Cartoon'))}
+          renderItem={(item, isActive) => {
+            console.log('item', item)
+            console.log('item', item)
+
+            return (
+              <div id={item.id}>
+                {item.mediaTitle}
+                <ShortVideo
+                  mediaTitle={item.mediaTitle}
+                  isActive={isActive}
+                />
+              </div>
+            )
+          }}
+        />
       )}
       {category === 'Series' && (
-        <InfiniteScroll item={movies} />
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Cartoon'))}
+          renderItem={(item, isActive) => {
+            return (
+              <div id={item.id}>
+                {item.mediaTitle}
+                <ShortVideo
+                  mediaTitle={item.mediaTitle}
+                  isActive={isActive}
+                />
+              </div>
+            )
+          }}
+        />
       )}
       {category === 'Courses' && (
-        <InfiniteScroll item={movies} />
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Courses'))}
+          renderItem={(item, isActive) => {
+            return (
+              <div id={item.id}>
+                {item.mediaTitle}
+                <ShortVideo
+                  mediaTitle={item.mediaTitle}
+                  isActive={isActive}
+                />
+              </div>
+            )
+          }}
+        />
       )}
       {/* <Footer /> */}
     </div>

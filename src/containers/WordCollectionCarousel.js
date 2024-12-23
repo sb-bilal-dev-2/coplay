@@ -125,7 +125,7 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
 
 export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIndexUpdate, lastItem }) => {
 
-    const [verticalScrollRef, activeCategory, scrollToCategory] = useScrolledItem('vertical', { itemDimention: 85 / 100, itemMargin: 8 });
+    const [verticalScrollRef, activeCategory, scrollToCategory] = useScrolledItem('vertical', { itemDimention: 60 / 100, itemMargin: 8 });
     console.log('active', activeCategory)
     useEffect(() => {
         if (onIndexUpdate) {
@@ -140,7 +140,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
         <div
             className="w-full overflow-hidden relative"
             style={{
-                height: '60dvh',
+                height: '40dvh',
             }}
         >
             {/* Vertical Carousel (Outer) */}
@@ -163,7 +163,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
                         style={{
                             scrollSnapAlign: 'center',
                             scrollSnapStop: 'always',
-                            height: '85%',
+                            height: '60%',
                         }}
                     >
                         <div
@@ -195,7 +195,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
                         style={{
                             scrollSnapAlign: 'center',
                             scrollSnapStop: 'always',
-                            height: '85%',
+                            height: '60%',
                             marginBottom: '8px'
                         }}
                     >

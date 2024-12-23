@@ -98,12 +98,13 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
   const loadMore = async () => {
     setLoading(true);
     try {
-      const newItems = await fetchData(page); // Your API call
+      const newItems = await fetchData(page) || []; // Your API call
       console.log('newItems', newItems)
-      if (items.find((item) => item.id === newItems[0].id)) {
+      if (items.find((item) => item.id === newItems[0]?.id) || !newItems.length) {
         setHasMore(false)
         return;
       }
+      console.log('newItems', newItems)
       setItems(prev => [...prev, ...newItems]);
       setPage(prev => prev + 1);
       setHasMore(newItems.length > 0);
@@ -117,13 +118,14 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
   const fetchData = async () => {
     let wordCollections
     try {
-      if (requestData) {
-        wordCollections = await requestData()
+      if (typeof requestData === 'function') {
+        wordCollections = (await requestData()).results
+        console.log('wordCollections', wordCollections)
       } else {
         wordCollections = (await api().get('/wordCollections')).results
       }
     } catch (err) {
-
+      console.log("InfiniteScroll Err", err)
     }
     return wordCollections
   }
@@ -135,9 +137,9 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
         onLoadMore={loadMore}
         hasMore={hasMore}
         loading={loading}
-        renderItem={(item) => {
+        renderItem={(item, isActive) => {
           if (renderItem) {
-            return renderItem(item)
+            return renderItem(item, isActive)
           } else {
             return (
               <Link to={`/word_collection/${item.title}`}>
@@ -161,48 +163,5 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
     </div>
   );
 };
-
-export const InfiniteScrollWordCollection = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/wordCollections')).results} />
-  )
-}
-
-export const InfiniteScrollMovies = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/movies')).results} />
-  )
-}
-
-export const InfiniteScrollMusic = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/music')).results} />
-  )
-}
-
-export const InfiniteScrollWords = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/words')).results} />
-  )
-}
-
-export const InfiniteScrollPhrases = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/phrases')).results} />
-  )
-}
-
-export const InfiniteScrollCartoons = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/cartoons')).results} />
-  )
-}
-
-export const InfiniteScrollSeries = () => {
-  return (
-    <ComposedInfiniteScroll requestData={async () => (await api().get('/rec/series')).results} />
-  )
-}
-
 
 export default ComposedInfiniteScroll;

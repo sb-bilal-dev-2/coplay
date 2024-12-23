@@ -162,8 +162,8 @@ export const WordInfoDropdown = ({ the_word, closeDropdown }) => {
             <p>{wordInfo?.description}</p>
             <p>{wordInfo?.pronounciation}</p>
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              <ComposedInfiniteScroll
-                requestData={async () => (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`))}
+              {/* <ComposedInfiniteScroll
+                requestData={async () => (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`)).results}
                 renderItem={(item) => (console.log('item', item),
                   <div key={item.id} className='flex p-1'>
                     <div style={{ width: '44%', height: '80px' }}>
@@ -179,7 +179,7 @@ export const WordInfoDropdown = ({ the_word, closeDropdown }) => {
                     </div>
                   </div>
                 )}
-              />
+              /> */}
             </div>
           </div>
         </div>

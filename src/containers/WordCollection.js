@@ -101,7 +101,7 @@ const WordCollection = () => {
             />
 
             <div>
-                <div style={{ width: '100%', height: '40dvh', background: '#111' }}>
+                <div style={{ width: '100%', height: '60dvh', background: '#111' }}>
 
                     {currentOccurance?.mediaTitle && !loading &&
                         <ShortVideo
