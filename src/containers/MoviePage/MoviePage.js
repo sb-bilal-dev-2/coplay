@@ -73,7 +73,7 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
           <div
             onClick={() => { }}
             key={item.id}
-            className="text-white-100 p-2 m-2 bg-indigo-500"
+            className="text-white-100 p-2 m-2 bg-indigo"
             style={{
               color: 'white',
               borderRadius: '16px',
@@ -129,12 +129,16 @@ const MoviePage = () => {
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   const [isFilterOpen, set_isFilterOpen] = useState(false);
   const { wordList, set_filter, set_sort, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
-  
+
   const [currentWord, set_currentWord] = useState('')
+
+
   useEffect(() => {
     // set_isRelOpen(false)
     set_currentWord('')
     set_isFilterOpen(false)
+    set_filter('')
+    set_sort('')
   }, [title])
 
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
@@ -166,13 +170,29 @@ const MoviePage = () => {
       <FilterDropdown
         isOpen={isFilterOpen}
         closeDropdown={() => set_isFilterOpen(false)}
-        options={[
+        sort_options={[
           { label: 'Easiest', value: 'Easiest' },
           { label: 'Hardest', value: 'Hardest' },
-          { label: 'Bookmarks', value: 'Bookmarks' },
-          { label: 'All New', value: 'All New' }
+          { label: 'Time', value: 'Time' },
         ]}
-        onChange={(option) => { }}
+        bookmark_options={[
+          { label: 'None', value: 'None' },
+          { label: 'All', value: 'All' },
+          { label: 'Fresh', value: 'Fresh' },
+        ]}
+        list_options={[
+          { label: 'All', value: 'All' },
+          { label: 'Beginner', value: 'Beginner' },
+          { label: 'Intermediate', value: 'Intermediate' },
+          { label: 'Advanced', value: 'Advanced' },
+        ]}
+        onChange={({ type, value }) => {
+          if (type === 'sort') {
+            set_sort(value)
+          } else {
+            set_filter(value)
+          }
+        }}
       />
       <div className="MainContainer flex flex-col">
         <div style={{ flex: 1 }}>

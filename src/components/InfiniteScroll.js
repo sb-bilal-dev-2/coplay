@@ -144,7 +144,7 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
             return (
               <Link to={`/word_collection/${item.title}`}>
                 <div key={item.id} className='flex p-1'>
-                  <div style={{ width: '44%', height: '80px' }}>
+                  <div style={{ minWidth: '44%', height: '80px' }}>
                     {
                       item?.keywords && item.keywords[0] &&
                       <VideoFrameForWord word={item.keywords[0].the_word} />

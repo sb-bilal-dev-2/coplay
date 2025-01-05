@@ -5,7 +5,7 @@ import { BASE_SERVER_URL } from "../api";
 import VideoFrame, { VideoFrameForWord } from "./VideoFrame";
 import BarsSmall from "./BarsSmall";
 
-const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical' }) => {
+const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical', renderItem }) => {
   const scrollRef = useRef(null);
   const [hoveringItemId, setHoveringItemId] = useState()
 

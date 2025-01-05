@@ -78,7 +78,7 @@ const WordCollection = () => {
     return (
         <>
             <GoBackButton />
-            <WordInfoDropdown 
+            <WordInfoDropdown
                 isOpen={currentWord}
                 closeDropdown={() => set_currentWord('')}
                 the_word={currentWord}
@@ -90,9 +90,13 @@ const WordCollection = () => {
                     { label: 'Easiest', value: 'Easiest' },
                     { label: 'Hardest', value: 'Hardest' },
                     { label: 'Bookmarks', value: 'Bookmarks' },
-                    { label: 'All New', value: 'All New' }
+                    { label: 'All', value: 'All' }
                 ]}
-                onChange={(option) => { }}
+                onChange={async (option) => {
+                    const new_filteredItemsMap = await (api().get(`/word_collection?title=${option.value}`))
+
+                    // set_filteredItemsMap(new_filteredItemsMap)
+                }}
             />
             <RelatedVideosDropdown
                 isOpen={isRelOpen}

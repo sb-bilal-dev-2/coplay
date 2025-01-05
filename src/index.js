@@ -29,7 +29,7 @@ import NotFound from "./containers/NotFound";
 import PricePage from "./containers/PricePage";
 import useAuthentication from "./containers/Authentication.util";
 import api from "./api";
-import { ShortVideo } from "./containers/ShortVideo";
+import { ShortVideo, VkVideoInit } from "./containers/ShortVideo";
 import VideoFrame, { VideoFrameForWord } from "./components/VideoFrame";
 import WordCollection from "./containers/WordCollection";
 
@@ -49,14 +49,20 @@ const router = createHashRouter(
         exact
         path="/single"
         element={<div style={{ width: '100vw', height: 400 }}>
-          <div style={{ width: '600px', height: '200px'}}>
+          <div style={{ width: '600px', height: '200px' }}>
             {/* <VideoFrame
               time={700}
               title={'frozen_2'}
               videoSrc={'https://api.coplay.live/api' + "/movie?name=" + 'frozen_2'}
             /> */}
             {/* <VideoFrameForWord word={'hello'}/> */}
-            <WordCollection />
+            {/* <WordCollection /> */}
+            <VkVideoInit
+              onTimeUpdate={() => { }}
+              isActive
+              iframeSrc={"https://vkvideo.ru/video_ext.php?oid=878939759&id=456239017"}
+              startTime={300}
+            />
           </div>
           {/* <ShortVideo isActive mediaTitle="frozen_2" forcedCurrentTimeChange={1500} hideSubtitles /> */}
           {/* <video width={300} autoPlay controls height={200}><source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4" /></video> */}
@@ -125,7 +131,7 @@ function authenticatedRoute() {
 async function authenticatedRoute_moderator() {
   const MODERATOR_EMAIL_LIST = { "saidbilol18@gmail.com": true, "nilufar4703@gmail.com": true, "00bilal.io@gmail.com": true }
   const token = localStorage.getItem("token");
-  
+
   if (token) {
     const response = await api().get(`/get-user`, {
       headers: {

@@ -4,7 +4,7 @@ import YoutubePlayer from "../components/YoutubePlayer"
 // import useMobileDetect from "../helper/useMobileDetect"
 
 
-export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdate, isYoutubeVideo, muted }) => {
+export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted }) => {
   const videoRef = useRef(null)
   const [isLoaded, set_isLoaded] = useState()
   useEffect(() => {
@@ -54,6 +54,56 @@ export const VideoInit = ({ isActive, autoplay, videoSrc, startTime, onTimeUpdat
   )
 }
 
+// <iframe "https://vkvideo.ru/video_ext.php?oid=878939759&id=456239017&hd=1&t=20s" />
+export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, muted }) => {
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    let vkVideo
+    
+    if (videoRef && videoRef.current.contentWindow.document) {
+      console.log('videoRef', videoRef.current.contentWindow.document)
+    }
+
+    if (iframeSrc && window.VK !== undefined) {
+      vkVideo = window.VK.VideoPlayer(videoRef.current)
+      console.log('VK', vkVideo)
+      if (!vkVideo) {
+        return;
+      }
+
+      vkVideo.on('timeupdate', () => {
+        if (onTimeUpdate) onTimeUpdate()
+      })
+  
+      vkVideo.on('inited', () => {
+        // loaded
+        if (muted) {
+          vkVideo.mute()
+        }
+      })
+  
+      vkVideo.on('started', () => {
+        // Начало воспроизведения видео
+        if (muted) {
+          vkVideo.mute()
+        }
+      })
+    }
+  }, [iframeSrc, window.VK])
+
+  return (
+    <iframe
+      style={{ width: '100%', height: '100%' }}
+      ref={videoRef}
+      src={iframeSrc + `&t=${startTime || 0}s&autoplay=${isActive ? 1 : 0}&hd=1&js_api=1`}
+      allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;"
+      frameborder="0"
+      allowfullscreen
+    ></iframe>
+  )
+}
+
 const getSubtitleIndexFromCurrentTime = (subtitleTime, subtitles) => {
   const currentTimeInMS = subtitleTime * 1000
   const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
@@ -70,9 +120,9 @@ const extractYoutubeId = title => {
 
 export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles }) => {
   // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
-  const isYoutubeVideo = mediaTitle && mediaTitle?.includes('YOUTUBE_ID[')
+  const isYoutubeVideo = mediaTitle && mediaTitle.includes('YOUTUBE_ID[')
   let mediaSrc = ''
-
+  const isVkVideo = mediaTitle?.includes('VKVIDEO_ID[')
   if (isYoutubeVideo) {
     mediaSrc = extractYoutubeId(mediaTitle)
   } else {
@@ -94,14 +144,23 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   return (
     <div className="ShortVideo">
       {/* {isActive && ( */}
-      {isYoutubeVideo ?
+      {isYoutubeVideo &&
         <YoutubePlayer
           onTimeUpdate={handleTimeUpdate}
           isActive={isActive}
           videoIdOrUrl={mediaSrc}
           startTime={forcedCurrentTimeChange}
         />
-        :
+      }
+      {isVkVideo &&
+        <VkVideoInit
+          onTimeUpdate={handleTimeUpdate}
+          isActive={isActive}
+          iframeSrc={mediaSrc}
+          startTime={forcedCurrentTimeChange}
+        />
+      }
+      {!isVkVideo && !isYoutubeVideo &&
         <VideoInit
           onTimeUpdate={handleTimeUpdate}
           isActive={isActive}

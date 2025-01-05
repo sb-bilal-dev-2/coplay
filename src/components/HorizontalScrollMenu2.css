@@ -1,4 +1,4 @@
-.horizontal-scroll-menu {
+.horizontal-scroll-menu2 {
   width: 100%;
   white-space: nowrap;
   overflow-x: hidden;
@@ -111,7 +111,7 @@
 
       .vertical {
         max-width: calc(100vw - 8px);
-        height: 180px;
+        height: 220px;
         width: 120px;
       }
 
@@ -121,18 +121,9 @@
         width: 160px;
       }
 
-      .list {
-        max-height: 120px;
-        min-height: 120px;
-      }
-
       .full {
-        width: 95dvw;
-        height: 240px;
-        
-        img {
-          object-fit: cover;
-        }
+        width: 100%;
+        height: 200px;
       }
     }
   }
@@ -184,7 +175,6 @@
   text-overflow: ellipsis;
   color: #222;
   font-weight: bold;
-  white-space: pre;
 }
 
 .list-card:hover {

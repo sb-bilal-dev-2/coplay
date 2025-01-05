@@ -521,7 +521,19 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const currentAvailableOccurancesLength = currentWordOccurances?.length
   // console.log('currentWordInfo', currentWordInfo)
 
-  return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength, wordOccurancesMap }
+  return {
+    set_sort,
+    set_filter,
+    wordInfos,
+    wordList,
+    practicingWordIndex,
+    set_practicingWordIndex,
+    currentWordInfo,
+    currentWord,
+    currentWordOccurances,
+    currentAvailableOccurancesLength,
+    wordOccurancesMap
+  }
 }
 
 async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousOccurancesMap, activeIndex) {

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vk Video IFrame</title>
+    <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+</head>
+<style>
+    iframe {
+        border: 1px solid red;
+    }
+
+    #video_player > div > div.videoplayer_ui > div.videoplayer_controls._has_fullscreen {
+        display: none !important;
+    }
+</style>
+<body>
+    <h1>Frozen</h1>
+    <iframe src="https://vkvideo.ru/video_ext.php?oid=878939759&id=456239017&hd=1&autoplay=1" width="640" height="360" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>
+</body>
+<script>
+    // https://id.vk.com/about/business/go/docs/ru/vkid/latest/vk-id/connection/start-integration/web/install
+    console.log('window.VKIDSDK', window.VKIDSDK)
+</script>
+</html>

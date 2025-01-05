@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import HorizontalScrollMenu, { TagsScroll } from "./components/HorizontalScrollMenu";
@@ -9,7 +9,11 @@ import Onboarding from "./components/Onboarding";
 import PWAInstall from "./components/PWAInstall";
 import { useDynamicReducer } from "./dynamicReducer";
 import InfiniteScroll from "./components/InfiniteScroll";
-import { ShortVideo } from "./containers/ShortVideo";
+import { ShortVideo, VkVideoInit } from "./containers/ShortVideo";
+import { WordCollectionCarousel2 } from "./containers/WordCollectionCarousel2";
+import { HorizontalScroll } from "./containers/WordCollectionCarousel";
+import { degausser } from "./utils/degausser";
+import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
 
 const HomePage = () => {
   const { items: videos } = useDynamicReducer("movies");
@@ -28,7 +32,9 @@ const HomePage = () => {
       <Onboarding />
       <StickyHeader />
       {/* <Hero /> */}
-      <TagsScroll firstSticky onIndexUpdate={(item) => set_category(item)} />
+      <div className="pb-2">
+        <TagsScroll firstSticky onIndexUpdate={(item) => set_category(item)} />
+      </div>
       {category === 'All' && (
         <>
           <div className="">
@@ -59,15 +65,10 @@ const HomePage = () => {
       {category === 'Phrases' && (
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Phrases'))}
-          renderItem={(item) => {
+          renderItem={(item, activeIndex) => {
             console.log('item', item)
-            return (
-              <div id={item.id}>
-                <p>{item.the_word}</p>
-                <p>{item.pronounciation}</p>
-                <p>{item.translation}</p>
-              </div>
-            )
+
+            return <Phrases item={item} />
           }}
         />
       )}
@@ -91,13 +92,7 @@ const HomePage = () => {
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Words'))}
           renderItem={(item) => {
-            return (
-              <div id={item.id}>
-                <p>{item.the_word}</p>
-                <p>{item.pronounciation}</p>
-                <p>{item.translation}</p>
-              </div>
-            )
+            return <Phrases item={item} />
           }}
         />
       )}
@@ -185,6 +180,39 @@ function Hero() {
       </div>
     </div>
   );
+}
+
+const useGetOccurrences = (lemma, limit) => {
+  const [occurrences, set_occurrences] = useState([])
+  const getOccurrences = async () => {
+    const new_occurrences = await api().get(`/occurances_v2?lemma=${lemma}&limit=${limit || '5'}`)
+    set_occurrences(new_occurrences)
+  }
+  useEffect(() => {
+    getOccurrences()
+  }, [lemma])
+
+  return occurrences
+}
+
+const Phrases = ({ item }) => {
+  const occurrences = useGetOccurrences(item.the_word)
+  console.log('occurrences', occurrences)
+  return (
+    <div id={item.id}>
+      {!!occurrences.length && (
+        <>
+          <span className="px-2" style={{ color: '#333', fontSize: '1em', fontWeight: 'bold' }}>
+            <span>{item.the_word}</span><span>{item.translation && '- ' + item.translation}</span>
+          </span>
+          <br />
+          <span>{item.pronounciation}</span>
+          <HorizontalScrollMenu2 items={occurrences} baseRoute={"movie"} mainText={item.the_word} />
+        </>
+      )}
+    </div>
+  )
+
 }
 
 export default HomePage;

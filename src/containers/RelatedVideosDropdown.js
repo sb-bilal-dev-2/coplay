@@ -35,7 +35,7 @@ const RelatedVideosDropdown = ({ videos, isOpen, closeDropdown }) => {
   );
 };
 
-const RadioButtons = ({ options, title, onChange }) => {
+const RadioButtons = ({ options = [], title, onChange }) => {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleOptionChange = (value) => {
@@ -51,8 +51,9 @@ const RadioButtons = ({ options, title, onChange }) => {
     >
       <div className="space-y-3">
         {options.map((option, index) => (
-          <label
+          <button
             key={index}
+            onClick={() => handleOptionChange(option.value)}
             className="flex items-center cursor-pointer group"
           >
             <input
@@ -72,26 +73,23 @@ const RadioButtons = ({ options, title, onChange }) => {
               `}
             >
               {selectedOption === option.value && (
-                <span className="w-2 h-2 rounded-full"></span>
+                <span className="w-3 h-3 rounded-full bg-red-500"></span>
               )}
             </span>
-            <span className="text-gray-700 group-hover:text-blue-600">
+            <span style={{ color: '#787378', fontWeight: 'bold' }} className="group-hover:text-blue-600">
               {option.label}
             </span>
-          </label>
+          </button>
         ))}
       </div>
     </div>
   );
 };
 
-export const FilterDropdown = ({ videos, isOpen, closeDropdown, options }) => {
+export const FilterDropdown = ({ videos, isOpen, closeDropdown, onChange, sort_options, list_options, bookmark_options}) => {
   const outsideClickElementRef = useRef()
 
   useOutsideAlerter(outsideClickElementRef, closeDropdown)
-  const handleChange = (value) => {
-    console.log('Selected:', value);
-  };
 
   return (
     <>
@@ -104,9 +102,9 @@ export const FilterDropdown = ({ videos, isOpen, closeDropdown, options }) => {
             ref={outsideClickElementRef}
           >
             <RadioButtons
-              options={options}
+              options={list_options}
               title="Select an Option"
-              onChange={handleChange}
+              onChange={onChange}
             />
           </div>
         </div>

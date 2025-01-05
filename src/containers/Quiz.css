@@ -3,9 +3,9 @@
     background: #222;
     position: fixed !important;
     height: 100%;
-    transform: translateX(calc(-50%));
+    /* transform: translateX(calc(-50%)); */
     /* position: absolute !important; */
-    left: 50%;
+    /* left: 50%; */
 }
 
 .ShortVideo {
@@ -63,12 +63,12 @@ div[data-vjs-player="true"] > div > video-js {
 .MainContainer {
     margin: 0 auto;
     position: relative;
-    width: 500px;
+    width: 100%;
     overflow: hidden;
 
-    @media (max-width: 600px) {
+    /* @media (max-width: 600px) {
         width: 100vw;
-    }
+    } */
 }
 
 .VideoContainer {

@@ -157,7 +157,7 @@ async function saveCanvasImage(canvas, fileName) {
     }
   } catch (error) {
     console.error('Error saving image:', error);
-    throw error;
+    // throw error;
   }
 }
 

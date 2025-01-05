@@ -5,7 +5,7 @@ import { degausser } from '../utils/degausser';
 import { useScrolledItem } from '../utils/useScrolledItem';
 
 
-export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dotPosition = 'top' }) => {
+export const HorizontalScroll = ({ items, active, onIndexUpdate }) => {
     const [horizontalScrollRefs, activeIndex, scrollToSubCategory] = useScrolledItem('horizontal');
 
     useEffect(() => {
@@ -16,7 +16,7 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dot
 
     useEffect(() => {
         if (activeIndex) {
-            if (onIndexUpdate) onIndexUpdate(activeIndex)
+            onIndexUpdate(activeIndex)
         }
     }, [activeIndex])
 
@@ -46,7 +46,7 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dot
                             scale = 1;
                             break;
                         case 1:  // Immediately adjacent dots
-                            scale = 1;
+                            scale = 0.9;
                             break;
                         case 2:  // Outer dots
                             scale = 0.7;
@@ -61,20 +61,19 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dot
                         <div
                             key={item?.id || `dot-${startIndex + index}`}
                             className={`
-                    relative rounded-full duration-150 ease-in-out
+                    relative rounded-full transition-all duration-300 ease-in-out
                     ${startIndex + index === activeIndex
-                                    ? 'w-3 h-2 bg-indigo'
-                                    : 'w-2 h-2 bg-gray-300'}
+                                    ? 'w-5 h-3 bg-indigo'
+                                    : 'w-3 h-3 bg-gray-300'}
                   `}
                             style={{
                                 transform: `scale(${scale})`,
-                                transition: 'transform 1s background 0.5s',
                                 opacity: opacity
                             }}
                         >
                             {startIndex + index === activeIndex && (
-                                <button className="absolute" style={{ fontSize: "8px", color: 'white', padding: '1.5px 7px' }}>
-                                    {/* <i className="fa-solid fa-play"></i> */}
+                                <button className="absolute" style={{ fontSize: "8px", color: 'white', padding: '1.5px 7px'}}>
+                                    <i className="fa-solid fa-play"></i>
                                 </button>
                             )}
                         </div>
@@ -86,7 +85,7 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dot
 
     return (
         <>
-            {dotPosition === 'top' && renderDots(items)}
+            {renderDots(items)}
             <div
                 ref={horizontalScrollRefs}
                 className="horizontal-carousel no-scrollbar w-full h-[400px] overflow-x-scroll scroll-smooth snap-x snap-mandatory"
@@ -105,29 +104,26 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dot
                         }}
                         className="min-w-full w-full h-full flex items-center justify-center"
                     >
-                        {renderItem ? renderItem(innerItem, subCategoryIndex, activeIndex) : (
-                            <div
-                                className={`
+                        <div
+                            className={`
     p-4 rounded-lg text-lg 
     ${active && activeIndex === subCategoryIndex
-                                        ? 'bg-indigo text-white'
-                                        : 'bg-gray-200 text-black'}
+                                    ? 'bg-indigo text-white'
+                                    : 'bg-gray-200 text-black'}
   `}
-                            >
-                                {/* {innerItem?.mediaTitle}<br /> */}
-                                {degausser(innerItem?.text)}
-                            </div>
-                        )}
+                        >
+                            {/* {innerItem?.mediaTitle}<br /> */}
+                            {degausser(innerItem?.text)}
+                        </div>
                     </div>
                 ))}
             </div>
-            {dotPosition === 'bottom' && renderDots(items)}
         </>
 
     )
 }
 
-export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIndexUpdate, lastItem }) => {
+export const WordCollectionCarousel2 = ({ items, innerItemsMap, onIndexUpdate, onInnerIndexUpdate, lastItem }) => {
 
     const [verticalScrollRef, activeCategory, scrollToCategory] = useScrolledItem('vertical', { itemDimention: 60 / 100, itemMargin: 8 });
     console.log('active', activeCategory)
@@ -149,7 +145,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
         >
             {/* Vertical Carousel (Outer) */}
             <div
-                style={{ width: '2px', height: progress * 100 + '%', borderRadius: '0 0 2px 2px' }}
+                style={{ width: '2px', height: progress * 100 + '%', borderRadius: '0 0 2px 2px'}}
                 className="bg-red-500 absolute left-0 transition-all duration-300 ease-in-out"
             />
             <div
