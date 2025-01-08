@@ -10,8 +10,7 @@ import PWAInstall from "./components/PWAInstall";
 import { useDynamicReducer } from "./dynamicReducer";
 import InfiniteScroll from "./components/InfiniteScroll";
 import { ShortVideo, VkVideoInit } from "./containers/ShortVideo";
-import { WordCollectionCarousel2 } from "./containers/WordCollectionCarousel2";
-import { HorizontalScroll } from "./containers/WordCollectionCarousel";
+import { HorizontalScrollCarousel } from "./containers/WordCollectionCarousel";
 import { degausser } from "./utils/degausser";
 import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
 
@@ -32,6 +31,7 @@ const HomePage = () => {
       <Onboarding />
       <StickyHeader />
       {/* <Hero /> */}
+      {/* <VideoFrame time={500} title={'frozen'} /> */}
       <div className="pb-2">
         <TagsScroll firstSticky onIndexUpdate={(item) => set_category(item)} />
       </div>
@@ -65,25 +65,42 @@ const HomePage = () => {
       {category === 'Phrases' && (
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Phrases'))}
-          renderItem={(item, activeIndex) => {
+          renderItem={(item, activeIndex, index) => {
             console.log('item', item)
 
-            return <Phrases item={item} />
+            return <Phrases item={item} isActive={activeIndex === index} />
           }}
         />
       )}
       {category === 'Music' && (
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Music'))}
-          renderItem={(item, isActive) => {
+          renderItem={(postItem, isActive) => {
             return (
-              <div id={item.id}>
-                {item.mediaTitle}
-                <ShortVideo
-                  mediaTitle={item.mediaTitle}
-                  isActive={isActive}
-                />
-              </div>
+              <HorizontalScrollCarousel
+                onIndexUpdate={() => { }}
+                dotPosition="bottom"
+                items={[1, 2, 3, 4]}
+                renderItem={(item, activeIndex, index) => {
+                  return (
+                    <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
+                      {activeIndex === index && (
+                        item.vkVideoEmbed ?
+                          <VkVideoInit
+                            iframeSrc={item.vkVideoEmbed}
+                            isActive={isActive}
+                            startTime={3}
+                          />
+                          :
+                          <ShortVideo
+                            mediaTitle={item.mediaTitle}
+                            isActive={isActive}
+                          />
+                      )}
+                    </div>
+                  )
+                }}
+              />
             )
           }}
         />
@@ -99,52 +116,103 @@ const HomePage = () => {
       {category === 'Cartoon' && (
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Cartoon'))}
-          renderItem={(item, isActive) => {
-            console.log('item', item)
+          renderItem={(postItem, isActive) => {
             return (
-              <div id={item.id}>
-                {item.mediaTitle}
-                <ShortVideo
-                  mediaTitle={item.mediaTitle}
-                  isActive={isActive}
-                />
-              </div>
+              <HorizontalScrollCarousel
+                onIndexUpdate={() => { }}
+                dotPosition="bottom"
+                items={[1, 2, 3, 4]}
+                renderItem={(item, activeIndex, index) => {
+                  return (
+                    <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
+                      {activeIndex === index && (
+                        item.vkVideoEmbed ?
+                          <VkVideoInit
+                            iframeSrc={item.vkVideoEmbed}
+                            isActive={isActive}
+                            startTime={3}
+                          />
+                          :
+                          <ShortVideo
+                            mediaTitle={item.mediaTitle}
+                            isActive={isActive}
+                          />
+                      )}
+                    </div>
+                  )
+                }}
+              />
             )
           }}
         />
       )}
       {category === 'Series' && (
         <InfiniteScroll
-          requestData={async () => (await api().get('/rec?category=Cartoon'))}
-          renderItem={(item, isActive) => {
+          requestData={async () => (await api().get('/rec?category=Series'))}
+          renderItem={(postItem, isActive) => {
             return (
-              <div id={item.id}>
-                {item.mediaTitle}
-                <ShortVideo
-                  mediaTitle={item.mediaTitle}
-                  isActive={isActive}
-                />
-              </div>
+              <HorizontalScrollCarousel
+                onIndexUpdate={() => { }}
+                dotPosition="bottom"
+                items={[1, 2, 3, 4]}
+                renderItem={(item, activeIndex, index) => {
+                  return (
+                    <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
+                      {activeIndex === index && (
+                        item.vkVideoEmbed ?
+                          <VkVideoInit
+                            iframeSrc={item.vkVideoEmbed}
+                            isActive={isActive}
+                            startTime={3}
+                          />
+                          :
+                          <ShortVideo
+                            mediaTitle={item.mediaTitle}
+                            isActive={isActive}
+                          />
+                      )}
+                    </div>
+                  )
+                }}
+              />
             )
           }}
-        />
-      )}
+        />)}
       {category === 'Courses' && (
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Courses'))}
-          renderItem={(item, isActive) => {
+          renderItem={(postItem, isActive) => {
             return (
-              <div id={item.id}>
-                {item.mediaTitle}
-                <ShortVideo
-                  mediaTitle={item.mediaTitle}
-                  isActive={isActive}
+              <div className="relative">
+                <h4 className="text-left absolute text-white" style={{ top: "10px", left: '8px', zIndex: '20', textShadow: '1px 1px #333' }}>{postItem.title}</h4>
+                <HorizontalScrollCarousel
+                  onIndexUpdate={() => { }}
+                  dotPosition="bottom"
+                  items={[1, 2, 3, 4]}
+                  renderItem={(item, activeIndex, index) => {
+                    return (
+                      <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
+                        {activeIndex === index && (
+                          item.vkVideoEmbed ?
+                            <VkVideoInit
+                              iframeSrc={item.vkVideoEmbed}
+                              isActive={isActive}
+                              startTime={3}
+                            />
+                            :
+                            <ShortVideo
+                              mediaTitle={item.mediaTitle}
+                              isActive={isActive}
+                            />
+                        )}
+                      </div>
+                    )
+                  }}
                 />
               </div>
             )
           }}
-        />
-      )}
+        />)}
       {/* <Footer /> */}
     </div>
   );
@@ -195,7 +263,7 @@ const useGetOccurrences = (lemma, limit) => {
   return occurrences
 }
 
-const Phrases = ({ item }) => {
+const Phrases = ({ item, isActive }) => {
   const occurrences = useGetOccurrences(item.the_word)
   console.log('occurrences', occurrences)
   return (
@@ -207,7 +275,7 @@ const Phrases = ({ item }) => {
           </span>
           <br />
           <span>{item.pronounciation}</span>
-          <HorizontalScrollMenu2 items={occurrences} baseRoute={"movie"} mainText={item.the_word} />
+          <HorizontalScrollMenu2 isActive={isActive} items={occurrences} baseRoute={"movie"} mainText={item.the_word} />
         </>
       )}
     </div>

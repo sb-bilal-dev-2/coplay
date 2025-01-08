@@ -85,7 +85,10 @@ const VideoFrameVideo = ({ time, videoSrc }) => {
 const VideoFrame = ({ time, videoSrc, title }) => {
   const [error, set_error] = useState(null);
   const savedImageUrl = `${BASE_SERVER_URL}/images/${title}${time}.jpg`
-
+  if (!videoSrc) {
+    videoSrc = BASE_SERVER_URL + "/movie?name=" + title
+  }
+  console.log('videoSrc', videoSrc, time, title)
   return !error ? 
     <img
       src={savedImageUrl}

@@ -5,7 +5,7 @@ import { degausser } from '../utils/degausser';
 import { useScrolledItem } from '../utils/useScrolledItem';
 
 
-export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dotPosition = 'top' }) => {
+export const HorizontalScrollCarousel = ({ items, active, onIndexUpdate, renderItem, dotPosition = 'top' }) => {
     const [horizontalScrollRefs, activeIndex, scrollToSubCategory] = useScrolledItem('horizontal');
 
     useEffect(() => {
@@ -105,7 +105,7 @@ export const HorizontalScroll = ({ items, active, onIndexUpdate, renderItem, dot
                         }}
                         className="min-w-full w-full h-full flex items-center justify-center"
                     >
-                        {renderItem ? renderItem(innerItem, subCategoryIndex, activeIndex) : (
+                        {renderItem ? renderItem(innerItem, activeIndex, subCategoryIndex) : (
                             <div
                                 className={`
     p-4 rounded-lg text-lg 
@@ -186,7 +186,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
                             <h2 className="text-2xl font-bold mb-4">{item.the_word}</h2>
 
                             {/* Horizontal Carousel (Inner) */}
-                            <HorizontalScroll
+                            <HorizontalScrollCarousel
                                 items={innerItemsMap[item.the_word]}
                                 active={categoryIndex === activeCategory}
                                 onIndexUpdate={onInnerIndexUpdate}

@@ -60,9 +60,10 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
 
   useEffect(() => {
     let vkVideo
-    
-    if (videoRef && videoRef.current.contentWindow.document) {
-      console.log('videoRef', videoRef.current.contentWindow.document)
+
+    if (videoRef && videoRef.current) {
+      // videoRef.current.crossOrigin = 'anonymous'
+      // console.log('videoRef', videoRef.current.contentWindow.document)
     }
 
     if (iframeSrc && window.VK !== undefined) {
@@ -72,35 +73,62 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
         return;
       }
 
-      vkVideo.on('timeupdate', () => {
-        if (onTimeUpdate) onTimeUpdate()
+      vkVideo.on('timeupdate', (event) => {
+        if (onTimeUpdate) {
+          onTimeUpdate(event)
+        }
       })
-  
+
       vkVideo.on('inited', () => {
         // loaded
+        vkVideo.seek(startTime)
         if (muted) {
           vkVideo.mute()
         }
       })
-  
+
       vkVideo.on('started', () => {
         // Начало воспроизведения видео
-        if (muted) {
-          vkVideo.mute()
-        }
+        // vkVideo.mute()
       })
     }
   }, [iframeSrc, window.VK])
-
+  console.log('startTime vk', startTime)
   return (
-    <iframe
-      style={{ width: '100%', height: '100%' }}
-      ref={videoRef}
-      src={iframeSrc + `&t=${startTime || 0}s&autoplay=${isActive ? 1 : 0}&hd=1&js_api=1`}
-      allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;"
-      frameborder="0"
-      allowfullscreen
-    ></iframe>
+    <div
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        width: '100%',
+        height: '100%'
+      }}
+    >
+      <iframe
+        style={{
+          // Show only half of the iframe
+          position: "absolute",
+          top: "-50%",
+          left: '-50%',
+          width: "200%",
+          height: "200%",
+        }}
+        ref={videoRef}
+        src={iframeSrc + `&t=${startTime || 0}s&autoplay=${isActive ? 1 : 0}&hd=1&js_api=1`}
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
+      {/* <div style={{
+              border: '1px solid red',
+              position: 'absolute',
+              zIndex: '100',
+              height: '400px',
+              width: '500px'
+            }}>
+
+            </div> */}
+
+    </div>
   )
 }
 
