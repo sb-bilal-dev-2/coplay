@@ -19,10 +19,10 @@ const InstallPWA = () => {
   }, []);
 
   useEffect(() => {
-    if (supportsPWA && !sessionStorage.getItem('installPromptShown')) {
+    if (supportsPWA && !localStorage.getItem('installPromptShown')) {
       const timer = setTimeout(() => {
         setShowPrompt(true);
-        sessionStorage.setItem('installPromptShown', 'true');
+        localStorage.setItem('installPromptShown', 'true');
       }, MINUTE * 2);
 
       return () => clearTimeout(timer);
@@ -47,7 +47,7 @@ const InstallPWA = () => {
 
   const dismissPrompt = () => {
     setShowPrompt(false);
-    sessionStorage.setItem('installPromptShown', 'true');
+    localStorage.setItem('installPromptShown', 'true');
   };
 
   if (!showPrompt) {
@@ -79,10 +79,10 @@ const IOSInstallInstructions = () => {
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
-    if (!sessionStorage.getItem('installPromptShown')) {
+    if (!localStorage.getItem('installPromptShown')) {
       const timer = setTimeout(() => {
         setShowInstructions(true);
-        sessionStorage.setItem('installPromptShown', 'true');
+        localStorage.setItem('installPromptShown', 'true');
       }, MINUTE * 2);
 
       return () => clearTimeout(timer);
@@ -91,7 +91,7 @@ const IOSInstallInstructions = () => {
 
   const dismissInstructions = () => {
     setShowInstructions(false);
-    sessionStorage.setItem('installPromptShown', 'true');
+    localStorage.setItem('installPromptShown', 'true');
   };
 
   if (!showInstructions) {
