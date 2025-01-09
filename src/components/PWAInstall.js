@@ -23,7 +23,7 @@ const InstallPWA = () => {
       const timer = setTimeout(() => {
         setShowPrompt(true);
         localStorage.setItem('installPromptShown', 'true');
-      }, MINUTE * 2);
+      }, MINUTE * 10);
 
       return () => clearTimeout(timer);
     }
