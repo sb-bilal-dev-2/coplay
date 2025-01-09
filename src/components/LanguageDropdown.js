@@ -130,22 +130,22 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
 
   return (
     <div ref={dropdownRef}>
-      <div
-        className="border border-none rounded cursor-pointer px-2"
+      <button
+        className="border border-none rounded cursor-pointer px-2 mt-1"
         onClick={() => toggleDropdown()}
       >
         {selectedOption ? (
-          <div className="flex justify-between items-center">
+          <button className="flex justify-between items-center">
             <img
               alt="flag"
               src={selectedOption.flag}
               className="w-6 h-6 rounded-full mr-1"
             />
-          </div>
+          </button>
         ) : (
           "Choose language"
         )}
-      </div>
+      </button>
       <ChooseLanguageModal
         show={showModal}
         toggleModal={toggleModal}
@@ -199,7 +199,7 @@ const ChooseLanguageModal = ({
         <p className="font-bold mb-1 ">{t("want to learn")}:</p>
         {LANGUAGES.map((option) => (
           <li key={option.id} className="list-none flex items-center">
-            <div
+            <button
               className={`${
                 selectedOption.iso === option.iso
                   ? "border-yellow-400"
@@ -216,7 +216,7 @@ const ChooseLanguageModal = ({
                 className="w-6 h-6 overflow-hidden rounded-full mr-4"
               />
               <span>{option.label}</span>
-            </div>
+            </button>
           </li>
         ))}
       </div>

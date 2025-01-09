@@ -46,11 +46,13 @@ const StickyHeader = ({ type = "primary", authPage }) => {
         } ${type}`}
     >
       <Link to="/" className="relative min-h-max min-w-max">
+      <button className="block">
         <img
           className="h-14 w-14"
           src="logo-black.png"
           alt="C Play logo placeholder"
         />
+      </button>
       </Link>
       <div className="flex items-center">
         {!authPage && (

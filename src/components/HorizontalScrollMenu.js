@@ -140,7 +140,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
     <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
       {firstSticky && (
         <div className="tags-first-sticky">
-          <div
+          <button
             key={tags[0]}
             className="px-3 mx-1 py-1 cursor-pointer select-none"
             style={{
@@ -156,7 +156,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
             onClick={() => handleItemClick(tags[0], 0)}
           >
             {tags[0]}
-          </div>
+          </button>
         </div>
       )}
       <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-10">
@@ -165,7 +165,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
             ++index;
           }
           return (
-            <div
+            <button
               key={item.label}
               className="px-3 mx-1 py-1 cursor-pointer select-none"
               style={{
@@ -180,7 +180,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
               }}
               onClick={() => handleItemClick(item, index)}>
               {item}
-            </div>
+            </button>
           )
         })}
       </div>
