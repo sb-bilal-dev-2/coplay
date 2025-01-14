@@ -133,88 +133,88 @@ const initAuth = (ownApp) => {
     }
   });
 
-   app.post("/telegram-auth", async (req, res) => {
-     const { telegramChatId, username } = req.body;
+  app.post("/telegram-auth", async (req, res) => {
+    const { telegramChatId, username } = req.body;
 
-     try {
-       if (!username || !telegramChatId) {
-         return res
-           .status(400)
-           .json({ message: "Missing username or telegramChatId" });
-       }
+    try {
+      if (!username || !telegramChatId) {
+        return res
+          .status(400)
+          .json({ message: "Missing username or telegramChatId" });
+      }
 
-       // Find user or create a new one
-       let user = await User.findOne({ telegramChatId });
+      // Find user or create a new one
+      let user = await User.findOne({ telegramChatId });
 
-       if (!user) {
-         user = new User({
-           username,
-           chatId: telegramChatId,
-           isTelegramConnected: true,
-         });
-         await user.save();
-       } else {
-         user.isTelegramConnected = true;
-         user.username = username;
-         await user.save();
-       }
+      if (!user) {
+        user = new User({
+          username,
+          chatId: telegramChatId,
+          isTelegramConnected: true,
+        });
+        await user.save();
+      } else {
+        user.isTelegramConnected = true;
+        user.username = username;
+        await user.save();
+      }
 
-       if (!user) {
-         return res.status(404).json({ message: "User not created" });
-       }
+      if (!user) {
+        return res.status(404).json({ message: "User not created" });
+      }
 
-       console.log("Login with telegram", user);
+      console.log("Login with telegram", user);
 
-       const token = generateToken(user);
+      const token = generateToken(user);
 
-       if (!token) {
-         throw new Error("Failed to generate token");
-       }
+      if (!token) {
+        throw new Error("Failed to generate token");
+      }
 
-       console.log("Token generated: ", token);
-       res.json({ token });
-     } catch (error) {
-       console.error("Telegram auth error:", error);
-       res
-         .status(500)
-         .json({ message: "Internal Server Error", error: error.message });
-     }
-   });
-
- app.post("/telegram-login", async (req, res) => {
-  const { userId, telegramChatId } = req.body;
-
-  try {
-    if (!userId || !telegramChatId) {
-      return res.status(400).json({ message: "Missing userId or telegramChatId" });
+      console.log("Token generated: ", token);
+      res.json({ token });
+    } catch (error) {
+      console.error("Telegram auth error:", error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error", error: error.message });
     }
+  });
 
-    const update = {
-      isTelegramConnected: true,
-      chatId: telegramChatId,
-    };
+  app.post("/telegram-login", async (req, res) => {
+    const { userId, telegramChatId } = req.body;
 
-    const user = await User.findByIdAndUpdate(userId, update);
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    try {
+      if (!userId || !telegramChatId) {
+        return res.status(400).json({ message: "Missing userId or telegramChatId" });
+      }
+
+      const update = {
+        isTelegramConnected: true,
+        chatId: telegramChatId,
+      };
+
+      const user = await User.findByIdAndUpdate(userId, update);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log("Login with telegram");
+
+      const token = generateToken(user);
+
+      if (!token) {
+        throw new Error("Failed to generate token");
+      }
+
+      console.log("Token generated: ", token);
+      res.json({ token });
+    } catch (error) {
+      console.error("Telegram login error:", error);
+      res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
-
-    console.log("Login with telegram");
-
-    const token = generateToken(user);
-
-    if (!token) {
-      throw new Error("Failed to generate token");
-    }
-
-    console.log("Token generated: ", token);
-    res.json({ token });
-  } catch (error) {
-    console.error("Telegram login error:", error);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
-  }
-});
+  });
 
   // Confirm Verification Code and Save User
   app.post("/confirm-signup", async (req, res) => {
@@ -469,6 +469,34 @@ async function requireAuth(req, res, next) {
   });
 }
 
+async function getUserIfExists(req) {
+  // Get the token from the request header
+  let getUserPromise;
+
+  try {
+    getUserPromise = await (new Promise((resolvePromise, rejectUser) => {
+
+      if (req.userId) {
+        resolvePromise(User.findById(req.userId))
+      } else {
+        let token = req.header("Authorization");
+        token = token && token?.split("Bearer ")[1];
+
+        jwt.verify(token, SECRET, async (err, user) => {
+          if (user.userId) {
+            resolvePromise(User.findById(user.userId))
+          }
+        });
+      }
+    }))
+  } catch (err) {
+    return;
+  }
+
+  return getUserPromise
+}
+
+
 const getUserIdByRequestToken = (req) => {
   const token = req.header("Authorization");
   // Check if token exists
@@ -490,5 +518,6 @@ const getUserIdByRequestToken = (req) => {
 module.exports = {
   initAuth,
   getUserIdByRequestToken,
+  getUserIfExists,
   UserModel: User,
 };

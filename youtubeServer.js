@@ -7,6 +7,9 @@ const { parseAndTranslate_single } = require('./newContent');
 const { getTranscriptionOfAudio } = require('./playground/openai');
 const path = require('path');
 const { toVtt } = require('subtitles-parser-vtt');
+const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
+const { subtitles_model } = require('./schemas/subtitles');
+
 /**
  * Example CLI
  * 
@@ -44,13 +47,12 @@ async function processYoutubeVideo(url, mediaLang) {
     console.log('processYoutubeVideo: ' + url)
     const mediaInfo = await getVideoInfoAndStore(url, mediaLang)
     console.log('processYoutubeVideo: new title', mediaInfo.title)
-    try {
-        // await downloadYouTubeVideo(url)
-        // await getTranscriptionAndStoreAsVtt(mediaInfo, mediaLang)
-        await parseAndTranslate_single(mediaInfo)
-    } catch(err) {
-        console.log('err', err)
-    }
+    const transcript = YoutubeTranscript.fetchTranscript("https://www.youtube.com/watch?v=2Vv-BfVoq4g").then(console.log);
+    const adaptedTranscript = transcript
+    await subtitles_model.insert(adaptedTranscript)
+    await parseAndTranslate_single(mediaInfo)
+
+    return subtitles_model.findOne({ youtubeUrl: mediaInfo.youtubeUrl })
 }
 
 // Function to get video information
@@ -66,7 +68,7 @@ async function getVideoInfoAndStore(url, mediaLang) {
             category: videoDetails.category,
             keywords: videoDetails.keywords,
             isShortsEligible: videoDetails.isShortsEligible,
-            youtubeUrl: videoDetails.video_url,
+            youtubeUrl: `https://www.youtube.com/embed/${videoDetails.videoId}`,
             thumbnail: videoDetails.thumbnails[videoDetails.thumbnails.length]
             // youtubeDetails: videoDetails,
         }

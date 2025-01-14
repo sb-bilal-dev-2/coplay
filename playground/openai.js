@@ -74,9 +74,10 @@ async function promptAI(content, customMessages) {
   });
 
   console.log('res', chatCompletion)
-  console.log('choices[0].message', chatCompletion.choices[0].message)
+  const message = chatCompletion?.choices && chatCompletion.choices[0]?.message
+  console.log('choices[0].message', message)
 
-  return chatCompletion?.choices[0]?.message
+  return message
 }
 
 async function generateImage(prompt) {

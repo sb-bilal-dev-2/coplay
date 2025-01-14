@@ -7,7 +7,7 @@ const cors = require('cors')
 const range = require('range-parser');
 const bodyParser = require('body-parser');
 const fromVtt = require('subtitles-parser-vtt').fromVtt
-const { initAuth, getUserIdByRequestToken } = require('./serverAuth');
+const { initAuth, getUserIdByRequestToken, getUserIfExists } = require('./serverAuth');
 const initCRUDAndDatabase = require('./serverCRUD').initCRUDAndDatabase;
 const fsPromises = require('fs/promises')
 const ip = require('ip');
@@ -21,6 +21,7 @@ const { users_model } = require('./schemas/users');
 const { wordCollections_model } = require('./schemas/wordCollections');
 const { sortByLearningState } = require('./src/helper/sortByLearningState');
 const { processYoutubeVideo } = require('./youtubeServer');
+const { movies_model } = require('./schemas/movies');
 
 writeDevelopmentIPAddress();
 
@@ -40,11 +41,145 @@ const port =
 const { createCRUDEndpoints } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
 
-app.get("/hello_world", (req, res) => {
+app.get("/hello_world", async (req, res) => {
+  // const {
+  //   query,
+  //   params,
+  //   path,
+  //   headers
+  // } = req
   res.type("text/plain");
-
-  res.send("Welcome!");
+  res.status(200).send("Welcome! ");
 });
+
+app.get("/rec", async (req, res) => {
+  const {
+    query,
+    params,
+    path,
+    headers
+  } = req
+
+  const user = await getUserIfExists(req)
+  let results = []
+  try {
+    if (query.category === 'Phrases') {
+      if (user) {
+        results = user.words
+        const UserWordsStringified = user.words.filter((item) => item.isPhrase).map(item => item.the_word).slice(0, 20)?.join()
+        const reccommended =
+          (await promptAI(`Reccommend me 20 phrases to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
+            ?.content?.split('\n')
+        results = reccommended.map((item) => ({ the_word: item })) || []
+      }
+    }
+    if (query.category === 'Words') {
+      if (user) {
+        results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const reccommended =
+          (await promptAI(`Reccommend me 20 words to learn based on last 20 words I learned. Respond with plain yaml one word per line like (e.g. hello\ncompany\nfew)). My last 20 words: ${UserWordsStringified}`))
+            ?.content?.split('\n')
+        results = reccommended.map((item) => ({ the_word: item })) || []
+      }
+    }
+    if (query.category === 'Music') {
+      if (user) {
+        const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        // (await promptAI(`Reccommend me 20 music to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //   ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ category: 'Music' })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Series') {
+      const query = await movies_model.find({ category: "Series" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 episode from different to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ category: "Series" })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Courses') {
+      const query = await movies_model.find({ category: "Courses" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 courses to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ category: 'Courses' })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Cartoon') {
+      const query = await movies_model.find({ category: "Cartoon" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 cartoons to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ category: 'Cartoon' })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Podcast') {
+      const query = await movies_model.find({ category: "Podcast" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 podcasts to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ category: 'Podcast' })
+
+        results = reccommendedVideos || []
+      }
+    }
+  } catch (err) {
+    console.log('REC err', err)
+  }
+  res.status(200).send({ results });
+});
+
 
 // async function getYoutubeSubtitles(youtubeId) {
 //   return (await fetch('https://subtitle.to/https://www.youtube.com/watch?v=' + youtubeId)).json()
@@ -54,29 +189,19 @@ app.get("/youtube_video", async (req, res) => {
   const { mediaLang } = req.query;
   const ids = req.query.ids.split(',')
 
-  // let subtitles = []
-
-  // subtitles = Promise.all(ids.map((id) => {
-  //   return getYoutubeSubtitles(id)
-  // }).catch(() => {}))
-
   if (!ids) {
     res.status(200).send("Sample request: https://api.coplay.live/api/youtube_video?mediaLang=en&ids=L0MK7qz13bU")
   }
   console.log('loop processYoutubeVideo(): ' + ids)
-  console.log('mediaLang', mediaLang)
   const results = []
   for (let id of ids) {
-    try {
-      const result = await processYoutubeVideo('https://www.youtube.com/watch?v=' + id, mediaLang)
-      results.push(result)
-    } catch (err) {
-      results.push(err)
-    }
+    const { videoDetails } = await require("ytdl-core").getInfo('https://www.youtube.com/watch?v=' + id);
+    const { category, title, description, lengthSeconds, ownerProfileUrl, isFamilySafe, embed } = videoDetails
+    const videoAdjust = { category, title, description, lengthSeconds, ownerProfileUrl, isFamilySafe, youtubeUrl: embed.iframeUrl }
+    results.push(videoAdjust)
   }
 
   res.status(200).send(results)
-  // const 
 })
 
 app.get("/occurances_v2", async (req, res) => {
@@ -239,7 +364,6 @@ app.get("/movie", (req, res) => {
   // console.log(req.query.name)
   // console.log('videoPath', videoPath)
   const videoStat = fs.statSync(videoPath);
-  console.log('videoStat', videoStat)
 
   const fileSize = videoStat.size;
   const rangeRequest = req.headers.range;
@@ -301,6 +425,7 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
     const { mediaTitle } = req.params;
+    const { bookmark, level, sort } = req.query;
     console.log(
       "fetching movie words for user_id: " + user_id,
       "mediaTitle: " + mediaTitle
@@ -326,20 +451,48 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
       console.error("Could not fetch words: ", err.code, err.message);
       return res.status(404).send(err.message);
     }
-    const userWordsMap = userWords.reduce(
-      (acc, item) => ((acc[item.the_word] = item), acc),
+    const shouldExcludeArchive = !bookmark.includes('Archive')
+    const shouldExcludeActive = !bookmark.includes('Active')
+
+    const userWordsToExclude = userWords.reduce(
+      (acc, item) => {
+        if (shouldExcludeArchive && item.archived) {
+          acc[item.the_word] = item
+        }
+        if (shouldExcludeActive && !item.archived) {
+          acc[item.the_word] = item
+        }
+        return acc
+      },
       {}
     );
     const movieWordsWithoutUserWords = movieWords.filter(
-      (item) => item && !Number(item) && !userWordsMap[item.the_word]
+      (item) => item && !Number(item) && !userWordsToExclude[item.the_word]
     );
+    const levelsMap = {
+      Beginner: level.includes('Beginner'),
+      Intermediate: level.includes('Intermediate'),
+      Advanced: level.includes('Advanced'),
+    }
+    const movieWordsFiltered = movieWordsWithoutUserWords.filter((item) => {
+      return levelsMap[item.level]
+    })
     const movieWordsUnduplicated = Object.values(
-      movieWordsWithoutUserWords.reduce(
+      movieWordsFiltered.reduce(
         (acc, item) => ((acc[item.the_word] = item), acc),
         {}
       )
     );
-    res.status(200).send(movieWordsUnduplicated.sort((a, b) => a.startTime - b.startTime));
+    const sorted = movieWordsUnduplicated.sort((a, b) => {
+      if (sort === 'Easy') {
+        return b.occurrence - a.occurrence
+      } else if (sort === 'Hard') {
+        return a.occurrence - b.ocurrence
+      } else {
+        a.startTime - b.startTime
+      }
+    })
+    res.status(200).send(sorted);
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -452,7 +605,7 @@ app.get("/subtitles_v2", async (req, res) => {
   }
 });
 
-app.get("/subtitles", async (req, res) => {
+app.get("/subtitles_v1", async (req, res) => {
   const mediaLang = "en";
   const defaultTranslateLanguage = "ru";
   try {
@@ -517,7 +670,7 @@ createFileRoute(app, "clipFiles");
 createCRUDEndpoints("users");
 createCRUDEndpoints("movies");
 createCRUDEndpoints("playList");
-// createCRUDEndpoints('subtitles');
+createCRUDEndpoints('subtitles');
 // createCRUDEndpoints('clips');
 // createCRUDEndpoints('quizzes');
 // createCRUDEndpoints('words');
@@ -672,6 +825,7 @@ async function findSubtitlesWithWord(word, mediaLang = "en", limit = 10) {
         },
       ])
       .limit(Number(limit));
+    console.log("OCCURR", results.filter(item => item.mediaTitle === 'frozen'))
     return results;
   } catch (err) {
     console.error(err);

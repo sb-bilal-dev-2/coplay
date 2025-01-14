@@ -39,7 +39,7 @@ async function addVttToDB(mediaInfo) {
              if (wordInfo) {
                 const lowOccurance = wordInfo.occurance < 10
                 if (lowOccurance) {
-                    lowOccuranceWords.push(word)
+                    lowOccuranceWords.push(wordInfo)
                 }
             } else {
                 ignoredWords.push(word)
