@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
 
-const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, startTime }) => {
+const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, startTime, scale = 1.2 }) => {
   console.log('videoIdOrUrl', videoIdOrUrl)
   const urlParams = videoIdOrUrl?.includes('?') && new URLSearchParams('?' + videoIdOrUrl.split('?')[1])
   const videoId = urlParams ? urlParams?.get('v') : videoIdOrUrl
@@ -108,8 +108,14 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
   };
 
   return (
-    <div className='w-full h-full'>
-      <div id={videoId + 'id'} className='w-full h-full'></div>
+    <div className='w-full h-full relative overflow-hidden'>
+      <div id={videoId + 'id'} style={{
+        height: 100 * scale + '%',
+        width: 100 * scale + '%',
+        position: 'absolute',
+        left: `-${(scale - 1) / 2 * 100}%`,
+        top: `-${(scale - 1) / 2 * 100}%`
+      }}></div>
       {!!controls &&
         <Controls
           player={player.current}

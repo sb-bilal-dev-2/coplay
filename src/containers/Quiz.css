@@ -226,6 +226,7 @@ div[data-vjs-player="true"] > div > video-js {
     }
 
     h4 {
-        color: #e08c6b;
+        color: var(--color-primary);
+        font-size: large;
     }
 }

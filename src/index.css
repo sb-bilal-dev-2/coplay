@@ -14,11 +14,11 @@
   --color-primary: rgba(255, 60, 0, 0.95);
   --color-secondary: #ffa75e;
   --color-white: #fff6ff;
-  --color-indigo: rgb(144 138 223);
+  --color-indigo: rgb(144 138 243);
 }
 
 .bg-indigo {
-  background: rgb(144 138 223);
+  background: rgb(144 138 243);
 }
 
 .color-primary {
@@ -49,6 +49,10 @@ h6 {
   font-family: "Arial Black";
 }
 
+h4 {
+  color: var(--color-primary);
+}
+
 button {
   filter: brightness(0.99);
 }
@@ -58,7 +62,7 @@ img {
 }
 
 button:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.05);
 }
 
 button:active {
@@ -139,12 +143,12 @@ input:-webkit-autofill:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  width: 30px;
+  height: 32px;
+  width: 32px;
   border-radius: 20px;
   cursor: pointer;
   user-select: none;
-  background: rgba(50, 50, 50, 0.8);
+  background: rgba(50, 50, 50, 0.9);
 
   &:hover {
     opacity: 0.95;
@@ -160,6 +164,7 @@ input:-webkit-autofill:active {
 
 /* SHARED CLASSES */
 .page-container {
+  min-height: 100dvh;
   display: block;
 }
 .section {

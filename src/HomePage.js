@@ -9,7 +9,7 @@ import Onboarding from "./components/Onboarding";
 import PWAInstall from "./components/PWAInstall";
 import { useDynamicReducer } from "./dynamicReducer";
 import InfiniteScroll from "./components/InfiniteScroll";
-import { ShortVideo, VkVideoInit } from "./containers/ShortVideo";
+import { VkVideoInit } from "./containers/ShortVideo";
 import { HorizontalScrollCarousel } from "./containers/WordCollectionCarousel";
 import { degausser } from "./utils/degausser";
 import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
@@ -17,10 +17,9 @@ import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
 const HomePage = () => {
   const { items: videos } = useDynamicReducer("movies");
   const { items: wordCollections } = useDynamicReducer("wordCollections");
-  const movies = videos?.filter(item => item.category !== 'Music');
+  const movies = videos?.filter(item => item.category === 'Cartoon');
+  const podcasts = videos?.filter(item => item.category === 'Podcast')
   const clips = videos?.filter(item => item.category === 'Music');
-  console.log('clips', clips)
-  console.log('movies', movies)
   const [category, set_category] = useState('All')
 
   const { t } = useTranslation();
@@ -38,11 +37,11 @@ const HomePage = () => {
       {category === 'All' && (
         <>
           <div className="">
-            <h2 className="home-page__title">{"Lessons"}</h2>
-            <HorizontalScrollMenu items={movies} baseRoute={"movie"} card_className="horizontal list" />
+            <h2 className="home-page__title">{"Podcasts"}</h2>
+            <HorizontalScrollMenu items={podcasts} baseRoute={"movie"} card_className="horizontal list" />
           </div>
           <div className="">
-            <h2 className="home-page__title">{"Movies"}</h2>
+            <h2 className="home-page__title">{"Cartoons"}</h2>
             <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
           </div>
           <div className="">
@@ -77,30 +76,7 @@ const HomePage = () => {
           requestData={async () => (await api().get('/rec?category=Music'))}
           renderItem={(postItem, isActive) => {
             return (
-              <HorizontalScrollCarousel
-                onIndexUpdate={() => { }}
-                dotPosition="bottom"
-                items={[1, 2, 3, 4]}
-                renderItem={(item, activeIndex, index) => {
-                  return (
-                    <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
-                      {activeIndex === index && (
-                        item.vkVideoEmbed ?
-                          <VkVideoInit
-                            iframeSrc={item.vkVideoEmbed}
-                            isActive={isActive}
-                            startTime={3}
-                          />
-                          :
-                          <ShortVideo
-                            mediaTitle={item.mediaTitle}
-                            isActive={isActive}
-                          />
-                      )}
-                    </div>
-                  )
-                }}
-              />
+              <CarouselPost postItem={postItem} isActive={isActive} />
             )
           }}
         />
@@ -118,30 +94,17 @@ const HomePage = () => {
           requestData={async () => (await api().get('/rec?category=Cartoon'))}
           renderItem={(postItem, isActive) => {
             return (
-              <HorizontalScrollCarousel
-                onIndexUpdate={() => { }}
-                dotPosition="bottom"
-                items={[1, 2, 3, 4]}
-                renderItem={(item, activeIndex, index) => {
-                  return (
-                    <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
-                      {activeIndex === index && (
-                        item.vkVideoEmbed ?
-                          <VkVideoInit
-                            iframeSrc={item.vkVideoEmbed}
-                            isActive={isActive}
-                            startTime={3}
-                          />
-                          :
-                          <ShortVideo
-                            mediaTitle={item.mediaTitle}
-                            isActive={isActive}
-                          />
-                      )}
-                    </div>
-                  )
-                }}
-              />
+              <CarouselPost postItem={postItem} isActive={isActive} />
+            )
+          }}
+        />
+      )}
+      {category === 'Podcasts' && (
+        <InfiniteScroll
+          requestData={async () => (await api().get('/rec?category=Podcast'))}
+          renderItem={(postItem, isActive) => {
+            return (
+              <CarouselPost postItem={postItem} isActive={isActive} />
             )
           }}
         />
@@ -151,72 +114,71 @@ const HomePage = () => {
           requestData={async () => (await api().get('/rec?category=Series'))}
           renderItem={(postItem, isActive) => {
             return (
-              <HorizontalScrollCarousel
-                onIndexUpdate={() => { }}
-                dotPosition="bottom"
-                items={[1, 2, 3, 4]}
-                renderItem={(item, activeIndex, index) => {
-                  return (
-                    <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
-                      {activeIndex === index && (
-                        item.vkVideoEmbed ?
-                          <VkVideoInit
-                            iframeSrc={item.vkVideoEmbed}
-                            isActive={isActive}
-                            startTime={3}
-                          />
-                          :
-                          <ShortVideo
-                            mediaTitle={item.mediaTitle}
-                            isActive={isActive}
-                          />
-                      )}
-                    </div>
-                  )
-                }}
-              />
+              <CarouselPost postItem={postItem} isActive={isActive} />
             )
           }}
         />)}
-      {category === 'Courses' && (
+      {/* {category === 'Courses' && (
         <InfiniteScroll
           requestData={async () => (await api().get('/rec?category=Courses'))}
           renderItem={(postItem, isActive) => {
             return (
-              <div className="relative">
-                <h4 className="text-left absolute text-white" style={{ top: "10px", left: '8px', zIndex: '20', textShadow: '1px 1px #333' }}>{postItem.title}</h4>
-                <HorizontalScrollCarousel
-                  onIndexUpdate={() => { }}
-                  dotPosition="bottom"
-                  items={[1, 2, 3, 4]}
-                  renderItem={(item, activeIndex, index) => {
-                    return (
-                      <div style={{ width: '100%', height: '200px', maxWidth: '500px', background: '#333', display: 'flex', flexDirection: 'column' }}>
-                        {activeIndex === index && (
-                          item.vkVideoEmbed ?
-                            <VkVideoInit
-                              iframeSrc={item.vkVideoEmbed}
-                              isActive={isActive}
-                              startTime={3}
-                            />
-                            :
-                            <ShortVideo
-                              mediaTitle={item.mediaTitle}
-                              isActive={isActive}
-                            />
-                        )}
-                      </div>
-                    )
-                  }}
-                />
-              </div>
+              <CarouselPost postItem={postItem} isActive={isActive} />
             )
           }}
-        />)}
+        />)} */}
       {/* <Footer /> */}
     </div>
   );
 };
+
+function CarouselPost({ postItem, isActive }) {
+  console.log('postItem', postItem)
+  console.log('postItem.youtubeUrl', postItem.youtubeUrl)
+  function renderItem(item, activeIndex, index) {
+    return (
+      <div style={{ width: '100%', height: '200px', background: '#333', display: 'flex', flexDirection: 'column' }}>
+        {activeIndex === index && (
+          item.vkVideoEmbed ?
+            <VkVideoInit
+              iframeSrc={item.vkVideoEmbed}
+              isActive={isActive}
+              startTime={3}
+            />
+            :
+            <div style={{ overflow: 'hidden', height: '100%', width: '100%', position: 'relative' }}>
+              <div style={{ height: '140%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${40 / 4}%` }}>
+                <iframe
+                  style={{ height: '100%', width: '100%' }}
+                  // src={"https://www.youtube.com/embed/2Vv-BfVoq4g"}
+                  src={item.youtubeUrl}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
+                />
+              </div>
+            </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative" style={{ maxWidth: "500px", margin: '10px auto' }}>
+      <Link to={'/movie/' + postItem?.title}>
+        <h4 className="text-left absolute text-white" style={{ top: "10px", left: '8px', zIndex: '20', textShadow: '1px 1px #333' }}>{postItem.title}</h4>
+      </Link>
+      {!postItem.carousels?.length ?
+        renderItem(postItem) :
+        <HorizontalScrollCarousel
+          onIndexUpdate={() => { }}
+          items={postItem.carousels}
+          dotPosition="bottom"
+          renderItem={renderItem}
+        />
+      }
+    </div>
+  )
+}
+
 const BASE_BUCKET_URI = BASE_SERVER_URL + "/movieFiles";
 function Hero() {
   const { t } = useTranslation();

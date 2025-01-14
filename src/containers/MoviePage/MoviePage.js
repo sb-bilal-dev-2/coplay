@@ -5,13 +5,14 @@ import axios from "axios";
 import "./MoviePage.css";
 import api, { BASE_SERVER_URL } from "../../api";
 import { usePremiumStatus } from "../../helper/usePremiumStatus";
-import { GoBackButton, useWordColletionWordInfos } from "../Quiz";
+import { GoBackButton } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
 import { ShortVideo } from "../ShortVideo";
 import { FilterDropdown, WordInfoDropdown } from "../RelatedVideosDropdown";
 import { createDebouncedFunction, debounce } from "../../debounce";
 import { useDispatch } from "react-redux";
 import { selectText } from "../../store";
+import { convertQueryObjectToCommaSeparatedString } from "../../utils/objectToQuery";
 
 export const InformedText = ({ text }) => {
   const parsedTextList = text.split(' ')
@@ -79,7 +80,8 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
               borderRadius: '16px',
               height: '60px',
               whiteSpace: 'nowrap',
-              background: active ? 'orange' : 'rgba(99,102,241)',
+              background: active && 'orange',
+              // background: active ? 'orange' : 'rgba(99,102,241)',
               lineHeight: '1'
             }}
           >
@@ -126,10 +128,18 @@ const MoviePage = () => {
   const { title } = useParams();
   const movieInfo = useMovieInfo(title);
   const isPremium = usePremiumStatus();
+  const [query, set_query] = useState('')
+  const [videoWords, set_videoWords] = useState([])
+  const requestVideoWords = async () => {
+    console.log('query', query)
+    const list = (await api().get(`/movie_words/${title}?${query}`))
+    set_videoWords(list)
+  }
+  useEffect(() => {
+    requestVideoWords()
+  }, [title, query])
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   const [isFilterOpen, set_isFilterOpen] = useState(false);
-  const { wordList, set_filter, set_sort, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(title, undefined, 'video')
-
   const [currentWord, set_currentWord] = useState('')
 
 
@@ -137,8 +147,7 @@ const MoviePage = () => {
     // set_isRelOpen(false)
     set_currentWord('')
     set_isFilterOpen(false)
-    set_filter('')
-    set_sort('')
+    set_query('')
   }, [title])
 
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
@@ -148,7 +157,7 @@ const MoviePage = () => {
       return list.findIndex(item => newTime > item.startTime && newTime < item.endTime)
     }
 
-    const foundItem = searchWordListTime(wordList)
+    const foundItem = searchWordListTime(videoWords)
     if (foundItem !== -1) {
       set_forcedActiveWordIndex(foundItem)
     } else {
@@ -164,48 +173,47 @@ const MoviePage = () => {
 
       <WordInfoDropdown
         isOpen={currentWord}
-        closeDropdown={() => set_currentWord('')}
-        the_word={currentWord}
+        excludeOccurrence={{ mediaTitle: title }}
       />
       <FilterDropdown
         isOpen={isFilterOpen}
         closeDropdown={() => set_isFilterOpen(false)}
+        onSubmit={(new_query_object, ev) => {
+          ev?.preventDefault()
+          const new_query = convertQueryObjectToCommaSeparatedString(new_query_object)
+          console.log('new_query_object', new_query_object)
+          if (new_query !== query) {
+            set_query(new_query)
+          }
+        }}
         sort_options={[
-          { label: 'Easiest', value: 'Easiest' },
-          { label: 'Hardest', value: 'Hardest' },
-          { label: 'Time', value: 'Time' },
+          { label: 'Easy', value: 'Easy' },
+          { label: 'Hard', value: 'Hard' },
+          { label: 'Not Sorted', value: 'Not Sorted' },
         ]}
         bookmark_options={[
-          { label: 'None', value: 'None' },
-          { label: 'All', value: 'All' },
-          { label: 'Fresh', value: 'Fresh' },
+          { label: 'Archives', value: 'Archives' },
+          { label: 'Active', value: 'Active' },
         ]}
         list_options={[
-          { label: 'All', value: 'All' },
           { label: 'Beginner', value: 'Beginner' },
           { label: 'Intermediate', value: 'Intermediate' },
           { label: 'Advanced', value: 'Advanced' },
         ]}
-        onChange={({ type, value }) => {
-          if (type === 'sort') {
-            set_sort(value)
-          } else {
-            set_filter(value)
-          }
-        }}
       />
       <div className="MainContainer flex flex-col">
         <div style={{ flex: 1 }}>
           <ShortVideo
             onTimeUpdate={handleTimeUpdate}
-            mediaTitle={title}
+            mediaTitle={(movieInfo?.youtubeUrl || title)}
             forcedCurrentTimeChange={forcedCurrentTimeChange}
+            scale={1.5}
             isActive
           />
         </div>
         <button onClick={() => set_isFilterOpen(!isFilterOpen)} className="bg-icon absolute bottom-2 right-0"><i className="fa-solid fa-filter text-gray-100"></i></button>
         <HorizontalScroll
-          items={wordList}
+          items={videoWords}
           autoScroll={true}
           forcedIndexChange={forcedActiveWordIndex}
           onTimeClick={(newTime) => {

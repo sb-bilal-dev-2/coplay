@@ -4,7 +4,7 @@ import YoutubePlayer from "../components/YoutubePlayer"
 // import useMobileDetect from "../helper/useMobileDetect"
 
 
-export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted }) => {
+export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted, scale }) => {
   const videoRef = useRef(null)
   const [isLoaded, set_isLoaded] = useState()
   useEffect(() => {
@@ -29,8 +29,15 @@ export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted }
     set_isLoaded(true)
   }
   return (
-    <div style={{ height: '100%' }}>
+    <div className="w-full h-full overflow-hidden relative">
       <video
+        style={{
+          height: 100 * scale + '%',
+          width: 100 * scale + '%',
+          position: 'absolute',
+          // left: `-${(scale - 1) / 2 * 100}%`,
+          top: `-${(scale - 1) / 2 * 100}%`
+        }}
         controls
         // autoPlay={isActive}
         ref={videoRef}
@@ -39,10 +46,8 @@ export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted }
         onTimeUpdate={() => {
           onTimeUpdate(videoRef.current)
         }}
-        className="w-full"
         playsInline
         webkit-playsinline="true"
-        style={{ height: '100%' }}
       // controlsList="nodownload"
       >
         <source
@@ -146,18 +151,17 @@ const extractYoutubeId = title => {
   return ''
 }
 
-export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles }) => {
+export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles, scale = 1.1 }) => {
   // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
   const isYoutubeVideo = mediaTitle && mediaTitle.includes('YOUTUBE_ID[')
   let mediaSrc = ''
-  const isVkVideo = mediaTitle?.includes('VKVIDEO_ID[')
   if (isYoutubeVideo) {
     mediaSrc = extractYoutubeId(mediaTitle)
   } else {
     // mediaSrc = `${BASE_SERVER_URL}/movieFiles/${mediaTitle}.480.mp4`
     mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
   }
-
+  console.log('mediaTitle', isYoutubeVideo, mediaSrc)
   const [subtitleTime, set_subtitleTime] = useState(0)
   const [subtitles] = useSubtitles(mediaTitle)
 
@@ -178,18 +182,12 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
           isActive={isActive}
           videoIdOrUrl={mediaSrc}
           startTime={forcedCurrentTimeChange}
+          scale={scale}
         />
       }
-      {isVkVideo &&
-        <VkVideoInit
-          onTimeUpdate={handleTimeUpdate}
-          isActive={isActive}
-          iframeSrc={mediaSrc}
-          startTime={forcedCurrentTimeChange}
-        />
-      }
-      {!isVkVideo && !isYoutubeVideo &&
+      {!isYoutubeVideo &&
         <VideoInit
+          scale={scale}
           onTimeUpdate={handleTimeUpdate}
           isActive={isActive}
           videoSrc={mediaSrc}

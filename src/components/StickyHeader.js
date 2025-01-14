@@ -114,7 +114,9 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 <div className="flex items-center select-none">
                   <Link to="/quiz/repeating?listType=self_words" className="relative">
                     {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
-                    <YourVideosIcon />
+                    <button className="block">
+                      <YourVideosIcon />
+                    </button>
                   </Link>
                   <UserNav
                     setIsNavMenuVisible={setIsNavMenuVisible}
@@ -200,7 +202,9 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <div ref={outsideNavClickWrapperRef}>
-      <img className="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
+      <button className="block">
+        <img className="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
+      </button>
       {isNavMenuVisible && (
         <ul className="nav-menu">
           <li>

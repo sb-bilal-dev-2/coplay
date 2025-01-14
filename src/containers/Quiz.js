@@ -378,6 +378,7 @@ const Quiz = () => {
 
                   {currentOccurance?.mediaTitle && !loading &&
                       <ShortVideo
+                          scale={1.5}
                           // onTimeUpdate={handleTimeUpdate}
                           mediaTitle={currentOccurance?.mediaTitle}
                           forcedCurrentTimeChange={currentOccurance?.startTime / 1000}
@@ -477,14 +478,13 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
   const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
-  const [sort, set_sort] =  useState('time') // easiest | hardest
-  const [filter, set_filter] = useState('') // other | beginner | c1
+  const [query, set_query] = useState('') // other | beginner | c1
 
   const getWordInfos = async () => {
     // const wordList = await requestWordCollectionWords(listName)
     const getWordsList = WORDS_FETCH_FUNCTION_BY_LISTTYPE[listType] || WORDS_FETCH_FUNCTION_BY_LISTTYPE['wordCollection']
     try {
-      const { list: wordList, filters, subtitle } = await getWordsList(listName, filter, sort)
+      const { list: wordList, subtitle } = await getWordsList(listName, query)
       const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
 
       Object.keys(new_wordOccurancesMap).forEach((key) => {
@@ -522,8 +522,7 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   // console.log('currentWordInfo', currentWordInfo)
 
   return {
-    set_sort,
-    set_filter,
+    set_query,
     wordInfos,
     wordList,
     practicingWordIndex,

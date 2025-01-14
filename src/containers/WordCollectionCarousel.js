@@ -21,6 +21,7 @@ export const HorizontalScrollCarousel = ({ items, active, onIndexUpdate, renderI
     }, [activeIndex])
 
     const renderDots = (dots) => {
+        if (items?.length <= 1) return;
         const totalDots = dots?.length;
         const maxVisibleDots = 5;
 
@@ -190,6 +191,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
                                 items={innerItemsMap[item.the_word]}
                                 active={categoryIndex === activeCategory}
                                 onIndexUpdate={onInnerIndexUpdate}
+                                dotPosition='bottom'
                             />
                         </div>
                     </div>

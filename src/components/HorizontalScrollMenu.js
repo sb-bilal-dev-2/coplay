@@ -77,7 +77,8 @@ export const HorizontalScrollMenuCardMain = ({
         {youtubeUrl?.length &&
           <img
             className="h-full w-full"
-            src={`https://img.youtube.com/vi/${youtubeUrl.split('v=')[1]}/hqdefault.jpg`}
+            style={{ objectFit: "cover" }}
+            src={`https://img.youtube.com/vi/${youtubeUrl.split('embed/')[1]}/hqdefault.jpg`}
           />
         }
         {(!youtubeUrl && !posterUrl &&
@@ -89,8 +90,7 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Cartoon', 'Series', 'Courses']
-// const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Podcasts', 'Cartoon', 'Series', 'Interactive', 'Courses']
+const TAGS = ['All', 'Phrases', 'Music', 'Words', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
 
 export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);
@@ -184,9 +184,9 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
           )
         })}
       </div>
-      <div className="tags-bar pt-1 absolute right-0">
+      {/* <div className="tags-bar pt-1 absolute right-0">
         <BarsSmall barsColor="#666" />
-      </div>
+      </div> */}
     </div>
   )
 }

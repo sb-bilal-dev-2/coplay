@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import useRequests from '../useRequests';
-import { useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router';
 import api from '../api';
 
 const CRUDRoute = () => {
@@ -9,7 +9,8 @@ const CRUDRoute = () => {
     const newItemTextarea = useRef()
     const [editingItem, setEditingItem] = useState('');
     const editingItemRef = useRef()
-
+    const location = useLocation();
+    const queryParams = Array.from(new URLSearchParams(location.search).entries());
     const {
         items,
         putItems,
@@ -19,7 +20,7 @@ const CRUDRoute = () => {
     } = useRequests(model)
 
     let filteredItems = items;
-
+    console.log('items', items)
     if (search) {
         filteredItems = items?.filter((item) => {
             const valueMatch = Object.entries(item).find(([_, value]) => {
@@ -42,9 +43,23 @@ const CRUDRoute = () => {
 
     const handlePutNewItem = () => {
         const input = newItemTextarea?.current?.value
-        const isYoutubeUrl = isValidUrl(input) && input.contains('https://www.youtube.com') || input.contains('https://youtu.be') // https://www.youtube.com/watch?v=2Vv-BfVoq4g
-        const newItemJson = isYoutubeUrl ? handleYoutubeUrl(input) : input.length && JSON.parse(newItemTextarea?.current?.value)
-        putItems(newItemJson, () => setEditingItem(''))
+        // const isYoutubeUrl = isValidUrl(input) && input?.contains('https://www.youtube.com') || input?.contains('https://youtu.be') // https://www.youtube.com/watch?v=2Vv-BfVoq4g
+        // const newItemJson = isYoutubeUrl
+        //     ? handleYoutubeUrl(input)
+        let newItemsJson = input.length && JSON.parse(newItemTextarea?.current?.value)
+        if (!Array.isArray(newItemsJson)) {
+            newItemsJson = [newItemsJson]
+        }
+
+        if (queryParams.length) {
+            queryParams.forEach(([paramKey, paramValue]) => {
+                newItemsJson.forEach((newItem) => {
+                    newItem[paramKey] = paramValue
+                })
+            })
+        }
+
+        putItems(newItemsJson, () => setEditingItem(''))
     }
 
     return (
@@ -82,7 +97,7 @@ const CRUDRoute = () => {
                     )
                 }
                 return (
-                    <><div className="border p-2 m-2" key={item._id} onClick={() => setEditingItem(item._id)}>{JSON.stringify(item, undefined, 2)}</div><hr /></>
+                    <><div className="border p-2 m-2 overflow-hidden" style={{ maxHeight: "100px", textOverflow: "ellipsis" }}  key={item._id} onClick={() => setEditingItem(item._id)}>{JSON.stringify(item, undefined, 2)}</div><hr /></>
                 )
             })}
         </div>

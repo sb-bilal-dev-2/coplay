@@ -131,7 +131,12 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
   }
 
   return (
-    <div className="px-1">
+    <div className="px-1" >
+      {!loading && !items.length && (
+        <div className='block mt-10'>
+          <p className="text-center text-gray-500 py-4">No items to load</p>
+        </div>
+      )}
       <InfiniteScroll
         items={items}
         onLoadMore={loadMore}

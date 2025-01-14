@@ -35,7 +35,7 @@ const RelatedVideosDropdown = ({ videos, isOpen, closeDropdown }) => {
   );
 };
 
-const RadioButtons = ({ options = [], title, onChange }) => {
+const RadioButtons = ({ options = [], title, onChange, horizontal }) => {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleOptionChange = (value) => {
@@ -49,7 +49,8 @@ const RadioButtons = ({ options = [], title, onChange }) => {
     <div
       className="RadioButtons p-6 shadow-md rounded-lg max-w-md mx-auto"
     >
-      <div className="space-y-3">
+      <h4>{title}</h4>
+      <div className="space-y-3" style={{ display: 'flex' }}>
         {options.map((option, index) => (
           <button
             key={index}
@@ -86,8 +87,11 @@ const RadioButtons = ({ options = [], title, onChange }) => {
   );
 };
 
-export const FilterDropdown = ({ videos, isOpen, closeDropdown, onChange, sort_options, list_options, bookmark_options}) => {
+export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, list_options, bookmark_options }) => {
   const outsideClickElementRef = useRef()
+  const [selected_sort, set_selected_sort] = useState('Not Sorted')
+  const [selected_list, set_selected_list] = useState([])
+  const [selected_bookmark, set_selected_bookmark] = useState([])
 
   useOutsideAlerter(outsideClickElementRef, closeDropdown)
 
@@ -101,11 +105,102 @@ export const FilterDropdown = ({ videos, isOpen, closeDropdown, onChange, sort_o
             className="RelatedVideosMenu px-4 pt-4 overflow-scroll"
             ref={outsideClickElementRef}
           >
-            <RadioButtons
-              options={list_options}
-              title="Select an Option"
-              onChange={onChange}
-            />
+            <form
+              className="RadioButtons p-6 shadow-md rounded-lg max-w-md mx-auto"
+            >
+
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold mb-2">Sort By</h4>
+                <div className="flex space-x-2">
+                  {sort_options.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => set_selected_sort(option.value)}
+                      className="px-4 py-2 rounded-lg text-sm bg-white"
+                      style={{
+                        color:  "#544",
+                        border: selected_sort.includes(option.value) && "solid 2px var(--color-secondary)"
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bookmark Options */}
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold mb-2">Include Bookmarks</h4>
+                <div className="flex space-x-2">
+                  {bookmark_options.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        const new_selected_bookmark = selected_bookmark.includes(option.value) ?
+                          selected_bookmark.filter(sl => sl !== option.value) :
+                          [...selected_bookmark, option.value]
+                        set_selected_bookmark(new_selected_bookmark)
+                      }}
+                      className="px-4 py-2 rounded-full text-sm bg-white"
+                      style={{
+                        color:  "#544",
+                        border: selected_bookmark.includes(option.value) ?  "solid 2px var(--color-secondary)" : "solid 2px white"
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* List Options */}
+              <div>
+                <h4 className="text-sm font-semibold mb-2">Skill Level</h4>
+                <div className="flex flex-wrap gap-2">
+                  {list_options.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        const new_selected_list = selected_list.includes(option.value) ?
+                          selected_list.filter(sl => sl !== option.value) :
+                          [...selected_list, option.value]
+                        set_selected_list(new_selected_list)
+                      }}
+                      className="px-4 py-2 rounded-full text-sm bg-white"
+                      style={{
+                        color:  "#544",
+                        border: selected_list.includes(option.value) ?  "solid 2px var(--color-secondary)" : "solid 2px white"
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-6 flex justify-end space-x-2">
+                <button
+                  className="px-4 py-2 text-sm"
+                  style={{ color: '#333' }}
+                  onClick={closeDropdown}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={(ev) => {
+                    console.log('ev', ev)
+                    const result = { sort: selected_sort }
+                    if (selected_bookmark.length) { result.bookmark = selected_bookmark }
+                    if (selected_list.length) { result.level = selected_list }
+                    onSubmit(result, ev)
+                    closeDropdown()
+                  }}
+                  className="px-4 py-2 text-sm bg-indigo text-white rounded-lg">
+                  Apply Filters
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -113,37 +208,38 @@ export const FilterDropdown = ({ videos, isOpen, closeDropdown, onChange, sort_o
   );
 };
 
-export const WordInfoDropdown = ({ the_word, closeDropdown }) => {
+export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => {
   const dispatch = useDispatch()
   const selected_text = useSelector((state) => state.wordInfo.selected_text)
   const [wordInfo, setWordInfo] = useState()
-  const [wordOccurrence, set_wordOccurrence] = useState()
-  console.log('wordOccurrence', wordOccurrence)
+  const [wordOccurrences, set_wordOccurrences] = useState()
+  console.log('wordOccurrences', wordOccurrences)
   const outsideClickElementRef = useRef()
   console.log('selected_text', selected_text)
   const isOpen = !!selected_text.length
   useOutsideAlerter(outsideClickElementRef, () => dispatch(selectText('')))
-  const requestWordInfo = async () => {
+  const request_wordInfo = async () => {
     try {
-      const newWordInfo = (await api().get(`/wordInfoLemma?mainLang=${'en'}&the_word=` + selected_text))
-      console.log('newWordInfo', newWordInfo)
-      setWordInfo(newWordInfo)
+      const new_wordInfo = (await api().get(`/wordInfoLemma?mainLang=${'en'}&the_word=` + selected_text))
+      console.log('new_wordInfo', new_wordInfo)
+      setWordInfo(new_wordInfo)
     } catch (err) {
 
     }
   }
-  const requestWordOccurrences = async (selected_text) => {
+  const request_wordOccurrencess = async (selected_text) => {
     try {
-      const newWordOccurrence = (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`))
-      set_wordOccurrence(newWordOccurrence)
+      const new_wordOccurrences = (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`))
+      console.log('new_wordOccurrences', new_wordOccurrences)
+      set_wordOccurrences(new_wordOccurrences.filter(item => (item.mediaTitle !== excludeOccurrence.title)))
     } catch (err) {
 
     }
   }
 
   useEffect(() => {
-    requestWordInfo(selected_text)
-    requestWordOccurrences(selected_text)
+    request_wordInfo(selected_text)
+    request_wordOccurrencess(selected_text)
   }, [selected_text])
 
   return (
