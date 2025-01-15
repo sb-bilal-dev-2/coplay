@@ -60,7 +60,7 @@ export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted, 
 }
 
 // <iframe "https://vkvideo.ru/video_ext.php?oid=878939759&id=456239017&hd=1&t=20s" />
-export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, muted }) => {
+export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, muted, scale = 2 }) => {
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -112,10 +112,10 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
         style={{
           // Show only half of the iframe
           position: "absolute",
-          top: "-50%",
-          left: '-50%',
-          width: "200%",
-          height: "200%",
+          top: `-${(scale - 1) / 2 * 100}%`,
+          left: `-${(scale - 1) / 2 * 100}%`,
+          width: `${scale * 100}%`,
+          height: `${scale * 100}%`,
         }}
         ref={videoRef}
         src={iframeSrc + `&t=${startTime || 0}s&autoplay=${isActive ? 1 : 0}&hd=1&js_api=1`}

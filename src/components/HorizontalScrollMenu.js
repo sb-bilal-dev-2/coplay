@@ -66,7 +66,7 @@ export const HorizontalScrollMenuCardMain = ({
   return (
     <Link
       className={`list-card ${card_className}`}
-      to={[baseRoute, title].join("/")}
+      to={[baseRoute, (baseRoute === 'movie' ? _id : title)].join("/")}
     >
       <div className="list-card__image mx-1" style={{
         backgroundImage: `url('${posterUrl ||

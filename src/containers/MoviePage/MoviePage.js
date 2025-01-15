@@ -7,12 +7,13 @@ import api, { BASE_SERVER_URL } from "../../api";
 import { usePremiumStatus } from "../../helper/usePremiumStatus";
 import { GoBackButton } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
-import { ShortVideo } from "../ShortVideo";
+import { ShortVideo, VideoInit, VkVideoInit } from "../ShortVideo";
 import { FilterDropdown, WordInfoDropdown } from "../RelatedVideosDropdown";
 import { createDebouncedFunction, debounce } from "../../debounce";
 import { useDispatch } from "react-redux";
 import { selectText } from "../../store";
 import { convertQueryObjectToCommaSeparatedString } from "../../utils/objectToQuery";
+import YoutubePlayer from "../../components/YoutubePlayer";
 
 export const InformedText = ({ text }) => {
   const parsedTextList = text.split(' ')
@@ -127,6 +128,7 @@ function displayTime(seconds) {
 const MoviePage = () => {
   const { title } = useParams();
   const movieInfo = useMovieInfo(title);
+  console.log('movieInfo', movieInfo)
   const isPremium = usePremiumStatus();
   const [query, set_query] = useState('')
   const [videoWords, set_videoWords] = useState([])
@@ -203,13 +205,31 @@ const MoviePage = () => {
       />
       <div className="MainContainer flex flex-col">
         <div style={{ flex: 1 }}>
-          <ShortVideo
+          {movieInfo?.youtubeUrl ?
+            <YoutubePlayer
+              videoIdOrUrl={movieInfo?.youtubeUrl}
+              controls
+              autoplay
+              scale={1}
+              startTime={0}
+              onTimeUpdate={handleTimeUpdate}
+            />
+            :
+            <VkVideoInit
+              scale={1}
+              isActive
+              iframeSrc={movieInfo?.vkVideoEmbed}
+              startTime={0}
+              onTimeUpdate={handleTimeUpdate}
+            />
+          }
+          {/* <ShortVideo
             onTimeUpdate={handleTimeUpdate}
             mediaTitle={(movieInfo?.youtubeUrl || title)}
             forcedCurrentTimeChange={forcedCurrentTimeChange}
             scale={1.5}
             isActive
-          />
+          /> */}
         </div>
         <button onClick={() => set_isFilterOpen(!isFilterOpen)} className="bg-icon absolute bottom-2 right-0"><i className="fa-solid fa-filter text-gray-100"></i></button>
         <HorizontalScroll
@@ -225,14 +245,14 @@ const MoviePage = () => {
   );
 };
 
-function useMovieInfo(title) {
+function useMovieInfo(id) {
   const [currentVideoInfo, set_currentVideoInfo] = useState({});
   const requestMovieInfo = async () => {
     try {
-      const response = await axios(
-        `${BASE_SERVER_URL}/movies?title=${title}`
-      );
-      const newMovieInfo = response.data?.results[0];
+      const requestUri = '/movies?_id=' + id
+      const response = await api().get(requestUri)
+      console.log('response s', response)
+      const newMovieInfo = response?.results[0];
       console.log("newMovieInfo", newMovieInfo);
       set_currentVideoInfo(newMovieInfo);
     } catch (err) {
@@ -242,7 +262,7 @@ function useMovieInfo(title) {
 
   useEffect(() => {
     requestMovieInfo();
-  }, [title]);
+  }, [id]);
 
   return currentVideoInfo
 }
