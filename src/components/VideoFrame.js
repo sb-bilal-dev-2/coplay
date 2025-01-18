@@ -88,7 +88,7 @@ const VideoFrame = ({ time, videoSrc, title }) => {
   if (!videoSrc) {
     videoSrc = BASE_SERVER_URL + "/movie?name=" + title
   }
-  console.log('videoSrc', videoSrc, time, title)
+
   return !error ? 
     <img
       src={savedImageUrl}

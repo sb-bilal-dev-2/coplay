@@ -1,15 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import { useParams } from "react-router-dom";
 
 import "./MoviePage.css";
-import api, { BASE_SERVER_URL } from "../../api";
+import api from "../../api";
 import { usePremiumStatus } from "../../helper/usePremiumStatus";
 import { GoBackButton } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
-import { ShortVideo, VideoInit, VkVideoInit } from "../ShortVideo";
+import { VkVideoInit } from "../ShortVideo";
 import { FilterDropdown, WordInfoDropdown } from "../RelatedVideosDropdown";
-import { createDebouncedFunction, debounce } from "../../debounce";
+import { createDebouncedFunction } from "../../debounce";
 import { useDispatch } from "react-redux";
 import { selectText } from "../../store";
 import { convertQueryObjectToCommaSeparatedString } from "../../utils/objectToQuery";
@@ -107,9 +106,11 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
 function displayTime(seconds) {
   // Calculate hours, minutes, and seconds (ensure to floor the values)
   const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
+  let minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = Math.floor(seconds % 60); // This removes fractions of a second
-
+  if (hours > 0 && minutes < 10) {
+    minutes = '0' + minutes
+  }
   // Construct the formatted time string
   let formattedTime = '';
 
@@ -132,6 +133,7 @@ const MoviePage = () => {
   const isPremium = usePremiumStatus();
   const [query, set_query] = useState('')
   const [videoWords, set_videoWords] = useState([])
+  console.log('videoWords', videoWords)
   const requestVideoWords = async () => {
     console.log('query', query)
     const list = (await api().get(`/movie_words/${title}?${query}`))
@@ -143,8 +145,8 @@ const MoviePage = () => {
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   const [isFilterOpen, set_isFilterOpen] = useState(false);
   const [currentWord, set_currentWord] = useState('')
-
-
+  const [subtitles] = useSubtitles(title, localStorage.getItem('learningLanguage'))
+  console.log('subtitles', subtitles)
   useEffect(() => {
     // set_isRelOpen(false)
     set_currentWord('')
@@ -153,8 +155,8 @@ const MoviePage = () => {
   }, [title])
 
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
-  const handleTimeUpdate = (videoRef) => {
-    const newTime = videoRef.currentTime * 1000
+  const handleTimeUpdate = (newTime) => {
+    newTime = newTime * 1000
     const searchWordListTime = (list) => {
       return list.findIndex(item => newTime > item.startTime && newTime < item.endTime)
     }
@@ -197,7 +199,7 @@ const MoviePage = () => {
           { label: 'Archives', value: 'Archives' },
           { label: 'Active', value: 'Active' },
         ]}
-        list_options={[
+        level_options={[
           { label: 'Beginner', value: 'Beginner' },
           { label: 'Intermediate', value: 'Intermediate' },
           { label: 'Advanced', value: 'Advanced' },
@@ -208,10 +210,9 @@ const MoviePage = () => {
           {movieInfo?.youtubeUrl ?
             <YoutubePlayer
               videoIdOrUrl={movieInfo?.youtubeUrl}
-              controls
               autoplay
               scale={1}
-              startTime={0}
+              startTime={forcedCurrentTimeChange || 0}
               onTimeUpdate={handleTimeUpdate}
             />
             :
@@ -219,7 +220,7 @@ const MoviePage = () => {
               scale={1}
               isActive
               iframeSrc={movieInfo?.vkVideoEmbed}
-              startTime={0}
+              startTime={forcedCurrentTimeChange || 0}
               onTimeUpdate={handleTimeUpdate}
             />
           }
@@ -238,7 +239,7 @@ const MoviePage = () => {
           forcedIndexChange={forcedActiveWordIndex}
           onTimeClick={(newTime) => {
             // change the current time of the video
-            set_forcedCurrentTimeChange(newTime / 1000)
+            set_forcedCurrentTimeChange(newTime)
           }} />
       </div>
     </ErrorBoundary>
@@ -265,6 +266,23 @@ function useMovieInfo(id) {
   }, [id]);
 
   return currentVideoInfo
+}
+function useSubtitles(mediaId, mediaLang) {
+  const [subtitles, setSubtitles] = useState([])
+
+  async function requestMainSubtitleByTitle() {
+    try {
+      const response = await api().get(`/subtitles?mediaId=${mediaId}&mediaLang=` + mediaLang)
+      setSubtitles(response?.results[0])
+    } catch (err) {
+    }
+  }
+
+  useEffect(() => {
+    requestMainSubtitleByTitle()
+  }, [mediaId, mediaLang])
+
+  return [subtitles]
 }
 
 function useHandleTimeUpdate(list, forcedWordIndex, set_forcedWordIndex) {

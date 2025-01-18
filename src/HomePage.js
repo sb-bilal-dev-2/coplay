@@ -242,7 +242,6 @@ const Phrases = ({ item, isActive }) => {
       )}
     </div>
   )
-
 }
 
 export default HomePage;

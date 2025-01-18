@@ -86,13 +86,13 @@ const WordCollection = () => {
             <FilterDropdown
                 isOpen={isFilterOpen}
                 closeDropdown={() => set_isFilterOpen(false)}
-                options={[
+                level_options={[
                     { label: 'Easiest', value: 'Easiest' },
                     { label: 'Hardest', value: 'Hardest' },
                     { label: 'Bookmarks', value: 'Bookmarks' },
                     { label: 'All', value: 'All' }
                 ]}
-                onChange={async (option) => {
+                onSubmit={async (option) => {
                     const new_filteredItemsMap = await (api().get(`/word_collection?title=${option.value}`))
 
                     // set_filteredItemsMap(new_filteredItemsMap)

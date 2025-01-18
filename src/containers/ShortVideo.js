@@ -64,6 +64,14 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
   const videoRef = useRef(null)
 
   useEffect(() => {
+    if (iframeSrc && window.VK !== undefined) {
+      const vkVideo = window.VK.VideoPlayer(videoRef.current)
+      console.log('startTime / 1000', startTime / 1000)
+      vkVideo?.seek(startTime / 1000)
+    }
+  }, [startTime])
+
+  useEffect(() => {
     let vkVideo
 
     if (videoRef && videoRef.current) {
@@ -80,7 +88,7 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
 
       vkVideo.on('timeupdate', (event) => {
         if (onTimeUpdate) {
-          onTimeUpdate(event)
+          onTimeUpdate(event.time, event)
         }
       })
 
@@ -118,7 +126,7 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
           height: `${scale * 100}%`,
         }}
         ref={videoRef}
-        src={iframeSrc + `&t=${startTime || 0}s&autoplay=${isActive ? 1 : 0}&hd=1&js_api=1`}
+        src={iframeSrc + `&autoplay=${isActive ? 1 : 0}&hd=1&js_api=1`}
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;"
         frameborder="0"
         allowfullscreen
@@ -204,7 +212,7 @@ function useSubtitles(mediaTitle, translateLang) {
   async function requestMainSubtitleByTitle() {
     try {
       translateLang = translateLang?.length ? '&translateLang=' + translateLang : ''
-      const response = await api().get(`/subtitles_v2?mediaTitle=${mediaTitle}` + translateLang)
+      const response = await api().get(`/subtitles_v2?mediaId=${mediaTitle}` + translateLang)
       setSubtitles(response)
     } catch (err) {
     }

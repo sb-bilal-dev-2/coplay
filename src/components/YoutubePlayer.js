@@ -14,12 +14,14 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
   });
 
   useEffect(() => {
+    console.log('startTime', startTime)
     if (startTime) {
-      player?.current?.seekTo(startTime)
+      player.current?.seekTo(startTime / 1000)
     }
   }, [startTime])
 
   useEffect(() => {
+    console.log('videoId', videoId)
     const onYouTubeIframeAPIReady = () => {
       const newPlayer = new window.YT.Player(videoId + 'id', {
         height: '360',
@@ -65,10 +67,10 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
         player.current.destroy();
       }
     };
-  }, [videoIdOrUrl]);
+  }, [videoId]);
 
   const onPlayerReady = (event) => {
-    updatePlayerState();
+    updatePlayerState(event);
     // if (player.current && player.current.unMute) {
     //     player.current.unMute();
     // }
@@ -76,20 +78,21 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
   };
 
   const onPlayerStateChange = (event) => {
-    updatePlayerState();
+    updatePlayerState(event);
   };
 
-  const updatePlayerState = () => {
+  const updatePlayerState = (event) => {
     if (player.current && player.current.getCurrentTime && player.current.getDuration && player.current.getPlayerState && player.current.getVolume) {
+      const currentTime = player.current.getCurrentTime()
       setPlayerState({
-        currentTime: player.current.getCurrentTime(),
+        currentTime,
         duration: player.current.getDuration(),
         isPlaying: player.current.getPlayerState() === window.YT.PlayerState.PLAYING,
         volume: player.current.getVolume(),
       });
 
       if (typeof onTimeUpdate === 'function') {
-        onTimeUpdate(player.current.getCurrentTime())
+        onTimeUpdate(currentTime)
       }
     }
   };

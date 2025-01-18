@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectText } from '../store';
 import { ShortVideo } from './ShortVideo';
 import { degausser } from '../utils/degausser';
+import HorizontalScrollMenu2 from '../components/HorizontalScrollMenu2';
 
 const RelatedVideosDropdown = ({ videos, isOpen, closeDropdown }) => {
   const outsideClickElementRef = useRef()
@@ -87,11 +88,11 @@ const RadioButtons = ({ options = [], title, onChange, horizontal }) => {
   );
 };
 
-export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, list_options, bookmark_options }) => {
+export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, level_options, bookmark_options }) => {
   const outsideClickElementRef = useRef()
   const [selected_sort, set_selected_sort] = useState('Not Sorted')
-  const [selected_list, set_selected_list] = useState([])
   const [selected_bookmark, set_selected_bookmark] = useState([])
+  const [selected_level, set_selected_level] = useState(['Intermediate', 'Advanced'])
 
   useOutsideAlerter(outsideClickElementRef, closeDropdown)
 
@@ -118,7 +119,7 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
                       onClick={() => set_selected_sort(option.value)}
                       className="px-4 py-2 rounded-lg text-sm bg-white"
                       style={{
-                        color:  "#544",
+                        color: "#544",
                         border: selected_sort.includes(option.value) && "solid 2px var(--color-secondary)"
                       }}
                     >
@@ -143,8 +144,8 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
                       }}
                       className="px-4 py-2 rounded-full text-sm bg-white"
                       style={{
-                        color:  "#544",
-                        border: selected_bookmark.includes(option.value) ?  "solid 2px var(--color-secondary)" : "solid 2px white"
+                        color: "#544",
+                        border: selected_bookmark.includes(option.value) ? "solid 2px var(--color-secondary)" : "solid 2px white"
                       }}
                     >
                       {option.label}
@@ -153,23 +154,23 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
                 </div>
               </div>
 
-              {/* List Options */}
+              {/* level Options */}
               <div>
                 <h4 className="text-sm font-semibold mb-2">Skill Level</h4>
                 <div className="flex flex-wrap gap-2">
-                  {list_options.map((option) => (
+                  {level_options.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => {
-                        const new_selected_list = selected_list.includes(option.value) ?
-                          selected_list.filter(sl => sl !== option.value) :
-                          [...selected_list, option.value]
-                        set_selected_list(new_selected_list)
+                        const new_selected_level = selected_level.includes(option.value) ?
+                          selected_level.filter(sl => sl !== option.value) :
+                          [...selected_level, option.value]
+                        set_selected_level(new_selected_level)
                       }}
                       className="px-4 py-2 rounded-full text-sm bg-white"
                       style={{
-                        color:  "#544",
-                        border: selected_list.includes(option.value) ?  "solid 2px var(--color-secondary)" : "solid 2px white"
+                        color: "#544",
+                        border: selected_level.includes(option.value) ? "solid 2px var(--color-secondary)" : "solid 2px white"
                       }}
                     >
                       {option.label}
@@ -192,7 +193,7 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
                     console.log('ev', ev)
                     const result = { sort: selected_sort }
                     if (selected_bookmark.length) { result.bookmark = selected_bookmark }
-                    if (selected_list.length) { result.level = selected_list }
+                    if (selected_level.length) { result.level = selected_level }
                     onSubmit(result, ev)
                     closeDropdown()
                   }}
@@ -231,7 +232,8 @@ export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => 
     try {
       const new_wordOccurrences = (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`))
       console.log('new_wordOccurrences', new_wordOccurrences)
-      set_wordOccurrences(new_wordOccurrences.filter(item => (item.mediaTitle !== excludeOccurrence.title)))
+      const new_wordOccurrences_adjusted = new_wordOccurrences.filter(item => (item.mediaTitle !== excludeOccurrence.title))
+      set_wordOccurrences(new_wordOccurrences)
     } catch (err) {
 
     }
@@ -252,28 +254,20 @@ export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => 
             className="RelatedVideosMenu px-4 pt-4 overflow-scroll"
             ref={outsideClickElementRef}
           >
-            <h4 className="text-left">{selected_text}</h4>
+            <h4 className="text-left">{selected_text + " " + "selected text translation"}</h4>
             <p>{wordInfo?.description}</p>
             <p>{wordInfo?.pronounciation}</p>
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-              {/* <ComposedInfiniteScroll
-                requestData={async () => (await api().get(`/occurances_v2?lemma=${selected_text}&limit=10`)).results}
-                renderItem={(item) => (console.log('item', item),
-                  <div key={item.id} className='flex p-1'>
-                    <div style={{ width: '44%', height: '80px' }}>
-                      <ShortVideo
-                        mediaTitle={item.mediaTitle}
-                        forcedCurrentTimeChange={item.startTime}
-                        isActive
-                      />
-                    </div>
-                    <div className='flex-1 pl-2' style={{ color: '#333'}}>
-                      <h5 className='text-left text-smx' style={{ color: '#333'}}>{item.mediaTitle}</h5>
-                      <div className='text-xs' style={{ color: '#333'}}>{degausser(item.text)}</div>
-                    </div>
-                  </div>
+                {(console.log('wordOccurrences', wordOccurrences), !!wordOccurrences.length) && (
+                  <>
+                    <span className="px-2" style={{ color: '#333', fontSize: '1em', fontWeight: 'bold' }}>
+                      {/* <span>{wordInfo?.the_word}</span><span>{wordInfo?.translation && '- ' + wordInfo?.translation}</span> */}
+                    </span>
+                    <br />
+                    <span>{wordInfo?.pronounciation}</span>
+                    <HorizontalScrollMenu2 isActive items={wordOccurrences} baseRoute={"movie"} mainText={wordInfo?.the_word} />
+                  </>
                 )}
-              /> */}
             </div>
           </div>
         </div>
