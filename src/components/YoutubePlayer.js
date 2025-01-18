@@ -14,7 +14,7 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
   });
 
   useEffect(() => {
-    console.log('startTime', startTime)
+    console.log('startTime', startTime / 1000)
     if (startTime) {
       player.current?.seekTo(startTime / 1000)
     }
@@ -36,8 +36,8 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
           'iv_load_policy': 3, // Hide video annotations
           'cc_load_policy': 0, // Hide closed captions
           // 'fs': 0, // Disable fullscreen button
-          'start': startTime, // Add this line to start at the specified time
-          'autoplay': autoplay && 1,
+          'start': startTime / 1000, // Add this line to start at the specified time
+          // 'autoplay': autoplay && 1,
           // 'autoplay': 1,
           // 'mute': 1
           'listType': 'playlist',
