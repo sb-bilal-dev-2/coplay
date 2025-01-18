@@ -125,19 +125,21 @@ function displayTime(seconds) {
 }
 
 
-
 const MoviePage = () => {
+  const DEFAULT_QUERY = convertQueryObjectToCommaSeparatedString({ sort: 'Not Sorted', level: ['Intermediate', 'Advanced']})
   const { title } = useParams();
   const movieInfo = useMovieInfo(title);
   console.log('movieInfo', movieInfo)
   const isPremium = usePremiumStatus();
-  const [query, set_query] = useState('')
+  const [query, set_query] = useState(DEFAULT_QUERY)
   const [videoWords, set_videoWords] = useState([])
   console.log('videoWords', videoWords)
   const requestVideoWords = async () => {
     console.log('query', query)
-    const list = (await api().get(`/movie_words/${title}?${query}`))
-    set_videoWords(list)
+    if (query !== "") {
+      const list = (await api().get(`/movie_words/${title}?${query}`))
+      set_videoWords(list)
+    }
   }
   useEffect(() => {
     requestVideoWords()
@@ -151,7 +153,7 @@ const MoviePage = () => {
     // set_isRelOpen(false)
     set_currentWord('')
     set_isFilterOpen(false)
-    set_query('')
+    set_query(DEFAULT_QUERY)
   }, [title])
 
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
@@ -185,7 +187,7 @@ const MoviePage = () => {
         onSubmit={(new_query_object, ev) => {
           ev?.preventDefault()
           const new_query = convertQueryObjectToCommaSeparatedString(new_query_object)
-          console.log('new_query_object', new_query_object)
+
           if (new_query !== query) {
             set_query(new_query)
           }

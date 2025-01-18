@@ -95,6 +95,17 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
   const [selected_level, set_selected_level] = useState(['Intermediate', 'Advanced'])
 
   useOutsideAlerter(outsideClickElementRef, closeDropdown)
+  const handleSubmit = (ev) => {
+    // console.log('ev', ev)
+    const result = { sort: selected_sort }
+    if (selected_bookmark.length) { result.bookmark = selected_bookmark }
+    if (selected_level.length) { result.level = selected_level }
+    onSubmit(result, ev)
+    closeDropdown()
+  }
+  useEffect(() => {
+    handleSubmit()
+  }, [])
 
   return (
     <>
@@ -189,14 +200,7 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
                   Cancel
                 </button>
                 <button
-                  onClick={(ev) => {
-                    console.log('ev', ev)
-                    const result = { sort: selected_sort }
-                    if (selected_bookmark.length) { result.bookmark = selected_bookmark }
-                    if (selected_level.length) { result.level = selected_level }
-                    onSubmit(result, ev)
-                    closeDropdown()
-                  }}
+                  onClick={handleSubmit}
                   className="px-4 py-2 text-sm bg-indigo text-white rounded-lg">
                   Apply Filters
                 </button>
