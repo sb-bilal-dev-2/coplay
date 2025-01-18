@@ -347,7 +347,7 @@ const initAuth = (ownApp) => {
         };
       }
 
-      console.log("get-user userData", userData);
+      // console.log("get-user userData", userData);
       res.status(200).json(userData);
     } catch (error) {
       console.error(error);

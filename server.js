@@ -20,8 +20,11 @@ const { gTranslate } = require('./gTranslate');
 const { users_model } = require('./schemas/users');
 const { wordCollections_model } = require('./schemas/wordCollections');
 const { sortByLearningState } = require('./src/helper/sortByLearningState');
-const { processYoutubeVideo } = require('./youtubeServer');
 const { movies_model } = require('./schemas/movies');
+const splitUsedWords = require('./splitUsedWords');
+const { degausser, addVttToDB } = require('./parseUsedWords');
+const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
+const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
 
 writeDevelopmentIPAddress();
 
@@ -41,6 +44,7 @@ const port =
 const { createCRUDEndpoints } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
 
+app.get('/', (req, res) => res.send('hmmm...'))
 app.get("/hello_world", async (req, res) => {
   // const {
   //   query,
@@ -202,6 +206,56 @@ app.get("/youtube_video", async (req, res) => {
   }
 
   res.status(200).send(results)
+})
+
+app.get('/youtube_transcript', async (req, res) => {
+  const { mediaLang } = req.query;
+  const ids = req.query.ids.split(',')
+
+  if (!ids) {
+    res.status(200).send("Sample request: https://api.coplay.live/api/youtube_transcript?mediaLang=en&ids=L0MK7qz13bU")
+  }
+
+  const results = []
+  for (let id of ids) {
+    const youtubeUrl = "https://www.youtube.com/watch?v=" + id;
+    let transcript;
+    try {
+      transcript = await YoutubeTranscript.fetchTranscript(youtubeUrl, { lang: mediaLang || '' });
+    } catch (err) {
+      return res.send('Transcript error: ' + err)
+    }
+    let transcriptAdjusted = {}
+    const relatedMovie = await movies_model.findOne({ youtubeUrl: 'https://www.youtube.com/embed/' + id })
+    if (relatedMovie) {
+      transcriptAdjusted.mediaId = relatedMovie._id
+      transcriptAdjusted.media = relatedMovie
+      transcriptAdjusted.subtitles = transcript
+      transcriptAdjusted.mediaLang = mediaLang
+      transcriptAdjusted.title = mediaLang
+    }
+
+    if (req.query.parse = '1') {
+      transcriptAdjusted.subtitles = transcriptAdjusted.subtitles.map((item) => {
+        const degaussedText = degausser(item.text)
+        return ({
+          ...item,
+          text: degaussedText,
+          startTime: item.offset * 1000,
+          endTime: (item.offset + item.duration) * 1000,
+          usedWords: splitUsedWords(degaussedText)
+        })
+      })
+    }
+    results.push(transcriptAdjusted)
+  }
+  res.status(200).send(results)
+})
+
+app.get("/parse_subtitle", async (req, res) => {
+  const { mediatitle, mediaLang, skipInsert } = req.query
+  const newSubtitle = await addVttToDB(mediatitle, mediaLang, !!skipInsert)
+  res.send(newSubtitle)
 })
 
 app.get("/occurances_v2", async (req, res) => {
@@ -421,14 +475,14 @@ function getContentType(extension) {
   }
 }
 
-app.get("/movie_words/:mediaTitle", async (req, res) => {
+app.get("/movie_words/:_id", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
-    const { mediaTitle } = req.params;
-    const { bookmark, level, sort } = req.query;
+    const { _id } = req.params;
+    const { bookmark, level, sort, mediaLang } = req.query;
     console.log(
       "fetching movie words for user_id: " + user_id,
-      "mediaTitle: " + mediaTitle
+      "_id: " + _id
     );
     let user;
 
@@ -437,22 +491,25 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
     }
     const userWords = user?.words || [];
     let movieWords;
+    console.log('f1')
     try {
-      console.log("mediaTitle requested", mediaTitle);
-      const movieSubtitle = await subtitles_model.findOne({ mediaTitle, translateLang: { $exists: false } });
-
+      console.log("_id requested", _id);
+      const movieSubtitle = await subtitles_model.findOne({ mediaId: _id, translateLang: { $exists: false } });
       movieWords = movieSubtitle.subtitles.reduce(
         (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime, endTime: item.endTime }))),
         []
       );
       // console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
+      console.log('f2')
     } catch (err) {
       console.error("Could not fetch words: ", err.code, err.message);
       return res.status(404).send(err.message);
     }
-    const shouldExcludeArchive = !bookmark.includes('Archive')
-    const shouldExcludeActive = !bookmark.includes('Active')
+    console.log('f3')
+
+    const shouldExcludeArchive = (bookmark && !bookmark.includes('Archive'))
+    const shouldExcludeActive = (bookmark && !bookmark.includes('Active'))
 
     const userWordsToExclude = userWords.reduce(
       (acc, item) => {
@@ -466,17 +523,48 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
       },
       {}
     );
+    console.log('f4')
+
     const movieWordsWithoutUserWords = movieWords.filter(
       (item) => item && !Number(item) && !userWordsToExclude[item.the_word]
     );
-    const levelsMap = {
-      Beginner: level.includes('Beginner'),
-      Intermediate: level.includes('Intermediate'),
-      Advanced: level.includes('Advanced'),
+    const REQUESTED_LEVELS_MAP = {
+      Beginner: level?.includes('Beginner'),
+      Intermediate: level?.includes('Intermediate'),
+      Advanced: level?.includes('Advanced'),
     }
+    console.log('REQUESTED_LEVELS_MAP', REQUESTED_LEVELS_MAP)
+    console.log('movieWordsWithoutUserWords', movieWordsWithoutUserWords)
+    const wordInfo_list = await mongoose.model(`wordInfos${`__${mediaLang || 'en'}__s`}`, wordInfos.schema).find({ the_word: movieWordsWithoutUserWords.map(item => item.the_word) })
+    const wordInfo_map = wordInfo_list.reduce((acc, item) => ((acc[item.the_word] = item), acc), {})
+    console.log('wordInfo_map', wordInfo_map) // movieWordsWithoutUserWords.map(item => item.the_word)
+    const EN_LEVELS_OCCURRENCE_MAP = LEVEL_TO_OCCURRENCE_MAP['en']
     const movieWordsFiltered = movieWordsWithoutUserWords.filter((item) => {
-      return levelsMap[item.level]
+      // return REQUESTED_LEVELS_MAP[wordInfo_map[item.the_word]?.level]
+      const wordInfo = wordInfo_map[item.the_word]
+      if (wordInfo) {
+        console.log('wordInfo', wordInfo)
+        const occurrenceCount = wordInfo_map[item.the_word]?.occuranceCount
+        return occurrenceCount < 20000
+        // console.log('item.the_word', item.the_word)
+        // let level = wordInfo.level
+        // if (!level) {
+        //   if (occurrenceCount > EN_LEVELS_OCCURRENCE_MAP.Beginner) {
+        //     level = 'Beginner'
+        //   } 
+        //   if (occurrenceCount < EN_LEVELS_OCCURRENCE_MAP.Beginner && occurrenceCount > EN_LEVELS_OCCURRENCE_MAP.Intermediate) {
+        //     level = 'Intermediate'
+        //   } 
+        //   if (occurrenceCount < EN_LEVELS_OCCURRENCE_MAP.Intermediate && occurrenceCount < EN_LEVELS_OCCURRENCE_MAP.Advanced) {
+        //     level = 'Advanced'
+        //   }
+        // }
+        // return REQUESTED_LEVELS_MAP[level]
+      } else {
+        return false
+      }
     })
+    console.log('movieWordsFiltered', movieWordsFiltered)
     const movieWordsUnduplicated = Object.values(
       movieWordsFiltered.reduce(
         (acc, item) => ((acc[item.the_word] = item), acc),
@@ -494,6 +582,7 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
     })
     res.status(200).send(sorted);
   } catch (err) {
+    console.log('f error', err.message)
     res.status(500).send(err.message);
   }
 });
@@ -770,7 +859,6 @@ function getHighestExistingQualityPathForTitle(title, chosenQuality) {
       "movieFiles",
       `${title}.${QUALITY_OPTIONS[index]}.mp4`
     );
-    console.log('videoPath' + index, videoPath)
 
     if (fs.existsSync(videoPath)) {
       return videoPath;
@@ -811,13 +899,28 @@ async function findSubtitlesWithWord(word, mediaLang = "en", limit = 10) {
         { $unwind: "$subtitles" },
         { $match: { "subtitles.usedWords": word, mediaLang } },
         {
+          $addFields: {
+            mediaIdObject: { $toObjectId: "$mediaId" }, // Convert mediaId string to ObjectId
+          },
+        },      
+        {
+          $lookup: {
+            from: "movies", // The name of the movies collection in MongoDB
+            localField: "mediaIdObject", // Field in subtitles_model that matches a field in movies
+            foreignField: "_id", // Field in movies collection to join on
+            as: "movieDetails", // The name of the field to store the joined data
+          },
+        },
+        {
           $project: {
             _id: 0,
             id: "$subtitles.id",
             text: "$subtitles.text",
             subtitleInfoId: "$_id",
-            youtubeUrl: "$youtubeUrl",
-            mediaTitle: "$mediaTitle",
+            youtubeUrl: { $arrayElemAt: ["$movieDetails.youtubeUrl", 0] }, // Accessing first matched movie
+            vkVideoEmbed: { $arrayElemAt: ["$movieDetails.vkVideoEmbed", 0] },
+            mediaLabel: { $arrayElemAt: ["$movieDetails.mediaLabel", 0] },
+            mediaId: "$mediaId",
             mediaSrc: "$mediaSrc",
             startTime: "$subtitles.startTime",
             endTime: "$subtitles.endTime",

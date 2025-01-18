@@ -11,11 +11,9 @@ const { get_languageWords } = require('./newLanguages')
 // const WordInfosModel = require('./schemas/wordInfos').wordInfos_model;
 
 
-async function addVttToDB(mediaInfo) {
-    const mediaLang = mediaInfo.mediaLang;
+async function addVttToDB(mediaTitle, mediaLang, skipInsert) {
     console.log('Media Lang: ' + mediaLang)
     const allLanguageWords = await get_languageWords(mediaLang)
-    let mediaTitle = mediaInfo.title;
     const subtitlePath = path.resolve(path.join(__dirname, 'files', 'movieFiles', `${mediaTitle}.${mediaLang}.vtt`));
     if (!fs.existsSync(subtitlePath)) {
         console.error('SUBTITLE_PARSER: no vtt for - ' + subtitlePath);
@@ -25,7 +23,6 @@ async function addVttToDB(mediaInfo) {
     const subtitles = fromVtt(subtitlesVtt, 'ms');
 
     if (!subtitles) return;
-    const usedWords = []
     const allLanguageWordsMap = allLanguageWords.reduce((acc, item) => (acc[item.the_word] = item, acc), {})
     const ignoredWords = []
     const lowOccuranceWords = []
@@ -53,33 +50,22 @@ async function addVttToDB(mediaInfo) {
         }
     })
 
-    // console.log('subtitles', subtitlesWithUsedWords)
-
-    const words = splitUsedWords(degausser(subtitles.map(sbt => sbt.text).join('\n')))
-
-    usedWords.push(...words)
-
-    const newParsedSubtitle = {
-        mediaLang,
-        title: mediaLang,
-        mediaId: mediaInfo._id,
-        mediaTitle,
-        subtitles: subtitlesWithUsedWords
-    }
-    if (mediaInfo.youtubeUrl) {
-        newParsedSubtitle.youtubeUrl = mediaInfo.youtubeUrl
-    }
-    console.log('newParsedSubtitle', newParsedSubtitle)
-    let parsedSubtitle;
     try {
-        parsedSubtitle = (await subtitles_model.create(newParsedSubtitle))
+        let newParsedSubtitle = {
+            mediaLang,
+            title: mediaLang,
+            mediaId: (await movies_model.findOne({ title: mediaTitle, mediaLang }))._id,
+            subtitles: subtitlesWithUsedWords
+        }
+
+        if (!skipInsert) {
+            newParsedSubtitle = (await subtitles_model.create(newParsedSubtitle))
+        }
+
+        return newParsedSubtitle
     } catch(err) {
         console.error('PARSER ERROR at' + mediaLang, err)
     }
-    console.log('parsedSubtitle id', parsedSubtitle?._id)
-    await movies_model.findByIdAndUpdate(mediaInfo._id, { parsedSubtitleId: parsedSubtitle._id })
-
-    return parsedSubtitle?._id
 }
 
 // async function promptMissingLemmas() {
