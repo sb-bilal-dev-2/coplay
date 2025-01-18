@@ -479,6 +479,7 @@ app.get("/movie_words/:_id", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
     const { _id } = req.params;
+    console.log('req.query', req.query)
     const { bookmark, level, sort, mediaLang } = req.query;
     console.log(
       "fetching movie words for user_id: " + user_id,
@@ -534,18 +535,30 @@ app.get("/movie_words/:_id", async (req, res) => {
       Advanced: level?.includes('Advanced'),
     }
     console.log('REQUESTED_LEVELS_MAP', REQUESTED_LEVELS_MAP)
-    console.log('movieWordsWithoutUserWords', movieWordsWithoutUserWords)
     const wordInfo_list = await mongoose.model(`wordInfos${`__${mediaLang || 'en'}__s`}`, wordInfos.schema).find({ the_word: movieWordsWithoutUserWords.map(item => item.the_word) })
     const wordInfo_map = wordInfo_list.reduce((acc, item) => ((acc[item.the_word] = item), acc), {})
-    console.log('wordInfo_map', wordInfo_map) // movieWordsWithoutUserWords.map(item => item.the_word)
-    const EN_LEVELS_OCCURRENCE_MAP = LEVEL_TO_OCCURRENCE_MAP['en']
+    // const EN_LEVELS_OCCURRENCE_MAP = LEVEL_TO_OCCURRENCE_MAP['en']
     const movieWordsFiltered = movieWordsWithoutUserWords.filter((item) => {
       // return REQUESTED_LEVELS_MAP[wordInfo_map[item.the_word]?.level]
       const wordInfo = wordInfo_map[item.the_word]
       if (wordInfo) {
-        console.log('wordInfo', wordInfo)
         const occurrenceCount = wordInfo_map[item.the_word]?.occuranceCount
-        return occurrenceCount < 20000
+
+        if (wordInfo?.level) {
+          return REQUESTED_LEVELS_MAP[wordInfo.level]
+        }
+        
+        let levelByOccurrence = ''
+        if (occurrenceCount > 10000) {
+          levelByOccurrence = 'Beginner'
+        }
+        if (occurrenceCount < 15000) {
+          levelByOccurrence = 'Intermediate'
+        }
+        if (occurrenceCount < 5000) {
+          levelByOccurrence = 'Advanced'
+        }
+        return REQUESTED_LEVELS_MAP[levelByOccurrence]
         // console.log('item.the_word', item.the_word)
         // let level = wordInfo.level
         // if (!level) {
@@ -563,7 +576,7 @@ app.get("/movie_words/:_id", async (req, res) => {
       } else {
         return false
       }
-    })
+    }).map(item => ({ ...item, occurrence: wordInfo_map[item.the_word].occuranceCount}))
     console.log('movieWordsFiltered', movieWordsFiltered)
     const movieWordsUnduplicated = Object.values(
       movieWordsFiltered.reduce(
@@ -575,11 +588,12 @@ app.get("/movie_words/:_id", async (req, res) => {
       if (sort === 'Easy') {
         return b.occurrence - a.occurrence
       } else if (sort === 'Hard') {
-        return a.occurrence - b.ocurrence
+        return a.occurrence - b.occurrence
       } else {
         a.startTime - b.startTime
       }
     })
+    console.log('sort', sort, movieWordsUnduplicated)
     res.status(200).send(sorted);
   } catch (err) {
     console.log('f error', err.message)
