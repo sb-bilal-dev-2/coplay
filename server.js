@@ -25,6 +25,7 @@ const splitUsedWords = require('./splitUsedWords');
 const { degausser, addVttToDB } = require('./parseUsedWords');
 const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
 const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
+const { telegramInit } = require('./tgbot')
 
 writeDevelopmentIPAddress();
 
@@ -43,6 +44,7 @@ const port =
   9090;
 const { createCRUDEndpoints } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
+telegramInit()
 
 app.get('/', (req, res) => res.send('hmmm...'))
 app.get("/hello_world", async (req, res) => {
@@ -63,17 +65,18 @@ app.get("/rec", async (req, res) => {
     path,
     headers
   } = req
+  const mediaLang = query.mediaLang || headers["learninglanguage"]
 
   const user = await getUserIfExists(req)
   let results = []
   try {
     if (query.category === 'Phrases') {
       if (user) {
-        results = user.words
+        // results = user.words
         const UserWordsStringified = user.words.filter((item) => item.isPhrase).map(item => item.the_word).slice(0, 20)?.join()
-        const reccommended =
-          (await promptAI(`Reccommend me 20 phrases to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
-            ?.content?.split('\n')
+        let reccommended = (await promptAI(`Reccommend me 20 phrases to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
+        console.log('reccommended', typeof reccommended?.content, reccommended, reccommended?.content)
+        reccommended = reccommended?.content?.split('\n').map((line) => line.includes('. ') && line.split('. ')[1])
         results = reccommended.map((item) => ({ the_word: item })) || []
       }
     }
@@ -90,25 +93,29 @@ app.get("/rec", async (req, res) => {
     }
     if (query.category === 'Music') {
       if (user) {
-        const words = wordInfos.wordInfos_model.find()
+        // const words = wordInfos.wordInfos_model.find()
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
         // const reccommendedTitles =
         // (await promptAI(`Reccommend me 20 music to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
         //   ?.choices[0]?.message?.split('\n')
 
-        const reccommendedVideos = await movies_model.find({ category: 'Music' })
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Music' })
+
+        results = reccommendedVideos || []
+      } else {
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Music' })
 
         results = reccommendedVideos || []
       }
     }
     if (query.category === 'Series') {
-      const query = await movies_model.find({ category: "Series" })
+      const query = await movies_model.find({ mediaLang, category: "Series" })
       console.log('query', query)
       results = query
 
       if (user) {
-        results = user.words
+        // results = user.words
         // const words = wordInfos.wordInfos_model.find()
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
@@ -116,18 +123,18 @@ app.get("/rec", async (req, res) => {
         //   (await promptAI(`Reccommend me 20 episode from different to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
         //     ?.choices[0]?.message?.split('\n')
 
-        const reccommendedVideos = await movies_model.find({ category: "Series" })
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: "Series" })
 
         results = reccommendedVideos || []
       }
     }
     if (query.category === 'Courses') {
-      const query = await movies_model.find({ category: "Courses" })
+      const query = await movies_model.find({ mediaLang, category: "Courses" })
       console.log('query', query)
       results = query
 
       if (user) {
-        results = user.words
+        // results = user.words
         // const words = wordInfos.wordInfos_model.find()
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
@@ -135,18 +142,18 @@ app.get("/rec", async (req, res) => {
         //   (await promptAI(`Reccommend me 20 courses to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
         //     ?.choices[0]?.message?.split('\n')
 
-        const reccommendedVideos = await movies_model.find({ category: 'Courses' })
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Courses' })
 
         results = reccommendedVideos || []
       }
     }
     if (query.category === 'Cartoon') {
-      const query = await movies_model.find({ category: "Cartoon" })
+      const query = await movies_model.find({ mediaLang, category: "Cartoon" })
       console.log('query', query)
       results = query
 
       if (user) {
-        results = user.words
+        // results = user.words
         // const words = wordInfos.wordInfos_model.find()
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
@@ -154,18 +161,18 @@ app.get("/rec", async (req, res) => {
         //   (await promptAI(`Reccommend me 20 cartoons to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
         //     ?.choices[0]?.message?.split('\n')
 
-        const reccommendedVideos = await movies_model.find({ category: 'Cartoon' })
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Cartoon' })
 
         results = reccommendedVideos || []
       }
     }
     if (query.category === 'Podcast') {
-      const query = await movies_model.find({ category: "Podcast" })
+      const query = await movies_model.find({ mediaLang, category: "Podcast" })
       console.log('query', query)
       results = query
 
       if (user) {
-        results = user.words
+        // results = user.words
         // const words = wordInfos.wordInfos_model.find()
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
@@ -173,7 +180,7 @@ app.get("/rec", async (req, res) => {
         //   (await promptAI(`Reccommend me 20 podcasts to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
         //     ?.choices[0]?.message?.split('\n')
 
-        const reccommendedVideos = await movies_model.find({ category: 'Podcast' })
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Podcast' })
 
         results = reccommendedVideos || []
       }
@@ -403,57 +410,65 @@ app.get('/wordInfoLemma', async (req, res) => {
 });
 
 app.get("/movie", (req, res) => {
-  const videoPath = getHighestExistingQualityPathForTitle(
-    req.query.name,
-    req.query.quality
-  );
+  try {
+    const videoPath = getHighestExistingQualityPathForTitle(
+      req.query.name,
+      req.query.quality
+    );
 
-  console.log('videoPath end', videoPath)
+    if (typeof videoPath === undefined) {
+      console.error('videoPath undefined')
+      return res.status(500).send('videoPath undefined')
+    }
+    console.log('videoPath end', videoPath)
 
-  if (!videoPath) {
-    console.error("VIDEOFILE NOT FOUND: " + req.query.name)
-    // return res.status(404)
-  }
-
-  // console.log(req.query.name)
-  // console.log('videoPath', videoPath)
-  const videoStat = fs.statSync(videoPath);
-
-  const fileSize = videoStat.size;
-  const rangeRequest = req.headers.range;
-  console.log('rangeRequest', rangeRequest)
-
-  if (!fileSize) {
-    return res.status(500).send('Requested File is Broken. Size: ' + fileSize)
-  }
-
-  if (rangeRequest) {
-    const ranges = range(fileSize, rangeRequest);
-    // console.log('ranges', ranges)
-    if (ranges === -1) {
-      // 416 Range Not Satisfiable
-      res.status(416).send("Requested range not satisfiable");
-      return;
+    if (!videoPath) {
+      console.error("VIDEOFILE NOT FOUND: " + req.query.name)
+      // return res.status(404)
     }
 
-    res.writeHead(206, {
-      "Content-Range": `bytes ${ranges[0].start}-${ranges[0].end}/${fileSize}`,
-      "Accept-Ranges": "bytes",
-      "Content-Length": ranges[0].end - ranges[0].start + 1,
-      "Content-Type": "video/mp4",
-    });
+    // console.log(req.query.name)
+    // console.log('videoPath', videoPath)
+    const videoStat = fs.statSync(videoPath || '');
 
-    fs.createReadStream(videoPath, {
-      start: ranges[0].start,
-      end: ranges[0].end,
-    }).pipe(res);
-  } else {
-    res.writeHead(200, {
-      "Content-Length": fileSize,
-      "Content-Type": "video/mp4",
-    });
+    const fileSize = videoStat.size;
+    const rangeRequest = req.headers.range;
+    console.log('rangeRequest', rangeRequest)
 
-    fs.createReadStream(videoPath).pipe(res);
+    if (!fileSize) {
+      return res.status(500).send('Requested File is Broken. Size: ' + fileSize)
+    }
+
+    if (rangeRequest) {
+      const ranges = range(fileSize, rangeRequest);
+      // console.log('ranges', ranges)
+      if (ranges === -1) {
+        // 416 Range Not Satisfiable
+        res.status(416).send("Requested range not satisfiable");
+        return;
+      }
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${ranges[0].start}-${ranges[0].end}/${fileSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": ranges[0].end - ranges[0].start + 1,
+        "Content-Type": "video/mp4",
+      });
+
+      fs.createReadStream(videoPath, {
+        start: ranges[0].start,
+        end: ranges[0].end,
+      }).pipe(res);
+    } else {
+      res.writeHead(200, {
+        "Content-Length": fileSize,
+        "Content-Type": "video/mp4",
+      });
+
+      fs.createReadStream(videoPath).pipe(res);
+    }
+  } catch (err) {
+    res.status(500).send('unhandled error')
   }
 });
 
@@ -547,7 +562,7 @@ app.get("/movie_words/:_id", async (req, res) => {
         if (wordInfo?.level) {
           return REQUESTED_LEVELS_MAP[wordInfo.level]
         }
-        
+
         let levelByOccurrence = ''
         if (occurrenceCount > 10000) {
           levelByOccurrence = 'Beginner'
@@ -576,7 +591,7 @@ app.get("/movie_words/:_id", async (req, res) => {
       } else {
         return false
       }
-    }).map(item => ({ ...item, occurrence: wordInfo_map[item.the_word].occuranceCount}))
+    }).map(item => ({ ...item, occurrence: wordInfo_map[item.the_word].occuranceCount }))
     console.log('movieWordsFiltered', movieWordsFiltered)
     const movieWordsUnduplicated = Object.values(
       movieWordsFiltered.reduce(
@@ -916,7 +931,7 @@ async function findSubtitlesWithWord(word, mediaLang = "en", limit = 10) {
           $addFields: {
             mediaIdObject: { $toObjectId: "$mediaId" }, // Convert mediaId string to ObjectId
           },
-        },      
+        },
         {
           $lookup: {
             from: "movies", // The name of the movies collection in MongoDB
