@@ -137,24 +137,17 @@ const StickyHeader = ({ type = "primary", authPage }) => {
     </header>
   );
 };
+const colors = {
+  A: "#cc3333", // Light Red
+  B: "#33cc33", // Light Green
+  C: "#3333cc", // Light Blue
+  D: "#cccc33", // Light Yellow
+  E: "#cc33cc", // Light Magenta
+  F: "#33cccc", // Light Cyan
+  // Add more mappings for other letters as needed
+};
 
-function getPlaceholderUrl(firstLetter) {
-  const colors = {
-    A: "cc3333", // Light Red
-    B: "33cc33", // Light Green
-    C: "3333cc", // Light Blue
-    D: "cccc33", // Light Yellow
-    E: "cc33cc", // Light Magenta
-    F: "33cccc", // Light Cyan
-    // Add more mappings for other letters as needed
-  };
-
-  const defaultColor = colors.D;
-
-  const color = colors[firstLetter.toUpperCase()] || defaultColor;
-
-  return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
-}
+const defaultColor = colors.D;
 
 const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const { t } = useTranslation();
@@ -163,7 +156,6 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const emailLetters = userEmail.match(/[A-Z]/gi) || [];
   const firstLetter =
     (!!emailLetters?.length && emailLetters[0]?.toUpperCase()) || "";
-  const avatarPath = getPlaceholderUrl(firstLetter);
   const outsideNavClickWrapperRef = useRef(null);
   const isTelegramConnected = useSelector(
     (state) => state.user?.user?.isTelegramConnected
@@ -202,8 +194,8 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <div ref={outsideNavClickWrapperRef}>
-      <button className="block">
-        <img className="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
+      <button className="block ml-2 h-8 w-8 text-sm rounded-full font-bold" style={{ background: defaultColor }} onClick={() => setIsNavMenuVisible(!isNavMenuVisible)}>
+        {firstLetter}
       </button>
       {isNavMenuVisible && (
         <ul className="nav-menu">

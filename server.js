@@ -66,7 +66,7 @@ app.post("/api/generate-telegram-code", (req, res) => {
       return res.status(400).json({ error: "userId is required" });
     }
 
-    const telegramLink = `https://t.me/copaly_bot?start=${_Id}`;
+    const telegramLink = `https://t.me/cosmo_ingiliz_bot?start=${_Id}`;
 
     res.json({ telegramLink });
   } catch (error) {
