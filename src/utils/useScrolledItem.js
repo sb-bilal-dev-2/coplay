@@ -26,6 +26,7 @@ export const useScrolledItem = (type = 'vertical', options = {}) => {
 
     // Calculate index with half-item threshold
     const index = Math.floor((scrollPosition + containerDimension / 2) / (containerDimension * itemDimention));
+
     return index;
   }, [type]);
 
@@ -96,9 +97,5 @@ export const useScrolledItem = (type = 'vertical', options = {}) => {
     };
   }, [handleScroll]);
 
-  return useMemo(() => [
-    scrollRef, 
-    activeIndex, 
-    scrollToIndex
-  ], [scrollRef, activeIndex, scrollToIndex]);
+  return {scrollRef, activeIndex, scrollToIndex};
 };

@@ -6,18 +6,18 @@ import { useScrolledItem } from '../utils/useScrolledItem';
 
 
 export const HorizontalScrollCarousel = ({ items, active, onIndexUpdate, renderItem, dotPosition = 'top' }) => {
-    const [horizontalScrollRefs, activeIndex, scrollToSubCategory] = useScrolledItem('horizontal');
+    const {scrollRef, activeIndex, scrollToIndex} = useScrolledItem('horizontal');
 
     useEffect(() => {
-        if (!active) {
-            scrollToSubCategory(0)
-        }
+        // if (!active) {
+            // scrollToIndex(0)
+        // }
     }, [active])
 
     useEffect(() => {
-        if (activeIndex) {
+        // if (activeIndex) {
             if (onIndexUpdate) onIndexUpdate(activeIndex)
-        }
+        // }
     }, [activeIndex])
 
     const renderDots = (dots) => {
@@ -89,7 +89,7 @@ export const HorizontalScrollCarousel = ({ items, active, onIndexUpdate, renderI
         <>
             {dotPosition === 'top' && renderDots(items)}
             <div
-                ref={horizontalScrollRefs}
+                ref={scrollRef}
                 className="horizontal-carousel no-scrollbar w-full h-[400px] overflow-x-scroll scroll-smooth snap-x snap-mandatory"
                 style={{
                     scrollSnapType: 'x mandatory',
@@ -127,19 +127,19 @@ export const HorizontalScrollCarousel = ({ items, active, onIndexUpdate, renderI
 
     )
 }
-
+const SCROLL_PROPS = { itemDimention: 60 / 100, itemMargin: 8 }
 export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, onInnerIndexUpdate, lastItem }) => {
 
-    const [verticalScrollRef, activeCategory, scrollToCategory] = useScrolledItem('vertical', { itemDimention: 60 / 100, itemMargin: 8 });
-    console.log('active', activeCategory)
+    const {scrollRef, activeIndex, scrollToIndex} = useScrolledItem('vertical', SCROLL_PROPS);
+
     useEffect(() => {
         if (onIndexUpdate) {
-            onIndexUpdate(activeCategory)
+            onIndexUpdate(activeIndex)
             onInnerIndexUpdate(0)
         }
-    }, [activeCategory])
+    }, [activeIndex])
 
-    const progress = activeCategory / items.length
+    const progress = activeIndex / items.length
 
     return (
         <div
@@ -154,7 +154,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
                 className="bg-red-500 absolute left-0 transition-all duration-300 ease-in-out"
             />
             <div
-                ref={verticalScrollRef}
+                ref={scrollRef}
                 className="w-full h-full no-scrollbar overflow-y-scroll scroll-smooth snap-y snap-mandatory"
                 style={{
                     scrollSnapType: 'y mandatory',
@@ -189,7 +189,7 @@ export const WordCollectionCarousel = ({ items, innerItemsMap, onIndexUpdate, on
                             {/* Horizontal Carousel (Inner) */}
                             <HorizontalScrollCarousel
                                 items={innerItemsMap[item.the_word]}
-                                active={categoryIndex === activeCategory}
+                                active={categoryIndex === activeIndex}
                                 onIndexUpdate={onInnerIndexUpdate}
                                 dotPosition='bottom'
                             />

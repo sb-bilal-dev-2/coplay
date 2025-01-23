@@ -5,7 +5,7 @@ const TelegramAuth = () => {
   const { t } = useTranslation();
 
    const auth = () => {
-    const telegramLink = `https://t.me/copaly_bot?start=auth`;
+    const telegramLink = `https://t.me/cosmo_ingiliz_bot?start=auth`;
     window.open(telegramLink, "_blank");
    };
 

@@ -147,17 +147,19 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
             return renderItem(item, isActive)
           } else {
             return (
-              <Link to={`/word_collection/${item.title}`}>
+              <Link to={`/word_collection/${item.title}`} className='mb-1'>
                 <div key={item.id} className='flex p-1'>
-                  <div style={{ minWidth: '44%', height: '80px' }}>
+                  <div className='border bg-white' style={{ minWidth: '44%', height: '80px'}}>
                     {
                       item?.keywords && item.keywords[0] &&
                       <VideoFrameForWord word={item.keywords[0].the_word} />
                     }
                   </div>
                   <div className='flex-1 pl-2'>
-                    <h5 className='text-left text-smx'>{item.title}</h5>
-                    <div className='text-xs'>{item.keywords.map((keyword) => keyword.the_word).join(', ')}</div>
+                    <h5 className='text-left text-smx'>{item.label}</h5>
+                    <div className='text-xs overflow-hidden' style={{ maxHeight: '64px' }}>{item.keywords.map((keyword) => (
+                      <div className='float-left tags-word px-1 mr-1 mb-1 mb-1 border'>{keyword.the_word}</div>
+                    ))}</div>
                   </div>
                 </div>
               </Link>

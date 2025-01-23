@@ -100,7 +100,9 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
     const result = { sort: selected_sort }
     if (selected_bookmark.length) { result.bookmark = selected_bookmark }
     if (selected_level.length) { result.level = selected_level }
-    onSubmit(result, ev)
+    if (typeof onSubmit === 'function') {
+      onSubmit(result, ev)
+    }
     closeDropdown()
   }
   useEffect(() => {

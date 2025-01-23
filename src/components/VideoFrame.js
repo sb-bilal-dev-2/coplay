@@ -73,7 +73,6 @@ const VideoFrameVideo = ({ time, videoSrc }) => {
             position: 'absolute',
             width: '100%',
             height: '100%',
-            border: '1px solid #ccc'
           }}
         >
           <canvas crossorigin="anonymous" ref={canvasRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} ></canvas>

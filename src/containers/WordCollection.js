@@ -107,11 +107,13 @@ const WordCollection = () => {
             <div>
                 <div style={{ width: '100%', height: '60dvh', background: '#111' }}>
 
-                    {currentOccurance?.mediaTitle && !loading &&
+                    {currentOccurance?.mediaId && !loading &&
                         <ShortVideo
                             // onTimeUpdate={handleTimeUpdate}
-                            mediaTitle={currentOccurance?.mediaTitle}
-                            forcedCurrentTimeChange={currentOccurance?.startTime / 1000}
+                            // mediaTitle={currentOccurance?.mediaTitle}
+                            vkVideoEmbed={currentOccurance.vkVideoEmbed}
+                            youtubeUrl={currentOccurance.youtubeUrl}
+                            forcedCurrentTimeChange={currentOccurance?.startTime}
                             isActive
                         />
                     }

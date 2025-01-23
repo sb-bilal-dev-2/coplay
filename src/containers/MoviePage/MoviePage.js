@@ -214,7 +214,7 @@ const MoviePage = () => {
               videoIdOrUrl={movieInfo?.youtubeUrl}
               autoplay
               scale={1}
-              startTime={forcedCurrentTimeChange || 0}
+              startTime={(forcedCurrentTimeChange || 0)}
               onTimeUpdate={handleTimeUpdate}
             />
             :
@@ -222,7 +222,7 @@ const MoviePage = () => {
               scale={1}
               isActive
               iframeSrc={movieInfo?.vkVideoEmbed}
-              startTime={forcedCurrentTimeChange || 0}
+              startTime={(forcedCurrentTimeChange || 0)}
               onTimeUpdate={handleTimeUpdate}
             />
           }

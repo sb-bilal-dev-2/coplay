@@ -62,12 +62,12 @@ export const VideoInit = ({ isActive, videoSrc, startTime, onTimeUpdate, muted, 
 // <iframe "https://vkvideo.ru/video_ext.php?oid=878939759&id=456239017&hd=1&t=20s" />
 export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, muted, scale = 2 }) => {
   const videoRef = useRef(null)
-
+  // console.log('iframeSrc', iframeSrc)
   useEffect(() => {
     if (iframeSrc && window.VK !== undefined) {
       const vkVideo = window.VK.VideoPlayer(videoRef.current)
-      console.log('startTime / 1000', startTime / 1000)
-      vkVideo?.seek(startTime / 1000)
+      // console.log('startTime', startTime)
+      vkVideo?.seek(Math.floor(startTime / 1000))
     }
   }, [startTime])
 
@@ -94,7 +94,7 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
 
       vkVideo.on('inited', () => {
         // loaded
-        vkVideo.seek(startTime)
+        vkVideo.seek(Math.floor(startTime / 1000))
         if (muted) {
           vkVideo.mute()
         }
@@ -106,7 +106,7 @@ export const VkVideoInit = ({ isActive, iframeSrc, startTime, onTimeUpdate, mute
       })
     }
   }, [iframeSrc, window.VK])
-  console.log('startTime vk', startTime)
+  // console.log('startTime vk', startTime)
   return (
     <div
       style={{
@@ -159,21 +159,20 @@ const extractYoutubeId = title => {
   return ''
 }
 
-export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles, scale = 1.1 }) => {
-  // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
-  const isYoutubeVideo = mediaTitle && mediaTitle.includes('YOUTUBE_ID[')
-  let mediaSrc = ''
-  if (isYoutubeVideo) {
-    mediaSrc = extractYoutubeId(mediaTitle)
-  } else {
-    // mediaSrc = `${BASE_SERVER_URL}/movieFiles/${mediaTitle}.480.mp4`
-    mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
-  }
-  console.log('mediaTitle', isYoutubeVideo, mediaSrc)
-  const [subtitleTime, set_subtitleTime] = useState(0)
-  const [subtitles] = useSubtitles(mediaTitle)
+const YoutubeExplore = () => {
+  return (
+    <div>
+      // Scrolling tags ["Trending", "Popular"]
+    </div>
+  )
+}
 
-  const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
+export const ShortVideo = ({ isActive, youtubeUrl, vkVideoEmbed, forcedCurrentTimeChange, onTimeUpdate, hideSubtitles, scale = 1.1 }) => {
+  // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
+  const [subtitleTime, set_subtitleTime] = useState(0)
+  // const [subtitles] = useSubtitles(mediaId)
+
+  // const subtitleIndex = getSubtitleIndexFromCurrentTime(subtitleTime, subtitles)
 
   const handleTimeUpdate = (newTime) => {
     if (onTimeUpdate) { onTimeUpdate(newTime) }
@@ -184,16 +183,24 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
   return (
     <div className="ShortVideo">
       {/* {isActive && ( */}
-      {isYoutubeVideo &&
+      {youtubeUrl && !vkVideoEmbed ?
         <YoutubePlayer
           onTimeUpdate={handleTimeUpdate}
           isActive={isActive}
-          videoIdOrUrl={mediaSrc}
+          videoIdOrUrl={youtubeUrl}
+          startTime={forcedCurrentTimeChange}
+          scale={scale}
+        />
+        :
+        <VkVideoInit
+          onTimeUpdate={handleTimeUpdate}
+          isActive={isActive}
+          iframeSrc={vkVideoEmbed}
           startTime={forcedCurrentTimeChange}
           scale={scale}
         />
       }
-      {!isYoutubeVideo &&
+      {/* {!isYoutubeVideo &&
         <VideoInit
           scale={scale}
           onTimeUpdate={handleTimeUpdate}
@@ -201,18 +208,18 @@ export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTi
           videoSrc={mediaSrc}
           startTime={forcedCurrentTimeChange}
         />
-      }
+      } */}
     </div>
   )
 }
 
-function useSubtitles(mediaTitle, translateLang) {
+function useSubtitles(mediaId, translateLang) {
   const [subtitles, setSubtitles] = useState([])
 
   async function requestMainSubtitleByTitle() {
     try {
       translateLang = translateLang?.length ? '&translateLang=' + translateLang : ''
-      const response = await api().get(`/subtitles_v2?mediaId=${mediaTitle}` + translateLang)
+      const response = await api().get(`/subtitles_v2?mediaId=${mediaId}` + translateLang)
       setSubtitles(response)
     } catch (err) {
     }
@@ -220,7 +227,7 @@ function useSubtitles(mediaTitle, translateLang) {
 
   useEffect(() => {
     requestMainSubtitleByTitle()
-  }, [mediaTitle, translateLang])
+  }, [mediaId, translateLang])
 
   return [subtitles]
 }

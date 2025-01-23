@@ -45,12 +45,12 @@ const HomePage = () => {
             <HorizontalScrollMenu items={movies} baseRoute={"movie"} />
           </div>
           <div className="">
-            <h2 className="home-page__title">{"C1"}</h2>
+            {/* <h2 className="home-page__title">{"C1"}</h2>
             <HorizontalScrollMenu
               items={wordCollections}
               baseRoute="word_collection"
               card_className="horizontal list"
-            />
+            /> */}
           </div>
           <div className="">
             <h2 className="home-page__title">{t("music")}</h2>
@@ -239,7 +239,7 @@ const Phrases = ({ item, isActive }) => {
           <span>{item.pronounciation}</span>
           <HorizontalScrollMenu2 isActive={isActive} items={occurrences} baseRoute={"movie"} mainText={item.the_word} />
         </>
-      )}
+      )} 
     </div>
   )
 }

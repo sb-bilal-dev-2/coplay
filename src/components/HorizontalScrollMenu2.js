@@ -17,71 +17,74 @@ const HorizontalScrollMenu2 = ({ items, baseRoute, card_className = 'vertical', 
   return (
     <div className="horizontal-scroll-menu2 no-scrollbar">
       <ul className="menu-list no-scrollbar" ref={scrollRef}>
-        {items?.map(({ id, label, mediaTitle: title, posterUrl, youtubeUrl, vkVideoEmbed, thumbnail, startTime, text }, index) => (
-          <li
-            onMouseEnter={() => setHoveringItemIndex(index)}
-            onMouseLeave={() => setHoveringItemIndex(null)}
-          >
-
-            <Link
-              className={`list-card ${card_className}`}
-            // to={[baseRoute, title].join("/")}
+        {items?.map(({ id, label, mediaTitle: title, posterUrl, youtubeUrl, vkVideoEmbed, thumbnail, startTime, text }, index) => {
+          const isActiveItem = isActive && hoveringItemIndex !== null && hoveringItemIndex === index
+          return (
+            <li
+              onMouseEnter={() => setHoveringItemIndex(index)}
+              onMouseLeave={() => setHoveringItemIndex(null)}
             >
-              <div className="list-card__image mx-1" style={{
-                backgroundImage: `url('${posterUrl ||
-                  `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
-                  }')` + `, url('${thumbnail}')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
-              }}>
-                {/* TODO: Implement hover play video */}
-                {/* {youtubeUrl && !!youtubeUrl?.length &&
+
+              <Link
+                className={`list-card ${card_className}`}
+              // to={[baseRoute, title].join("/")}
+              >
+                <div className="list-card__image mx-1" style={{
+                  backgroundImage: `url('${posterUrl ||
+                    `${BASE_SERVER_URL}/${baseRoute}Files/${title}.jpg`
+                    }')` + `, url('${thumbnail}')` + ", url('https://as2.ftcdn.net/v2/jpg/01/06/56/01/1000_F_106560184_nv5HWNCckLtha3SlovZBi39nbaVBNzb1.jpg')",
+                }}>
+                  {/* TODO: Implement hover play video */}
+                  {/* {youtubeUrl && !!youtubeUrl?.length &&
                   <img
                     className="h-full w-full"
                     src={`https://img.youtube.com/vi/${youtubeUrl.split('v=')[1]}/hqdefault.jpg`}
                   />
                 } */}
-                <h2 style={{ right: '4px', position: 'absolute', zIndex: '10', textShadow: '1px 1px #333' }}>{secondsToDisplayTime(startTime / 1000)}</h2>
-                <p style={{ fontSize: '0.8em', textAlign: 'right', padding: '4px', position: 'absolute', top: '20px', zIndex: '10', textShadow: '1px 1px #333' }}>{degausser(text)}</p>
-                <p style={{ bottom: '0', position: 'absolute', right: '4px', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', maxHeight: '54px', fontSize: '0.7em', textAlign: 'right', zIndex: '10', textShadow: '1px 1px #333' }}>{(label || title)?.replaceAll('_', ' ')}</p>
-                {/* {id !== hoveringItemIndex && (
+                  <h2 style={{ right: '4px', position: 'absolute', zIndex: '10', textShadow: '1px 1px #333' }}>{secondsToDisplayTime(startTime / 1000)}</h2>
+                  <p style={{ fontSize: '0.8em', textAlign: 'right', padding: '4px', position: 'absolute', top: '20px', zIndex: '10', textShadow: '1px 1px #333' }}>{degausser(text)}</p>
+                  <p style={{ bottom: '0', position: 'absolute', right: '4px', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', maxHeight: '54px', fontSize: '0.7em', textAlign: 'right', zIndex: '10', textShadow: '1px 1px #333' }}>{(label || title)?.replaceAll('_', ' ')}</p>
+                  {/* {id !== hoveringItemIndex && (
                   <VideoFrame
                     time={startTime / 1000}
                     title={title}
                   />
                 )} */}
-                {youtubeUrl && !vkVideoEmbed && hoveringItemIndex !== null && index === hoveringItemIndex && (
-                  // <YoutubePlayer
-                  //   autoplay
-                  //   scale={1}
-                  //   videoIdOrUrl={youtubeUrl}
-                  //   onTimeUpdate={() => {
-                  //   }}
-                  //   isActive
-                  //   startTime={startTime}
-                  // />
-                  <div style={{ overflow: 'hidden', height: '100%', width: '100%', position: 'relative' }}>
-                    <div style={{ height: '140%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${40 / 4}%` }}>
-                      <iframe
-                        style={{ height: '100%', width: '100%' }}
-                        src={youtubeUrl + '?autoplay=1&start=' + Math.floor(startTime / 1000)}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
-                      />
+                  {youtubeUrl && !vkVideoEmbed && isActiveItem && (
+                    // <YoutubePlayer
+                    //   autoplay
+                    //   scale={1}
+                    //   videoIdOrUrl={youtubeUrl}
+                    //   onTimeUpdate={() => {
+                    //   }}
+                    //   isActive
+                    //   startTime={startTime}
+                    // />
+                    <div style={{ overflow: 'hidden', height: '100%', width: '100%', position: 'relative' }}>
+                      <div style={{ height: '140%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${40 / 4}%` }}>
+                        <iframe
+                          style={{ height: '100%', width: '100%' }}
+                          src={youtubeUrl + '?autoplay=1&start=' + Math.floor(startTime / 1000)}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-                {vkVideoEmbed && hoveringItemIndex !== null && index === hoveringItemIndex && (
-                  <VkVideoInit
-                    onTimeUpdate={() => {
-                    }}
-                    iframeSrc={vkVideoEmbed}
-                    startTime={startTime / 1000}
-                    isActive
-                    halfVisible
-                  />
-                )}
-              </div>
-            </Link>
-          </li>
-        ))}
+                  )}
+                  {vkVideoEmbed && isActiveItem && (
+                    <VkVideoInit
+                      onTimeUpdate={() => {
+                      }}
+                      iframeSrc={vkVideoEmbed}
+                      startTime={startTime / 1000}
+                      isActive
+                      halfVisible
+                    />
+                  )}
+                </div>
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </div>
   );

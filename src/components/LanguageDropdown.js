@@ -177,7 +177,7 @@ const ChooseLanguageModal = ({
       ></i>
       <h1 className="font-bold text-white">{t("add new language")}</h1>
 
-      <div className="w-60 m-auto mt-10">
+      <div className="m-auto mt-10" style={{ maxWidth: '280px' }}>
         <p className="font-bold mb-2">{t("native language")}</p>
         <div className="py-2">
           {APP_LANGUAGES.map((option) => (
@@ -195,7 +195,7 @@ const ChooseLanguageModal = ({
         </div>
       </div>
 
-      <div className="w-60 m-auto mt-10">
+      <div className="m-auto mt-10" style={{ maxWidth: '280px' }}>
         <p className="font-bold mb-1 ">{t("want to learn")}:</p>
         {LANGUAGES.map((option) => (
           <li key={option.id} className="list-none flex items-center">
