@@ -4,7 +4,7 @@ const { initCRUDAndDatabase } = require("./serverCRUD");
 const cron = require("node-cron");
 
 const TOKEN = process.env.TG_BOT_TOKEN;
-const TG_LOGIN = process.env.TG_LOGIN;
+const TG_LOGIN = 'https://www.coplay.live/';
 const QUIZ_PAGE = process.env.TG_LOGIN + "#/quiz/learning";
 let bot = null;
 
@@ -56,107 +56,58 @@ function telegramInit() {
     const chatId = message.chat.id;
     const data = callbackQuery.data;
 
-    const SIGN_UP_LINK = `${TG_LOGIN}/#/auth/login`;
-    const LEARN = `${TG_LOGIN}/#/my_list`;
-
     switch (data) {
       case "option1":
         bot.answerCallbackQuery(callbackQuery.id, {
           text: "You selected Login. Please login.",
         });
-
-        const inlineKeyboard1 = {
-          inline_keyboard: [
-            [
-              {
-                text: "Sign Up",
-                web_app: { url: SIGN_UP_LINK },
-              },
-            ],
-          ],
-        };
-        console.log("SIGN_UP_LINK", SIGN_UP_LINK);
-
         bot.sendMessage(chatId, "Click the button below to open the web app:", {
-          reply_markup: inlineKeyboard1,
+          reply_markup: { remove_keyboard: true },
         });
         break;
 
       case "option2":
         bot.answerCallbackQuery(callbackQuery.id, {
-          text: "You selected Option 2",
+          text: "You selected Learn.",
         });
-        const inlineKeyboard2 = {
-          inline_keyboard: [
-            [
-              {
-                text: "Learn",
-                web_app: { url: LEARN },
-              },
-            ],
-          ],
-        };
-
-        bot.sendMessage(chatId, "Click the button below to open the web app:", {
-          reply_markup: inlineKeyboard2,
+        bot.sendMessage(chatId, "Learning module loaded.", {
+          reply_markup: { remove_keyboard: true },
         });
         break;
 
       case "option3":
         bot.answerCallbackQuery(callbackQuery.id, {
-          text: "You selected Option 3",
+          text: "You selected Set Notification.",
         });
-        bot.sendMessage(
-          chatId,
-          "When do you want to repeat the words? Please pick a time (e.g., 15:30):"
-        );
-        bot.once("message", (msg) => {
-          const repeatTime = msg.text;
-          console.log("Repeat time set to:", repeatTime);
-
-          const [hours, minutes] = repeatTime.split(":");
-          cron.schedule(`0 ${minutes} ${hours} * * *`, () => {
-            const notificationKeyboard = {
-              inline_keyboard: [
-                [
-                  {
-                    text: "Go to quiz page",
-                    web_app: { url: QUIZ_PAGE },
-                  },
-                  {
-                    text: "Learn words",
-                    web_app: { url: LEARN },
-                  },
-                ],
-              ],
-            };
-
-            bot.sendMessage(
-              chatId,
-              "Time to repeat your words! Click the button below to start the quiz:",
-              { reply_markup: notificationKeyboard }
-            );
-          });
+        bot.sendMessage(chatId, "Notification settings updated.", {
+          reply_markup: { remove_keyboard: true },
         });
         break;
 
       default:
-        bot.answerCallbackQuery(callbackQuery.id, { text: "Unknown option" });
+        bot.answerCallbackQuery(callbackQuery.id, { text: "Unknown option." });
     }
   });
 }
 
 function showMainMenu(chatId) {
   const options = {
-    reply_markup: JSON.stringify({
+    reply_markup: {
       inline_keyboard: [
         [{ text: "Login", callback_data: "option1" }],
         [{ text: "Learn", callback_data: "option2" }],
         [{ text: "Set Notification for repeat", callback_data: "option3" }],
       ],
-    }),
+    },
   };
   bot.sendMessage(chatId, "Please choose an option:", options);
+
+  // Clear the keyboard after a timeout (optional)
+  setTimeout(() => {
+    bot.sendMessage(chatId, "Clearing keyboard...", {
+      reply_markup: { remove_keyboard: true },
+    });
+  }, 30000); // Clear after 30 seconds
 }
 
 module.exports = {

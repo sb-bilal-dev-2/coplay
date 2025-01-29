@@ -25,7 +25,8 @@ const splitUsedWords = require('./splitUsedWords');
 const { degausser, addVttToDB } = require('./parseUsedWords');
 const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
 const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
-const { telegramInit } = require('./tgbot')
+const { telegramInit } = require('./tgbot');
+const { fetchTrendingVideos, fetchPopularVideos, searchYouTubeVideos } = require('./youtube_api');
 
 writeDevelopmentIPAddress();
 
@@ -57,6 +58,59 @@ app.get("/hello_world", async (req, res) => {
   res.type("text/plain");
   res.status(200).send("Welcome! ");
 });
+
+app.get('/youtube_trends', async (req, res) => {
+  try {
+    const {
+      limit,
+      page,
+      category
+    } = req.query
+    // const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+    const mediaLang = req.query.mediaLang
+
+    const results = await fetchTrendingVideos(mediaLang, limit, page, category)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+})
+
+app.get('/youtube_popular', async (req, res) => {
+  try {
+    const {
+      limit,
+      page,
+      category
+    } = req.query
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+
+    const results = await fetchPopularVideos(mediaLang, limit, page, category)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+})
+
+app.get('/youtube_search', async (req, res) => {
+  try {
+    const {
+      query,
+      limit,
+      page,
+      category
+    } = req.query
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+
+    const results = await searchYouTubeVideos(query, mediaLang, limit, category)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+})
 
 app.get("/rec", async (req, res) => {
   const {

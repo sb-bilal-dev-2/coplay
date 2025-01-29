@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-// const TelegramBot = require('node-telegram-bot-api');
 const User = require("./schemas/users.js").users_model; // Update the path accordingly
 const axios = require("axios");
 
