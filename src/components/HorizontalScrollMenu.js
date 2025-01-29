@@ -90,7 +90,7 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-const TAGS = ['All', 'Music', 'Words', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
+const TAGS = ['Popular', 'Trending 🔥', 'Music', 'Words', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
 
 export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);
@@ -147,6 +147,8 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
               // borderBottom: currentIndex === index && '2px solid orangered',
               // color: currentIndex === index ? 'orangered' : '#333',
               // height: '42px',
+              whiteSpace: 'nowrap',
+              wordBreak: 'keep-all',
               fontWeight: 'bolder',
               background: currentIndex === 0 ? 'black' : 'rgb(255 248 238)',
               color: currentIndex === 0 ? 'white' : '#423531',
@@ -172,6 +174,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
                 // borderBottom: currentIndex === index && '2px solid orangered',
                 // color: currentIndex === index ? 'orangered' : '#333',
                 // padding: '4px',
+                whiteSpace: 'nowrap',
                 fontWeight: 'bolder',
                 background: currentIndex === index ? 'black' : 'rgb(255 255 255)',
                 color: currentIndex === index ? 'white' : '#423531',

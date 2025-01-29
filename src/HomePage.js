@@ -34,7 +34,7 @@ const HomePage = () => {
       <div className="pb-2">
         <TagsScroll firstSticky onIndexUpdate={(item) => set_category(item)} />
       </div>
-      {category === 'All' && (
+      {category === 'Popular' && (
         <>
           <div className="">
             <h2 className="home-page__title">{"Podcasts"}</h2>
@@ -57,9 +57,63 @@ const HomePage = () => {
             <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
           </div>
           <div className="">
+            <h2 className="home-page__title">{t("Words and Phrases")}</h2>
+            {/* <InfiniteScroll
+              requestData={async () => (await api().get('/rec?category=Phrases'))}
+              renderItem={(item, activeIndex, index) => {
+                console.log('item', item)
+
+                return <Phrases item={item} isActive={activeIndex === index} />
+              }}
+            /> */}
             <InfiniteScroll item={movies} />
           </div>
         </>
+      )}
+      {category === 'Trending 🔥' && (
+        <InfiniteScroll
+          requestData={async () => (await api().get('/youtube_trends'))}
+          renderItem={(item) => {
+            console.log('item', item)
+            // channelTitle
+            // description
+            // stats
+            // {viewCount: '388706', likeCount: '56218', favoriteCount: '0', commentCount: '4982'}
+            // thumbnail
+            // title
+            // videoId
+
+            return (
+              <div className="relative" style={{ maxWidth: "500px", margin: '10px auto' }}>
+                <Link to={'/movie/' + item?.title}>
+                  <h4 className="text-left absolute text-white" style={{ top: "10px", left: '8px', zIndex: '20', textShadow: '1px 1px #333' }}>{item.title}</h4>
+                </Link>
+                <div style={{ width: '100%', height: '200px', background: '#333', display: 'flex', flexDirection: 'column', borderRadius: '4px' }}>
+                  {(
+                    item.vkVideoEmbed ?
+                      <VkVideoInit
+                        iframeSrc={item.vkVideoEmbed}
+                        isActive
+                        startTime={3}
+                      />
+                      :
+                      <div style={{ overflow: 'hidden', height: '100%', width: '100%', position: 'relative' }}>
+                        <div style={{ height: '130%', width: '150%', position: 'absolute', left: `-${50 / 2}%`, bottom: `-${30 / 4}%` }}>
+                          <iframe
+                            style={{ height: '100%', width: '100%' }}
+                            // src={"https://www.youtube.com/embed/2Vv-BfVoq4g"}
+                            src={"https://www.youtube.com/embed/" + item.videoId}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
+                          />
+                        </div>
+                      </div>
+                  )}
+                </div>
+              </div>
+
+            )
+          }}
+        />
       )}
       {category === 'Phrases' && (
         <InfiniteScroll
@@ -239,7 +293,7 @@ const Phrases = ({ item, isActive }) => {
           <span>{item.pronounciation}</span>
           <HorizontalScrollMenu2 isActive={isActive} items={occurrences} baseRoute={"movie"} mainText={item.the_word} />
         </>
-      )} 
+      )}
     </div>
   )
 }
