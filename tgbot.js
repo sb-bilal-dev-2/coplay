@@ -5,7 +5,7 @@ const cron = require("node-cron");
 
 const TOKEN = process.env.TG_BOT_TOKEN;
 const TG_LOGIN = 'https://www.coplay.live/';
-const QUIZ_PAGE = process.env.TG_LOGIN + "#/quiz/learning";
+const QUIZ_PAGE = process.env.TG_LOGIN + "quiz/learning";
 let bot = null;
 
 // initCRUDAndDatabase();
@@ -25,7 +25,7 @@ function telegramInit() {
           inline_keyboard: [[
             {
               text: "Authenticate",
-              url: `${TG_LOGIN}/#/auth/login?username=${username}&telegramChatId=${chatId}`
+              url: `${TG_LOGIN}/auth/login?username=${username}&telegramChatId=${chatId}`
             }
           ]]
         }
@@ -38,13 +38,13 @@ function telegramInit() {
             {
               text: "Open Auth Web App",
               web_app: {
-                url: `${TG_LOGIN}/#/auth/login?userId=${params}&telegramChatId=${chatId}`
+                url: `${TG_LOGIN}/auth/login?userId=${params}&telegramChatId=${chatId}`
               }
             }
           ]]
         }
       });
-      console.log("code provided", `${TG_LOGIN}/#/auth/login?userId=${params}&telegramChatId=${chatId}`);
+      console.log("code provided", `${TG_LOGIN}/auth/login?userId=${params}&telegramChatId=${chatId}`);
     } else {
       // User started the bot without any parameters
       showMainMenu(chatId);
