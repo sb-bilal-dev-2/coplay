@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { redirect, useParams } from "react-router-dom";
+import { redirect, useNavigate, useParams } from "react-router-dom";
 
 import "./MoviePage.css";
 import api from "../../api";
@@ -127,24 +127,39 @@ function displayTime(seconds) {
 
 const MoviePage = () => {
   const DEFAULT_QUERY = convertQueryObjectToCommaSeparatedString({ sort: 'Not Sorted', level: ['Intermediate', 'Advanced']})
-  const { title: videoId } = useParams();
-  const youtubeIdOnVideo = videoId.includes('youtube_') ? videoId.split('youtube_')[1] : undefined
-  const movieInfo = useMovieInfo(videoId);
-  console.log('movieInfo', movieInfo)
+  const { title } = useParams();
+  const youtubeIdOnVideo = title.includes('youtube_') ? title.split('youtube_')[1] : undefined
+  const [subtitleParsed, set_subtitleParsed] = useState(null)
   const isPremium = usePremiumStatus();
   const [query, set_query] = useState(DEFAULT_QUERY)
-
+  const [videoWords, set_videoWords] = useState([])
+  const videoId = (youtubeIdOnVideo && subtitleParsed?.videoInfo?._id) || title
+  const movieInfo = useMovieInfo(videoId);
   async function initYoutubeVideo() {
-    const videoInfo = await api().get('/youtube_video_init/' + youtubeIdOnVideo)
-    return redirect('movie/' + videoInfo._id)
+    const learningLang = localStorage.getItem("learningLanguage")
+    const list = [];
+    try {
+      const response = await api().get(`/youtube_video_init/${youtubeIdOnVideo}?mediaLang=${learningLang}&${query}`)
+      // list = response.wordList
+      console.log('parsed', response)
+      set_subtitleParsed(response)
+    } catch(err) {
+
+    }
   }
 
   useEffect(() => {
-    if (youtubeIdOnVideo) {
+    if (youtubeIdOnVideo && !subtitleParsed) {
       initYoutubeVideo()
     }
-  }, [youtubeIdOnVideo])
-  const [videoWords, set_videoWords] = useState([])
+  }, [youtubeIdOnVideo, videoId, subtitleParsed])
+
+  useEffect(() => {
+    if (youtubeIdOnVideo && !subtitleParsed) {
+      return;
+    }
+    requestVideoWords()
+  }, [youtubeIdOnVideo, videoId, subtitleParsed])
   console.log('videoWords', videoWords)
   const requestVideoWords = async () => {
     console.log('query', query)
@@ -153,9 +168,6 @@ const MoviePage = () => {
       set_videoWords(list)
     }
   }
-  useEffect(() => {
-    requestVideoWords()
-  }, [videoId, query])
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   const [isFilterOpen, set_isFilterOpen] = useState(false);
   const [currentWord, set_currentWord] = useState('')
@@ -221,9 +233,9 @@ const MoviePage = () => {
       />
       <div className="MainContainer flex flex-col">
         <div style={{ flex: 1 }}>
-          {movieInfo?.youtubeUrl ?
+          {movieInfo?.youtubeUrl || youtubeIdOnVideo ?
             <YoutubePlayer
-              videoIdOrUrl={movieInfo?.youtubeUrl}
+              videoIdOrUrl={movieInfo?.youtubeUrl || youtubeIdOnVideo}
               autoplay
               scale={1}
               startTime={(forcedCurrentTimeChange || 0)}
@@ -261,15 +273,15 @@ const MoviePage = () => {
 };
 
 function useMovieInfo(id) {
-  const [currentVideoInfo, set_currentVideoInfo] = useState(null);
+  const [movieInfo, set_movieInfo] = useState(null);
   const requestMovieInfo = async () => {
     try {
       const requestUri = '/movies?_id=' + id
       const response = await api().get(requestUri)
       console.log('response s', response)
-      const newMovieInfo = response?.results[0];
-      console.log("newMovieInfo", newMovieInfo);
-      set_currentVideoInfo(newMovieInfo);
+      const new_movieInfo = response?.results[0];
+      console.log("new_movieInfo", new_movieInfo);
+      set_movieInfo(new_movieInfo);
     } catch (err) {
       console.log("ITEM GET ERROR: ", err);
     }
@@ -279,7 +291,7 @@ function useMovieInfo(id) {
     requestMovieInfo();
   }, [id]);
 
-  return currentVideoInfo
+  return movieInfo
 }
 function useSubtitles(mediaId, mediaLang) {
   const [subtitles, setSubtitles] = useState([])
