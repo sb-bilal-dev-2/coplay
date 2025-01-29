@@ -142,7 +142,7 @@ function AdvancedSwipe({
   onError = (err) => {
     if (err?.response?.status === 401) {
       if (window.confirm('Sign in to add words and for more! \nPress ok to go to login screen')) {
-        window.location.replace(window.location.origin + '/#/auth/login')
+        window.location.replace(window.location.origin + '/auth/login')
       }
     } 
     // if (err?.response?.status === 403) {

@@ -85,7 +85,7 @@ const HomePage = () => {
 
             return (
               <div className="relative" style={{ maxWidth: "500px", margin: '10px auto' }}>
-                <Link to={'/movie/' + item?.title}>
+                <Link to={'/movie/' + 'youtube_' + item.videoId}>
                   <h4 className="text-left absolute text-white" style={{ top: "10px", left: '8px', zIndex: '20', textShadow: '1px 1px #333' }}>{item.title}</h4>
                 </Link>
                 <div style={{ width: '100%', height: '200px', background: '#333', display: 'flex', flexDirection: 'column', borderRadius: '4px' }}>
@@ -201,7 +201,7 @@ function CarouselPost({ postItem, isActive }) {
             />
             :
             <div style={{ overflow: 'hidden', height: '100%', width: '100%', position: 'relative' }}>
-              <div style={{ height: '140%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${40 / 4}%` }}>
+              <div style={{ height: '130%', width: '150%', position: 'absolute', left: `-${50 / 2}%`, bottom: `-${30 / 4}%` }}>
                 <iframe
                   style={{ height: '100%', width: '100%' }}
                   // src={"https://www.youtube.com/embed/2Vv-BfVoq4g"}

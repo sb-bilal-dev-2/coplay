@@ -6,11 +6,11 @@ import "./index.css";
 import MoviePage from "./containers/MoviePage/MoviePage";
 import reportWebVitals from "./reportWebVitals";
 import {
-  createHashRouter,
   createRoutesFromElements,
   Route,
   redirect,
   RouterProvider,
+  createBrowserRouter,
 } from "react-router-dom";
 import { store } from "./store";
 import { Provider } from "react-redux";
@@ -35,7 +35,7 @@ import WordCollection from "./containers/WordCollection";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const router = createHashRouter(
+const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route exact path="/" element={<HomePage />} />

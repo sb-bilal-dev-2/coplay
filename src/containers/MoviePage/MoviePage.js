@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { redirect, useParams } from "react-router-dom";
 
 import "./MoviePage.css";
 import api from "../../api";
@@ -127,34 +127,46 @@ function displayTime(seconds) {
 
 const MoviePage = () => {
   const DEFAULT_QUERY = convertQueryObjectToCommaSeparatedString({ sort: 'Not Sorted', level: ['Intermediate', 'Advanced']})
-  const { title } = useParams();
-  const movieInfo = useMovieInfo(title);
+  const { title: videoId } = useParams();
+  const youtubeIdOnVideo = videoId.includes('youtube_') ? videoId.split('youtube_')[1] : undefined
+  const movieInfo = useMovieInfo(videoId);
   console.log('movieInfo', movieInfo)
   const isPremium = usePremiumStatus();
   const [query, set_query] = useState(DEFAULT_QUERY)
+
+  async function initYoutubeVideo() {
+    const videoInfo = await api().get('/youtube_video_init/' + youtubeIdOnVideo)
+    return redirect('movie/' + videoInfo._id)
+  }
+
+  useEffect(() => {
+    if (youtubeIdOnVideo) {
+      initYoutubeVideo()
+    }
+  }, [youtubeIdOnVideo])
   const [videoWords, set_videoWords] = useState([])
   console.log('videoWords', videoWords)
   const requestVideoWords = async () => {
     console.log('query', query)
     if (query !== "") {
-      const list = (await api().get(`/movie_words/${title}?${query}`))
+      const list = (await api().get(`/movie_words/${videoId}?${query}`))
       set_videoWords(list)
     }
   }
   useEffect(() => {
     requestVideoWords()
-  }, [title, query])
+  }, [videoId, query])
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   const [isFilterOpen, set_isFilterOpen] = useState(false);
   const [currentWord, set_currentWord] = useState('')
-  const [subtitles] = useSubtitles(title, localStorage.getItem('learningLanguage'))
+  const [subtitles] = useSubtitles(videoId, localStorage.getItem('learningLanguage'))
   console.log('subtitles', subtitles)
   useEffect(() => {
     // set_isRelOpen(false)
     set_currentWord('')
     set_isFilterOpen(false)
     set_query(DEFAULT_QUERY)
-  }, [title])
+  }, [videoId])
 
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
   const handleTimeUpdate = (newTime) => {
@@ -179,7 +191,7 @@ const MoviePage = () => {
 
       <WordInfoDropdown
         isOpen={currentWord}
-        excludeOccurrence={{ mediaTitle: title }}
+        excludeOccurrence={{ mediaTitle: videoId }}
       />
       <FilterDropdown
         isOpen={isFilterOpen}
@@ -228,7 +240,7 @@ const MoviePage = () => {
           }
           {/* <ShortVideo
             onTimeUpdate={handleTimeUpdate}
-            mediaTitle={(movieInfo?.youtubeUrl || title)}
+            mediaTitle={(movieInfo?.youtubeUrl || videoId)}
             forcedCurrentTimeChange={forcedCurrentTimeChange}
             scale={1.5}
             isActive
@@ -249,7 +261,7 @@ const MoviePage = () => {
 };
 
 function useMovieInfo(id) {
-  const [currentVideoInfo, set_currentVideoInfo] = useState({});
+  const [currentVideoInfo, set_currentVideoInfo] = useState(null);
   const requestMovieInfo = async () => {
     try {
       const requestUri = '/movies?_id=' + id
