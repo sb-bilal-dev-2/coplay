@@ -90,7 +90,7 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-const TAGS = ['Popular', 'Trending 🔥', 'Music', 'Words', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
+const TAGS = ['Trending 🔥', 'Popular', 'Music', 'Words', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
 
 export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);
@@ -137,12 +137,12 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
   }, [forcedIndex])
 
   return (
-    <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
+    <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent pb-1">
       {firstSticky && (
         <div className="tags-first-sticky">
           <button
             key={tags[0]}
-            className="px-3 mx-1 py-1 cursor-pointer select-none"
+            className="px-3 mr-1 py-1 cursor-pointer select-none"
             style={{
               // borderBottom: currentIndex === index && '2px solid orangered',
               // color: currentIndex === index ? 'orangered' : '#333',
@@ -152,7 +152,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
               fontWeight: 'bolder',
               background: currentIndex === 0 ? 'black' : 'rgb(255 248 238)',
               color: currentIndex === 0 ? 'white' : '#423531',
-              borderRadius: '8px',
+              borderRadius: '9px',
               border: '1px solid rgb(100 100 100)',
             }}
             onClick={() => handleItemClick(tags[0], 0)}
@@ -161,7 +161,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
           </button>
         </div>
       )}
-      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-10">
+      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0">
         {tags?.slice(firstSticky && 1).map((item, index) => {
           if (firstSticky) {
             ++index;
@@ -169,7 +169,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
           return (
             <button
               key={item.label}
-              className="px-3 mx-1 py-1 cursor-pointer select-none"
+              className="px-3 mx-0.5 py-1 cursor-pointer select-none"
               style={{
                 // borderBottom: currentIndex === index && '2px solid orangered',
                 // color: currentIndex === index ? 'orangered' : '#333',
@@ -178,7 +178,7 @@ export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstStick
                 fontWeight: 'bolder',
                 background: currentIndex === index ? 'black' : 'rgb(255 255 255)',
                 color: currentIndex === index ? 'white' : '#423531',
-                borderRadius: '8px',
+                borderRadius: '9px',
                 border: '1px solid rgb(255 164 104)',
               }}
               onClick={() => handleItemClick(item, index)}>

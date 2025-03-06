@@ -4,7 +4,7 @@ import { redirect, useNavigate, useParams } from "react-router-dom";
 import "./MoviePage.css";
 import api from "../../api";
 import { usePremiumStatus } from "../../helper/usePremiumStatus";
-import { GoBackButton } from "../Quiz";
+import { GoBackButton, ScrollingSubtitles } from "../Quiz";
 import ErrorBoundary from "../ErrorBoundary";
 import { VkVideoInit } from "../ShortVideo";
 import { FilterDropdown, WordInfoDropdown } from "../RelatedVideosDropdown";
@@ -29,7 +29,7 @@ export const InformedText = ({ text }) => {
   )
 }
 
-export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = true }) => {
+export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = true, vertical }) => {
   const scrollRef = useRef(null);
   const [activeIndex, set_activeIndex] = useState(Infinity)
   const scrollToIndex = (index) => {
@@ -38,16 +38,31 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
       const items = container.children;
       if (items[index]) {
         const item = items[index];
-        const itemWidth = item.offsetWidth;
-        const containerWidth = container.offsetWidth;
+        if (vertical) {
+          const itemHeight = item.offsetHeight;
+          const containerHeight = container.offsetHeight; // Use `clientHeight` instead of `offsetHeight`
 
-        // Calculate the scroll position to center the item
-        const scrollPosition = item.offsetLeft - (containerWidth / 2) + (itemWidth / 2);
-        console.log('scrollPosition', scrollPosition)
-        container.scrollTo({
-          left: scrollPosition,
-          behavior: 'smooth'
-        });
+          // Calculate the scroll position to center the item
+          console.log('item.offsetTop', item.offsetTop);
+          const scrollPosition = item.offsetTop - (containerHeight / 2) + (itemHeight / 2);
+          console.log('scrollPosition', scrollPosition);
+
+          container.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+          });
+        } else {
+          const itemWidth = item.offsetWidth;
+          const containerWidth = container.offsetWidth;
+
+          // Calculate the scroll position to center the item
+          const scrollPosition = item.offsetLeft - (containerWidth / 2) + (itemWidth / 2);
+          console.log('scrollPosition', scrollPosition)
+          container.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
+          });
+        }
       }
     }
   };
@@ -67,15 +82,22 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
   }, [forcedIndexChange])
 
   return (
-    <div className="w-full bg-black-100 flex overflow-scroll" ref={scrollRef}>
+    <div
+      className={`overflow-scroll no-scrollbar
+        ${vertical ? "absolute h-full" : "bg-black-100 flex w-full"}
+        `}
+      ref={scrollRef}
+      style={{ justifyItems: "left" }}
+    >
       {items.map((item, index) => {
         const active = index === activeIndex
         return (
           <div
             onClick={() => { }}
             key={item.id}
-            className="text-white-100 p-2 m-2 bg-indigo"
+            className={`text-white-100 ${vertical ? "p-1.5 m-1 bg-indigo" : "p-2 m-1 bg-indigo"}`}
             style={{
+              alignSelf: "left",
               color: 'white',
               borderRadius: '16px',
               height: '60px',
@@ -86,16 +108,23 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
             }}
           >
             <InformedText text={item.the_word} /><br />
-            <button
-              className="text-xs select-none"
-              onClick={() => {
-                changeIndex(index)
-                if (onTimeClick) {
-                  onTimeClick(item.startTime)
-                }
-              }}>
-              {displayTime(item.startTime / 1000)}
-            </button>
+            <div>
+              <button className="pr-0.5">+</button>
+              <button
+                className="text-xs select-none font-bold"
+                style={{
+                  fontSize: active ? "11px" : '10px',
+                  color: active ? 'white' : 'rgb(255 215 141)'
+                }}
+                onClick={() => {
+                  changeIndex(index)
+                  if (onTimeClick) {
+                    onTimeClick(item.startTime)
+                  }
+                }}>
+                {displayTime(item.startTime / 1000)}
+              </button>
+            </div>
           </div>
         )
       })}
@@ -126,7 +155,7 @@ function displayTime(seconds) {
 
 
 const MoviePage = () => {
-  const DEFAULT_QUERY = convertQueryObjectToCommaSeparatedString({ sort: 'Not Sorted', level: ['Intermediate', 'Advanced']})
+  const DEFAULT_QUERY = convertQueryObjectToCommaSeparatedString({ sort: 'Not Sorted', level: ['Intermediate', 'Advanced'] })
   const { title } = useParams();
   const youtubeIdOnVideo = title.includes('youtube_') ? title.split('youtube_')[1] : undefined
   const [subtitleParsed, set_subtitleParsed] = useState(null)
@@ -143,7 +172,7 @@ const MoviePage = () => {
       // list = response.wordList
       console.log('parsed', response)
       set_subtitleParsed(response)
-    } catch(err) {
+    } catch (err) {
 
     }
   }
@@ -164,15 +193,23 @@ const MoviePage = () => {
   const requestVideoWords = async () => {
     console.log('query', query)
     if (query !== "") {
-      const list = (await api().get(`/movie_words/${videoId}?${query}`))
-      set_videoWords(list)
+      try {
+        const list = (await api().get(`/movie_words/${videoId}?${query}`))
+        set_videoWords(list)
+      } catch(err) {
+
+      }
     }
   }
   const [forcedCurrentTimeChange, set_forcedCurrentTimeChange] = useState()
   const [isFilterOpen, set_isFilterOpen] = useState(false);
   const [currentWord, set_currentWord] = useState('')
-  const [subtitles] = useSubtitles(videoId, localStorage.getItem('learningLanguage'))
+  console.log('subtitleParsed', subtitleParsed)
+  const subtitles = subtitleParsed?.subtitles?.subtitles
   console.log('subtitles', subtitles)
+  // const [subtitles] = useSubtitles(videoId, localStorage.getItem('learningLanguage'))
+  const [matchedSubtitleLine, set_matchedSubtitleLine] = useState(0)
+
   useEffect(() => {
     // set_isRelOpen(false)
     set_currentWord('')
@@ -183,20 +220,21 @@ const MoviePage = () => {
   const [forcedActiveWordIndex, set_forcedActiveWordIndex] = useState(Infinity)
   const handleTimeUpdate = (newTime) => {
     newTime = newTime * 1000
-    const searchWordListTime = (list) => {
-      return list.findIndex(item => newTime > item.startTime && newTime < item.endTime)
-    }
-
-    const foundItem = searchWordListTime(videoWords)
+    const foundItem = videoWords.findIndex(item => newTime > item.startTime && newTime < item.endTime)
     if (foundItem !== -1) {
       set_forcedActiveWordIndex(foundItem)
     } else {
       set_forcedActiveWordIndex(Infinity)
     }
+    // console.log('new_matchedSubtitleLine', subtitleParsed)
+    const new_matchedSubtitleLine = subtitles?.findIndex(item => newTime >= item.startTime && newTime < item.endTime)
+    // console.log('new_matchedSubtitleLine', new_matchedSubtitleLine, subtitles, newTime)
+    if (matchedSubtitleLine !== new_matchedSubtitleLine) {
+      set_matchedSubtitleLine(new_matchedSubtitleLine)
+    }
   }
   // const [isRelOpen, set_isRelOpen] = useState(false);
-
-
+  console.log('movieInfo?.youtubeUrl || youtubeIdOnVideo', movieInfo?.youtubeUrl || youtubeIdOnVideo)
   return (
     <ErrorBoundary>
       <GoBackButton />
@@ -233,9 +271,9 @@ const MoviePage = () => {
       />
       <div className="MainContainer flex flex-col">
         <div style={{ flex: 1 }}>
-          {movieInfo?.youtubeUrl || youtubeIdOnVideo ?
+          {(movieInfo?.youtubeUrl || youtubeIdOnVideo) && subtitleParsed && videoWords.length ?
             <YoutubePlayer
-              videoIdOrUrl={movieInfo?.youtubeUrl || youtubeIdOnVideo}
+              videoIdOrUrl={movieInfo?.youtubeUrl || "embed/" + youtubeIdOnVideo}
               autoplay
               scale={1}
               startTime={(forcedCurrentTimeChange || 0)}
@@ -250,6 +288,12 @@ const MoviePage = () => {
               onTimeUpdate={handleTimeUpdate}
             />
           }
+          <ScrollingSubtitles
+            highlightedText={videoWords && videoWords[forcedActiveWordIndex]?.the_word}
+            subtitles={subtitles}
+            currentIndex={matchedSubtitleLine}
+            singleLine
+          />
           {/* <ShortVideo
             onTimeUpdate={handleTimeUpdate}
             mediaTitle={(movieInfo?.youtubeUrl || videoId)}
@@ -260,6 +304,7 @@ const MoviePage = () => {
         </div>
         <button onClick={() => set_isFilterOpen(!isFilterOpen)} className="bg-icon absolute bottom-2 right-0"><i className="fa-solid fa-filter text-gray-100"></i></button>
         <HorizontalScroll
+          vertical
           items={videoWords}
           autoScroll={true}
           forcedIndexChange={forcedActiveWordIndex}
@@ -277,7 +322,11 @@ function useMovieInfo(id) {
   const requestMovieInfo = async () => {
     try {
       const requestUri = '/movies?_id=' + id
-      const response = await api().get(requestUri)
+      let response;
+      try {
+        response = await api().get(requestUri)
+
+      } catch(err) {}
       console.log('response s', response)
       const new_movieInfo = response?.results[0];
       console.log("new_movieInfo", new_movieInfo);

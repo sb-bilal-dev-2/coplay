@@ -15,12 +15,15 @@ import { degausser } from "./utils/degausser";
 import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
 
 const HomePage = () => {
-  const { items: videos } = useDynamicReducer("movies");
-  const { items: wordCollections } = useDynamicReducer("wordCollections");
-  const movies = videos?.filter(item => item.category === 'Cartoon');
-  const podcasts = videos?.filter(item => item.category === 'Podcast')
-  const clips = videos?.filter(item => item.category === 'Music');
-  const [category, set_category] = useState('All')
+  // const { items: videos } = useDynamicReducer("movies");
+  // const { items: wordCollections } = useDynamicReducer("wordCollections");
+  // const movies = videos?.filter(item => item.category === 'Cartoon');
+  // const clips = videos?.filter(item => item.category === 'Music');
+  const [category, set_category] = useState("Trending 🔥")
+  const [podcasts] = useGetPopular("podcasts")
+  const [clips] = useGetPopular("music")
+  const [movies] = useGetPopular("cartoon")
+  const [series] = useGetPopular("series")
 
   const { t } = useTranslation();
 
@@ -72,17 +75,8 @@ const HomePage = () => {
       )}
       {category === 'Trending 🔥' && (
         <InfiniteScroll
-          requestData={async () => (await api().get('/youtube_trends'))}
+          requestData={async () => (await api().get(`/youtube_trends`))}
           renderItem={(item) => {
-            console.log('item', item)
-            // channelTitle
-            // description
-            // stats
-            // {viewCount: '388706', likeCount: '56218', favoriteCount: '0', commentCount: '4982'}
-            // thumbnail
-            // title
-            // videoId
-
             return (
               <div className="relative" style={{ maxWidth: "500px", margin: '10px auto' }}>
                 <Link to={'/movie/' + 'youtube_' + item.videoId}>
@@ -127,7 +121,8 @@ const HomePage = () => {
       )}
       {category === 'Music' && (
         <InfiniteScroll
-          requestData={async () => (await api().get('/rec?category=Music'))}
+          // requestData={async () => (await api().get('/rec?category=Music'))}
+          requestData={() => ({ results: clips })}
           renderItem={(postItem, isActive) => {
             return (
               <CarouselPost postItem={postItem} isActive={isActive} />
@@ -145,7 +140,8 @@ const HomePage = () => {
       )}
       {category === 'Cartoon' && (
         <InfiniteScroll
-          requestData={async () => (await api().get('/rec?category=Cartoon'))}
+          // requestData={async () => (await api().get('/rec?category=Cartoon'))}
+          requestData={() => ({ results: movies })}
           renderItem={(postItem, isActive) => {
             return (
               <CarouselPost postItem={postItem} isActive={isActive} />
@@ -155,7 +151,8 @@ const HomePage = () => {
       )}
       {category === 'Podcasts' && (
         <InfiniteScroll
-          requestData={async () => (await api().get('/rec?category=Podcast'))}
+          // requestData={async () => (await api().get('/rec?category=Podcast'))}
+          requestData={() => ({ results: podcasts })}
           renderItem={(postItem, isActive) => {
             return (
               <CarouselPost postItem={postItem} isActive={isActive} />
@@ -165,7 +162,8 @@ const HomePage = () => {
       )}
       {category === 'Series' && (
         <InfiniteScroll
-          requestData={async () => (await api().get('/rec?category=Series'))}
+          // requestData={async () => (await api().get('/rec?category=Series'))}
+          requestData={() => ({ results: series })}
           renderItem={(postItem, isActive) => {
             return (
               <CarouselPost postItem={postItem} isActive={isActive} />
@@ -296,6 +294,19 @@ const Phrases = ({ item, isActive }) => {
       )}
     </div>
   )
+}
+
+function useGetPopular(category) {
+  const [podcasts, set_podcasts] = useState([])
+  const request_podcasts = async () => {
+    api().get('/youtube_popular?category=' + category)
+      .then((new_podcasts) => set_podcasts(new_podcasts.results.videos))
+      .catch((err) => {})
+  }
+  useEffect(() => {
+    request_podcasts()
+  }, [category])
+  return [podcasts, set_podcasts]
 }
 
 export default HomePage;

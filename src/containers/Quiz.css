@@ -148,13 +148,19 @@ div[data-vjs-player="true"] > div > video-js {
 }
 
 .scrollsub-container {
-    height: 120px;
     min-width: 100px;
-    width: 50%;
+    max-width: 84dvw;
+    /* width: 50%; */
     scroll-snap-type: y mandatory;
     color: white;
-    box-shadow: 1px 1px 5px 5px #0000001f;
-    background: #0000001f;
+    pointer-events: none;
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    /* box-shadow: 1px 1px 5px 5px #0000001f; */
+    /* background: #0000001f; */
 
     @media (max-width: 600px) {
         /* min-width: 300px; */
@@ -167,7 +173,7 @@ div[data-vjs-player="true"] > div > video-js {
     padding: 0 40px;
     
     @media (max-width: 600px) {
-        padding: 0 10px;
+        padding: 0 8px;
     }
 }
 

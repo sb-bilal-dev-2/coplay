@@ -58,7 +58,7 @@ const useRequests = (uri) => {
         try {
             dispatchGet({ type: `${uri}_${method}_REQUEST` });
             const response = await api()[method.toLowerCase()](url, data);
-            console.log('response?.results', response?.results)
+            // console.log('response?.results', response?.results)
             dispatchGet({ type: `${uri}_${method}_SUCCESS`, payload: response });
         } catch (error) {
             console.log(uri + 'error', error)

@@ -74,15 +74,15 @@ const ShortsContainer = ({ items, forceRenderFirstItem, wordsIndex, onSwipeLeft,
   )
 }
 
-const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
+export const ScrollingSubtitles = ({ subtitles, onTimeClick, currentIndex, singleLine, highlightedText = "" }) => {
   const scrollRef = useRef(null);
 
   const handleItemClick = (newIndex) => {
     console.log('newIndex', newIndex)
-    if (setCurrentTime) {
+    if (onTimeClick) {
       const newItem = subtitles[newIndex]
       if (newItem?.startTime) {
-        setCurrentTime(newItem?.startTime)
+        onTimeClick(newItem?.startTime)
       }
     }
   }
@@ -128,14 +128,27 @@ const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
     }
   }, [scrollRef.current])
 
-
+  function getHighlights(text, word) {
+    const index = text.toLowerCase().indexOf(word.toLowerCase());
+    return index;
+  }
+  
   return (
     // <DraggableResizableComponent>
     <div
       ref={scrollRef}
+      style={{ height: "120px" }}
       className="scrollsub-container absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
     >
       {subtitles?.map((subtitleLine, lineIndex) => {
+        if (singleLine && currentIndex !== lineIndex) {
+          return;
+        }
+        const degaussedText = degausser(subtitleLine.text)
+        const highlightedIndexStart = currentIndex === lineIndex && getHighlights(degaussedText, highlightedText)
+        // console.log('highlightedText', highlightedText)
+        const highlightedIndexEnd = highlightedIndexStart === -1 ? -1 : highlightedIndexStart + highlightedText.length
+        // console.log('highlightedIndexStart', highlightedIndexStart, highlightedIndexEnd)
         return (
           <div
             style={{
@@ -153,7 +166,7 @@ const ScrollingSubtitles = ({ subtitles, setCurrentTime, currentIndex }) => {
             <b className="ml-1" style={{
               fontWeight: lineIndex === currentIndex ? 'bold' : 'normal',
               transition: '0.125s ease-in'
-            }}>{degausser(subtitleLine.text)}</b>
+            }}>{degaussedText.split('').map((char, index) => <span style={{ color: index >= highlightedIndexStart && index < highlightedIndexEnd ? 'orange' : "" }}>{char}</span>)}</b>
           </div>
         )
       })}
