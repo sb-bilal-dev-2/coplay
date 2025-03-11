@@ -12,6 +12,7 @@ import RelatedVideosDropdown, { FilterDropdown } from "./RelatedVideosDropdown";
 import { WordCollectionCarousel } from "./WordCollectionCarousel";
 import SecondaryButton from "../components/SecondaryButton";
 import YoutubePlayer from "../components/YoutubePlayer";
+import { getPronFunc } from "../utils/pron";
 
 
 function useTelegramWebApp() {
@@ -132,7 +133,7 @@ export const ScrollingSubtitles = ({ subtitles, onTimeClick, currentIndex, singl
     const index = text.toLowerCase().indexOf(word.toLowerCase());
     return index;
   }
-  
+
   return (
     // <DraggableResizableComponent>
     <div
@@ -163,10 +164,14 @@ export const ScrollingSubtitles = ({ subtitles, onTimeClick, currentIndex, singl
               style={{ fontSize: '0.6em', display: 'block', transition: '0.125s ease-in' }}
               onClick={() => handleItemClick(lineIndex)}
             ></i> */}
-            <b className="ml-1" style={{
-              fontWeight: lineIndex === currentIndex ? 'bold' : 'normal',
-              transition: '0.125s ease-in'
-            }}>{degaussedText.split('').map((char, index) => <span style={{ color: index >= highlightedIndexStart && index < highlightedIndexEnd ? 'orange' : "" }}>{char}</span>)}</b>
+            <div className="text-center">
+              <b className="ml-1" style={{
+                fontWeight: lineIndex === currentIndex ? 'bold' : 'normal',
+                transition: '0.125s ease-in'
+              }}>{degaussedText.split('').map((char, index) => <span style={{ color: index >= highlightedIndexStart && index < highlightedIndexEnd ? 'orange' : "" }}>{char}</span>)}</b>
+              <br />
+              {lineIndex === currentIndex && <div>{getPronFunc()(degaussedText)}</div>}
+            </div>
           </div>
         )
       })}
@@ -396,7 +401,7 @@ const Quiz = () => {
                   autoplay
                   scale={1}
                   startTime={currentOccurance?.startTime}
-                  // onTimeUpdate={handleTimeUpdate}
+                // onTimeUpdate={handleTimeUpdate}
                 />
                 :
                 <VkVideoInit
@@ -404,7 +409,7 @@ const Quiz = () => {
                   isActive
                   iframeSrc={currentOccurance?.vkVideoEmbed}
                   startTime={Math.floor(currentOccurance?.startTime)}
-                  // onTimeUpdate={handleTimeUpdate}
+                // onTimeUpdate={handleTimeUpdate}
                 />
               }
             </>

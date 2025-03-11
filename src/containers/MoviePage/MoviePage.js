@@ -13,6 +13,8 @@ import { useDispatch } from "react-redux";
 import { selectText } from "../../store";
 import { convertQueryObjectToCommaSeparatedString } from "../../utils/objectToQuery";
 import YoutubePlayer from "../../components/YoutubePlayer";
+import CircularMenu, { StarRating } from "../../components/CircularMenu";
+import { getPronFunc } from "../../utils/pron";
 
 export const InformedText = ({ text }) => {
   const parsedTextList = text.split(' ')
@@ -95,21 +97,24 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
           <div
             onClick={() => { }}
             key={item.id}
-            className={`text-white-100 ${vertical ? "p-1.5 m-1 bg-indigo" : "p-2 m-1 bg-indigo"}`}
+            className={`text-white-100 px-1.5 p-0.5 m-1 ${vertical ? "" : ""}`}
             style={{
               alignSelf: "left",
               color: 'white',
-              borderRadius: '16px',
-              height: '60px',
+              borderRadius: '4px',
+              // height: '60px',
               whiteSpace: 'nowrap',
-              background: active && 'orange',
+              fontSize: active ? '1.6em' : '',
+              background: active ? 'orange' : 'rgba(99,102,241, 0.5)',
               // background: active ? 'orange' : 'rgba(99,102,241)',
               lineHeight: '1'
             }}
           >
             <InformedText text={item.the_word} /><br />
+            <span>{item.pronounciation}</span><br />
             <div>
-              <button className="pr-0.5">+</button>
+              {/* <CircularMenu /> */}
+              {/* <button className="pr-0.5">+</button> */}
               <button
                 className="text-xs select-none font-bold"
                 style={{
@@ -124,6 +129,8 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
                 }}>
                 {displayTime(item.startTime / 1000)}
               </button>
+              <StarRating scale={active && 1.1} />
+
             </div>
           </div>
         )
@@ -191,11 +198,20 @@ const MoviePage = () => {
   }, [youtubeIdOnVideo, videoId, subtitleParsed])
   console.log('videoWords', videoWords)
   const requestVideoWords = async () => {
+    // const getPronounciation = PRONS[mediaLang]
     console.log('query', query)
     if (query !== "") {
       try {
         const list = (await api().get(`/movie_words/${videoId}?${query}`))
-        set_videoWords(list)
+        const listWithPronounciation = await Promise.all(list.map((item) => {
+          const pronounciation = getPronFunc()(item.the_word)
+
+          return {
+            ...item,
+            pronounciation
+          }
+        }))
+        set_videoWords(listWithPronounciation)
       } catch(err) {
 
       }

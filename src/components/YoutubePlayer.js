@@ -34,7 +34,7 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
           'rel': 0,
           'showinfo': 0,
           'iv_load_policy': 3, // Hide video annotations
-          'cc_load_policy': 0, // Hide closed captions
+          'cc_load_policy': 3, // Hide closed captions
           // 'fs': 0, // Disable fullscreen button
           'start': Math.floor(startTime / 1000), // Add this line to start at the specified time
           // 'autoplay': autoplay && 1,
