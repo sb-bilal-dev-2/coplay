@@ -10,5 +10,6 @@ sudo systemctl restart apache2
 Marketplace: Node Click to Deploy
 
 GIT git clone https://github.com/sb-bilal-dev/cplay.git
+git remote set-url origin https://CLASSIC_TOKEN@github.com/sb-bilal-dev-2/coplay.git
 GIT login with: sb-bilal-dev and ghp_nVpOp***78CDxv9ZyVdaOhzWXlA1H40wJ2g***yfmF or sb-bilal-dev-2 and !94********Bilol
 GIT git config --global credential.helper store
