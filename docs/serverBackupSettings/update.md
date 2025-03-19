@@ -10,5 +10,5 @@ sudo systemctl restart apache2
 Marketplace: Node Click to Deploy
 
 GIT git clone https://github.com/sb-bilal-dev/cplay.git
-GIT login with: sb-bilal-dev and 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 or sb-bilal-dev-2 and !94********Bilol
+GIT login with: sb-bilal-dev and ghp_nVpOp***78CDxv9ZyVdaOhzWXlA1H40wJ2g***yfmF or sb-bilal-dev-2 and !94********Bilol
 GIT git config --global credential.helper store
