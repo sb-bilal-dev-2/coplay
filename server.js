@@ -27,6 +27,7 @@ const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
 const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
 const { telegramInit } = require('./tgbot');
 const { fetchTrendingVideos, fetchPopularVideos, searchYouTubeVideos } = require('./youtube_api');
+const { pronKorean } = require('./utils/pronounciation');
 
 writeDevelopmentIPAddress();
 
@@ -67,8 +68,8 @@ app.get('/youtube_trends', async (req, res) => {
       category
     } = req.query
     // const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
-    const mediaLang = req.query.mediaLang
-
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+    console.log('mediaLang', req.query.mediaLang, req.headers["learninglanguage"])
     const results = await fetchTrendingVideos(mediaLang, limit, page, category)
 
     res.status(200).send({ results })
@@ -86,7 +87,7 @@ app.get('/youtube_popular', async (req, res) => {
     } = req.query
     const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
 
-    const results = await fetchPopularVideos(mediaLang, limit, page, category)
+    const results = await fetchPopularVideos(category, mediaLang, limit, page)
 
     res.status(200).send({ results })
   } catch (err) {
@@ -250,6 +251,49 @@ app.get("/rec", async (req, res) => {
 //   return (await fetch('https://subtitle.to/https://www.youtube.com/watch?v=' + youtubeId)).json()
 // }
 
+app.get("/youtube_video_init/:id", async (req, res) => {
+  // handle transcript error: http://localhost:3000/movie/youtube_3oA8kt8685I
+  try {
+    const { id } = req.params
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+    const thisServer = `http://localhost:${port}`
+    console.log('id', id)
+    const matchedVideo = await movies_model.findOne({ youtubeUrl: 'https://www.youtube.com/embed/' + id })
+    if (matchedVideo) {
+      const subtitles = await subtitles_model.findOne({ mediaId: matchedVideo._id, mediaLang })
+      return res.status(200).send({ videoInfo: matchedVideo, subtitles, parsedList: [] })
+    }
+    const newVideoInfo = (await fetch(`${thisServer}/youtube_video?ids=${id}`).then(response => response.json()))[0]
+    const videoInfoAdjusted = { ...newVideoInfo, mediaLang }
+    let videoInfo
+    let videoTranscript
+    try {
+      videoTranscript = (await fetch(`${thisServer}/youtube_transcript?parse=1&ids=${id}&mediaLang=${mediaLang}`).then(response => response.json()))[0]
+      // console.log('TRANScRipt', videoTranscript)
+      if (!videoTranscript || videoTranscript.error) {
+        return res.status(400).json({ error: 'Transcript Failed\n' })
+      }
+      console.log('videoInfoAdjusted', videoInfoAdjusted)
+      videoInfo = (await movies_model.create(videoInfoAdjusted))
+      console.log('videoInfo', videoInfo)
+      videoTranscript.mediaId = videoInfo._id
+      videoTranscript.media = videoInfo
+      videoTranscript.mediaLang = mediaLang
+      videoTranscript.title = mediaLang
+    } catch (err) {
+      // handleTranscriptError
+      console.log('Transcript ERROR Y: ', err)
+      res.status(400).json(err)
+    }
+    const subtitle = (await subtitles_model.create(videoTranscript))
+
+    res.status(200).send({ subtitle, videoInfo })
+
+  } catch (error) {
+    console.error('YOUTUBE_INIT_ERR: ', error)
+  }
+})
+
 app.get("/youtube_video", async (req, res) => {
   const { mediaLang } = req.query;
   const ids = req.query.ids.split(',')
@@ -270,7 +314,8 @@ app.get("/youtube_video", async (req, res) => {
 })
 
 app.get('/youtube_transcript', async (req, res) => {
-  const { mediaLang } = req.query;
+  // const LANG_MAP = { "en": "en-US" }
+  let mediaLang = req.headers["learninglanguage"] || req.query.mediaLang;
   const ids = req.query.ids.split(',')
 
   if (!ids) {
@@ -284,10 +329,30 @@ app.get('/youtube_transcript', async (req, res) => {
     try {
       transcript = await YoutubeTranscript.fetchTranscript(youtubeUrl, { lang: mediaLang || '' });
     } catch (err) {
-      return res.send('Transcript error: ' + err)
+      let errMessage = err.toString()
+      console.error('Transcript ERROR: ', req.query.mediaLang, req.headers["learninglanguage"], err, errMessage.includes('Available languages: '))
+      const mainAvailableLanguage = errMessage.includes('Available languages: ') && errMessage.split('Available languages: ')[1].split(',')[0]
+      console.log('mainAvailableLanguage', mainAvailableLanguage)
+
+      if (!mainAvailableLanguage) {
+        return res.status(400).json({ error: errMessage })
+      }
+
+      try {
+        transcript = await YoutubeTranscript.fetchTranscript(youtubeUrl, { lang: mainAvailableLanguage || '' })
+        console.log('2nd ATTEMPT SUCCESS length: ', transcript.length)
+      } catch (err) {
+        errMessage = err.toString()
+
+        console.log('Transcript ERROR 2: ', errMessage)
+        return res.status(400).json({ error: errMessage })
+      }
     }
     let transcriptAdjusted = {}
-    const relatedMovie = await movies_model.findOne({ youtubeUrl: 'https://www.youtube.com/embed/' + id })
+    const matchingUrl = 'https://www.youtube.com/embed/' + id
+    console.log('matchingUrl', matchingUrl)
+    const relatedMovie = await movies_model.findOne({ youtubeUrl: matchingUrl })
+    console.log('relatedMovie', relatedMovie)
     if (relatedMovie) {
       transcriptAdjusted.mediaId = relatedMovie._id
       transcriptAdjusted.media = relatedMovie
@@ -297,7 +362,7 @@ app.get('/youtube_transcript', async (req, res) => {
     }
 
     if (req.query.parse = '1') {
-      transcriptAdjusted.subtitles = transcriptAdjusted.subtitles.map((item) => {
+      transcriptAdjusted.subtitles = transcript.map((item) => {
         const degaussedText = degausser(item.text)
         return ({
           ...item,
@@ -308,6 +373,7 @@ app.get('/youtube_transcript', async (req, res) => {
         })
       })
     }
+    console.log('transcriptAdjusted', transcriptAdjusted)
     results.push(transcriptAdjusted)
   }
   res.status(200).send(results)
@@ -374,88 +440,37 @@ app.get('/processWordInfos', async (req, res) => {
 })
 
 app.get('/wordInfoLemma', async (req, res) => {
-  let { the_word, mainLang } = req.query;
+  let { the_word } = req.query;
   const { learninglanguage } = req.headers;
-  console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
+  const mainLang = learninglanguage
+  console.log('the_word, mainLang', the_word, req.query.mainLang, learninglanguage)
   try {
     const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
-    const requestedWordInfos = await WordInfosModel.find({ the_word });
-    console.log("requestedWordInfos", requestedWordInfos);
-    const wordInfo = requestedWordInfos[0];
+    const wordInfo = await WordInfosModel.findOne({ the_word });
 
-    if (!requestedWordInfos.length || !wordInfo) {
-      res.status(404).send("Word info Not found: " + the_word);
+    if (!wordInfo) {
+      return res.status(404).send("Word info Not found: " + the_word);
     }
 
-    let updatedWordInfo = wordInfo;
-    if (wordInfo && wordInfo.shortDefinition) {
-      if (!updatedWordInfo?.the_word_translations) {
-        updatedWordInfo.the_word_translations = {};
+    let updatedWordInfo = wordInfo
+    if (!updatedWordInfo.pronounciation) {
+      updatedWordInfo.pronounciation = await getPronounciation(the_word, mainLang)
+    }
+    if (!wordInfo.shortDefinitions[learninglanguage]) {
+      try {
+        const input = { learninglanguage, mainLang }
+        const new_info_response = (await promptAI(`give me word info about in the given language: e.g. input { learninglanguage: "ko", mainLang: "ru", the_word: "그" } should return { shortDefinition, shortExplanation }\nINPUT: ${input}`)).content
+        const new_info_parsed = JSON.parse(new_info_response)
+
+        updatedWordInfo.shortDefinitions[learninglanguage] = new_info_parsed.shortDefinition
+        updatedWordInfo.shortExplanations[learninglanguage] = new_info_parsed.shortExplanation
+      } catch (err) {
+        console.log("Error fetching word info: " + the_word, err);
+        res.status(500);
       }
-      console.log("updatedWordInfo 1", updatedWordInfo);
-      if (!updatedWordInfo.the_word_translations[mainLang]) {
-        updatedWordInfo.the_word_translations[mainLang] = await gTranslate(
-          wordInfo.the_word,
-          mainLang
-        );
-      }
-      const updatedWordInfosKeys = (await promptWordInfos([wordInfo.the_word], learninglanguage))[0]
-      console.log('updatedWordInfosKeys 10', updatedWordInfosKeys)
-      Object.keys(updatedWordInfosKeys).map(updatedKey => {
-        console.log('updatedKey', updatedKey, updatedWordInfosKeys[updatedKey])
-        updatedWordInfo[updatedKey] = updatedWordInfosKeys[updatedKey]
-      })
-      console.log('updatedWordInfo 2', updatedWordInfo)
     }
 
-    if (mainLang !== 'en' && wordInfo.shortDefinition && (!wordInfo.shortDefinition_translations || !wordInfo.shortDefinition_translations[mainLang])) {
-      console.log('wordInfo.shortDefinition')
-
-      const translationKeysMap = await processTranslations(learninglanguage, mainLang, [wordInfo])
-      const translationKeys = translationKeysMap[wordInfo.the_word] //
-      Object.keys(translationKeys).map((translationKey) => {
-        if (!updatedWordInfo[translationKey]) {
-          updatedWordInfo[translationKey] = {}
-        }
-        updatedWordInfo[translationKey][mainLang] = translationKeys[translationKey]
-      })
-      console.log('updatedWordInfo 3', updatedWordInfo)
-    }
-
-    if (
-      mainLang !== "en" &&
-      wordInfo.shortDefinition &&
-      (!wordInfo.shortDefinition_translations ||
-        !wordInfo.shortDefinition_translations[mainLang])
-    ) {
-      console.log("wordInfo.shortDefinition");
-
-      const translationKeysMap = await processTranslations(
-        learninglanguage,
-        mainLang,
-        [wordInfo]
-      );
-      const translationKeys = translationKeysMap[wordInfo.the_word]; //
-      Object.keys(translationKeys).map((translationKey) => {
-        if (!updatedWordInfo[translationKey]) {
-          updatedWordInfo[translationKey] = {};
-        }
-        updatedWordInfo[translationKey][mainLang] =
-          translationKeys[translationKey];
-      });
-      console.log("updatedWordInfo 3", updatedWordInfo);
-    }
-
-    if (
-      wordInfo &&
-      (!wordInfo.shortDefinition ||
-        !wordInfo.the_word_translations ||
-        !wordInfo.the_word_translations[mainLang] ||
-        !wordInfo.shortDefinition_translations ||
-        !wordInfo.shortDefinition_translations[mainLang])
-    ) {
-      await WordInfosModel.findByIdAndUpdate(wordInfo._id, updatedWordInfo);
-    }
+    await WordInfosModel.findByIdAndUpdate(wordInfo._id, updatedWordInfo);
     res.status(200).send(updatedWordInfo);
   } catch (err) {
     console.log("err", err);
@@ -544,12 +559,63 @@ function getContentType(extension) {
   }
 }
 
+app.get('/translation', async (req, res) => {
+  const { type, text } = req.query
+
+  try {
+    const translation = await gTranslate(text)
+    console.log('translated: ', text, translation)
+    res.status(200).send(translation)
+  } catch (err) {
+    console.log('translation error: ', err)
+    res.status(500).send('Translation error')
+  }
+})
+
+const pinyin = require("chinese-to-pinyin")
+const ROMINIZE_FUNCTION = {
+  'zh-CN': (text) => pinyin(text),
+  // 'jp': () => {  },
+  // 'th': () => {  },
+  'ko': (text) => pronKorean(text),
+  'en-US': async (text) => {
+    try {
+      JSON.parse((await promptAI(`Pronounce the input and return json. e.g. for { result: "/həˈloʊ/ " } return { lang: "en-US", text: "hello" }.
+INPUT { text: "${text}", lang: "en-US" }
+`)).content).result
+    } catch (err) {
+      res.status(500).send('failed pronounciation')
+    }
+  },
+  'default': async (text, lang) => JSON.parse((await promptAI(`Pronounce the input and return json. e.g. for { result: "/həˈloʊ/ " } return { lang: "en-US", text: "hello" }.
+    INPUT { text: "${text}", lang: "${lang}" }
+    `)).content).result
+}
+
+function getPronounciation(text, lang) {
+  return (ROMINIZE_FUNCTION[lang] || ROMINIZE_FUNCTION.default)(text, lang)
+}
+
+app.get('/pronounciation', async (req, res) => {
+  try {
+    // const { body: text } = req.body;
+    const { text } = req.query
+    const mediaLang = req.headers["learninglanguage"] || req.query.mediaLang
+    console.log('text', mediaLang, text)
+    const pronounciation = getPronounciation(text, mediaLang)
+    res.status(200).send(pronounciation)
+  } catch (err) {
+
+  }
+})
+
 app.get("/movie_words/:_id", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
     const { _id } = req.params;
     console.log('req.query', req.query)
-    const { bookmark, level, sort, mediaLang } = req.query;
+    const { bookmark, level, sort } = req.query;
+    const mediaLang = req.headers["learninglanguage"] || req.query.mediaLang
     console.log(
       "fetching movie words for user_id: " + user_id,
       "_id: " + _id
@@ -569,7 +635,7 @@ app.get("/movie_words/:_id", async (req, res) => {
         (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime, endTime: item.endTime }))),
         []
       );
-      // console.log('movieWords', movieWords)
+      console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
       console.log('f2')
     } catch (err) {
@@ -646,10 +712,11 @@ app.get("/movie_words/:_id", async (req, res) => {
         return false
       }
     }).map(item => ({ ...item, occurrence: wordInfo_map[item.the_word].occuranceCount }))
-    console.log('movieWordsFiltered', movieWordsFiltered)
+    // console.log('movieWordsFiltered', movieWordsFiltered)
+    // const movieWordsUnduplicated = movieWordsFiltered
     const movieWordsUnduplicated = Object.values(
       movieWordsFiltered.reduce(
-        (acc, item) => ((acc[item.the_word] = item), acc),
+        (acc, item) => (!acc[item.the_word] && (acc[item.the_word] = item), acc),
         {}
       )
     );
@@ -662,13 +729,62 @@ app.get("/movie_words/:_id", async (req, res) => {
         a.startTime - b.startTime
       }
     })
-    console.log('sort', sort, movieWordsUnduplicated)
+    // console.log('sort', sort, movieWordsUnduplicated)
     res.status(200).send(sorted);
   } catch (err) {
     console.log('f error', err.message)
     res.status(500).send(err.message);
   }
 });
+
+app.post("/self_words_increment", requireAuth, async (req, res) => {
+  try {
+    const { language } = req.query;
+    const { learninglang } = req.headers;
+    const User = users_model;
+    const _id = req.userId;
+    const wordListKey = learninglang || language ? `${learninglang || language}_words` : "words";
+    console.log('wordListKey', wordListKey)
+    const updatedWordOrWordsArray = req.body;
+    // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
+    const user = await User.findById(_id);
+    if (!user) {
+      res.statusCode(404).send("Requested user not found");
+    }
+    const updatedWordsMap = !Array.isArray(updatedWordOrWordsArray)
+      ? [updatedWordOrWordsArray]
+      : updatedWordOrWordsArray.reduce(
+        (acc, item) => ((acc[item.the_word] = item), acc),
+        {}
+      );
+    console.log("updatedWordsMap", updatedWordsMap);
+    const userWords = user[wordListKey] || [];
+    console.log("userWords.length", userWords.length);
+    // console.log('words', words)
+    userWords.forEach((userWord) => {
+      const updatedWordMatch = updatedWordsMap[userWord.the_word];
+      delete updatedWordsMap[userWord.the_word];
+      if (updatedWordMatch) {
+        userWord = updatedWordMatch;
+      }
+    });
+    const update = {
+      _id,
+      updatedTime: Date.now(),
+    };
+    const addedNewWordsArray = Object.values(updatedWordsMap);
+    update[wordListKey] = addedNewWordsArray.concat(userWords);
+    console.log("update", update);
+    // console.log('update', update)
+    console.log("_id", _id);
+    await User.findByIdAndUpdate(_id, update);
+
+    res.status(200).send(update.words);
+  } catch (err) {
+    console.log("ERRORED: ", err);
+    res.status(500).send(err.message);
+  }
+})
 
 app.post("/self_words", requireAuth, async (req, res) => {
   try {
@@ -680,6 +796,7 @@ app.post("/self_words", requireAuth, async (req, res) => {
 
     const updatedWordOrWordsArray = req.body;
     // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
+    console.log('wordListKey', wordListKey)
     const user = await User.findById(_id);
     if (!user) {
       res.statusCode(404).send("Requested user not found");
@@ -742,7 +859,7 @@ app.get("/self_words/:listType", requireAuth, async (req, res) => {
     const userLists = sortByLearningState(userWords)
     userWordsByType = userLists[listType + 'List']
 
-    res.status(200).json(userWordsByType);
+    res.status(200).json(userWords);
 
   } catch (error) {
     console.error(error);

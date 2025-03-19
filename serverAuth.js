@@ -482,7 +482,7 @@ async function getUserIfExists(req) {
         token = token && token?.split("Bearer ")[1];
 
         jwt.verify(token, SECRET, async (err, user) => {
-          if (user.userId) {
+          if (user?.userId) {
             resolvePromise(User.findById(user.userId))
           }
         });

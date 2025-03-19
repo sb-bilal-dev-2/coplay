@@ -7,7 +7,6 @@ const schema = new Schema({
   occuranceCount: Number,
   lemmaIndex: Number,
   the_word: String,
-  pronounciation: String,
   romanization: String,
   function: String,
   isLemma: Boolean,
@@ -15,9 +14,6 @@ const schema = new Schema({
   rootWord: String,
   functions: [String],
   pronounciation: String,
-  detailedExplanation: String,
-  shortExplanation: String,
-  shortDefinition: String,
   mistyped: Boolean,
   slang: Boolean,
   vulgar: Boolean,
@@ -36,7 +32,6 @@ const schema = new Schema({
   within50k: Boolean,
   within5k: Boolean,
   isPhrase: Boolean,
-  mainDefinition: String,
   definitions: [
     Schema({
       definition: String,
@@ -49,10 +44,18 @@ const schema = new Schema({
   youglishSrcs: [String],
   youglishOccurances: Number,
   youglishParsed: Boolean,
-  the_word_translations: Schema.Types.Mixed,
-  detailedExplanation_translations: Schema.Types.Mixed,
-  shortExplanation_translations: Schema.Types.Mixed,
-  shortDefinition_translations: Schema.Types.Mixed,
+  detailedExplanation: {
+    default: {},
+    type: Schema.Types.Mixed
+  },
+  shortExplanations: {
+    default: {},
+    type: Schema.Types.Mixed
+  },
+  shortDefinitions: {
+    default: {},
+    type: Schema.Types.Mixed
+  },
   // pronounciations: {
   //   type: String,
   //   required: true,
