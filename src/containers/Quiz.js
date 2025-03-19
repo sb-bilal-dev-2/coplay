@@ -170,7 +170,7 @@ export const ScrollingSubtitles = ({ subtitles, onTimeClick, currentIndex, singl
                 transition: '0.125s ease-in'
               }}>{degaussedText.split('').map((char, index) => <span style={{ color: index >= highlightedIndexStart && index < highlightedIndexEnd ? 'orange' : "" }}>{char}</span>)}</b>
               <br />
-              {lineIndex === currentIndex && <div>{getPronFunc()(degaussedText)}</div>}
+              {/* {lineIndex === currentIndex && <div>{getPronFunc()(degaussedText)}</div>} */}
             </div>
           </div>
         )

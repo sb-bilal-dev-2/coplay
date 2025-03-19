@@ -16,6 +16,24 @@ import YoutubePlayer from "../../components/YoutubePlayer";
 import CircularMenu, { StarRating } from "../../components/CircularMenu";
 import { getPronFunc } from "../../utils/pron";
 
+const StarButton = ({ percent = 40, highlighted, onClick }) => {
+  return (
+    <button className="relative w-6 h-4" onClick={onClick}>
+      {/* Empty Star */}
+      <i className={`fa-regular fa-star absolute top-0 left-0 w-full h-full text-xl ${highlighted ? "text-yellow-300" : "text-gray-100"}`}></i>
+
+      {/* Filled Portion */}
+      <div
+        className="absolute top-0 left-0 w-full overflow-hidden"
+        style={{ height: `${percent}%`, transition: "height 0.5s ease-in-out" }}
+      >
+        <i className="fa-solid fa-star text-yellow-300 w-full h-full text-xl"></i>
+      </div>
+    </button>
+  );
+};
+
+
 export const InformedText = ({ text }) => {
   const parsedTextList = text.split(' ')
   const dispatch = useDispatch()
@@ -31,9 +49,32 @@ export const InformedText = ({ text }) => {
   )
 }
 
-export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = true, vertical }) => {
+const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = true, vertical }) => {
   const scrollRef = useRef(null);
   const [activeIndex, set_activeIndex] = useState(Infinity)
+  const [userBookmarks, set_userBookmarks] = useState({})
+
+  async function handleBookmarkClick(item) {
+    const repeatCount = userBookmarks[item.the_word]?.repeatCount
+    const newWord = { the_word: item.the_word, repeatCount: isNaN(repeatCount) ? 0 : repeatCount + 1, context: item, repeatTime: Date.now() }
+
+    set_userBookmarks({ ...userBookmarks, [item.the_word]: newWord })
+    const response = await api().post('/self_words_increment', [newWord])
+    console.log('response', response)
+  }
+
+  async function getUserWords() {
+    const response = await api().get('/self_words/repeating')
+    console.log('user words', response)
+    const mappedUserWords = response.reduce((acc, item) => (acc[item.the_word] = item, acc), {})
+    set_userBookmarks(mappedUserWords)
+  }
+
+  useEffect(() => {
+    getUserWords()
+  }, [])
+  console.log('userBookmarks', userBookmarks)
+
   const scrollToIndex = (index) => {
     if (scrollRef.current) {
       const container = scrollRef.current;
@@ -110,7 +151,14 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
               lineHeight: '1'
             }}
           >
-            <InformedText text={item.the_word} /><br />
+            <InformedText text={item.the_word} />
+            <StarButton
+              percent={(userBookmarks && userBookmarks[item.the_word]?.repeatCount && userBookmarks[item.the_word].repeatCount * 20) || 0}
+              // percent={50}
+              onClick={() => handleBookmarkClick(item, index)}
+              highlighted={userBookmarks && userBookmarks[item.the_word]}
+            />
+            <br />
             <span>{item.pronounciation}</span><br />
             <div>
               {/* <CircularMenu /> */}
@@ -129,8 +177,8 @@ export const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoSc
                 }}>
                 {displayTime(item.startTime / 1000)}
               </button>
-              <StarRating scale={active && 1.1} />
-
+              {/* <StarRating scale={active && 1.1} />
+               */}
             </div>
           </div>
         )
@@ -212,7 +260,7 @@ const MoviePage = () => {
           }
         }))
         set_videoWords(listWithPronounciation)
-      } catch(err) {
+      } catch (err) {
 
       }
     }
@@ -342,7 +390,7 @@ function useMovieInfo(id) {
       try {
         response = await api().get(requestUri)
 
-      } catch(err) {}
+      } catch (err) { }
       console.log('response s', response)
       const new_movieInfo = response?.results[0];
       console.log("new_movieInfo", new_movieInfo);

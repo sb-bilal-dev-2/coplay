@@ -218,18 +218,24 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
 export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => {
   const dispatch = useDispatch()
   const selected_text = useSelector((state) => state.wordInfo.selected_text)
-  const [wordInfo, setWordInfo] = useState()
+  // const [translation, set_translation] = useState("")
+  const [wordInfo, setWordInfo] = useState(null)
   const [wordOccurrences, set_wordOccurrences] = useState()
   console.log('wordOccurrences', wordOccurrences)
   const outsideClickElementRef = useRef()
   console.log('selected_text', selected_text)
   const isOpen = !!selected_text.length
   useOutsideAlerter(outsideClickElementRef, () => dispatch(selectText('')))
-  const request_wordInfo = async () => {
+  const request_wordInfo = async (selected_text) => {
     try {
-      const new_wordInfo = (await api().get(`/wordInfoLemma?mainLang=${'en'}&the_word=` + selected_text))
+      console.log('requesting info for: ' + selected_text)
+      const new_wordInfo = (await api().get(`/wordInfoLemma?mainLang=${localStorage.getItem("mainLanguage") || 'en'}&the_word=` + selected_text))
       console.log('new_wordInfo', new_wordInfo)
       setWordInfo(new_wordInfo)
+      
+      // const noTranslation = new_wordInfo && !new_wordInfo?.the_word_translations['en']
+      // const new_translation = noTranslation && await api().get('/translation?text=' + selected_text)
+      // set_translation(new_translation)
     } catch (err) {
 
     }
@@ -246,8 +252,11 @@ export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => 
   }
 
   useEffect(() => {
-    request_wordInfo(selected_text)
-    request_wordOccurrencess(selected_text)
+    setWordInfo(null)
+    // if (selected_text?.length) {
+      request_wordInfo(selected_text)
+      request_wordOccurrencess(selected_text)
+    // }
   }, [selected_text])
 
   return (
@@ -260,11 +269,10 @@ export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => 
             className="RelatedVideosMenu px-4 pt-4 overflow-scroll"
             ref={outsideClickElementRef}
           >
-            <h4 className="text-left">{selected_text + " " + "selected text translation"}</h4>
-            <p>{wordInfo?.description}</p>
-            <p>{wordInfo?.pronounciation}</p>
+            <h4 className="text-left">{`${selected_text}[${wordInfo?.pronounciation}]${wordInfo?.shortDefinitions[localStorage.getItem("mainLanguage") || 'en']}`}</h4>
+            <p>{wordInfo?.shortExplanations && wordInfo.shortExplanations[localStorage.getItem("mainLanguage") || 'en']}</p>
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                {(console.log('wordOccurrences', wordOccurrences), !!wordOccurrences.length) && (
+                {!!wordOccurrences.length && (
                   <>
                     <span className="px-2" style={{ color: '#333', fontSize: '1em', fontWeight: 'bold' }}>
                       {/* <span>{wordInfo?.the_word}</span><span>{wordInfo?.translation && '- ' + wordInfo?.translation}</span> */}
