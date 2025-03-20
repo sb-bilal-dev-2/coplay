@@ -1,0 +1,70 @@
+
+.star-rating {
+    display: flex;
+    gap: 1px;
+    font-size: 0.3rem;
+    cursor: pointer;
+}
+
+.star {
+    height: 6px;
+    width: 6px;
+    border-radius: 2px;
+    background-color: white;
+    transition: color 0.3s;
+}
+
+.star.selected {
+    color: gold;
+    background-color: gold;
+}
+/**/
+
+.circle-menu {
+    position: relative;
+    width: 12px;
+    height: 12px;
+}
+
+.central-button {
+    width: 12px;
+    height: 12px;
+    /* background-color: gold; */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.5em;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: background 0.3s ease;
+}
+
+.central-button:hover {
+    background-color: orange;
+}
+
+.menu-item {
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0);
+    transition: background 0.3s ease;
+}
+
+.menu-item:hover {
+    background-color: lightgray;
+}
+

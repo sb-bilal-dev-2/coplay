@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
 
-const YoutubePlayer = ({ videoIdOrUrl, controls }) => {
-  console.log('videoIdOrUrl', videoIdOrUrl)
-  const urlParams = videoIdOrUrl?.includes('?') && new URLSearchParams('?' + videoIdOrUrl.split('?')[1])
-  const videoId = urlParams ? urlParams?.get('v') : videoIdOrUrl
-  const startTime = parseInt((urlParams?.get('t') || '0').replace('s', ''));
+const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, startTime, scale = 1.2 }) => {
+  const videoId = videoIdOrUrl.split('embed/')[1]
+  // const initTime = parseInt((urlParams?.get('t') || '0').replace('s', ''));
 
   const player = useRef(null);
   const [playerState, setPlayerState] = useState({
@@ -16,6 +14,14 @@ const YoutubePlayer = ({ videoIdOrUrl, controls }) => {
   });
 
   useEffect(() => {
+    // console.log('startTime', startTime / 1000)
+    if (startTime) {
+      player.current?.seekTo(Math.floor(startTime / 1000))
+    }
+  }, [startTime])
+
+  useEffect(() => {
+    console.log('videoId', videoId)
     const onYouTubeIframeAPIReady = () => {
       const newPlayer = new window.YT.Player(videoId + 'id', {
         height: '360',
@@ -28,13 +34,14 @@ const YoutubePlayer = ({ videoIdOrUrl, controls }) => {
           'rel': 0,
           'showinfo': 0,
           'iv_load_policy': 3, // Hide video annotations
-          'cc_load_policy': 0, // Hide closed captions
+          'cc_load_policy': 3, // Hide closed captions
           // 'fs': 0, // Disable fullscreen button
-          'start': startTime, // Add this line to start at the specified time
-          'autoplay': 1,
+          'start': Math.floor(startTime / 1000), // Add this line to start at the specified time
+          // 'autoplay': autoplay && 1,
+          // 'autoplay': 1,
           // 'mute': 1
           'listType': 'playlist',
-          'list': urlParams?.get('list')
+          // 'list': urlParams
         },
         events: {
           'onReady': onPlayerReady,
@@ -60,10 +67,10 @@ const YoutubePlayer = ({ videoIdOrUrl, controls }) => {
         player.current.destroy();
       }
     };
-  }, [videoIdOrUrl]);
+  }, [videoId]);
 
   const onPlayerReady = (event) => {
-    updatePlayerState();
+    updatePlayerState(event);
     // if (player.current && player.current.unMute) {
     //     player.current.unMute();
     // }
@@ -71,17 +78,22 @@ const YoutubePlayer = ({ videoIdOrUrl, controls }) => {
   };
 
   const onPlayerStateChange = (event) => {
-    updatePlayerState();
+    updatePlayerState(event);
   };
 
-  const updatePlayerState = () => {
+  const updatePlayerState = (event) => {
     if (player.current && player.current.getCurrentTime && player.current.getDuration && player.current.getPlayerState && player.current.getVolume) {
+      const currentTime = player.current.getCurrentTime()
       setPlayerState({
-        currentTime: player.current.getCurrentTime(),
+        currentTime,
         duration: player.current.getDuration(),
         isPlaying: player.current.getPlayerState() === window.YT.PlayerState.PLAYING,
         volume: player.current.getVolume(),
       });
+
+      if (typeof onTimeUpdate === 'function') {
+        onTimeUpdate(currentTime)
+      }
     }
   };
 
@@ -97,8 +109,14 @@ const YoutubePlayer = ({ videoIdOrUrl, controls }) => {
   };
 
   return (
-    <div>
-      <div id={videoId + 'id'} className='w-screen'></div>
+    <div className='w-full h-full relative overflow-hidden'>
+      <div id={videoId + 'id'} style={{
+        height: 100 * scale + '%',
+        width: 100 * scale + '%',
+        position: 'absolute',
+        left: `-${(scale - 1) / 2 * 100}%`,
+        top: `-${(scale - 1) / 2 * 100}%`
+      }}></div>
       {!!controls &&
         <Controls
           player={player.current}
@@ -161,13 +179,13 @@ const Controls = ({ player, playerState, updatePlayerState, formatTime, startTim
   return (
     <div className="custom-controls">
       {playerState.isPlaying ?
-        <button onClick={handlePause}><i class="fa-solid fa-pause"></i></button>
+        <button onClick={handlePause}><i className="fa-solid fa-pause"></i></button>
         :
-        <button onClick={handlePlay} className=''><i class="fa-solid fa-play"></i></button>
+        <button onClick={handlePlay} className=''><i className="fa-solid fa-play"></i></button>
       }
-      <button onClick={handleRewind}><i class="fa fa-undo" aria-hidden="true"></i>Start</button>
-      <button onClick={() => handleRewind(5)}><i class="fa fa-undo" aria-hidden="true"></i>5s</button>
-      <button onClick={handleForward}><i class="fa fa-rotate-right" aria-hidden="true"></i>5s</button>
+      <button onClick={handleRewind}><i className="fa fa-undo" aria-hidden="true"></i>Start</button>
+      <button onClick={() => handleRewind(5)}><i className="fa fa-undo" aria-hidden="true"></i>5s</button>
+      <button onClick={handleForward}><i className="fa fa-rotate-right" aria-hidden="true"></i>5s</button>
       <input
         type="range"
         value={(playerState.currentTime / playerState.duration) * 100 || 0}

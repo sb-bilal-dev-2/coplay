@@ -22,15 +22,15 @@ const dataReducer = (uri) => (state, action) => {
         case `${uri}_DELETE_FAIL`:
             return { ...state, [uri + 'DELETE_REQUESTloading']: false, loading: false, [uri + 'DELETE_REQUESTerror']: action.payload };
         case `${uri}_GET_SUCCESS`:
-            return { ...state, [uri + 'GET_REQUESTloading']: false, loading: false, items: action.payload?.data?.results, [uri + 'GET_REQUESTerror']: null };
+            return { ...state, [uri + 'GET_REQUESTloading']: false, loading: false, items: action.payload?.results, [uri + 'GET_REQUESTerror']: null };
         case `${uri}_PUT_SUCCESS`:
             const newItems =
-               Array.isArray(action.payload.data) ? action.payload.data : [action.payload.data]
+               Array.isArray(action.payload) ? action.payload : [action.payload]
             const items = state.items.filter(item => !newItems.find(ii => ii._id === item._id));
 
             return { ...state, [uri + 'PUT_REQUESTloading']: false, loading: false, items: newItems.concat(items), [uri + 'PUT_REQUESTerror']: null };
         case `${uri}_DELETE_SUCCESS`:
-            return { ...state, [uri + 'DELETE_REQUESTloading']: false, loading: false, items: state.items.filter(ii => ii._id !== action.payload.data._id), [uri + 'DELETE_REQUESTerror']: null };
+            return { ...state, [uri + 'DELETE_REQUESTloading']: false, loading: false, items: state.items.filter(ii => ii._id !== action.payload._id), [uri + 'DELETE_REQUESTerror']: null };
         default:
             return state;
     }
@@ -58,11 +58,12 @@ const useRequests = (uri) => {
         try {
             dispatchGet({ type: `${uri}_${method}_REQUEST` });
             const response = await api()[method.toLowerCase()](url, data);
+            // console.log('response?.results', response?.results)
             dispatchGet({ type: `${uri}_${method}_SUCCESS`, payload: response });
         } catch (error) {
             console.log(uri + 'error', error)
-            console.log('error?.request?.data', error?.response?.data)
-            const errorMessage = error?.response?.data || error.message 
+            console.log('error?.request?.data', error?.response)
+            const errorMessage = error?.response || error.message 
             dispatchGet({ type: `${uri}_${method}_FAIL`, payload: errorMessage });
         }
     };

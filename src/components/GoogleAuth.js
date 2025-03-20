@@ -24,8 +24,8 @@ export const GoogleAuth = () => {
 
         console.log("user google", response);
 
-        dispatch(updateUser(response.data.user));
-        localStorage.setItem("token", response.data.token);
+        dispatch(updateUser(response.user));
+        localStorage.setItem("token", response.token);
         navigate("/")
       } catch (error) {
         console.log("Error get user from google", error);

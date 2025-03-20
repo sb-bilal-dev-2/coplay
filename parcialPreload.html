@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Partial Video Preloading</title>
+</head>
+<body>
+    <h1>Partial Preload</h1>
+    <video id="myVideo" width="640" height="360" controls>
+        <source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <video id="myVideo2"width="640" height="360" controls preload="metadata">
+        <source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <script>
+        const video = document.getElementById('myVideo');
+        
+        // Function to partially preload video
+        function partialPreload(video, seconds = 2) {
+            // Set up media source
+            const mediaSource = new MediaSource();
+            video.src = URL.createObjectURL(mediaSource);
+
+            mediaSource.addEventListener('sourceopen', async () => {
+                const sourceBuffer = mediaSource.addSourceBuffer('video/mp4');
+                
+                try {
+                    // Fetch the entire video
+                    const response = await fetch('your-video.mp4');
+                    const arrayBuffer = await response.arrayBuffer();
+                    
+                    // Calculate the byte range for first 2 seconds
+                    // Note: This is a simplified approach and might need adjustment
+                    // based on your specific video file
+                    const partialBuffer = arrayBuffer.slice(0, arrayBuffer.byteLength * (seconds / video.duration));
+                    
+                    // Append partial buffer
+                    sourceBuffer.appendBuffer(partialBuffer);
+                    
+                    // Signal end of stream after appending
+                    mediaSource.endOfStream();
+                } catch (error) {
+                    console.error('Preload error:', error);
+                }
+            });
+        }
+
+        // Apply partial preload when video is ready
+        video.addEventListener('loadedmetadata', () => {
+            partialPreload(video);
+        });
+
+        // Optional: Handle play event to show full video loading
+        video.addEventListener('play', () => {
+            // If video hasn't fully loaded, you might want to trigger full load
+            if (video.readyState < 2) {
+                video.load(); // Reload full video
+            }
+        });
+    </script>
+</body>
+</html>

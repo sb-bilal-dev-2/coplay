@@ -1,5 +1,5 @@
 import React from 'react';
-import { secondsToDisplayTime } from './useKeyDown';
+import { secondsToDisplayTime } from "../../utils/secondsToDisplayTime";
 import VideoDropdown from './VideoDropdown';
 
 export const Controls = ({

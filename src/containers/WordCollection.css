@@ -1,0 +1,15 @@
+
+.horizontal-carousel {
+
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Prevent scrollbar space, while keeping functionality */
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    overflow-y: scroll;
+}

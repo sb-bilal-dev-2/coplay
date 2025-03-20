@@ -6,11 +6,11 @@ import "./index.css";
 import MoviePage from "./containers/MoviePage/MoviePage";
 import reportWebVitals from "./reportWebVitals";
 import {
-  createHashRouter,
   createRoutesFromElements,
   Route,
   redirect,
   RouterProvider,
+  createBrowserRouter,
 } from "react-router-dom";
 import { store } from "./store";
 import { Provider } from "react-redux";
@@ -29,10 +29,13 @@ import NotFound from "./containers/NotFound";
 import PricePage from "./containers/PricePage";
 import useAuthentication from "./containers/Authentication.util";
 import api from "./api";
+import { ShortVideo, VkVideoInit } from "./containers/ShortVideo";
+import VideoFrame, { VideoFrameForWord } from "./components/VideoFrame";
+import WordCollection from "./containers/WordCollection";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const router = createHashRouter(
+const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route exact path="/" element={<HomePage />} />
@@ -41,6 +44,29 @@ const router = createHashRouter(
         path="/account"
         element={<Account />}
         loader={authenticatedRoute}
+      />
+      <Route
+        exact
+        path="/single"
+        element={<div style={{ width: '100vw', height: 400 }}>
+          <div style={{ width: '600px', height: '200px' }}>
+            {/* <VideoFrame
+              time={700}
+              title={'frozen_2'}
+              videoSrc={'https://api.coplay.live/api' + "/movie?name=" + 'frozen_2'}
+            /> */}
+            {/* <VideoFrameForWord word={'hello'}/> */}
+            {/* <WordCollection /> */}
+            <VkVideoInit
+              onTimeUpdate={() => { }}
+              isActive
+              iframeSrc={"https://vkvideo.ru/video_ext.php?oid=878939759&id=456239017"}
+              startTime={300}
+            />
+          </div>
+          {/* <ShortVideo isActive mediaTitle="frozen_2" forcedCurrentTimeChange={1500} hideSubtitles /> */}
+          {/* <video width={300} autoPlay controls height={200}><source src="https://api.coplay.live/api/movieFiles/frozen.480.mp4" type="video/mp4" /></video> */}
+        </div>}
       />
       <Route
         exact
@@ -58,6 +84,8 @@ const router = createHashRouter(
         element={<WordsPage />}
         loader={authenticatedRoute}
       />
+      <Route path="word_collection/:list" element={<WordCollection />} />
+      {/* <Route path="word_collection/:list" element={<Quiz />} /> */}
       <Route path="movie/:title" element={<MoviePage />} />
       <Route path="auth/:screen" element={<Authentication />} />
       <Route path="crud/:model" element={<CRUDRoute />} loader={authenticatedRoute_moderator} />
@@ -103,14 +131,14 @@ function authenticatedRoute() {
 async function authenticatedRoute_moderator() {
   const MODERATOR_EMAIL_LIST = { "saidbilol18@gmail.com": true, "nilufar4703@gmail.com": true, "00bilal.io@gmail.com": true }
   const token = localStorage.getItem("token");
-  
+
   if (token) {
     const response = await api().get(`/get-user`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (!MODERATOR_EMAIL_LIST[response?.data?.email]) {
+    if (!MODERATOR_EMAIL_LIST[response?.email]) {
       return redirect("/")
     }
   } else {

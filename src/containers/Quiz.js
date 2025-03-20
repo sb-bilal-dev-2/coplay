@@ -3,14 +3,16 @@ import { useParams } from "react-router";
 import { motion } from 'framer-motion';
 import api from "../api";
 import "./Quiz.css";
-import { BASE_SERVER_URL } from "../api";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import YoutubePlayer from "../components/YoutubePlayer";
-import ErrorBoundary from "./ErrorBoundary";
-import VideojsInited from "../components/VideojsInited";
 import useCustomScroll from "../components/useCustomScroll";
 import BarsSmall from "../components/BarsSmall";
-import DraggableResizableComponent from "../components/DraggableResizableComponent";
+import { degausser } from "../utils/degausser";
+import { ShortVideo, VkVideoInit } from "./ShortVideo";
+import RelatedVideosDropdown, { FilterDropdown } from "./RelatedVideosDropdown";
+import { WordCollectionCarousel } from "./WordCollectionCarousel";
+import SecondaryButton from "../components/SecondaryButton";
+import YoutubePlayer from "../components/YoutubePlayer";
+import { getPronFunc } from "../utils/pron";
 
 
 function useTelegramWebApp() {
@@ -34,7 +36,8 @@ export const GoBackButton = () => {
 
   return (<button
     onClick={() => navigate(-1)}
-    className="absolute z-50 top-4 left-4 text-gray-200 cursor-pointer"
+    className="absolute z-50 top-4 left-4 cursor-pointer flex items-center justify-center"
+    style={{ background: 'rgba(55, 55, 55, 0.85)', borderRadius: '30px', height: '30px', width: '30px', color: '#fff' }}
   >
     <i className="fa fa-arrow-left" aria-hidden="true"></i>
   </button>
@@ -72,101 +75,15 @@ const ShortsContainer = ({ items, forceRenderFirstItem, wordsIndex, onSwipeLeft,
   )
 }
 
-const extractYoutubeId = title => {
-  if (title = title.split('YOUTUBE_ID[')[1]) {
-    return 'https://www.youtube.com/watch?v=' + title.split(']')[0];
-  }
-  return ''
-}
-
-export const ShortVideo = ({ isActive, mediaTitle, forcedCurrentTimeChange, onTimeUpdate }) => {
-  // const [inner_forcedCurrentTimeChange, set_inner_forcedTimeChange] = useState()
-  const isYoutubeVideo = mediaTitle && mediaTitle?.includes('YOUTUBE_ID[')
-  let mediaSrc = ''
-
-  if (isYoutubeVideo) {
-    mediaSrc = extractYoutubeId(mediaTitle)
-  } else {
-    mediaSrc = `${BASE_SERVER_URL}/movie?name=${mediaTitle}`
-  }
-
-  const [subtitles, currentSubtitleIndex] = useSubtitles(mediaTitle, forcedCurrentTimeChange)
-  
-  // useEffect(() => {
-  //   set_inner_forcedTimeChange(inner_forcedCurrentTimeChange)
-  // }, forcedCurrentTimeChange)
-
-  // console.log('currentSubtitleIndex', currentSubtitleIndex, forcedCurrentTimeChange)
-
-  return (
-    <div className="ShortVideo">
-      {isYoutubeVideo ?
-        <YoutubePlayer
-          isActive={isActive}
-          videoIdOrUrl={mediaSrc}
-          // startTime={inner_forcedCurrentTimeChange}
-          startTime={forcedCurrentTimeChange}
-          onTimeUpdate={onTimeUpdate}
-        />
-        :
-        <VideojsInited
-          onTimeUpdate={onTimeUpdate}
-          isActive={isActive}
-          videoSrc={mediaSrc}
-          // startTime={inner_forcedCurrentTimeChange}
-          startTime={forcedCurrentTimeChange}
-        />
-      }
-      <ScrollingSubtitles subtitles={subtitles} forcedIndex={currentSubtitleIndex} />
-    </div>
-  )
-}
-
-function useSubtitles(mediaTitle, currentTime, translateLang) {
-  const [subtitles, setSubtitles] = useState([])
-  const [currentSubtitleIndex, set_currentSubtitleIndex] = useState()
-
-  async function requestMainSubtitleByTitle() {
-    try {
-      translateLang = translateLang?.length ? '&translateLang=' + translateLang : ''
-      const response = await api().get(`/subtitles_v2?mediaTitle=${mediaTitle}` + translateLang)
-      setSubtitles(response.data)
-    } catch (err) {
-    }
-  }
-
-  const getSubtitleIndexFromCurrentTime = useCallback(() => {    
-    const currentTimeInMS = currentTime * 1000
-    const new_currentSubtitleIndex = subtitles.findIndex((item) => item.startTime > currentTimeInMS)
-    console.log('new_currentSubtitleIndex', new_currentSubtitleIndex, currentTime, subtitles.length)
-    return new_currentSubtitleIndex - 1
-  }, [currentTime, subtitles])
-
-  useEffect(() => {
-    requestMainSubtitleByTitle()
-  }, [mediaTitle, translateLang])
-
-  useEffect(() => {
-    const new_currentIndex = getSubtitleIndexFromCurrentTime()
-    if (new_currentIndex !== currentSubtitleIndex) {
-      set_currentSubtitleIndex(new_currentIndex)
-    }
-  }, [subtitles, currentTime])
-
-  return [subtitles, currentSubtitleIndex]
-}
-
-const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
+export const ScrollingSubtitles = ({ subtitles, onTimeClick, currentIndex, singleLine, highlightedText = "" }) => {
   const scrollRef = useRef(null);
-  const [currentIndex, set_currentIndex] = useState(0)
 
   const handleItemClick = (newIndex) => {
-    set_currentIndex(newIndex)
     console.log('newIndex', newIndex)
-    if (updateCurrentTime) {
+    if (onTimeClick) {
       const newItem = subtitles[newIndex]
       if (newItem?.startTime) {
-        updateCurrentTime(newItem?.startTime)
+        onTimeClick(newItem?.startTime)
       }
     }
   }
@@ -212,45 +129,49 @@ const ScrollingSubtitles = ({ subtitles, updateCurrentTime, forcedIndex }) => {
     }
   }, [scrollRef.current])
 
-  useEffect(() => {
-    if (forcedIndex !== currentIndex) {
-      set_currentIndex(forcedIndex)
-    }
-  }, [forcedIndex])
+  function getHighlights(text, word) {
+    const index = text.toLowerCase().indexOf(word.toLowerCase());
+    return index;
+  }
 
   return (
     // <DraggableResizableComponent>
     <div
       ref={scrollRef}
-      className="absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
-      style={{
-        background: '#0000004d',
-        height: '120px',
-        width: '50vw',
-        minWidth: '280px',
-        scrollSnapType: 'y mandatory',
-        boxShadow: '1px 1px 5px 5px #0000004d',
-        color: 'white'
-      }}
+      style={{ height: "120px" }}
+      className="scrollsub-container absolute bottom-10 px-4 left-5 z-20 overflow-scroll"
     >
       {subtitles?.map((subtitleLine, lineIndex) => {
+        if (singleLine && currentIndex !== lineIndex) {
+          return;
+        }
+        const degaussedText = degausser(subtitleLine.text)
+        const highlightedIndexStart = currentIndex === lineIndex && getHighlights(degaussedText, highlightedText)
+        // console.log('highlightedText', highlightedText)
+        const highlightedIndexEnd = highlightedIndexStart === -1 ? -1 : highlightedIndexStart + highlightedText.length
+        // console.log('highlightedIndexStart', highlightedIndexStart, highlightedIndexEnd)
         return (
           <div
             style={{
               scrollSnapAlign: 'center',
               transition: '0.125s ease-in',
-              opacity: lineIndex === forcedIndex ? '1' : '0.8',
+              opacity: lineIndex === currentIndex ? '1' : '0.9',
             }}
             className="flex items-center"
           >
-            <i
+            {/* <i
               className="fa fa-play text-xs cursor-pointer hover:text-red-500 p-1"
               style={{ fontSize: '0.6em', display: 'block', transition: '0.125s ease-in' }}
               onClick={() => handleItemClick(lineIndex)}
-            ></i><b className="ml-1" style={{ 
-              transform: lineIndex === forcedIndex ? 'scale(1.02)' : 'scale(1)',
-              transition: '0.125s ease-in'
-            }}>{subtitleLine.text}</b>
+            ></i> */}
+            <div className="text-center">
+              <b className="ml-1" style={{
+                fontWeight: lineIndex === currentIndex ? 'bold' : 'normal',
+                transition: '0.125s ease-in'
+              }}>{degaussedText.split('').map((char, index) => <span style={{ color: index >= highlightedIndexStart && index < highlightedIndexEnd ? 'orange' : "" }}>{char}</span>)}</b>
+              <br />
+              {/* {lineIndex === currentIndex && <div>{getPronFunc()(degaussedText)}</div>} */}
+            </div>
           </div>
         )
       })}
@@ -282,9 +203,9 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
           id: occuranceItem?.id, renderItem: (activeOccuranceIndex) => {
             // const hidden = (playingWordIndex !== wordIndex && playingWordIndex + 1 !== wordIndex && playingWordIndex - 1 !== wordIndex) || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
             // const hidden = playingWordIndex !== wordIndex || (activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex)
-            const hidden = activeOccuranceIndex !== occuranceIndex && activeOccuranceIndex + 1 !== occuranceIndex && activeOccuranceIndex - 1 !== occuranceIndex
+            const currentOrFollowingItem = activeOccuranceIndex === occuranceIndex || activeOccuranceIndex + 1 === occuranceIndex
             // if (occuranceIndex === 0) return;
-            return !hidden && <ShortVideo
+            return currentOrFollowingItem && <ShortVideo
               isActive={activeOccuranceIndex === occuranceIndex}
               mediaTitle={currentPlayingOccurance?.mediaTitle}
               forcedCurrentTimeChange={currentPlayingOccurance?.startTime / 1000}
@@ -296,9 +217,10 @@ export const ShortsColumns = ({ currentWordOccurances, forceRenderFirstItem, wor
   )
 }
 
-export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
+export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex, filterBarClick }) => {
   const scrollRef = useRef(null);
   const [currentIndex, set_currentIndex] = useState(0)
+  const { list: title } = useParams()
 
   const handleItemClick = (newIndex) => {
     set_currentIndex(newIndex)
@@ -329,61 +251,235 @@ export const WordsScroll = ({ wordList, onIndexUpdate, forcedIndex }) => {
   }, [currentIndex])
 
   useEffect(() => {
-    if (forcedIndex !== currentIndex) {
+    if (forcedIndex !== undefined && forcedIndex !== currentIndex) {
       set_currentIndex(forcedIndex)
     }
   }, [forcedIndex])
 
+  useEffect(() => {
+    set_isRelOpen(false)
+  }, [title])
+
+  const [isRelOpen, set_isRelOpen] = useState(false);
+
   return (
-    <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent">
-      <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll absolute top-0">
-        {wordList?.map((item, index) => {
-          return (
-            <div
-              className="scroll-list__item px-1 mx-2 py-2 cursor-pointer"
-              style={{
-                borderBottom: currentIndex === index && '2px solid orangered',
-                // backgroundColor: currentIndex === index && '#f9e7db5e',
-                color: currentIndex === index && 'orangered',
-                fontWeight: currentIndex === index && 'bolder',
-                height: '50px',
-              }}
-              onClick={() => handleItemClick(index)}>
-              {item.the_word}
-            </div>
-          )
-        })}
+    <>
+      <RelatedVideosDropdown
+        isOpen={isRelOpen}
+        closeDropdown={() => set_isRelOpen(false)}
+        videos={[]}
+      />
+      <div className="scroll-list-container relative text-white z-20 scroll-main-container flex bg-transparent">
+        <div ref={scrollRef} className="scroll-list flex w-full overflow-scroll top-0 mr-6">
+          {wordList?.map((item, index) => {
+            return (
+              <div
+                className="scroll-list__item px-1 mx-2 py-2 cursor-pointer"
+                style={{
+                  borderBottom: currentIndex === index && '2px solid orangered',
+                  // backgroundColor: currentIndex === index && '#f9e7db5e',
+                  color: currentIndex === index && 'orangered',
+                  fontWeight: currentIndex === index && 'bolder',
+                  transform: currentIndex === index && 'scale(1.2)',
+                  height: '50px',
+                  marginLeft: !index && 40,
+                }}
+                onClick={() => handleItemClick(index)}>
+                {item.the_word}
+              </div>
+            )
+          })}
+          <div
+            className="bg-icon scroll-list__item px-3 mx-2 py-2 cursor-pointer"
+            style={{
+              marginLeft: !wordList.length && 40,
+              // borderLeft: wordList.length && '1px solid #333'
+            }}
+            onClick={() => set_isRelOpen(true)}
+          >
+            <i className="fa fa-plus"></i>
+          </div>
+        </div>
+        <div
+          onClick={filterBarClick}
+          className="scroll-list-container__right-bar pt-1 absolute right-0 top-2"
+        >
+          <BarsSmall />
+        </div>
       </div>
-      <div className="scroll-list-container__right-bar pt-1 absolute right-0">
-        <BarsSmall />
-      </div>
-    </div>
+    </>
   )
 }
 
 const Quiz = () => {
-  const { } = useTelegramWebApp()
+  const navigate = useNavigate()
   const { list: listName, word: paramWord } = useParams();
+  const [occuranceIndex, set_occuranceIndex] = useState()
   let [searchParams] = useSearchParams();
-  const { wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord, searchParams.get('listType'), searchParams)
-  // console.log('wordList', wordList, currentWordOccurances)
-  // const [subtitles] = useSubtitles('kung_fu_panda_3')
+  const { wordOccurancesMap, wordList, set_practicingWordIndex, practicingWordIndex: playingWordIndex, currentWordInfo, currentWordOccurances, currentAvailableOccurancesLength, wordInfos } = useWordColletionWordInfos(listName, paramWord, searchParams.get('listType'), searchParams)
+  const [loading, setLoading] = useState(false)
+  // console.log('wordList', wordList)
+  console.log('currentWordOccurances', currentWordOccurances)
+  const currentOccurance = currentWordOccurances[occuranceIndex]
+  console.log('currentWordOccurance[occuranceIndex]', currentOccurance)
+  console.log('occuranceIndex', occuranceIndex)
+
+  useEffect(() => {
+    set_isRelOpen(false)
+    set_isFilterOpen(false)
+  }, [listName])
+
+  const [isRelOpen, set_isRelOpen] = useState(false);
+  const [isFilterOpen, set_isFilterOpen] = useState(false);
+  const [bookmarkedAll, set_bookmarkedAll] = useState(false);
+
+  const handleBookmark = async () => {
+    if (!localStorage.getItem('token')) {
+      console.log('fffff')
+      return navigate('/auth/login')
+    }
+    set_bookmarkedAll(true)
+    try {
+      await api().post("/self_words", wordList.map((item) => {
+        return {
+          the_word: item.the_word,
+          repeatCount: 0,
+          repeatTime: Date.now(),
+        }
+      }))
+    } catch (err) {
+      console.log('await api().post')
+      set_bookmarkedAll(false)
+    }
+  }
+  const handleUnbookmark = async () => {
+    if (!localStorage.getItem('token')) {
+      return navigate('/auth/login')
+    }
+    set_bookmarkedAll(false)
+    try {
+      await api().post("/self_words", wordList.map((item) => {
+        return {
+          the_word: item.the_word,
+          repeatCount: 0,
+          archieved: true,
+          repeatTime: Date.now(),
+        }
+      }))
+    } catch (err) {
+      set_bookmarkedAll(true)
+    }
+  }
+
   return (
-    <ErrorBoundary>
+    <>
       <GoBackButton />
-      <div className="MainContainer">
-        <WordsScroll wordList={wordList} onIndexUpdate={set_practicingWordIndex} forcedIndex={playingWordIndex} />
-        <ShortsColumns
-          wordList={wordList}
-          currentWordOccurances={currentWordOccurances}
-          wordsIndex={playingWordIndex}
-          set_practicingWordIndex={set_practicingWordIndex}
+      <FilterDropdown
+        isOpen={isFilterOpen}
+        closeDropdown={() => set_isFilterOpen(false)}
+        options={[
+          { label: 'Easiest', value: 'Easiest' },
+          { label: 'Hardest', value: 'Hardest' },
+          { label: 'Bookmarks', value: 'Bookmarks' },
+          { label: 'All New', value: 'All New' }
+        ]}
+        onChange={(option) => { }}
+      />
+      <RelatedVideosDropdown
+        isOpen={isRelOpen}
+        closeDropdown={() => set_isRelOpen(false)}
+        videos={[]}
+      />
+
+      <div>
+        <div style={{ width: '100%', height: '60dvh', background: '#111' }}>
+          {currentOccurance?.mediaId && !loading && (
+            <>
+              {currentOccurance?.youtubeUrl ?
+                <YoutubePlayer
+                  videoIdOrUrl={currentOccurance?.youtubeUrl}
+                  autoplay
+                  scale={1}
+                  startTime={currentOccurance?.startTime}
+                // onTimeUpdate={handleTimeUpdate}
+                />
+                :
+                <VkVideoInit
+                  scale={1}
+                  isActive
+                  iframeSrc={currentOccurance?.vkVideoEmbed}
+                  startTime={Math.floor(currentOccurance?.startTime)}
+                // onTimeUpdate={handleTimeUpdate}
+                />
+              }
+            </>
+          )}
+          {/* // <ShortVideo
+                      //     scale={1.5}
+                      //     // onTimeUpdate={handleTimeUpdate}
+                      //     mediaTitle={currentOccurance?.mediaTitle}
+                      //     forcedCurrentTimeChange={currentOccurance?.startTime / 1000}
+                      //     isActive
+                      // /> */}
+        </div>
+
+        <WordCollectionCarousel
+          items={wordList}
+          lastItem={(
+            <div
+              className="flex flex-col items-center justify-center relative h-full"
+              style={{
+                margin: '8px',
+                border: '2px solid orange',
+                borderRadius: '12px'
+              }}
+            >
+              {/* <div
+                              className="absolute left-4 top-4 select-none"
+                          >
+                              {bookmarkedAll ?
+                                  <button><i onClick={handleUnbookmark} className="fa-solid fa-bookmark text-red"></i></button>
+                                  :
+                                  <button><i onClick={handleBookmark} className="fa-regular fa-bookmark text-red"></i></button>
+                              }
+                              {" "}
+                              {listName.replaceAll("_", " ")}
+                          </div> */}
+              <h2 className="text-2xl font-bold mb-4 text-green-500">{'Keep it up!'}</h2>
+              <div className='grid grid-flow-col items-center gap-2'>
+                <SecondaryButton
+                  button
+                  title={"GET MORE"}
+                  onClick={() => set_isRelOpen(true)}
+                ></SecondaryButton>
+              </div>
+              {/* Horizontal Carousel (Inner) */}
+              {/* <HorizontalScroll
+                              items={innerItemsMap[item.the_word]}
+                              active={categoryIndex === activeCategory}
+                              onIndexUpdate={onInnerIndexUpdate}
+                          /> */}
+            </div>
+          )}
+          innerItemsMap={wordOccurancesMap}
+          onIndexUpdate={set_practicingWordIndex}
+          onInnerIndexUpdate={(newIndex) => {
+            const nextTitle = currentWordOccurances[newIndex]
+            console.log('nextTitle', nextTitle)
+            console.log('currentOccurance?.mediaTitle', currentOccurance?.mediaTitle)
+            if (nextTitle?.mediaTitle !== currentOccurance?.mediaTitle) {
+              setLoading(true)
+            }
+            setTimeout(() => {
+              set_occuranceIndex(newIndex)
+              setLoading(false)
+            }, 10)
+          }}
         />
-        {/* <ScrollingSubtitles subtitles={subtitles} /> */}
       </div>
-    </ErrorBoundary>
-  );
-};
+    </>
+  )
+}
 
 function useBodyOverflowHidden() {
   useEffect(() => {
@@ -397,29 +493,44 @@ function useBodyOverflowHidden() {
 }
 
 const WORDS_FETCH_FUNCTION_BY_LISTTYPE = {
-  'wordCollection': async (listName) => (await api('').get(`/wordCollections?title=${listName}`)).data.results[0]?.keywords || [],
-  'video': async (listName) => (await api().get(`/movie_words/${listName}?without_user_words=true`)).data,
+  'wordCollection': async (listName) => {
+    const list = (await api('').get(`/wordCollections?title=${listName}`)).results[0]?.keywords || []
+    return { list }
+  },
+  'video': async (listName) => {
+    const list = (await api().get(`/movie_words/${listName}?without_user_words=true`))
+    return { list }
+  },
   'self_words': async (listName) => {
-    const wordList = (await api().get(`/self_words/${listName}`)).data
-
-    return wordList;
+    const list = (await api().get(`/self_words/${listName}`))
+    return { list };
   }
   // 'playlist': requestPlaylistWords,
   // 'userList': requestUserList,
 }
 
-export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */) {
+export function useWordColletionWordInfos(listName, initialWord, listType = 'wordCollecition' /* video | series */, youtube) {
   const [wordList, set_wordList] = useState([])
   const [wordInfos, set_wordInfos] = useState({})
   const [practicingWordIndex, set_practicingWordIndex] = useState(0)
   const [wordOccurancesMap, set_wordOccurancesMap] = useState({})
+  const [query, set_query] = useState('') // other | beginner | c1
 
   const getWordInfos = async () => {
     // const wordList = await requestWordCollectionWords(listName)
     const getWordsList = WORDS_FETCH_FUNCTION_BY_LISTTYPE[listType] || WORDS_FETCH_FUNCTION_BY_LISTTYPE['wordCollection']
     try {
-      const wordList = await getWordsList(listName)
+      const { list: wordList, subtitle } = await getWordsList(listName, query)
       const { new_wordInfosMap, new_wordOccurancesMap } = await requestWordInfosAndOccurancesMap(wordList, wordInfos, wordOccurancesMap, practicingWordIndex)
+
+      Object.keys(new_wordOccurancesMap).forEach((key) => {
+        const item = new_wordOccurancesMap[key]
+        console.log('item', item)
+        // if (item.length < 5 && !y_wordOccurancesMap[key]) {
+        //   const newOne = y_wordOccurancesMap[key] = searchFilmotSubtitles({ query: '"key"' })
+        //   set_y_wordOccurancesMap({ ...y_wordOccurancesMap, ...newOne })
+        // }
+      })
       set_wordList(wordList)
       set_wordOccurancesMap(new_wordOccurancesMap)
       set_wordInfos(new_wordInfosMap)
@@ -445,7 +556,19 @@ export function useWordColletionWordInfos(listName, initialWord, listType = 'wor
   const currentWordOccurances = wordOccurancesMap[currentWord]?.concat(currentWordInfo?.youglishSrcs) || []
   const currentAvailableOccurancesLength = currentWordOccurances?.length
   // console.log('currentWordInfo', currentWordInfo)
-  return { wordInfos, wordList, practicingWordIndex, set_practicingWordIndex, currentWordInfo, currentWord, currentWordOccurances, currentAvailableOccurancesLength }
+
+  return {
+    set_query,
+    wordInfos,
+    wordList,
+    practicingWordIndex,
+    set_practicingWordIndex,
+    currentWordInfo,
+    currentWord,
+    currentWordOccurances,
+    currentAvailableOccurancesLength,
+    wordOccurancesMap
+  }
 }
 
 async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousOccurancesMap, activeIndex) {
@@ -473,7 +596,7 @@ async function requestWordInfosAndOccurancesMap(list, previousInfoMap, previousO
 
 async function request_wordOccurances(the_word) {
   try {
-    const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`)).data;
+    const wordData = (await api().get(`/occurances_v2?lemma=${the_word}&limit=10`));
     // console.log("wordData", wordData);
     if (wordData?.length) {
       return wordData

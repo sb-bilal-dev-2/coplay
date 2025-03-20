@@ -66,7 +66,7 @@ function Tooltip(props) {
           ></i>
           <Link to={"/quiz/" + text.toLowerCase()}>
             <i
-              class="fa-regular fa-circle-play iconButton"
+              className="fa-regular fa-circle-play iconButton"
               onClick={handleInfoClick}
             ></i>{" "}
           </Link>

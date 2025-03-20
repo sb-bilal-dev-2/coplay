@@ -11,7 +11,7 @@ const useRequestWordCollectionWordList = (listName) => {
   const requestWordCollection = async () => {
     const response = await api().get(`/wordCollections?title=${listName}`);
 
-    set_wordCollection(response?.data?.results[0]?.keywords?.map(item => item.the_word));
+    set_wordCollection(response?.results[0]?.keywords?.map(item => item.the_word));
   };
 
   useEffect(() => {

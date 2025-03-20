@@ -2,6 +2,10 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+#video_player {
+  height: 50% !important;
+}
+
 #root {
   min-height: 100vh;
   display: flex;
@@ -10,6 +14,11 @@
   --color-primary: rgba(255, 60, 0, 0.95);
   --color-secondary: #ffa75e;
   --color-white: #fff6ff;
+  --color-indigo: rgb(144 138 243);
+}
+
+.bg-indigo {
+  background: rgb(144 138 243);
 }
 
 .color-primary {
@@ -40,12 +49,34 @@ h6 {
   font-family: "Arial Black";
 }
 
+h4 {
+  color: var(--color-primary);
+}
+
 button {
-  filter: brightness(0.96);
+  filter: brightness(0.99);
+}
+
+img {
+  user-select: none;
 }
 
 button:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.05);
+}
+
+button:active {
+  transform: scale(0.90);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -64,6 +95,10 @@ video {
 
 form button:hover {
   opacity: 0.8;
+}
+
+p {
+  white-space: break-spaces;
 }
 
 /* Remove autofill styles START */
@@ -104,10 +139,32 @@ input:-webkit-autofill:active {
   content: "U+26F6";
 }
 
+.bg-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(50, 50, 50, 0.9);
+
+  &:hover {
+    opacity: 0.95;
+  }
+
+  &:active {
+    opacity: 0.9;
+    filter: brightness(1.1);
+  }
+}
+
 /* ICONS END */
 
 /* SHARED CLASSES */
 .page-container {
+  min-height: 100dvh;
   display: block;
 }
 .section {

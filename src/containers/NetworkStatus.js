@@ -11,12 +11,14 @@ export function NetworkAlert() {
           (isOnline && showAlert) || !isOnline
             ? ` ${isOnline ? "bg-green-400" : "bg-red-400"}  z-50 opacity-100`
             : "opacity-0"
-        } fixed top-14 left-1/2 transform -translate-x-1/2 flex items-center text-white px-4 py-2 rounded shadow-lg`}
+        } fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full text-white px-4 py-2 shadow-lg`}
       >
-        <i className="fas fa-exclamation-triangle mr-2"></i>
-        <span className="text-white">
-          {!isOnline ? <div>No Internet Connection <i onClick={() => window.location.reload()} className="fa fa-refresh cursor-pointer p-1"></i></div> : "Back Online"}
-        </span>
+        <div className="m-auto flex items-center justify-center">
+          <i className="fas fa-exclamation-triangle mr-2"></i>
+          <span className="text-white">
+            {!isOnline ? <div>No Internet Connection <i onClick={() => window.location.reload()} className="fa fa-refresh cursor-pointer p-1"></i></div> : "Back Online"}
+          </span>
+        </div>
       </div>
     );
   } else {

@@ -1,0 +1,216 @@
+.horizontal-scroll-menu2 {
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: visible;
+  position: relative;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent scrollbar space, while keeping functionality */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+.tags-first-sticky {
+  margin-right: -40px;
+  margin-left: 40px;
+  z-index: 30;
+
+  @media (max-width: 600px) {
+    margin-right: -10px;
+    margin-left: 10px;
+  }
+}
+
+.tags-bar {
+  background: #fff6ff;
+  padding: 2px 16px;
+
+  @media (max-width: 600px) {
+    padding: 2px 4px;
+  }
+}
+
+.menu-list {
+  width: 100%;
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  white-space: nowrap;
+  position: relative;
+  margin: 0;
+  display: flex;
+  padding: 0 4px 0px 4px;
+  margin-top: 6px;
+
+  .vertical {
+    max-width: calc(100vw - 8px);
+    height: 280px;
+    width: 160px;
+  }
+
+  .horizontal {
+    max-width: calc(100vw - 8px);
+    height: 180px;
+    width: 240px;
+  }
+
+  .list {
+    overflow: visible;
+    position: relative;
+    margin-top: 6px;
+  }
+
+  .list::after {
+    border-radius: 40px 40px 0 0;
+    margin-left: 2.5%;
+    margin-top: -4px;
+    position: absolute;
+    width: 95%;
+    height: 4px;
+    content: '';
+    background: rgb(194 170 0 / 94%);
+    border-top: 1px solid white;
+  }
+
+  .list::before {
+    border-radius: 90px 90px 0 0;
+    margin-left: 5%;
+    margin-top: -6px;
+    position: absolute;
+    width: 90%;
+    height: 6px;
+    content: '';
+    background: rgb(216 184 88);
+  }
+}
+
+.menu-list li {
+  scroll-snap-align: start;
+  /* padding-left: 12px;
+  padding-right: 12px; */
+
+  .full {
+    width: 600px;
+    height: 400px;
+    flex-grow: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .menu-list {
+    li {
+      /* padding-left: 6px;
+      padding-right: 6px; */
+
+      .vertical {
+        max-width: calc(100vw - 8px);
+        height: 220px;
+        width: 120px;
+      }
+
+      .horizontal {
+        max-width: calc(100vw - 8px);
+        height: 120px;
+        width: 160px;
+      }
+
+      .full {
+        width: 100%;
+        height: 200px;
+      }
+    }
+  }
+}
+
+@media (min-width: 468px) {
+
+  /* Webkit browsers (Chrome, Safari) */
+  .menu-list::-webkit-scrollbar {
+    width: 1px;
+    /* Width of the scrollbar */
+  }
+
+  .menu-list::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    /* Color of the scrollbar thumb */
+  }
+
+  .menu-list::-webkit-scrollbar-track {
+    background-color: transparent;
+    /* Color of the scrollbar track */
+  }
+}
+
+.list-card {
+  float: left;
+  display: flex;
+  flex-direction: column;
+  user-select: "none";
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  /* text-shadow: 1px 1px 1px black; */
+}
+
+.list-card>.list-card__image {
+  background-position: center;
+  background-size: cover;
+  filter: brightness(0.95);
+  flex: 1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.list-card__title {
+  overflow-x: hidden;
+  margin: 10px;
+  text-align: left;
+  text-overflow: ellipsis;
+  color: #222;
+  font-weight: bold;
+}
+
+.list-card:hover {
+  filter: brightness(1);
+}
+
+.menu-item:hover {
+  background-color: #dcdcdc;
+}
+
+/* Scroll Buttons Styles */
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  border: none;
+  width: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 100;
+  opacity: 0.3;
+  font-weight: bolder;
+  user-select: none;
+}
+
+.scroll-button:hover {
+  opacity: 0.8;
+}
+
+.scroll-button:first-child {
+  left: 0;
+  height: 100%;
+}
+
+.scroll-button:last-child {
+  height: 100%;
+  right: 0;
+}

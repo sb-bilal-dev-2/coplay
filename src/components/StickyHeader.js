@@ -39,6 +39,10 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const isPricePage = location.pathname.includes("price_page");
   const learningLanguage = localStorage.getItem("learningLanguage");
   const closeButtonRef = useRef(null)
+  const youtubeEmbedUrlFromSearch =
+    (search.includes('youtube.com/embed/') && search)
+    || (search.includes('www.youtube.com/watch?v=') && `https://www.youtube.com/embed/${search.split('https://www.youtube.com/watch?v=')[1]}`)
+    || (search.includes('https://youtu.be/') && `https://www.youtube.com/embed/${search.split('https://youtu.be/')[1]}`)
 
   return (
     <header
@@ -46,13 +50,15 @@ const StickyHeader = ({ type = "primary", authPage }) => {
         } ${type}`}
     >
       <Link to="/" className="relative min-h-max min-w-max">
-        <img
-          class="h-14 w-14"
-          src="logo-black.png"
-          alt="C Play logo placeholder"
-        />
+        <button className="block">
+          <img
+            className="h-14 w-14"
+            src="logo-black.png"
+            alt="C Play logo placeholder"
+          />
+        </button>
       </Link>
-      <div class="flex items-center">
+      <div className="flex items-center">
         {!authPage && (
           <>
             <div
@@ -71,23 +77,37 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                   ref={closeButtonRef}
                   className="close-search-button text-gray-150 float-right pointer absolute"
                   onClick={() => {
-                    setSearching(!searching);
                     setSearch("");
+                    setSearching(!searching);
                   }}
                 >
                   <i className="fas fa-times"></i>
                 </button>
               }
               <div className={`search-container ${searching ? "show" : ""}`}>
-                <h3>Vidoes</h3>
-                {!!filteredVideos?.length &&
+                {youtubeEmbedUrlFromSearch &&
+                  <>
+                    <div style={{ overflow: 'hidden', height: '400px', width: '100%', position: 'relative' }}>
+                      <div style={{ height: '100%', width: '100%', position: 'absolute' }}>
+                        <iframe
+                          style={{ height: '100%', width: '100%' }}
+                          src={youtubeEmbedUrlFromSearch}
+                          // src={"https://www.youtube.com/embed/2Vv-BfVoq4g"}
+                          // src={item.youtubeUrl}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
+                        />
+                      </div>
+                    </div>
+                  </>
+                }
+                {/* {!!filteredVideos?.length &&
                   <HorizontalScrollMenu items={filteredVideos} baseRoute={"movie"} />
                 }
                 <h3>Collections</h3>
                 {!!filtered_wordCollections?.length &&
                   <HorizontalScrollMenu items={filtered_wordCollections} baseRoute={"quiz"} />
 
-                }
+                } */}
               </div>
             </div>
             {/* 
@@ -109,10 +129,12 @@ const StickyHeader = ({ type = "primary", authPage }) => {
 
             <div className="user-menu">
               {loggedIn ? (
-                <div className="flex items-center">
+                <div className="flex items-center select-none">
                   <Link to="/quiz/repeating?listType=self_words" className="relative">
                     {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
-                    <YourVideosIcon />
+                    <button className="block">
+                      <YourVideosIcon />
+                    </button>
                   </Link>
                   <UserNav
                     setIsNavMenuVisible={setIsNavMenuVisible}
@@ -133,24 +155,17 @@ const StickyHeader = ({ type = "primary", authPage }) => {
     </header>
   );
 };
+const colors = {
+  A: "#cc3333", // Light Red
+  B: "#33cc33", // Light Green
+  C: "#3333cc", // Light Blue
+  D: "#cccc33", // Light Yellow
+  E: "#cc33cc", // Light Magenta
+  F: "#33cccc", // Light Cyan
+  // Add more mappings for other letters as needed
+};
 
-function getPlaceholderUrl(firstLetter) {
-  const colors = {
-    A: "cc3333", // Light Red
-    B: "33cc33", // Light Green
-    C: "3333cc", // Light Blue
-    D: "cccc33", // Light Yellow
-    E: "cc33cc", // Light Magenta
-    F: "33cccc", // Light Cyan
-    // Add more mappings for other letters as needed
-  };
-
-  const defaultColor = colors.D;
-
-  const color = colors[firstLetter.toUpperCase()] || defaultColor;
-
-  return `https://placehold.co/32x32/${color}/ffffff.png?text=${firstLetter}`;
-}
+const defaultColor = colors.D;
 
 const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const { t } = useTranslation();
@@ -159,7 +174,6 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
   const emailLetters = userEmail.match(/[A-Z]/gi) || [];
   const firstLetter =
     (!!emailLetters?.length && emailLetters[0]?.toUpperCase()) || "";
-  const avatarPath = getPlaceholderUrl(firstLetter);
   const outsideNavClickWrapperRef = useRef(null);
   const isTelegramConnected = useSelector(
     (state) => state.user?.user?.isTelegramConnected
@@ -190,7 +204,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
         _Id,
       });
 
-      window.location.href = response.data.telegramLink;
+      window.location.href = response.telegramLink;
     } catch (error) {
       console.error("Error generating connection code:", error);
     }
@@ -198,19 +212,21 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <div ref={outsideNavClickWrapperRef}>
-      <img class="h-8 ml-2" src={avatarPath} alt="User avatar placeholder" onClick={() => setIsNavMenuVisible(!isNavMenuVisible)} />
+      <button className="block ml-2 h-8 w-8 text-sm rounded-full font-bold" style={{ background: defaultColor }} onClick={() => setIsNavMenuVisible(!isNavMenuVisible)}>
+        {firstLetter}
+      </button>
       {isNavMenuVisible && (
         <ul className="nav-menu">
           <li>
             {" "}
             <Link to="/account">
-              <i class="fa-solid fa-user text-gray-400 m-2" />
+              <i className="fa-solid fa-user text-gray-400 m-2" />
               <b>{t("account")}</b>
             </Link>
           </li>
           <li>
             <button onClick={handleLogout}>
-              <i class="fa-solid fa-door-open text-gray-400  m-2" />
+              <i className="fa-solid fa-door-open text-gray-400  m-2" />
               <b>{t("sign out")}</b>
             </button>
           </li>

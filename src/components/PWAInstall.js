@@ -19,11 +19,11 @@ const InstallPWA = () => {
   }, []);
 
   useEffect(() => {
-    if (supportsPWA && !sessionStorage.getItem('installPromptShown')) {
+    if (supportsPWA && !localStorage.getItem('installPromptShown')) {
       const timer = setTimeout(() => {
         setShowPrompt(true);
-        sessionStorage.setItem('installPromptShown', 'true');
-      }, MINUTE * 2);
+        localStorage.setItem('installPromptShown', 'true');
+      }, MINUTE * 10);
 
       return () => clearTimeout(timer);
     }
@@ -47,7 +47,7 @@ const InstallPWA = () => {
 
   const dismissPrompt = () => {
     setShowPrompt(false);
-    sessionStorage.setItem('installPromptShown', 'true');
+    localStorage.setItem('installPromptShown', 'true');
   };
 
   if (!showPrompt) {
@@ -79,10 +79,10 @@ const IOSInstallInstructions = () => {
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
-    if (!sessionStorage.getItem('installPromptShown')) {
+    if (!localStorage.getItem('installPromptShown')) {
       const timer = setTimeout(() => {
         setShowInstructions(true);
-        sessionStorage.setItem('installPromptShown', 'true');
+        localStorage.setItem('installPromptShown', 'true');
       }, MINUTE * 2);
 
       return () => clearTimeout(timer);
@@ -91,7 +91,7 @@ const IOSInstallInstructions = () => {
 
   const dismissInstructions = () => {
     setShowInstructions(false);
-    sessionStorage.setItem('installPromptShown', 'true');
+    localStorage.setItem('installPromptShown', 'true');
   };
 
   if (!showInstructions) {
@@ -102,7 +102,7 @@ const IOSInstallInstructions = () => {
     <div className="fixed top-20 left-4 right-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200 max-w-sm mx-auto z-50">
       <p className="text-lg font-semibold mb-3">Install <img src='logo-black.png' className="w-8 h-8 overflow-hidden rounded-full inline" />Coplay App?</p>
       <ol className="list-decimal list-inside mb-4 text-gray-700">
-        <li className="mb-2">Tap the Share button <img src='image.png' className="w-8 h-8 overflow-hidden rounded-full inline" /><br /> in your browser.</li>
+        <li className="mb-2">Tap the <img src='image.png' className="w-8 h-8 overflow-hidden rounded-full inline" /><br /> icon in your search barch.</li>
         <li className="mb-2">Scroll down and tap "Add to Home Screen" <i className="fa fa-plus p-1 rounded border border-2 text-gray-600 border-gray-600"></i></li>
       </ol>
       <button 
