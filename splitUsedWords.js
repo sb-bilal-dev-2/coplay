@@ -19,7 +19,8 @@ const IGNORED_CHARS_MAP = [
     '¿',
     '¡',
     '–',
-    '—'
+    '—',
+    '♪'
 ].reduce((acc, item) => (acc[item] = true, acc), {})
 
 function splitUsedWords(text = '') {

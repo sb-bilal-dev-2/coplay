@@ -20,7 +20,6 @@ const youtube = google.youtube({ version: 'v3', auth: process.env.GOOGLE_API_KEY
 // For Linux:
 // wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 // sudo apt install ./google-chrome-stable_current_amd64.deb
-const pinyin = require("chinese-to-pinyin")
 
 const { default: mongoose } = require('mongoose');
 const { promptWordInfos } = require('./promptWordInfos');
@@ -81,14 +80,6 @@ async function updateWordCollectionWordInfos(mediaLang) {
     // await promptWordInfoAndUpdateDB(the_word, mediaLang)
   }
   console.log('UPDATED KEYWORDS:', keywords.map(item => item.the_word))
-}
-
-const ROMINIZE_FUNCTION = {
-  'zh-CN': (text) => pinyin(text),
-  'jp': () => { },
-  'th': () => { },
-  'ko': () => { },
-  'default': () => { }
 }
 
 async function updateAllWord(langCode) {

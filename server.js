@@ -7,7 +7,7 @@ const cors = require('cors')
 const range = require('range-parser');
 const bodyParser = require('body-parser');
 const fromVtt = require('subtitles-parser-vtt').fromVtt
-const { initAuth, getUserIdByRequestToken } = require('./serverAuth');
+const { initAuth, getUserIdByRequestToken, getUserIfExists } = require('./serverAuth');
 const initCRUDAndDatabase = require('./serverCRUD').initCRUDAndDatabase;
 const fsPromises = require('fs/promises')
 const ip = require('ip');
@@ -20,7 +20,14 @@ const { gTranslate } = require('./gTranslate');
 const { users_model } = require('./schemas/users');
 const { wordCollections_model } = require('./schemas/wordCollections');
 const { sortByLearningState } = require('./src/helper/sortByLearningState');
-const { processYoutubeVideo } = require('./youtubeServer');
+const { movies_model } = require('./schemas/movies');
+const splitUsedWords = require('./splitUsedWords');
+const { degausser, addVttToDB } = require('./parseUsedWords');
+const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
+const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
+const { telegramInit } = require('./tgbot');
+const { fetchTrendingVideos, fetchPopularVideos, searchYouTubeVideos } = require('./youtube_api');
+const { pronKorean } = require('./utils/pronounciation');
 
 writeDevelopmentIPAddress();
 
@@ -39,44 +46,343 @@ const port =
   9090;
 const { createCRUDEndpoints } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
+telegramInit()
 
-app.get("/hello_world", (req, res) => {
+app.get('/', (req, res) => res.send('hmmm...'))
+app.get("/hello_world", async (req, res) => {
+  // const {
+  //   query,
+  //   params,
+  //   path,
+  //   headers
+  // } = req
   res.type("text/plain");
-
-  res.send("Welcome!");
+  res.status(200).send("Welcome! ");
 });
+
+app.get('/youtube_trends', async (req, res) => {
+  try {
+    const {
+      limit,
+      page,
+      category
+    } = req.query
+    // const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+    console.log('mediaLang', req.query.mediaLang, req.headers["learninglanguage"])
+    const results = await fetchTrendingVideos(mediaLang, limit, page, category)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+})
+
+app.get('/youtube_popular', async (req, res) => {
+  try {
+    const {
+      limit,
+      page,
+      category
+    } = req.query
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+
+    const results = await fetchPopularVideos(category, mediaLang, limit, page)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+})
+
+app.get('/youtube_search', async (req, res) => {
+  try {
+    const {
+      query,
+      limit,
+      page,
+      category
+    } = req.query
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+
+    const results = await searchYouTubeVideos(query, mediaLang, limit, category)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+})
+
+app.get("/rec", async (req, res) => {
+  const {
+    query,
+    params,
+    path,
+    headers
+  } = req
+  const mediaLang = query.mediaLang || headers["learninglanguage"]
+
+  const user = await getUserIfExists(req)
+  let results = []
+  try {
+    if (query.category === 'Phrases') {
+      if (user) {
+        // results = user.words
+        const UserWordsStringified = user.words.filter((item) => item.isPhrase).map(item => item.the_word).slice(0, 20)?.join()
+        let reccommended = (await promptAI(`Reccommend me 20 phrases to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
+        console.log('reccommended', typeof reccommended?.content, reccommended, reccommended?.content)
+        reccommended = reccommended?.content?.split('\n').map((line) => line.includes('. ') && line.split('. ')[1])
+        results = reccommended.map((item) => ({ the_word: item })) || []
+      }
+    }
+    if (query.category === 'Words') {
+      if (user) {
+        results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const reccommended =
+          (await promptAI(`Reccommend me 20 words to learn based on last 20 words I learned. Respond with plain yaml one word per line like (e.g. hello\ncompany\nfew)). My last 20 words: ${UserWordsStringified}`))
+            ?.content?.split('\n')
+        results = reccommended.map((item) => ({ the_word: item })) || []
+      }
+    }
+    if (query.category === 'Music') {
+      if (user) {
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        // (await promptAI(`Reccommend me 20 music to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //   ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Music' })
+
+        results = reccommendedVideos || []
+      } else {
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Music' })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Series') {
+      const query = await movies_model.find({ mediaLang, category: "Series" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        // results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 episode from different to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: "Series" })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Courses') {
+      const query = await movies_model.find({ mediaLang, category: "Courses" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        // results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 courses to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Courses' })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Cartoon') {
+      const query = await movies_model.find({ mediaLang, category: "Cartoon" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        // results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 cartoons to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Cartoon' })
+
+        results = reccommendedVideos || []
+      }
+    }
+    if (query.category === 'Podcast') {
+      const query = await movies_model.find({ mediaLang, category: "Podcast" })
+      console.log('query', query)
+      results = query
+
+      if (user) {
+        // results = user.words
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+        const history = user?.history?.movies
+        // const reccommendedTitles =
+        //   (await promptAI(`Reccommend me 20 podcasts to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
+        //     ?.choices[0]?.message?.split('\n')
+
+        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Podcast' })
+
+        results = reccommendedVideos || []
+      }
+    }
+  } catch (err) {
+    console.log('REC err', err)
+  }
+  res.status(200).send({ results });
+});
+
 
 // async function getYoutubeSubtitles(youtubeId) {
 //   return (await fetch('https://subtitle.to/https://www.youtube.com/watch?v=' + youtubeId)).json()
 // }
 
+app.get("/youtube_video_init/:id", async (req, res) => {
+  // handle transcript error: http://localhost:3000/movie/youtube_3oA8kt8685I
+  try {
+    const { id } = req.params
+    const mediaLang = req.query.mediaLang || req.headers["learninglanguage"]
+    const thisServer = `http://localhost:${port}`
+    console.log('id', id)
+    const matchedVideo = await movies_model.findOne({ youtubeUrl: 'https://www.youtube.com/embed/' + id })
+    if (matchedVideo) {
+      const subtitles = await subtitles_model.findOne({ mediaId: matchedVideo._id, mediaLang })
+      return res.status(200).send({ videoInfo: matchedVideo, subtitles, parsedList: [] })
+    }
+    const newVideoInfo = (await fetch(`${thisServer}/youtube_video?ids=${id}`).then(response => response.json()))[0]
+    const videoInfoAdjusted = { ...newVideoInfo, mediaLang }
+    let videoInfo
+    let videoTranscript
+    try {
+      videoTranscript = (await fetch(`${thisServer}/youtube_transcript?parse=1&ids=${id}&mediaLang=${mediaLang}`).then(response => response.json()))[0]
+      // console.log('TRANScRipt', videoTranscript)
+      if (!videoTranscript || videoTranscript.error) {
+        return res.status(400).json({ error: 'Transcript Failed\n' })
+      }
+      console.log('videoInfoAdjusted', videoInfoAdjusted)
+      videoInfo = (await movies_model.create(videoInfoAdjusted))
+      console.log('videoInfo', videoInfo)
+      videoTranscript.mediaId = videoInfo._id
+      videoTranscript.media = videoInfo
+      videoTranscript.mediaLang = mediaLang
+      videoTranscript.title = mediaLang
+    } catch (err) {
+      // handleTranscriptError
+      console.log('Transcript ERROR Y: ', err)
+      res.status(400).json(err)
+    }
+    const subtitle = (await subtitles_model.create(videoTranscript))
+
+    res.status(200).send({ subtitle, videoInfo })
+
+  } catch (error) {
+    console.error('YOUTUBE_INIT_ERR: ', error)
+  }
+})
+
 app.get("/youtube_video", async (req, res) => {
   const { mediaLang } = req.query;
   const ids = req.query.ids.split(',')
-
-  // let subtitles = []
-
-  // subtitles = Promise.all(ids.map((id) => {
-  //   return getYoutubeSubtitles(id)
-  // }).catch(() => {}))
 
   if (!ids) {
     res.status(200).send("Sample request: https://api.coplay.live/api/youtube_video?mediaLang=en&ids=L0MK7qz13bU")
   }
   console.log('loop processYoutubeVideo(): ' + ids)
-  console.log('mediaLang', mediaLang)
   const results = []
   for (let id of ids) {
-    try {
-      const result = await processYoutubeVideo('https://www.youtube.com/watch?v=' + id, mediaLang)
-      results.push(result)
-    } catch (err) {
-      results.push(err)
-    }
+    const { videoDetails } = await require("ytdl-core").getInfo('https://www.youtube.com/watch?v=' + id);
+    const { category, title, description, lengthSeconds, ownerProfileUrl, isFamilySafe, embed } = videoDetails
+    const videoAdjust = { category, title, description, lengthSeconds, ownerProfileUrl, isFamilySafe, youtubeUrl: embed.iframeUrl }
+    results.push(videoAdjust)
   }
 
   res.status(200).send(results)
-  // const 
+})
+
+app.get('/youtube_transcript', async (req, res) => {
+  // const LANG_MAP = { "en": "en-US" }
+  let mediaLang = req.headers["learninglanguage"] || req.query.mediaLang;
+  const ids = req.query.ids.split(',')
+
+  if (!ids) {
+    res.status(200).send("Sample request: https://api.coplay.live/api/youtube_transcript?mediaLang=en&ids=L0MK7qz13bU")
+  }
+
+  const results = []
+  for (let id of ids) {
+    const youtubeUrl = "https://www.youtube.com/watch?v=" + id;
+    let transcript;
+    try {
+      transcript = await YoutubeTranscript.fetchTranscript(youtubeUrl, { lang: mediaLang || '' });
+    } catch (err) {
+      let errMessage = err.toString()
+      console.error('Transcript ERROR: ', req.query.mediaLang, req.headers["learninglanguage"], err, errMessage.includes('Available languages: '))
+      const mainAvailableLanguage = errMessage.includes('Available languages: ') && errMessage.split('Available languages: ')[1].split(',')[0]
+      console.log('mainAvailableLanguage', mainAvailableLanguage)
+
+      if (!mainAvailableLanguage) {
+        return res.status(400).json({ error: errMessage })
+      }
+
+      try {
+        transcript = await YoutubeTranscript.fetchTranscript(youtubeUrl, { lang: mainAvailableLanguage || '' })
+        console.log('2nd ATTEMPT SUCCESS length: ', transcript.length)
+      } catch (err) {
+        errMessage = err.toString()
+
+        console.log('Transcript ERROR 2: ', errMessage)
+        return res.status(400).json({ error: errMessage })
+      }
+    }
+    let transcriptAdjusted = {}
+    const matchingUrl = 'https://www.youtube.com/embed/' + id
+    console.log('matchingUrl', matchingUrl)
+    const relatedMovie = await movies_model.findOne({ youtubeUrl: matchingUrl })
+    console.log('relatedMovie', relatedMovie)
+    if (relatedMovie) {
+      transcriptAdjusted.mediaId = relatedMovie._id
+      transcriptAdjusted.media = relatedMovie
+      transcriptAdjusted.subtitles = transcript
+      transcriptAdjusted.mediaLang = mediaLang
+      transcriptAdjusted.title = mediaLang
+    }
+
+    if (req.query.parse = '1') {
+      transcriptAdjusted.subtitles = transcript.map((item) => {
+        const degaussedText = degausser(item.text)
+        return ({
+          ...item,
+          text: degaussedText,
+          startTime: item.offset * 1000,
+          endTime: (item.offset + item.duration) * 1000,
+          usedWords: splitUsedWords(degaussedText)
+        })
+      })
+    }
+    console.log('transcriptAdjusted', transcriptAdjusted)
+    results.push(transcriptAdjusted)
+  }
+  res.status(200).send(results)
+})
+
+app.get("/parse_subtitle", async (req, res) => {
+  const { mediatitle, mediaLang, skipInsert } = req.query
+  const newSubtitle = await addVttToDB(mediatitle, mediaLang, !!skipInsert)
+  res.send(newSubtitle)
 })
 
 app.get("/occurances_v2", async (req, res) => {
@@ -134,88 +440,37 @@ app.get('/processWordInfos', async (req, res) => {
 })
 
 app.get('/wordInfoLemma', async (req, res) => {
-  let { the_word, mainLang } = req.query;
+  let { the_word } = req.query;
   const { learninglanguage } = req.headers;
-  console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
+  const mainLang = learninglanguage
+  console.log('the_word, mainLang', the_word, req.query.mainLang, learninglanguage)
   try {
     const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
-    const requestedWordInfos = await WordInfosModel.find({ the_word });
-    console.log("requestedWordInfos", requestedWordInfos);
-    const wordInfo = requestedWordInfos[0];
+    const wordInfo = await WordInfosModel.findOne({ the_word });
 
-    if (!requestedWordInfos.length || !wordInfo) {
-      res.status(404).send("Word info Not found: " + the_word);
+    if (!wordInfo) {
+      return res.status(404).send("Word info Not found: " + the_word);
     }
 
-    let updatedWordInfo = wordInfo;
-    if (wordInfo && wordInfo.shortDefinition) {
-      if (!updatedWordInfo?.the_word_translations) {
-        updatedWordInfo.the_word_translations = {};
+    let updatedWordInfo = wordInfo
+    if (!updatedWordInfo.pronounciation) {
+      updatedWordInfo.pronounciation = await getPronounciation(the_word, mainLang)
+    }
+    if (!wordInfo.shortDefinitions[learninglanguage]) {
+      try {
+        const input = { learninglanguage, mainLang }
+        const new_info_response = (await promptAI(`give me word info about in the given language: e.g. input { learninglanguage: "ko", mainLang: "ru", the_word: "그" } should return { shortDefinition, shortExplanation }\nINPUT: ${input}`)).content
+        const new_info_parsed = JSON.parse(new_info_response)
+
+        updatedWordInfo.shortDefinitions[learninglanguage] = new_info_parsed.shortDefinition
+        updatedWordInfo.shortExplanations[learninglanguage] = new_info_parsed.shortExplanation
+      } catch (err) {
+        console.log("Error fetching word info: " + the_word, err);
+        res.status(500);
       }
-      console.log("updatedWordInfo 1", updatedWordInfo);
-      if (!updatedWordInfo.the_word_translations[mainLang]) {
-        updatedWordInfo.the_word_translations[mainLang] = await gTranslate(
-          wordInfo.the_word,
-          mainLang
-        );
-      }
-      const updatedWordInfosKeys = (await promptWordInfos([wordInfo.the_word], learninglanguage))[0]
-      console.log('updatedWordInfosKeys 10', updatedWordInfosKeys)
-      Object.keys(updatedWordInfosKeys).map(updatedKey => {
-        console.log('updatedKey', updatedKey, updatedWordInfosKeys[updatedKey])
-        updatedWordInfo[updatedKey] = updatedWordInfosKeys[updatedKey]
-      })
-      console.log('updatedWordInfo 2', updatedWordInfo)
     }
 
-    if (mainLang !== 'en' && wordInfo.shortDefinition && (!wordInfo.shortDefinition_translations || !wordInfo.shortDefinition_translations[mainLang])) {
-      console.log('wordInfo.shortDefinition')
-
-      const translationKeysMap = await processTranslations(learninglanguage, mainLang, [wordInfo])
-      const translationKeys = translationKeysMap[wordInfo.the_word] //
-      Object.keys(translationKeys).map((translationKey) => {
-        if (!updatedWordInfo[translationKey]) {
-          updatedWordInfo[translationKey] = {}
-        }
-        updatedWordInfo[translationKey][mainLang] = translationKeys[translationKey]
-      })
-      console.log('updatedWordInfo 3', updatedWordInfo)
-    }
-
-    if (
-      mainLang !== "en" &&
-      wordInfo.shortDefinition &&
-      (!wordInfo.shortDefinition_translations ||
-        !wordInfo.shortDefinition_translations[mainLang])
-    ) {
-      console.log("wordInfo.shortDefinition");
-
-      const translationKeysMap = await processTranslations(
-        learninglanguage,
-        mainLang,
-        [wordInfo]
-      );
-      const translationKeys = translationKeysMap[wordInfo.the_word]; //
-      Object.keys(translationKeys).map((translationKey) => {
-        if (!updatedWordInfo[translationKey]) {
-          updatedWordInfo[translationKey] = {};
-        }
-        updatedWordInfo[translationKey][mainLang] =
-          translationKeys[translationKey];
-      });
-      console.log("updatedWordInfo 3", updatedWordInfo);
-    }
-
-    if (
-      wordInfo &&
-      (!wordInfo.shortDefinition ||
-        !wordInfo.the_word_translations ||
-        !wordInfo.the_word_translations[mainLang] ||
-        !wordInfo.shortDefinition_translations ||
-        !wordInfo.shortDefinition_translations[mainLang])
-    ) {
-      await WordInfosModel.findByIdAndUpdate(wordInfo._id, updatedWordInfo);
-    }
+    await WordInfosModel.findByIdAndUpdate(wordInfo._id, updatedWordInfo);
     res.status(200).send(updatedWordInfo);
   } catch (err) {
     console.log("err", err);
@@ -224,58 +479,65 @@ app.get('/wordInfoLemma', async (req, res) => {
 });
 
 app.get("/movie", (req, res) => {
-  const videoPath = getHighestExistingQualityPathForTitle(
-    req.query.name,
-    req.query.quality
-  );
+  try {
+    const videoPath = getHighestExistingQualityPathForTitle(
+      req.query.name,
+      req.query.quality
+    );
 
-  console.log('videoPath end', videoPath)
+    if (typeof videoPath === undefined) {
+      console.error('videoPath undefined')
+      return res.status(500).send('videoPath undefined')
+    }
+    console.log('videoPath end', videoPath)
 
-  if (!videoPath) {
-    console.error("VIDEOFILE NOT FOUND: " + req.query.name)
-    // return res.status(404)
-  }
-
-  // console.log(req.query.name)
-  // console.log('videoPath', videoPath)
-  const videoStat = fs.statSync(videoPath);
-  console.log('videoStat', videoStat)
-
-  const fileSize = videoStat.size;
-  const rangeRequest = req.headers.range;
-  console.log('rangeRequest', rangeRequest)
-
-  if (!fileSize) {
-    return res.status(500).send('Requested File is Broken. Size: ' + fileSize)
-  }
-
-  if (rangeRequest) {
-    const ranges = range(fileSize, rangeRequest);
-    // console.log('ranges', ranges)
-    if (ranges === -1) {
-      // 416 Range Not Satisfiable
-      res.status(416).send("Requested range not satisfiable");
-      return;
+    if (!videoPath) {
+      console.error("VIDEOFILE NOT FOUND: " + req.query.name)
+      // return res.status(404)
     }
 
-    res.writeHead(206, {
-      "Content-Range": `bytes ${ranges[0].start}-${ranges[0].end}/${fileSize}`,
-      "Accept-Ranges": "bytes",
-      "Content-Length": ranges[0].end - ranges[0].start + 1,
-      "Content-Type": "video/mp4",
-    });
+    // console.log(req.query.name)
+    // console.log('videoPath', videoPath)
+    const videoStat = fs.statSync(videoPath || '');
 
-    fs.createReadStream(videoPath, {
-      start: ranges[0].start,
-      end: ranges[0].end,
-    }).pipe(res);
-  } else {
-    res.writeHead(200, {
-      "Content-Length": fileSize,
-      "Content-Type": "video/mp4",
-    });
+    const fileSize = videoStat.size;
+    const rangeRequest = req.headers.range;
+    console.log('rangeRequest', rangeRequest)
 
-    fs.createReadStream(videoPath).pipe(res);
+    if (!fileSize) {
+      return res.status(500).send('Requested File is Broken. Size: ' + fileSize)
+    }
+
+    if (rangeRequest) {
+      const ranges = range(fileSize, rangeRequest);
+      // console.log('ranges', ranges)
+      if (ranges === -1) {
+        // 416 Range Not Satisfiable
+        res.status(416).send("Requested range not satisfiable");
+        return;
+      }
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${ranges[0].start}-${ranges[0].end}/${fileSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": ranges[0].end - ranges[0].start + 1,
+        "Content-Type": "video/mp4",
+      });
+
+      fs.createReadStream(videoPath, {
+        start: ranges[0].start,
+        end: ranges[0].end,
+      }).pipe(res);
+    } else {
+      res.writeHead(200, {
+        "Content-Length": fileSize,
+        "Content-Type": "video/mp4",
+      });
+
+      fs.createReadStream(videoPath).pipe(res);
+    }
+  } catch (err) {
+    res.status(500).send('unhandled error')
   }
 });
 
@@ -297,13 +559,66 @@ function getContentType(extension) {
   }
 }
 
-app.get("/movie_words/:mediaTitle", async (req, res) => {
+app.get('/translation', async (req, res) => {
+  const { type, text } = req.query
+
+  try {
+    const translation = await gTranslate(text)
+    console.log('translated: ', text, translation)
+    res.status(200).send(translation)
+  } catch (err) {
+    console.log('translation error: ', err)
+    res.status(500).send('Translation error')
+  }
+})
+
+const pinyin = require("chinese-to-pinyin")
+const ROMINIZE_FUNCTION = {
+  'zh-CN': (text) => pinyin(text),
+  // 'jp': () => {  },
+  // 'th': () => {  },
+  'ko': (text) => pronKorean(text),
+  'en-US': async (text) => {
+    try {
+      JSON.parse((await promptAI(`Pronounce the input and return json. e.g. for { result: "/həˈloʊ/ " } return { lang: "en-US", text: "hello" }.
+INPUT { text: "${text}", lang: "en-US" }
+`)).content).result
+    } catch (err) {
+      res.status(500).send('failed pronounciation')
+    }
+  },
+  'default': async (text, lang) => JSON.parse((await promptAI(`Pronounce the input and return json. e.g. for { result: "/həˈloʊ/ " } return { lang: "en-US", text: "hello" }.
+    INPUT { text: "${text}", lang: "${lang}" }
+    `)).content).result
+}
+
+function getPronounciation(text, lang) {
+  return (ROMINIZE_FUNCTION[lang] || ROMINIZE_FUNCTION.default)(text, lang)
+}
+
+app.get('/pronounciation', async (req, res) => {
+  try {
+    // const { body: text } = req.body;
+    const { text } = req.query
+    const mediaLang = req.headers["learninglanguage"] || req.query.mediaLang
+    console.log('text', mediaLang, text)
+    const pronounciation = getPronounciation(text, mediaLang)
+    res.status(200).send(pronounciation)
+  } catch (err) {
+
+  }
+})
+
+app.get("/movie_words/:_id", async (req, res) => {
   try {
     let user_id = await getUserIdByRequestToken(req);
-    const { mediaTitle } = req.params;
+    const { _id } = req.params;
+    console.log('req.query', req.query)
+    const { bookmark, level, sort } = req.query;
+    const mediaLang = req.headers["learninglanguage"] || req.query.mediaLang
     console.log(
       "fetching movie words for user_id: " + user_id,
-      "mediaTitle: " + mediaTitle
+      "_id: " + _id
     );
     let user;
 
@@ -312,38 +627,164 @@ app.get("/movie_words/:mediaTitle", async (req, res) => {
     }
     const userWords = user?.words || [];
     let movieWords;
+    console.log('f1')
     try {
-      console.log("mediaTitle requested", mediaTitle);
-      const movieSubtitle = await subtitles_model.findOne({ mediaTitle, translateLang: { $exists: false } });
-
+      console.log("_id requested", _id);
+      const movieSubtitle = await subtitles_model.findOne({ mediaId: _id, translateLang: { $exists: false } });
       movieWords = movieSubtitle.subtitles.reduce(
         (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime, endTime: item.endTime }))),
         []
       );
-      // console.log('movieWords', movieWords)
+      console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
+      console.log('f2')
     } catch (err) {
       console.error("Could not fetch words: ", err.code, err.message);
       return res.status(404).send(err.message);
     }
-    const userWordsMap = userWords.reduce(
-      (acc, item) => ((acc[item.the_word] = item), acc),
+    console.log('f3')
+
+    const shouldExcludeArchive = (bookmark && !bookmark.includes('Archive'))
+    const shouldExcludeActive = (bookmark && !bookmark.includes('Active'))
+
+    const userWordsToExclude = userWords.reduce(
+      (acc, item) => {
+        if (shouldExcludeArchive && item.archived) {
+          acc[item.the_word] = item
+        }
+        if (shouldExcludeActive && !item.archived) {
+          acc[item.the_word] = item
+        }
+        return acc
+      },
       {}
     );
+    console.log('f4')
+
     const movieWordsWithoutUserWords = movieWords.filter(
-      (item) => item && !Number(item) && !userWordsMap[item.the_word]
+      (item) => item && !Number(item) && !userWordsToExclude[item.the_word]
     );
+    const REQUESTED_LEVELS_MAP = {
+      Beginner: level?.includes('Beginner'),
+      Intermediate: level?.includes('Intermediate'),
+      Advanced: level?.includes('Advanced'),
+    }
+    console.log('REQUESTED_LEVELS_MAP', REQUESTED_LEVELS_MAP)
+    const wordInfo_list = await mongoose.model(`wordInfos${`__${mediaLang || 'en'}__s`}`, wordInfos.schema).find({ the_word: movieWordsWithoutUserWords.map(item => item.the_word) })
+    const wordInfo_map = wordInfo_list.reduce((acc, item) => ((acc[item.the_word] = item), acc), {})
+    // const EN_LEVELS_OCCURRENCE_MAP = LEVEL_TO_OCCURRENCE_MAP['en']
+    const movieWordsFiltered = movieWordsWithoutUserWords.filter((item) => {
+      // return REQUESTED_LEVELS_MAP[wordInfo_map[item.the_word]?.level]
+      const wordInfo = wordInfo_map[item.the_word]
+      if (wordInfo) {
+        const occurrenceCount = wordInfo_map[item.the_word]?.occuranceCount
+
+        if (wordInfo?.level) {
+          return REQUESTED_LEVELS_MAP[wordInfo.level]
+        }
+
+        let levelByOccurrence = ''
+        if (occurrenceCount > 10000) {
+          levelByOccurrence = 'Beginner'
+        }
+        if (occurrenceCount < 15000) {
+          levelByOccurrence = 'Intermediate'
+        }
+        if (occurrenceCount < 5000) {
+          levelByOccurrence = 'Advanced'
+        }
+        return REQUESTED_LEVELS_MAP[levelByOccurrence]
+        // console.log('item.the_word', item.the_word)
+        // let level = wordInfo.level
+        // if (!level) {
+        //   if (occurrenceCount > EN_LEVELS_OCCURRENCE_MAP.Beginner) {
+        //     level = 'Beginner'
+        //   } 
+        //   if (occurrenceCount < EN_LEVELS_OCCURRENCE_MAP.Beginner && occurrenceCount > EN_LEVELS_OCCURRENCE_MAP.Intermediate) {
+        //     level = 'Intermediate'
+        //   } 
+        //   if (occurrenceCount < EN_LEVELS_OCCURRENCE_MAP.Intermediate && occurrenceCount < EN_LEVELS_OCCURRENCE_MAP.Advanced) {
+        //     level = 'Advanced'
+        //   }
+        // }
+        // return REQUESTED_LEVELS_MAP[level]
+      } else {
+        return false
+      }
+    }).map(item => ({ ...item, occurrence: wordInfo_map[item.the_word].occuranceCount }))
+    // console.log('movieWordsFiltered', movieWordsFiltered)
+    // const movieWordsUnduplicated = movieWordsFiltered
     const movieWordsUnduplicated = Object.values(
-      movieWordsWithoutUserWords.reduce(
-        (acc, item) => ((acc[item.the_word] = item), acc),
+      movieWordsFiltered.reduce(
+        (acc, item) => (!acc[item.the_word] && (acc[item.the_word] = item), acc),
         {}
       )
     );
-    res.status(200).send(movieWordsUnduplicated.sort((a, b) => a.startTime - b.startTime));
+    const sorted = movieWordsUnduplicated.sort((a, b) => {
+      if (sort === 'Easy') {
+        return b.occurrence - a.occurrence
+      } else if (sort === 'Hard') {
+        return a.occurrence - b.occurrence
+      } else {
+        a.startTime - b.startTime
+      }
+    })
+    // console.log('sort', sort, movieWordsUnduplicated)
+    res.status(200).send(sorted);
   } catch (err) {
+    console.log('f error', err.message)
     res.status(500).send(err.message);
   }
 });
+
+app.post("/self_words_increment", requireAuth, async (req, res) => {
+  try {
+    const { language } = req.query;
+    const { learninglang } = req.headers;
+    const User = users_model;
+    const _id = req.userId;
+    const wordListKey = learninglang || language ? `${learninglang || language}_words` : "words";
+    console.log('wordListKey', wordListKey)
+    const updatedWordOrWordsArray = req.body;
+    // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
+    const user = await User.findById(_id);
+    if (!user) {
+      res.statusCode(404).send("Requested user not found");
+    }
+    const updatedWordsMap = !Array.isArray(updatedWordOrWordsArray)
+      ? [updatedWordOrWordsArray]
+      : updatedWordOrWordsArray.reduce(
+        (acc, item) => ((acc[item.the_word] = item), acc),
+        {}
+      );
+    console.log("updatedWordsMap", updatedWordsMap);
+    const userWords = user[wordListKey] || [];
+    console.log("userWords.length", userWords.length);
+    // console.log('words', words)
+    userWords.forEach((userWord) => {
+      const updatedWordMatch = updatedWordsMap[userWord.the_word];
+      delete updatedWordsMap[userWord.the_word];
+      if (updatedWordMatch) {
+        userWord = updatedWordMatch;
+      }
+    });
+    const update = {
+      _id,
+      updatedTime: Date.now(),
+    };
+    const addedNewWordsArray = Object.values(updatedWordsMap);
+    update[wordListKey] = addedNewWordsArray.concat(userWords);
+    console.log("update", update);
+    // console.log('update', update)
+    console.log("_id", _id);
+    await User.findByIdAndUpdate(_id, update);
+
+    res.status(200).send(update.words);
+  } catch (err) {
+    console.log("ERRORED: ", err);
+    res.status(500).send(err.message);
+  }
+})
 
 app.post("/self_words", requireAuth, async (req, res) => {
   try {
@@ -355,6 +796,7 @@ app.post("/self_words", requireAuth, async (req, res) => {
 
     const updatedWordOrWordsArray = req.body;
     // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
+    console.log('wordListKey', wordListKey)
     const user = await User.findById(_id);
     if (!user) {
       res.statusCode(404).send("Requested user not found");
@@ -417,7 +859,7 @@ app.get("/self_words/:listType", requireAuth, async (req, res) => {
     const userLists = sortByLearningState(userWords)
     userWordsByType = userLists[listType + 'List']
 
-    res.status(200).json(userWordsByType);
+    res.status(200).json(userWords);
 
   } catch (error) {
     console.error(error);
@@ -452,7 +894,7 @@ app.get("/subtitles_v2", async (req, res) => {
   }
 });
 
-app.get("/subtitles", async (req, res) => {
+app.get("/subtitles_v1", async (req, res) => {
   const mediaLang = "en";
   const defaultTranslateLanguage = "ru";
   try {
@@ -517,7 +959,7 @@ createFileRoute(app, "clipFiles");
 createCRUDEndpoints("users");
 createCRUDEndpoints("movies");
 createCRUDEndpoints("playList");
-// createCRUDEndpoints('subtitles');
+createCRUDEndpoints('subtitles');
 // createCRUDEndpoints('clips');
 // createCRUDEndpoints('quizzes');
 // createCRUDEndpoints('words');
@@ -617,7 +1059,6 @@ function getHighestExistingQualityPathForTitle(title, chosenQuality) {
       "movieFiles",
       `${title}.${QUALITY_OPTIONS[index]}.mp4`
     );
-    console.log('videoPath' + index, videoPath)
 
     if (fs.existsSync(videoPath)) {
       return videoPath;
@@ -658,13 +1099,28 @@ async function findSubtitlesWithWord(word, mediaLang = "en", limit = 10) {
         { $unwind: "$subtitles" },
         { $match: { "subtitles.usedWords": word, mediaLang } },
         {
+          $addFields: {
+            mediaIdObject: { $toObjectId: "$mediaId" }, // Convert mediaId string to ObjectId
+          },
+        },
+        {
+          $lookup: {
+            from: "movies", // The name of the movies collection in MongoDB
+            localField: "mediaIdObject", // Field in subtitles_model that matches a field in movies
+            foreignField: "_id", // Field in movies collection to join on
+            as: "movieDetails", // The name of the field to store the joined data
+          },
+        },
+        {
           $project: {
             _id: 0,
             id: "$subtitles.id",
             text: "$subtitles.text",
             subtitleInfoId: "$_id",
-            youtubeUrl: "$youtubeUrl",
-            mediaTitle: "$mediaTitle",
+            youtubeUrl: { $arrayElemAt: ["$movieDetails.youtubeUrl", 0] }, // Accessing first matched movie
+            vkVideoEmbed: { $arrayElemAt: ["$movieDetails.vkVideoEmbed", 0] },
+            mediaLabel: { $arrayElemAt: ["$movieDetails.mediaLabel", 0] },
+            mediaId: "$mediaId",
             mediaSrc: "$mediaSrc",
             startTime: "$subtitles.startTime",
             endTime: "$subtitles.endTime",
@@ -672,6 +1128,7 @@ async function findSubtitlesWithWord(word, mediaLang = "en", limit = 10) {
         },
       ])
       .limit(Number(limit));
+    console.log("OCCURR", results.filter(item => item.mediaTitle === 'frozen'))
     return results;
   } catch (err) {
     console.error(err);

@@ -245,7 +245,6 @@ async function promptSubtitlesOpenAi(prompt, itemsToProcess, existingProcessedSu
       // model: 'gpt-4o', // https://platform.openai.com/docs/models
     });
 
-    console.log('res', chatCompletion)
     console.log('choices[0].message.content', chatCompletion.choices[0].message.content)
 
     const promptResponse = chatCompletion.choices[0].message.content;

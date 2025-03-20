@@ -208,11 +208,11 @@ function getWordInfoPromptByLanguage(the_word, langCode) {
 
     const finalPrompt = `${prompt}
 OPTIONAL_RESPONSE_VALUES: ${OPTIONAL_VALUES}
+e.g.
+input ${SAMPLE_INPUT_STRINGIFIED}
+should respond with ${SAMPLE_RESPONSE_STRINGIFIED}
 
-SAMPLE_INPUT: ${SAMPLE_INPUT_STRINGIFIED}
-SAMPLE_RESPONSE: ${SAMPLE_RESPONSE_STRINGIFIED}
-
-REAL_INPUT: ${JSON.stringify(input)}
+INPUT: ${JSON.stringify(input)}
 `
     console.log('PROMPT for ' + the_word, finalPrompt)
     return finalPrompt

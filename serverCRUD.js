@@ -208,6 +208,8 @@ function getFilterFromQuery(query) {
     let queryValueJSON;
     try {
       queryValueJSON = JSON.parse(queryValue)
+      // console.log('queryValueJSON', queryValueJSON)
+
       if (queryValueJSON !== null) {
         query[key] = queryValueJSON;
       }
