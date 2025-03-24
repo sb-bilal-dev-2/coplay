@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
 
-const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, startTime, scale = 1.2 }) => {
-  const videoId = videoIdOrUrl.split('embed/')[1]
+const YoutubePlayer = ({ videoIdOrUrl = "", controls, autoplay, muted, onTimeUpdate, startTime, scale = 1.2 }) => {
+  const videoId = videoIdOrUrl?.split('embed/')[1] || ""
   // const initTime = parseInt((urlParams?.get('t') || '0').replace('s', ''));
 
   const player = useRef(null);
@@ -53,7 +53,7 @@ const YoutubePlayer = ({ videoIdOrUrl, controls, autoplay, muted, onTimeUpdate, 
 
     if (!window.YT) {
       const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
+      tag.src = "https://www.youtube.com/iframe_api" || "";
       document.head.appendChild(tag);
       window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     } else {

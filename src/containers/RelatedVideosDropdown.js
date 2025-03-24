@@ -269,7 +269,7 @@ export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => 
             className="RelatedVideosMenu px-4 pt-4 overflow-scroll"
             ref={outsideClickElementRef}
           >
-            <h4 className="text-left">{`${selected_text}[${wordInfo?.pronounciation}]${wordInfo?.shortDefinitions[localStorage.getItem("mainLanguage") || 'en']}`}</h4>
+            <h4 className="text-left">{`${selected_text}[${wordInfo?.pronounciation}]${wordInfo?.shortDefinitions && wordInfo?.shortDefinitions[localStorage.getItem("mainLanguage") || 'en']}`}</h4>
             <p>{wordInfo?.shortExplanations && wordInfo.shortExplanations[localStorage.getItem("mainLanguage") || 'en']}</p>
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {!!wordOccurrences.length && (

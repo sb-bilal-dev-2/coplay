@@ -396,13 +396,24 @@ const Quiz = () => {
           {currentOccurance?.mediaId && !loading && (
             <>
               {currentOccurance?.youtubeUrl ?
-                <YoutubePlayer
-                  videoIdOrUrl={currentOccurance?.youtubeUrl}
-                  autoplay
-                  scale={1}
-                  startTime={currentOccurance?.startTime}
-                // onTimeUpdate={handleTimeUpdate}
-                />
+                // <YoutubePlayer
+                //   videoIdOrUrl={currentOccurance?.youtubeUrl}
+                //   autoplay
+                //   scale={1}
+                //   startTime={currentOccurance?.startTime}
+                // // onTimeUpdate={handleTimeUpdate}
+                // />
+                <div style={{ overflow: 'hidden', height: '100%', width: '100%', position: 'relative' }}>
+                  <div style={{ height: '140%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${40 / 4}%` }}>
+                    <iframe
+                      style={{ height: '100%', width: '100%' }}
+                      src={currentOccurance?.youtubeUrl + '?autoplay=1&start=' + Math.floor(currentOccurance?.startTime / 1000)}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
+                    />
+                  </div>
+                </div>
+
+                // <></>
                 :
                 <VkVideoInit
                   scale={1}

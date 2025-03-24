@@ -13,12 +13,11 @@ import { useDispatch } from "react-redux";
 import { selectText } from "../../store";
 import { convertQueryObjectToCommaSeparatedString } from "../../utils/objectToQuery";
 import YoutubePlayer from "../../components/YoutubePlayer";
-import CircularMenu, { StarRating } from "../../components/CircularMenu";
 import { getPronFunc } from "../../utils/pron";
 
 const StarButton = ({ percent = 40, highlighted, onClick }) => {
   return (
-    <button className="relative w-6 h-4" onClick={onClick}>
+    <button className="relative w-6 h-4" style={{ transform: 'rotate(-75deg) translateX(-10%)' }} onClick={onClick}>
       {/* Empty Star */}
       <i className={`fa-regular fa-star absolute top-0 left-0 w-full h-full text-xl ${highlighted ? "text-yellow-300" : "text-gray-100"}`}></i>
 
