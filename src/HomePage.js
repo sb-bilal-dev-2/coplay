@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 import HorizontalScrollMenu, { TagsScroll } from "./components/HorizontalScrollMenu";
@@ -13,6 +13,7 @@ import { VkVideoInit } from "./containers/ShortVideo";
 import { HorizontalScrollCarousel } from "./containers/WordCollectionCarousel";
 import { degausser } from "./utils/degausser";
 import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
+import { useOutsideAlerter } from "./components/useOutsideAlerter";
 
 const HomePage = () => {
   // const { items: videos } = useDynamicReducer("movies");
@@ -32,6 +33,39 @@ const HomePage = () => {
       <PWAInstall />
       <Onboarding />
       <StickyHeader />
+      <HorizontalScrollCarousel
+        dotPosition="bottom"
+        active
+        items={[{ text: "Ni hao.", translated: "Hello." }, { text: "Ni hao.", translated: "Hello." }]}
+        renderItem={({ text, translated }) => {
+          return (
+            <div className="text-4xl">
+              <h4 className="color-secondary">
+                {text}
+              </h4>
+              <h3 className="text-gray-800">
+                {translated}
+              </h3>
+            </div>
+          )
+        }} />
+      <div>
+
+      </div>
+      <div className="Hero grid gap-2 grid-flow-col p-4 radius-4">
+        <Link to="/quiz/repeating?listType=self_words" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa-regular fa-star color-secondary"></i>
+          <p className="text-sm text-gray-700">Repeat</p>
+        </Link>
+        <Link className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa-regular fa-message color-secondary"></i>
+          <p className="text-sm text-gray-700">Dialogs</p>
+        </Link>
+        <Link className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa-regular fa-clock color-secondary"></i>
+          <p className="text-sm text-gray-700">History</p>
+        </Link>
+      </div>
       {/* <Hero /> */}
       {/* <VideoFrame time={500} title={'frozen'} /> */}
       <div className="pb-2">
@@ -60,7 +94,7 @@ const HomePage = () => {
             <HorizontalScrollMenu items={clips} baseRoute={"movie"} card_className="full" />
           </div>
           <div className="">
-            <h2 className="home-page__title">{t("Words and Phrases")}</h2>
+            {/* <h2 className="home-page__title">{t("Words and Phrases")}</h2> */}
             {/* <InfiniteScroll
               requestData={async () => (await api().get('/rec?category=Phrases'))}
               renderItem={(item, activeIndex, index) => {
@@ -69,7 +103,7 @@ const HomePage = () => {
                 return <Phrases item={item} isActive={activeIndex === index} />
               }}
             /> */}
-            <InfiniteScroll item={movies} />
+            {/* <InfiniteScroll item={movies} /> */}
           </div>
         </>
       )}
@@ -106,16 +140,6 @@ const HomePage = () => {
               </div>
 
             )
-          }}
-        />
-      )}
-      {category === 'Phrases' && (
-        <InfiniteScroll
-          requestData={async () => (await api().get('/rec?category=Phrases'))}
-          renderItem={(item, activeIndex, index) => {
-            console.log('item', item)
-
-            return <Phrases item={item} isActive={activeIndex === index} />
           }}
         />
       )}
@@ -301,7 +325,7 @@ function useGetPopular(category) {
   const request_podcasts = async () => {
     api().get('/youtube_popular?category=' + category)
       .then((new_podcasts) => set_podcasts(new_podcasts.results.videos))
-      .catch((err) => {})
+      .catch((err) => { })
   }
   useEffect(() => {
     request_podcasts()

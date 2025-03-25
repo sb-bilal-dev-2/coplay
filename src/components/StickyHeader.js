@@ -15,13 +15,18 @@ import { BarsWatchAgain, YourVideosIcon } from "./BarsSmall";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
-  const outsideSearchClickWrapperRef = useRef(null);
   const loggedIn = localStorage.getItem("token");
   const [isNavMenuVisible, setIsNavMenuVisible] = useState(false);
   const isSticky = useSticky();
+  const outsideSearchClickWrapperRef = useRef(null);
   const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState("");
   useOutsideAlerter(outsideSearchClickWrapperRef, () => setSearching(false));
+  const closeButtonRef = useRef(null)
+  const youtubeEmbedUrlFromSearch =
+    (search.includes('youtube.com/embed/') && search)
+    || (search.includes('www.youtube.com/watch?v=') && `https://www.youtube.com/embed/${search.split('https://www.youtube.com/watch?v=')[1]}`)
+    || (search.includes('https://youtu.be/') && `https://www.youtube.com/embed/${search.split('https://youtu.be/')[1]}`)
 
   const { items: videoItems, getItems: getVideos } =
     useDynamicReducer("movies");
@@ -38,11 +43,6 @@ const StickyHeader = ({ type = "primary", authPage }) => {
   const location = useLocation();
   const isPricePage = location.pathname.includes("price_page");
   const learningLanguage = localStorage.getItem("learningLanguage");
-  const closeButtonRef = useRef(null)
-  const youtubeEmbedUrlFromSearch =
-    (search.includes('youtube.com/embed/') && search)
-    || (search.includes('www.youtube.com/watch?v=') && `https://www.youtube.com/embed/${search.split('https://www.youtube.com/watch?v=')[1]}`)
-    || (search.includes('https://youtu.be/') && `https://www.youtube.com/embed/${search.split('https://youtu.be/')[1]}`)
 
   return (
     <header
@@ -70,6 +70,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 onClick={() => setSearching(true)}
                 value={search}
                 ref={outsideSearchClickWrapperRef}
+                placeholder=""
                 onChange={(ev) => setSearch(ev.target.value)}
               />
               {!!searching &&
@@ -130,12 +131,12 @@ const StickyHeader = ({ type = "primary", authPage }) => {
             <div className="user-menu">
               {loggedIn ? (
                 <div className="flex items-center select-none">
-                  <Link to="/quiz/repeating?listType=self_words" className="relative">
-                    {/* <i class="fa-solid fa-book-bookmark m-2 text-xl hover:text-orangered" /> */}
+                  {/* <Link to="/quiz/repeating?listType=self_words" className="relative">
+                    <i class="fa-regular pt-1 pr-1 fa-star text-xl hover:text-orangered" />
                     <button className="block">
                       <YourVideosIcon />
                     </button>
-                  </Link>
+                  </Link> */}
                   <UserNav
                     setIsNavMenuVisible={setIsNavMenuVisible}
                     isNavMenuVisible={isNavMenuVisible}

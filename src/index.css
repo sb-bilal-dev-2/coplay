@@ -11,18 +11,30 @@
   display: flex;
   flex-direction: column;
 
-  --color-primary: rgba(255, 60, 0, 0.95);
+  --color-primary: rgba(255, 77, 0, 0.906);
   --color-secondary: #ffa75e;
   --color-white: #fff6ff;
-  --color-indigo: rgb(144 138 243);
+  --color-indigo: rgb(154, 149, 241);
 }
 
 .bg-indigo {
-  background: rgb(144 138 243);
+  background: rgb(147, 143, 233);
+}
+
+.bg-orangewhite {
+  background: rgb(255 249 244 / 50%);
 }
 
 .color-primary {
   color: var(--color-primary)
+}
+
+.color-secondary {
+  color: var(--color-secondary)
+}
+
+.color-indigo {
+  color: var(--color-indigo)
 }
 
 html {
