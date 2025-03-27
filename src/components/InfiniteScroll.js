@@ -100,6 +100,10 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
     try {
       const newItems = await fetchData(page); // Your API call
       console.log('newItems', newItems)
+      if (!newItems || !Array.isArray(newItems)) {
+        setLoading(false)
+        setHasMore(false)
+      }
       if (items.find((item) => item.id === newItems[0]?.id) || !newItems.length) {
         setHasMore(false)
         return;

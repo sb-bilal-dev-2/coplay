@@ -90,7 +90,7 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-const TAGS = ['Popular', 'Trending 🔥', 'Music', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
+const TAGS = ['Trending 🔥', 'Popular', 'Music', 'Cartoon', 'Podcasts', 'Series'] // add 'Courses', 'Interactive',
 
 export const TagsScroll = ({ tags = TAGS, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);

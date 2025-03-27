@@ -33,40 +33,7 @@ const HomePage = () => {
       <PWAInstall />
       <Onboarding />
       <StickyHeader />
-      <HorizontalScrollCarousel
-        dotPosition="bottom"
-        active
-        items={[{ text: "Ni hao.", translated: "Hello." }, { text: "Ni hao.", translated: "Hello." }]}
-        renderItem={({ text, translated }) => {
-          return (
-            <div className="text-4xl">
-              <h4 className="color-secondary">
-                {text}
-              </h4>
-              <h3 className="text-gray-800">
-                {translated}
-              </h3>
-            </div>
-          )
-        }} />
-      <div>
-
-      </div>
-      <div className="Hero grid gap-2 grid-flow-col p-4 radius-4">
-        <Link to="/quiz/repeating?listType=self_words" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
-          <i className="fa-regular fa-star color-secondary"></i>
-          <p className="text-sm text-gray-700">Repeat</p>
-        </Link>
-        <Link className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
-          <i className="fa-regular fa-message color-secondary"></i>
-          <p className="text-sm text-gray-700">Dialogs</p>
-        </Link>
-        <Link className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
-          <i className="fa-regular fa-clock color-secondary"></i>
-          <p className="text-sm text-gray-700">History</p>
-        </Link>
-      </div>
-      {/* <Hero /> */}
+      <Hero />
       {/* <VideoFrame time={500} title={'frozen'} /> */}
       <div className="pb-2">
         <TagsScroll firstSticky onIndexUpdate={(item) => set_category(item)} />
@@ -255,36 +222,67 @@ function CarouselPost({ postItem, isActive }) {
   )
 }
 
-const BASE_BUCKET_URI = BASE_SERVER_URL + "/movieFiles";
+
 function Hero() {
   const { t } = useTranslation();
+  const INITIAL_HEADER_BY_LANG = {
+    'zh-CN': [{ text: "Ni hao.", trans: { en: "Hello.", uz: "Salom." }}],
+    'ko': [{ text: "Annageseo", trans: { en: "Hello.", uz: "Salom." }}],
+    'en': [{ text: "Hello", trans: { en: "Hello.", uz: "Salom." }}]
+  }
+  
+  const [phrases, set_phrases] = useState([])
+  async function getPhrases() {
+    try {
+      const new_phrases = (await api().get('/rec?category=Phrases')).results
+      console.log('new_phrases', new_phrases)
+      set_phrases(new_phrases)
+    } catch(err) {
 
+    }
+  }
+  useEffect(() => {
+    getPhrases()
+  }, [])
+  console.log('phrases', phrases)
   return (
-    <div className="relative heroContainer">
-      <img
-        className="w-full"
-        src={`${BASE_BUCKET_URI}/frozen.hero.jpg`}
-        alt="American Nightmare banner placeholder"
+    <>
+      <HorizontalScrollCarousel
+        dotPosition="bottom"
+        active
+        items={INITIAL_HEADER_BY_LANG[localStorage.getItem('learningLanguage')].concat(phrases)}
+        renderItem={({ text, trans }) => {
+          return (
+            <div className="text-4xl">
+              <h4 className="color-secondary" translate="no">
+                {text}
+              </h4>
+              <h3 className="text-gray-800">
+                {trans && trans['uz']}
+              </h3>
+            </div>
+          )
+        }}
       />
-      <div className="info absolute bottom-20 left-10">
-        <h1 className="text-4xl font-bold mb-4">
-          {t("learn english with Frozen")}
-        </h1>
-        <div className="flex">
-          <button className="flex items-center rounded-sm bg-white text-black px-4 py-2 mr-4">
-            <Link to={"/movie/frozen"}>
-              <i className="fas fa-play mr-2">
-                <b className="ml-2 uppercase font-bold">{t("play")}</b>
-              </i>
-            </Link>
-          </button>
-          <button className="primary-button-2 flex items-center px-4 py-2">
-            <i className="fas fa-info-circle mr-2"></i>
-            {t("Frozen Vocab")}
-          </button>
-        </div>
+      <div className="Hero grid gap-2 grid-flow-col p-4 radius-4">
+        <Link to="/quiz/repeating?listType=self_words" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa-regular fa-star color-secondary"></i>
+          <p className="text-sm text-gray-700">Repeat</p>
+        </Link>
+        <Link to="/stories" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa fa-book-open color-secondary"></i>
+          <p className="text-sm text-gray-700">Stories</p>
+        </Link>
+        <Link to="/dialogs" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa-regular fa-message color-secondary"></i>
+          <p className="text-sm text-gray-700">Dialogs</p>
+        </Link>
+        <Link to="/history" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+          <i className="fa-regular fa-clock color-secondary"></i>
+          <p className="text-sm text-gray-700">History</p>
+        </Link>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -309,10 +307,10 @@ const Phrases = ({ item, isActive }) => {
       {!!occurrences.length && (
         <>
           <span className="px-2" style={{ color: '#333', fontSize: '1em', fontWeight: 'bold' }}>
-            <span>{item.the_word}</span><span>{item.translation && '- ' + item.translation}</span>
+            <span translate="no">{item.the_word}</span><span>{item.translation && '- ' + item.translation}</span>
           </span>
           <br />
-          <span>{item.pronounciation}</span>
+          <span translate="no">{item.pronounciation}</span>
           <HorizontalScrollMenu2 isActive={isActive} items={occurrences} baseRoute={"movie"} mainText={item.the_word} />
         </>
       )}

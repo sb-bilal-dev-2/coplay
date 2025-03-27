@@ -70,7 +70,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 onClick={() => setSearching(true)}
                 value={search}
                 ref={outsideSearchClickWrapperRef}
-                placeholder=""
+                placeholder="Search & Add"
                 onChange={(ev) => setSearch(ev.target.value)}
               />
               {!!searching &&
