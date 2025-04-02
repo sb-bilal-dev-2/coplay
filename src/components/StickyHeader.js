@@ -146,7 +146,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 </div>
               ) : (
                 <button>
-                  <Link to="/auth/login">
+                  <Link to="/auth/login" className="color-indigo-2">
                     <b>{t("login")}</b>
                   </Link>
                 </button>
@@ -162,7 +162,7 @@ const colors = {
   A: "#cc3333", // Light Red
   B: "#33cc33", // Light Green
   C: "#3333cc", // Light Blue
-  D: "#cccc33", // Light Yellow
+  D: "rgb(224 224 0)", // Light Yellow
   E: "#cc33cc", // Light Magenta
   F: "#33cccc", // Light Cyan
   // Add more mappings for other letters as needed
@@ -215,7 +215,7 @@ const UserNav = ({ isNavMenuVisible, setIsNavMenuVisible }) => {
 
   return (
     <div ref={outsideNavClickWrapperRef}>
-      <button className="block ml-2 h-8 w-8 text-sm rounded-full font-bold" style={{ background: defaultColor }} onClick={() => setIsNavMenuVisible(!isNavMenuVisible)}>
+      <button className="block ml-2 h-8 w-8 text-sm rounded-full font-bold color-indigo-2" style={{ background: defaultColor }} onClick={() => setIsNavMenuVisible(!isNavMenuVisible)}>
         {firstLetter}
       </button>
       {isNavMenuVisible && (

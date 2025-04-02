@@ -257,7 +257,7 @@ function Hero() {
               <h4 className="color-secondary" translate="no">
                 {text}
               </h4>
-              <h3 className="text-gray-800">
+              <h3 className="text-gray-700">
                 {trans && trans['uz']}
               </h3>
             </div>
@@ -265,21 +265,21 @@ function Hero() {
         }}
       />
       <div className="Hero grid gap-2 grid-flow-col p-4 radius-4">
-        <Link to="/quiz/repeating?listType=self_words" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+        <Link to="/quiz/repeating?listType=self_words" className="bg-white border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
           <i className="fa-regular fa-star color-secondary"></i>
-          <p className="text-sm text-gray-700">Repeat</p>
+          <p className="text-sm text-gray-600">Repeat</p>
         </Link>
-        <Link to="/stories" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+        <Link to="/stories" className="bg-white border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
           <i className="fa fa-book-open color-secondary"></i>
-          <p className="text-sm text-gray-700">Stories</p>
+          <p className="text-sm text-gray-600">Stories</p>
         </Link>
-        <Link to="/dialogs" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+        <Link to="/dialogs" className="bg-white border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
           <i className="fa-regular fa-message color-secondary"></i>
-          <p className="text-sm text-gray-700">Dialogs</p>
+          <p className="text-sm text-gray-600">Dialogs</p>
         </Link>
-        <Link to="/history" className="bg-orangewhite border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px rgb(20, 20, 20, 0.05)' }}>
+        <Link to="/history" className="bg-white border p-2 rounded-lg text-center" style={{ border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
           <i className="fa-regular fa-clock color-secondary"></i>
-          <p className="text-sm text-gray-700">History</p>
+          <p className="text-sm text-gray-600">History</p>
         </Link>
       </div>
     </>

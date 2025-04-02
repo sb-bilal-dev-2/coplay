@@ -12,9 +12,10 @@
   flex-direction: column;
 
   --color-primary: rgba(255, 77, 0, 0.906);
-  --color-secondary: #ffa75e;
+  --color-secondary: #ffaa72;
   --color-white: #fff6ff;
   --color-indigo: rgb(154, 149, 241);
+  --color-indigo-2: rgb(125 123 160);
 }
 
 .bg-indigo {
@@ -22,7 +23,15 @@
 }
 
 .bg-orangewhite {
-  background: rgb(255 249 244 / 50%);
+  background: rgb(255 252 247);
+}
+
+/* .bg-white {
+
+} */
+
+.bg-redwhite {
+  background: rgb(255, 252, 252);
 }
 
 .color-primary {
@@ -35,6 +44,10 @@
 
 .color-indigo {
   color: var(--color-indigo)
+}
+
+.color-indigo-2 {
+  color: var(--color-indigo-2);
 }
 
 html {
@@ -59,9 +72,6 @@ h6 {
   font-size: initial;
   font-weight: bold;
   font-family: "Arial Black";
-}
-
-* {
   color: #353530;
 }
 
