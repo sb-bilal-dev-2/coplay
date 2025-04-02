@@ -28,7 +28,7 @@ const dataReducer = (uri) => (state, action) => {
                Array.isArray(action.payload) ? action.payload : [action.payload]
             const items = state.items.filter(item => !newItems.find(ii => ii._id === item._id));
 
-            return { ...state, [uri + 'PUT_REQUESTloading']: false, loading: false, items: newItems.concat(items), [uri + 'PUT_REQUESTerror']: null };
+            return { ...state, [uri + 'PUT_REQUESTloading']: false, loading: false, items: newItems?.concat(items), [uri + 'PUT_REQUESTerror']: null };
         case `${uri}_DELETE_SUCCESS`:
             return { ...state, [uri + 'DELETE_REQUESTloading']: false, loading: false, items: state.items.filter(ii => ii._id !== action.payload._id), [uri + 'DELETE_REQUESTerror']: null };
         default:

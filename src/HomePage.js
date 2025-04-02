@@ -250,7 +250,7 @@ function Hero() {
       <HorizontalScrollCarousel
         dotPosition="bottom"
         active
-        items={INITIAL_HEADER_BY_LANG[localStorage.getItem('learningLanguage')].concat(phrases)}
+        items={INITIAL_HEADER_BY_LANG[localStorage.getItem('learningLanguage')]?.concat(phrases)}
         renderItem={({ text, trans }) => {
           return (
             <div className="text-4xl">

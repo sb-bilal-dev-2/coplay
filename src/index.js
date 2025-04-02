@@ -32,7 +32,7 @@ import api from "./api";
 import { ShortVideo, VkVideoInit } from "./containers/ShortVideo";
 import VideoFrame, { VideoFrameForWord } from "./components/VideoFrame";
 import WordCollection from "./containers/WordCollection";
-import { Dialog, Dialogs, History } from "./containers/Dialogs";
+import { Dialog, Dialogs, History, Story } from "./containers/Dialogs";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -87,7 +87,7 @@ const router = createBrowserRouter(
       />
       <Route path="dialogs" element={<Dialogs />} />
       <Route path="dialogs/:dialogId" element={<Dialog />} />
-      <Route path="stories" element={<Dialogs />} />
+      <Route path="stories" element={<Story />} />
       <Route path="stories/:dialogId" element={<Dialog />} />
       <Route path="history" element={<History />} />
       <Route path="word_collection/:list" element={<WordCollection />} />

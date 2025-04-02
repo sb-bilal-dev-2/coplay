@@ -61,6 +61,10 @@ h6 {
   font-family: "Arial Black";
 }
 
+* {
+  color: #353530;
+}
+
 h4 {
   color: var(--color-primary);
 }

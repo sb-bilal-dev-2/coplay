@@ -231,6 +231,14 @@ const MoviePage = () => {
     }
   }
 
+  async function updateUserHistory() {
+    try {
+      await api().get(`/user_history`, [videoId])
+    } catch(err) {
+      
+    }
+  }
+
   useEffect(() => {
     if (youtubeIdOnVideo && !subtitleParsed) {
       initYoutubeVideo()
