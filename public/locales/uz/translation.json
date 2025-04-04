@@ -32,11 +32,10 @@
   "month": "{{item}} Oy",
   "buy": "sotib olish",
   "awesome": "Ajoyib",
-  "add new languages": "Yangi tillar qo'shing",
-  "add new language": "Yangi til qo'shing",
+  "add new language": "Til",
   "learning": "O'rganilayotgan tillar",
-  "native language": "Asosiy til",
-  "want to learn": "Tillar",
+  "native language": "Qaysi tilda or'ganasiz?",
+  "want to learn": "Qaysi Tilni O'rganmoqchisiz?",
   "connect to telegram": "Telegram Bot",
   "sign in with Telegram" : "Telegram"
 

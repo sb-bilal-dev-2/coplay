@@ -11,12 +11,16 @@ export const LANGUAGES = [
   { id: 1, label: "English", iso: "en", flag: "./USA.webp" },
   { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
   { id: 3, label: "Chinese", iso: "zh-CN", flag: "./china.png" },
+  { id: 3, label: "Turkish", iso: "tr", flag: "./country_flags/tr.svg" },
 ];
 
 export const APP_LANGUAGES = [
   { id: "en", iso: "en", label: "English" },
   { id: "uz", iso: "uz", label: "O'zbekcha" },
   { id: "ru", iso: "ru", label: "Русский" },
+  // { id: "tr", iso: "tr", label: "Türkçe" },
+  // { id: "kz", iso: "kz", label: "Қазақ тілі" },
+  // { id: "kz", iso: "kz", label: "Қазақ тілі" },
 ];
 
 const findFormLanguagesList = (selectedLanguage) => {
@@ -178,7 +182,7 @@ const ChooseLanguageModal = ({
       <h1 className="font-bold text-white">{t("add new language")}</h1>
 
       <div className="m-auto mt-10" style={{ maxWidth: '280px' }}>
-        <p className="font-bold mb-2">{t("native language")}</p>
+        <p className="text-gray-100 font-bold mb-2">{t("native language")}</p>
         <div className="py-2">
           {APP_LANGUAGES.map((option) => (
             <span
@@ -196,7 +200,7 @@ const ChooseLanguageModal = ({
       </div>
 
       <div className="m-auto mt-10" style={{ maxWidth: '280px' }}>
-        <p className="font-bold mb-1 ">{t("want to learn")}:</p>
+        <p className="text-gray-100 font-bold mb-1 ">{t("want to learn")}</p>
         {LANGUAGES.map((option) => (
           <li key={option.id} className="list-none flex items-center">
             <button
