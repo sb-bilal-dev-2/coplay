@@ -227,9 +227,9 @@ div[data-vjs-player="true"] > div > video-js {
     bottom: 0;
     height: 80dvh;
 
-    * {
+    /* * {
         color: #fff;
-    }
+    } */
 
     h4 {
         color: var(--color-primary);

@@ -41,8 +41,8 @@ const HorizontalScrollMenu2 = ({ items, baseRoute, card_className = 'vertical', 
                     src={`https://img.youtube.com/vi/${youtubeUrl.split('v=')[1]}/hqdefault.jpg`}
                   />
                 } */}
-                  <h2 style={{ right: '4px', position: 'absolute', zIndex: '10', textShadow: '1px 1px #333' }}>{secondsToDisplayTime(startTime / 1000)}</h2>
-                  <p style={{ fontSize: '0.8em', textAlign: 'right', padding: '4px', position: 'absolute', top: '20px', zIndex: '10', textShadow: '1px 1px #333' }}>{degausser(text)}</p>
+                  <h2 style={{ right: '4px', position: 'absolute', zIndex: '10', textShadow: '1px 1px #333', color: 'white'}}>{secondsToDisplayTime(startTime / 1000)}</h2>
+                  <p style={{ fontSize: '0.8em', textAlign: 'right', padding: '4px', position: 'absolute', top: '20px', zIndex: '10', textShadow: '1px 1px #333', color: 'white'}}>{degausser(text)}</p>
                   <p style={{ bottom: '0', position: 'absolute', right: '4px', maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', maxHeight: '54px', fontSize: '0.7em', textAlign: 'right', zIndex: '10', textShadow: '1px 1px #333' }}>{(label || title)?.replaceAll('_', ' ')}</p>
                   {/* {id !== hoveringItemIndex && (
                   <VideoFrame

@@ -74,7 +74,7 @@ export const Story = () => {
 
     return <div className="page-container home-page">
         <StickyHeader />
-        <h1 className="text-xl color-secondary">Dialog</h1>
+        <h1 className="text-xl color-primary">Dialog</h1>
         <div
             className=''
             onClick={() => {

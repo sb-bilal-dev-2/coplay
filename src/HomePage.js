@@ -254,7 +254,7 @@ function Hero() {
         renderItem={({ text, trans }) => {
           return (
             <div className="text-4xl">
-              <h4 className="color-secondary" translate="no">
+              <h4 className="color-primary" translate="no">
                 {text}
               </h4>
               <h3 className="text-gray-700">
