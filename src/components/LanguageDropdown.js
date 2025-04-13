@@ -12,6 +12,7 @@ export const LANGUAGES = [
   { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
   { id: 3, label: "Chinese", iso: "zh-CN", flag: "./china.png" },
   { id: 3, label: "Turkish", iso: "tr", flag: "./country_flags/tr.svg" },
+  { id: 3, label: "Russian", iso: "ru", flag: "./country_flags/ru.svg" },
 ];
 
 export const APP_LANGUAGES = [

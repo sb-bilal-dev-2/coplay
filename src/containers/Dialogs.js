@@ -60,7 +60,7 @@ export const Story = () => {
 
     async function request_dialog() {
         try {
-            const new_dialog = (await api().get('/dialog')).results
+            const new_dialog = (await api().get('/stories')).results
 
             set_dialog(new_dialog)
         } catch (err) {
@@ -73,8 +73,8 @@ export const Story = () => {
     }, [dialogId])
 
     return <div className="page-container home-page">
-        <StickyHeader />
-        <h1 className="text-xl color-primary">Dialog</h1>
+        <StickyHeader title="Stories" />
+        {/* <h1 className="text-xl color-primary">Stories</h1> */}
         <div
             className=''
             onClick={() => {
@@ -114,7 +114,7 @@ export const Dialog = () => {
 
     return <div className="page-container home-page">
         <StickyHeader />
-        <h1 className="text-xl">Dialog</h1>
+        {/* <h1 className="text-xl">Dialog</h1> */}
         <div className=''>{dialog.map((item) => {
             return <div className='bg-white rounded-xl m-4 p-4'>
                 <p>{item.text}</p>

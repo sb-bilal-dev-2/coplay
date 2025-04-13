@@ -66,7 +66,8 @@ export const pronKorean = function (input) {
 }
 
 const PRON_FUNCTIONS = {
-    'ko': pronKorean
+    'ko': pronKorean,
+    'default': () => undefined
 }
 
 export const getPronFunc = () => {

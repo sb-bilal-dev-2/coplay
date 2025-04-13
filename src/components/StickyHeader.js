@@ -49,10 +49,10 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       className={`sticky-header ${isSticky || searching ? "nav-menu-visible" : ""
         } ${type}`}
     >
-      <Link to="/" className="relative min-h-max min-w-max">
+      <Link to="/" className="relative min-h-max min-w-max flex items-center">
         <button className="block">
           <img
-            style={{ height: '64px', width: '68px' }}
+            style={{ height: '62px', width: '68px', marginLeft: '-4px' }}
             // className="h-12 w-12"
             // src="logo12.png"
             src="logo14.png"

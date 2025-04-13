@@ -258,8 +258,9 @@ const MoviePage = () => {
     if (query !== "") {
       try {
         const list = (await api().get(`/movie_words/${videoId}?${query}`))
+        console.log('videoLength', list.length)
         const listWithPronounciation = await Promise.all(list.map((item) => {
-          const pronounciation = getPronFunc()(item.the_word)
+          const pronounciation = item.pronounciation || getPronFunc()(item.the_word)
 
           return {
             ...item,
@@ -306,6 +307,7 @@ const MoviePage = () => {
   }
   // const [isRelOpen, set_isRelOpen] = useState(false);
   console.log('movieInfo?.youtubeUrl || youtubeIdOnVideo', movieInfo?.youtubeUrl || youtubeIdOnVideo)
+  console.log('movieInfo?.youtubeUrl || youtubeIdOnVideo) && subtitleParsed && videoWords.length', (movieInfo?.youtubeUrl || youtubeIdOnVideo) && subtitleParsed && videoWords.length)
   return (
     <ErrorBoundary>
       <GoBackButton />
