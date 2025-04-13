@@ -22,12 +22,7 @@ const StarButton = ({ percent = 40, highlighted, onClick }) => {
       <i className={`fa-regular fa-star absolute top-0 left-0 w-full h-full text-xl ${highlighted ? "text-yellow-300" : "text-gray-100"}`}></i>
 
       {/* Filled Portion */}
-      <div
-        className="absolute top-0 left-0 w-full overflow-hidden"
-        style={{ height: `${percent}%`, transition: "height 0.5s ease-in-out" }}
-      >
-        <i className="fa-solid fa-star text-yellow-300 w-full h-full text-xl"></i>
-      </div>
+      <i style={{ height: `${percent}%`, transition: "height 0.125s ease-in-out" }} className="fa-solid fa-star text-yellow-300 w-full h-full text-xl absolute top-0 left-0 w-full overflow-hidden"></i>
     </button>
   );
 };
@@ -125,11 +120,10 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
 
   return (
     <div
-      className={`overflow-scroll no-scrollbar
+      className={`overflow-scroll no-scrollbar justify-items-start
         ${vertical ? "absolute h-full" : "bg-black-100 flex w-full"}
         `}
       ref={scrollRef}
-      style={{ justifyItems: "left" }}
     >
       {items.map((item, index) => {
         const active = index === activeIndex
@@ -137,7 +131,7 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
           <div
             onClick={() => { }}
             key={item.id}
-            className={`text-white-100 px-1.5 p-0.5 m-1 ${vertical ? "" : ""}`}
+            className={`text-white-100 px-1.5 p-1 m-1 ${vertical ? "" : ""}`}
             style={{
               alignSelf: "left",
               color: 'white',
@@ -150,13 +144,15 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
               lineHeight: '1'
             }}
           >
-            <InformedText text={item.the_word} />
-            <StarButton
-              percent={(userBookmarks && userBookmarks[item.the_word]?.repeatCount && userBookmarks[item.the_word].repeatCount * 20) || 0}
-              // percent={50}
-              onClick={() => handleBookmarkClick(item, index)}
-              highlighted={userBookmarks && userBookmarks[item.the_word]}
-            />
+            <div className="flex justify-items-center">
+              <InformedText text={item.the_word} />
+              <StarButton
+                percent={(userBookmarks && userBookmarks[item.the_word]?.repeatCount && userBookmarks[item.the_word].repeatCount * 40) || 0}
+                // percent={50}
+                onClick={() => handleBookmarkClick(item, index)}
+                highlighted={userBookmarks && userBookmarks[item.the_word]}
+              />
+            </div>
             <br />
             <span>{item.pronounciation}</span><br />
             <div>
@@ -234,8 +230,8 @@ const MoviePage = () => {
   async function updateUserHistory() {
     try {
       await api().get(`/user_history`, [videoId])
-    } catch(err) {
-      
+    } catch (err) {
+
     }
   }
 

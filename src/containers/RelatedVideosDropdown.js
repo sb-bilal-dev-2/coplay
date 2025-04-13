@@ -1,13 +1,10 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useOutsideAlerter } from '../components/useOutsideAlerter';
-import InfiniteScroll, { InfiniteScrollOccurrences } from '../components/InfiniteScroll';
-import ComposedInfiniteScroll from '../components/InfiniteScroll';
+import InfiniteScroll from '../components/InfiniteScroll';
 import api from '../api';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectText } from '../store';
-import { ShortVideo } from './ShortVideo';
-import { degausser } from '../utils/degausser';
 import HorizontalScrollMenu2 from '../components/HorizontalScrollMenu2';
 
 const RelatedVideosDropdown = ({ videos, isOpen, closeDropdown }) => {
@@ -119,7 +116,7 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
             className="RelatedVideosMenu px-4 pt-4 overflow-scroll"
             ref={outsideClickElementRef}
           >
-            <form
+            <div
               className="RadioButtons p-6 shadow-md rounded-lg max-w-md mx-auto"
             >
 
@@ -207,7 +204,7 @@ export const FilterDropdown = ({ isOpen, closeDropdown, onSubmit, sort_options, 
                   Apply Filters
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -270,7 +267,7 @@ export const WordInfoDropdown = ({ excludeOccurrence = { mediaTitle: '' } }) => 
             ref={outsideClickElementRef}
           >
             <h4 className="text-left">{`${selected_text} - ${wordInfo?.shortDefinitions && wordInfo?.shortDefinitions[localStorage.getItem("mainLanguage") || 'en'] || ''}`}</h4>
-            <h5 className='text-left -mt-2'>[{wordInfo?.pronounciation}]</h5>
+            <h5 className='text-left -mt-2'>{wordInfo?.pronounciation && `[${wordInfo?.pronounciation}]`}</h5>
             <p className='text-indigo-2 mt-1'>{wordInfo?.shortExplanations && wordInfo.shortExplanations[localStorage.getItem("mainLanguage") || 'en'] || ''}</p>
             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 {!!wordOccurrences.length && (

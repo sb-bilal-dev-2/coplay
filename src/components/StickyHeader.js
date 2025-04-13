@@ -3,15 +3,12 @@ import "./StickyHeader.css";
 import { Link, useLocation } from "react-router-dom";
 import { useOutsideAlerter } from "./useOutsideAlerter";
 import useAuthentication from "../containers/Authentication.util";
-import { BASE_SERVER_URL } from "../api";
 import { useTranslation } from "react-i18next";
 import LanguageDropdown from "./LanguageDropdown";
 import { useDynamicReducer } from "../dynamicReducer";
 import { googleLogout } from "@react-oauth/google";
 import api from "../api";
 import { useSelector } from "react-redux";
-import HorizontalScrollMenu from "./HorizontalScrollMenu";
-import { BarsWatchAgain, YourVideosIcon } from "./BarsSmall";
 
 const StickyHeader = ({ type = "primary", authPage }) => {
   const { t } = useTranslation();
@@ -37,11 +34,11 @@ const StickyHeader = ({ type = "primary", authPage }) => {
       item?.label?.toLowerCase().startsWith(search.toLowerCase()) || item?.title?.toLowerCase().includes(search.toLowerCase())
     );
   };
-  const filteredVideos = filterByLabel(videoItems)
-  const filtered_wordCollections = filterByLabel(wordCollections)
+  // const filteredVideos = filterByLabel(videoItems)
+  // const filtered_wordCollections = filterByLabel(wordCollections)
 
   const location = useLocation();
-  const isPricePage = location.pathname.includes("price_page");
+  // const isPricePage = location.pathname.includes("price_page");
   const learningLanguage = localStorage.getItem("learningLanguage");
 
   return (
