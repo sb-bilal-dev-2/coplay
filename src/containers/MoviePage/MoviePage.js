@@ -246,7 +246,7 @@ const MoviePage = () => {
       return;
     }
     requestVideoWords()
-  }, [youtubeIdOnVideo, videoId, subtitleParsed])
+  }, [youtubeIdOnVideo, videoId, subtitleParsed, query])
   console.log('videoWords', videoWords)
   const requestVideoWords = async () => {
     // const getPronounciation = PRONS[mediaLang]
@@ -318,7 +318,7 @@ const MoviePage = () => {
         onSubmit={(new_query_object, ev) => {
           ev?.preventDefault()
           const new_query = convertQueryObjectToCommaSeparatedString(new_query_object)
-
+          console.log('new_query', new_query)
           if (new_query !== query) {
             set_query(new_query)
           }
