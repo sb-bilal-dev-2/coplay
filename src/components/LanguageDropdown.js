@@ -136,7 +136,7 @@ const LanguageDropdown = ({ selectedLanguage, afterLangChange }) => {
   return (
     <div ref={dropdownRef}>
       <button
-        className="border border-none rounded cursor-pointer px-2 mt-1"
+        className="border border-none rounded cursor-pointer pl-2 mt-1"
         onClick={() => toggleDropdown()}
       >
         {selectedOption ? (

@@ -121,7 +121,7 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
   return (
     <div
       className={`overflow-scroll no-scrollbar justify-items-start
-        ${vertical ? "absolute h-full" : "bg-black-100 flex w-full"}
+        ${vertical ? "absolute h-full pt-20" : "bg-black-100 flex w-full pl-15"}
         `}
       ref={scrollRef}
     >

@@ -13,7 +13,7 @@
 
   --color-primary: rgba(255, 111, 49, 0.949);
   --color-secondary: #ffaa72;
-  --color-white: #fff6ff;
+  --color-white: #fff9ff;
   --color-indigo: rgb(154, 149, 241);
   --color-indigo-2: rgb(125 123 160);
 }
@@ -235,7 +235,7 @@ input:-webkit-autofill:active {
 }
 
 .bg-primary {
-  background-color: #fff6ff;
+  background-color: var(--color-white);
 }
 
 .bg-secondary {

@@ -109,9 +109,9 @@
 }
 
 .searchInputContainer input {
-  width: 40vw;
+  width: 35dvw;
   max-width: 200px;
-  padding-left: 40px;
+  padding-left: 30px;
   outline: none;
   background: transparent;
   border: 1px solid white;

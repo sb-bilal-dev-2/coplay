@@ -30,7 +30,7 @@
 }
 
 .tags-bar {
-  background: #fff6ff;
+  background: var(--color-white);
   padding: 2px 16px;
 
   @media (max-width: 600px) {
