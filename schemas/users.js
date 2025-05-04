@@ -25,6 +25,7 @@ const schema = new Schema({
   verificationCode: { type: Number },
   verifiedEmail: { type: Boolean, default: false },
   verificationCodeTimestamp: { type: Date },
+  history: [],
   mainLanguage: String,
   premiumExpireDate: { type: Date, default: Date.now },
   learningLanguages: [String],

@@ -26,7 +26,7 @@ const { degausser, addVttToDB } = require('./parseUsedWords');
 const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
 const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
 const { telegramInit } = require('./tgbot');
-const { fetchTrendingVideos, fetchPopularVideos, searchYouTubeVideos } = require('./youtube_api');
+const { fetchTrendingVideos, fetchPopularVideos, searchYouTubeVideos, fetchPlaylist } = require('./youtube_api');
 const { pronKorean } = require('./utils/pronounciation');
 
 writeDevelopmentIPAddress();
@@ -58,6 +58,29 @@ app.get("/hello_world", async (req, res) => {
   // } = req
   res.type("text/plain");
   res.status(200).send("Welcome! ");
+});
+
+app.get("/stories", async (req, res) => {
+  const {
+    query,
+    params,
+    path,
+    headers
+  } = req
+  try {
+    let results = []
+    const reccommended = (await promptAI(`
+      Give a dialog that will use five ${"b1"} words/phrases ${""} and other simpler words.
+      Answer in json format. { dialog: [{name: String, text: String}], wordHighlights: [{ dialogIndex, startIndex, word }] }
+`))
+// Answer in json format. { dialog: [{name: String, text: String}], wordHighlights: [{ dialogIndex, startIndex, word }] }
+    results = JSON.parse(reccommended.replaceAll("```json\n", "").replaceAll("\n```", ""))
+    console.log('results', results)
+    res.type("text/plain");
+    res.status(200).send(results);
+  } catch(err) {
+    res.status(500).send(err?.message)
+  }
 });
 
 app.get('/youtube_trends', async (req, res) => {
@@ -95,6 +118,22 @@ app.get('/youtube_popular', async (req, res) => {
   }
 })
 
+app.get('/youtube_playlist', async (req, res) => {
+  try {
+    const {
+      playlistId,
+      limit,
+      // page,
+    } = req.query
+    const results = await fetchPlaylist(playlistId, limit)
+
+    res.status(200).send({ results })
+  } catch (err) {
+    res.status(500).send(err?.message)
+  }
+
+})
+
 app.get('/youtube_search', async (req, res) => {
   try {
     const {
@@ -129,9 +168,9 @@ app.get("/rec", async (req, res) => {
       if (user) {
         // results = user.words
         const UserWordsStringified = user.words.filter((item) => item.isPhrase).map(item => item.the_word).slice(0, 20)?.join()
-        let reccommended = (await promptAI(`Reccommend me 20 phrases to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
-        console.log('reccommended', typeof reccommended?.content, reccommended, reccommended?.content)
-        reccommended = reccommended?.content?.split('\n').map((line) => line.includes('. ') && line.split('. ')[1])
+        let reccommended = (await promptAI(`Reccommend me 20 phrases in ${mediaLang} to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
+        console.log('reccommended', typeof reccommended, reccommended, reccommended)
+        reccommended = reccommended?.split('\n').map((line) => line.includes('. ') && line.split('. ')[1])
         results = reccommended.map((item) => ({ the_word: item })) || []
       }
     }
@@ -141,8 +180,8 @@ app.get("/rec", async (req, res) => {
         // const words = wordInfos.wordInfos_model.find()
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const reccommended =
-          (await promptAI(`Reccommend me 20 words to learn based on last 20 words I learned. Respond with plain yaml one word per line like (e.g. hello\ncompany\nfew)). My last 20 words: ${UserWordsStringified}`))
-            ?.content?.split('\n')
+          (await promptAI(`Reccommend me 20 words in ${mediaLang} to learn based on last 20 words I learned. Respond with plain yaml one word per line like (e.g. hello\ncompany\nfew)). My last 20 words: ${UserWordsStringified}`))
+            ?.split('\n')
         results = reccommended.map((item) => ({ the_word: item })) || []
       }
     }
@@ -152,8 +191,7 @@ app.get("/rec", async (req, res) => {
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
         // const reccommendedTitles =
-        // (await promptAI(`Reccommend me 20 music to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
-        //   ?.choices[0]?.message?.split('\n')
+        // (await promptAI(`Reccommend me 20 music to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Music' })
 
@@ -175,8 +213,7 @@ app.get("/rec", async (req, res) => {
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
         // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 episode from different to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
-        //     ?.choices[0]?.message?.split('\n')
+        //   (await promptAI(`Reccommend me 20 episode from different to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: "Series" })
 
@@ -194,8 +231,7 @@ app.get("/rec", async (req, res) => {
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
         // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 courses to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
-        //     ?.choices[0]?.message?.split('\n')
+        //   (await promptAI(`Reccommend me 20 courses to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Courses' })
 
@@ -213,8 +249,7 @@ app.get("/rec", async (req, res) => {
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
         // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 cartoons to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
-        //     ?.choices[0]?.message?.split('\n')
+        //   (await promptAI(`Reccommend me 20 cartoons to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Cartoon' })
 
@@ -232,8 +267,7 @@ app.get("/rec", async (req, res) => {
         const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
         const history = user?.history?.movies
         // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 podcasts to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))
-        //     ?.choices[0]?.message?.split('\n')
+        //   (await promptAI(`Reccommend me 20 podcasts to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Podcast' })
 
@@ -440,12 +474,11 @@ app.get('/processWordInfos', async (req, res) => {
 })
 
 app.get('/wordInfoLemma', async (req, res) => {
-  let { the_word } = req.query;
-  const { learninglanguage } = req.headers;
-  const mainLang = learninglanguage
-  console.log('the_word, mainLang', the_word, req.query.mainLang, learninglanguage)
+  let { the_word, mainLang } = req.query;
+  const { learninglanguage = 'en' } = req.headers;
+  console.log('the_word, mainLang', the_word, mainLang, learninglanguage)
   try {
-    const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage}__s`, wordInfos.schema);
+    const WordInfosModel = mongoose.model(`wordInfos__${learninglanguage || 'en'}__s`, wordInfos.schema);
     const wordInfo = await WordInfosModel.findOne({ the_word });
 
     if (!wordInfo) {
@@ -454,16 +487,20 @@ app.get('/wordInfoLemma', async (req, res) => {
 
     let updatedWordInfo = wordInfo
     if (!updatedWordInfo.pronounciation) {
-      updatedWordInfo.pronounciation = await getPronounciation(the_word, mainLang)
+      updatedWordInfo.pronounciation = await getPronounciation(the_word, learninglanguage)
     }
-    if (!wordInfo.shortDefinitions[learninglanguage]) {
+    if (!wordInfo.shortDefinitions[mainLang]) {
       try {
-        const input = { learninglanguage, mainLang }
-        const new_info_response = (await promptAI(`give me word info about in the given language: e.g. input { learninglanguage: "ko", mainLang: "ru", the_word: "그" } should return { shortDefinition, shortExplanation }\nINPUT: ${input}`)).content
-        const new_info_parsed = JSON.parse(new_info_response)
-
-        updatedWordInfo.shortDefinitions[learninglanguage] = new_info_parsed.shortDefinition
-        updatedWordInfo.shortExplanations[learninglanguage] = new_info_parsed.shortExplanation
+        const new_info_response = (await promptAI(
+          `Give translation in Uzbek (latin) ${mainLang} language. add comment if needed, add example in comment if needed. Skip the comment if the word is simple.
+          Do not add any other language, even english or the given words language in your answer. Respond with parsable json of string values { translation: string, comment: string  }
+          Word: ${the_word} (${learninglanguage})`,
+          { system: 'You are a translator app that also gives short definition and short explanation in my mother langauge.'}
+        ))
+        const new_info_parsed = typeof new_info_response === 'object' ? new_info_response : JSON.parse(new_info_response.replaceAll('```json\n', "").replaceAll("\n```", ""))
+        console.log('new_info_parsed', new_info_parsed)
+        updatedWordInfo.shortDefinitions[mainLang] = new_info_parsed.translation
+        updatedWordInfo.shortExplanations[mainLang] = new_info_parsed.comment
       } catch (err) {
         console.log("Error fetching word info: " + the_word, err);
         res.status(500);
@@ -582,14 +619,14 @@ const ROMINIZE_FUNCTION = {
     try {
       JSON.parse((await promptAI(`Pronounce the input and return json. e.g. for { result: "/həˈloʊ/ " } return { lang: "en-US", text: "hello" }.
 INPUT { text: "${text}", lang: "en-US" }
-`)).content).result
+`))).result
     } catch (err) {
       res.status(500).send('failed pronounciation')
     }
   },
   'default': async (text, lang) => JSON.parse((await promptAI(`Pronounce the input and return json. e.g. for { result: "/həˈloʊ/ " } return { lang: "en-US", text: "hello" }.
     INPUT { text: "${text}", lang: "${lang}" }
-    `)).content).result
+    `))).result
 }
 
 function getPronounciation(text, lang) {

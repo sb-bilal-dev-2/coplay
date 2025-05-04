@@ -10,7 +10,6 @@ const schema = new Schema({
   romanization: String,
   function: String,
   isLemma: Boolean,
-  translations: Schema.Types.Mixed,
   rootWord: String,
   functions: [String],
   pronounciation: String,
@@ -44,6 +43,7 @@ const schema = new Schema({
   youglishSrcs: [String],
   youglishOccurances: Number,
   youglishParsed: Boolean,
+  translations: Schema.Types.Mixed,
   detailedExplanation: {
     default: {},
     type: Schema.Types.Mixed

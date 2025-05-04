@@ -9,7 +9,7 @@ try {
   openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
   });
-} catch(err) {
+} catch (err) {
   console.log('OPENAI_CONNECTION_ERROR', err)
 }
 // generateImage();
@@ -42,7 +42,7 @@ async function getTranscriptionOfAudio(filePath) {
       model: "whisper-1",
       response_format: "verbose_json",
       timestamp_granularities: ["segment"],
-      
+
     });
 
     if (transcription) {
@@ -58,23 +58,27 @@ async function getTranscriptionOfAudio(filePath) {
 }
 
 // Call the function to execute it
-
-async function promptAI(content, customMessages) {
+async function promptAI(content, options = {}) {
+  const { system, customMessages } = options
   let messages = [{ role: 'user', content }]
   if (!content) {
     messages = customMessages
   }
+
+  if (system) {
+    messages.unshift({ role: "system", content: system })
+  }
+  
   if (!openai) {
     throw new Error('NetworkError')
   }
   const chatCompletion = await openai.chat.completions.create({
     messages,
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4.1-mini',
     temperature: 0.0
   });
 
-  console.log('res', chatCompletion)
-  const message = chatCompletion?.choices && chatCompletion.choices[0]?.message
+  const message = chatCompletion?.choices && chatCompletion.choices[0]?.message?.content
   console.log('choices[0].message', message)
 
   return message
@@ -97,12 +101,27 @@ async function generateImagesForWords(words = []) {
     words.map(async (item) => {
       res = await generateImage(
         `Icon style simple, no text allowed. Icon for the given phrase/word: ` +
-          item
+        item
       );
       console.log(item, res);
       return [item, res];
     })
   );
+}
+
+async function deepseekRequest(content) {
+  const openai2 = new OpenAI({
+    baseURL: 'https://api.deepseek.com',
+    apiKey: process.env.DEEPSEEK_API_KEY
+  });
+
+  const completion = await openai2.chat.completions.create({
+    messages: [{ role: "system", content: "You are a helpful assistant." }],
+    model: "deepseek-chat",
+  });
+
+  console.log(completion.choices[0].message.content);
+  return completion.choices[0].message.content
 }
 
 module.exports = {
