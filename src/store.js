@@ -12,6 +12,28 @@ const wordInfo_store = {
     selectedWordInfo: {},
 }
 
+const language_store = {
+    reload: null,
+    learningLanguage: localStorage.getItem('learningLanguage'),
+    mainLanguage: localStorage.getItem('mainLangauge')
+}
+export const language_slice = createSlice({
+    name: 'language',
+    initialState: language_store,
+    reducers: {
+        set_learningLangauge: (state, action) => {
+            state.learningLanguage = action.payload
+        },
+        set_mainLanguage: (state, action) => {
+            state.mainLanguage = action.payload
+        },
+        set_reload: (state, action) => {
+            state.reload = action.payload
+        }
+    },
+})
+export const { set_learningLangauge, set_mainLanguage, set_reload } = language_slice.actions
+
 export const user_slice = createSlice({
     name: 'user',
     initialState: user_store,

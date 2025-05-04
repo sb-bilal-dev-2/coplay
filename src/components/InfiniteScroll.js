@@ -12,6 +12,7 @@ const InfiniteScroll = ({
   loading: externalLoading = false,
   loadingComponent,
   endMessage = "No more items to load",
+  reloadVariable = "",
   threshold = 0.1,
   rootMargin = '500px 0px'
 }) => {
@@ -21,7 +22,7 @@ const InfiniteScroll = ({
   // Update items when initialItems prop changes
   useEffect(() => {
     setItems(initialItems);
-  }, [initialItems]);
+  }, [initialItems, reloadVariable]);
 
   // Memoize the intersection observer callback
   const handleObserver = useCallback((entries) => {
