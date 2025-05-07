@@ -146,8 +146,6 @@ const HomePage = () => {
 };
 
 function CarouselPost({ postItem, isActive }) {
-  console.log('postItem', postItem)
-  console.log('postItem.youtubeUrl', postItem.youtubeUrl)
   function renderItem(item, activeIndex, index) {
     return (
       <div style={{ width: '100%', height: '200px', background: '#333', display: 'flex', flexDirection: 'column' }}>
@@ -164,7 +162,7 @@ function CarouselPost({ postItem, isActive }) {
                 <iframe
                   style={{ height: '100%', width: '100%' }}
                   // src={"https://www.youtube.com/embed/2Vv-BfVoq4g"}
-                  src={item.youtubeUrl}
+                  src={"https://www.youtube.com/embed/" + item.videoId}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"
                 />
               </div>
@@ -176,7 +174,7 @@ function CarouselPost({ postItem, isActive }) {
 
   return (
     <div className="relative" style={{ maxWidth: "500px", margin: '10px auto' }}>
-      <Link to={'/movie/' + postItem?.title}>
+      <Link to={'/movie/youtube_' + postItem.videoId}>
         <h4 className="text-left absolute text-white" style={{ top: "10px", left: '8px', zIndex: '20', textShadow: '1px 1px #333' }}>{postItem.title}</h4>
       </Link>
       {!postItem.carousels?.length ?

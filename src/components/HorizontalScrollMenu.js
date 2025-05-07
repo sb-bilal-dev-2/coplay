@@ -12,14 +12,14 @@ const HorizontalScrollMenu = ({ items, baseRoute, card_className = 'vertical', r
   return (
     <div className="horizontal-scroll-menu no-scrollbar">
       <ul className="menu-list no-scrollbar" ref={scrollRef}>
-        {items?.map(({ _id, label, title, posterUrl, youtubeUrl, thumbnail, keywords }) => (
+        {items?.map(({ videoId, label, title, posterUrl, youtubeUrl, thumbnail, keywords }) => (
           <li
-            onMouseEnter={() => setHoveringItemId(_id)}
+            onMouseEnter={() => setHoveringItemId(videoId)}
             onMouseLeave={() => setHoveringItemId('')}
             className="w-full"
           >
             <HorizontalScrollMenuCardMain
-              _id={_id}
+              _id={videoId}
               label={label}
               title={title}
               posterUrl={posterUrl}
@@ -66,7 +66,7 @@ export const HorizontalScrollMenuCardMain = ({
   return (
     <Link
       className={`list-card ${card_className}`}
-      to={[baseRoute, (baseRoute === 'movie' ? _id : title)].join("/")}
+      to={[baseRoute, (baseRoute === 'movie' ? "youtube_" + _id : title)].join("/")}
     >
       <div className="list-card__image mx-1" style={{
         backgroundImage: `url('${posterUrl ||
