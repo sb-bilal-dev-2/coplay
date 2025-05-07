@@ -48,10 +48,11 @@ async function fetchPlaylist(playlistId, limit = 20, expireMinutes = 10) {
             throw new Error(`Error fetching playlist videos: ${response.statusText}`);
         }
         const data = await response.json();
+
         const videos = data.items?.map((item) => {
             return {
                 title: item.snippet.title,
-                videoId: item?.resourceId?.videoId,
+                videoId: item?.snippet?.resourceId?.videoId,
                 description: item.snippet.description,
                 thumbnail: item.snippet.thumbnails.high.url,
                 channelTitle: item.snippet.channelTitle,

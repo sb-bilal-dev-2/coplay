@@ -163,35 +163,33 @@ app.get("/rec", async (req, res) => {
 
   const user = await getUserIfExists(req)
   let results = []
+  const userWords = user["words_" + mediaLang] || user.words
   try {
     if (query.category === 'Phrases') {
-      if (user) {
-        // results = user.words
-        const UserWordsStringified = user.words.filter((item) => item.isPhrase).map(item => item.the_word).slice(0, 20)?.join()
-        let reccommended = (await promptAI(`Reccommend me 20 phrases in ${mediaLang} to learn based on last 20 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 20 phrases: ${UserWordsStringified}`))
+      if (userWords) {
+        // const words = wordInfos.wordInfos_model.find()
+        const UserWordsStringified = userWords.filter((item) => item.isPhrase).map(item => item.the_word).slice(0, 10)?.join()
+        let reccommended = (await promptAI(`Reccommend me 15 phrases in ${mediaLang} to learn based on last 10 phrases I learned. Respond with plain yaml one phrase per line e.g. get out\ncome on\nget on). My last 10 phrases: ${UserWordsStringified}`))
         console.log('reccommended', typeof reccommended, reccommended, reccommended)
         reccommended = reccommended?.split('\n').map((line) => line.includes('. ') && line.split('. ')[1])
         results = reccommended.map((item) => ({ the_word: item })) || []
       }
     }
     if (query.category === 'Words') {
-      if (user) {
-        results = user.words
-        // const words = wordInfos.wordInfos_model.find()
-        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+      if (userWords) {
+        const UserWordsStringified = userWords.map(item => item.the_word).slice(0, 10)?.join()
         const reccommended =
-          (await promptAI(`Reccommend me 20 words in ${mediaLang} to learn based on last 20 words I learned. Respond with plain yaml one word per line like (e.g. hello\ncompany\nfew)). My last 20 words: ${UserWordsStringified}`))
+          (await promptAI(`Reccommend me 15 words in ${mediaLang} to learn based on last 10 words I learned. Respond with plain yaml one word per line like (e.g. hello\ncompany\nfew)). My last 10 words: ${UserWordsStringified}`))
             ?.split('\n')
         results = reccommended.map((item) => ({ the_word: item })) || []
       }
     }
     if (query.category === 'Music') {
-      if (user) {
-        // const words = wordInfos.wordInfos_model.find()
-        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+      if (userWords) {
+        const UserWordsStringified = userWords.map(item => item.the_word).slice(0, 10)?.join()
         const history = user?.history?.movies
-        // const reccommendedTitles =
-        // (await promptAI(`Reccommend me 20 music to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
+        const reccommendedTitles =
+        (await promptAI(`Reccommend me 15 music to learn based on last 10 words I learned. Respond with plain yaml one word per line. My last 10 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Music' })
 
@@ -207,69 +205,13 @@ app.get("/rec", async (req, res) => {
       console.log('query', query)
       results = query
 
-      if (user) {
-        // results = user.words
-        // const words = wordInfos.wordInfos_model.find()
-        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
+      if (userWords) {
+        const UserWordsStringified = userWords.map(item => item.the_word).slice(0, 10)?.join()
         const history = user?.history?.movies
-        // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 episode from different to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
+        const reccommendedTitles =
+          (await promptAI(`Reccommend me 15 episode from different to learn based on last 10 words I learned. Respond with plain yaml one word per line. My last 10 words: ${UserWordsStringified}`))?.split('\n')
 
         const reccommendedVideos = await movies_model.find({ mediaLang, category: "Series" })
-
-        results = reccommendedVideos || []
-      }
-    }
-    if (query.category === 'Courses') {
-      const query = await movies_model.find({ mediaLang, category: "Courses" })
-      console.log('query', query)
-      results = query
-
-      if (user) {
-        // results = user.words
-        // const words = wordInfos.wordInfos_model.find()
-        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
-        const history = user?.history?.movies
-        // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 courses to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
-
-        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Courses' })
-
-        results = reccommendedVideos || []
-      }
-    }
-    if (query.category === 'Cartoon') {
-      const query = await movies_model.find({ mediaLang, category: "Cartoon" })
-      console.log('query', query)
-      results = query
-
-      if (user) {
-        // results = user.words
-        // const words = wordInfos.wordInfos_model.find()
-        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
-        const history = user?.history?.movies
-        // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 cartoons to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
-
-        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Cartoon' })
-
-        results = reccommendedVideos || []
-      }
-    }
-    if (query.category === 'Podcast') {
-      const query = await movies_model.find({ mediaLang, category: "Podcast" })
-      console.log('query', query)
-      results = query
-
-      if (user) {
-        // results = user.words
-        // const words = wordInfos.wordInfos_model.find()
-        const UserWordsStringified = user.words.map(item => item.the_word).slice(0, 20)?.join()
-        const history = user?.history?.movies
-        // const reccommendedTitles =
-        //   (await promptAI(`Reccommend me 20 podcasts to learn based on last 20 words I learned. Respond with plain yaml one word per line. My last 20 words: ${UserWordsStringified}`))?.split('\n')
-
-        const reccommendedVideos = await movies_model.find({ mediaLang, category: 'Podcast' })
 
         results = reccommendedVideos || []
       }
@@ -662,7 +604,7 @@ app.get("/movie_words/:_id", async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(user_id)) {
       user = await users_model.findById(user_id)
     }
-    const userWords = user?.words || [];
+    const userWords = user["words_" + mediaLang] || user.words;
     let movieWords;
     console.log('f1')
     try {
@@ -777,11 +719,9 @@ app.get("/movie_words/:_id", async (req, res) => {
 app.post("/self_words_increment", requireAuth, async (req, res) => {
   try {
     const { language } = req.query;
-    const { learninglang } = req.headers;
+    const learninglang = req.headers["learninglanguage"];
     const User = users_model;
     const _id = req.userId;
-    const wordListKey = learninglang || language ? `${learninglang || language}_words` : "words";
-    console.log('wordListKey', wordListKey)
     const updatedWordOrWordsArray = req.body;
     // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
     const user = await User.findById(_id);
@@ -795,7 +735,7 @@ app.post("/self_words_increment", requireAuth, async (req, res) => {
         {}
       );
     console.log("updatedWordsMap", updatedWordsMap);
-    const userWords = user[wordListKey] || [];
+    const userWords = user["words_" + learninglang] || user.words;
     console.log("userWords.length", userWords.length);
     // console.log('words', words)
     userWords.forEach((userWord) => {
@@ -810,7 +750,7 @@ app.post("/self_words_increment", requireAuth, async (req, res) => {
       updatedTime: Date.now(),
     };
     const addedNewWordsArray = Object.values(updatedWordsMap);
-    update[wordListKey] = addedNewWordsArray.concat(userWords);
+    update["words_" + learninglang] = addedNewWordsArray.concat(userWords);
     console.log("update", update);
     // console.log('update', update)
     console.log("_id", _id);
@@ -826,14 +766,12 @@ app.post("/self_words_increment", requireAuth, async (req, res) => {
 app.post("/self_words", requireAuth, async (req, res) => {
   try {
     const { language } = req.query;
-    const { learninglang } = req.headers;
+    const learninglang = req.headers["learninglanguage"];
     const User = users_model;
     const _id = req.userId;
-    const wordListKey = learninglang || language ? `${learninglang || language}_words` : "words";
 
     const updatedWordOrWordsArray = req.body;
     // console.log('updatedWordOrWordsArray', updatedWordOrWordsArray)
-    console.log('wordListKey', wordListKey)
     const user = await User.findById(_id);
     if (!user) {
       res.statusCode(404).send("Requested user not found");
@@ -845,7 +783,7 @@ app.post("/self_words", requireAuth, async (req, res) => {
         {}
       );
     console.log("updatedWordsMap", updatedWordsMap);
-    const userWords = user[wordListKey] || [];
+    const userWords = user["words_" + learninglang] || user.words;
     console.log("userWords.length", userWords.length);
     // console.log('words', words)
     userWords.forEach((userWord) => {
@@ -860,7 +798,7 @@ app.post("/self_words", requireAuth, async (req, res) => {
       updatedTime: Date.now(),
     };
     const addedNewWordsArray = Object.values(updatedWordsMap);
-    update[wordListKey] = addedNewWordsArray.concat(userWords);
+    user["words_" + learninglang] = addedNewWordsArray.concat(userWords);
     console.log("update", update);
     // console.log('update', update)
     console.log("_id", _id);
@@ -875,6 +813,7 @@ app.post("/self_words", requireAuth, async (req, res) => {
 
 app.get("/self_words/:listType", requireAuth, async (req, res) => {
   const User = users_model;
+  const learninglang = req.headers["learninglanguage"]
 
   try {
     console.log("REQUEST With User: ", req.userId);
@@ -890,7 +829,7 @@ app.get("/self_words/:listType", requireAuth, async (req, res) => {
 
     // Return user information (you can customize what data you want to send back)
     let userWordsByType = [];
-    const userWords = user.words
+    const userWords = user["words_" + learninglang] || user.words
     console.log('userWords', userWords)
 
     const userLists = sortByLearningState(userWords)
