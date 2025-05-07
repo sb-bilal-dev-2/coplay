@@ -34,8 +34,8 @@
   "awesome": "Awesome",
   "add new language": "Choose language",
   "learning": "Learning",
-  "native language": "Native language",
-  "want to learn": "Learn",
+  "native language": "What is your native language?",
+  "want to learn": "What languages you want to learn?",
   "connect to telegram" : "Telegram Bot",
   "sign in with Telegram" : "Telegram"
 }

@@ -9,10 +9,13 @@ import "./LanguageModal.css";
 export const LANGUAGES = [
   // { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
   { id: 1, label: "English", iso: "en", flag: "./USA.webp" },
-  { id: 2, label: "Korean", iso: "ko", flag: "./korea.webp" },
-  { id: 3, label: "Chinese", iso: "zh-CN", flag: "./china.png" },
-  { id: 3, label: "Turkish", iso: "tr", flag: "./country_flags/tr.svg" },
-  { id: 3, label: "Russian", iso: "ru", flag: "./country_flags/ru.svg" },
+  { id: 2, label: "Chinese", iso: "zh-CN", flag: "./china.png", disabled: true },
+  { id: 3, label: "Korean", iso: "ko", flag: "./korea.webp", disabled: true },
+  { id: 4, label: "Turkish", iso: "tr", flag: "./country_flags/tr.svg", disabled: true },
+  { id: 5, label: "Russian", iso: "ru", flag: "./country_flags/ru.svg", disabled: true },
+  { id: 6, label: "French", iso: "fr", flag: "./country_flags/fr.svg", disabled: true },
+  { id: 7, label: "Spanish", iso: "es", flag: "./country_flags/es.svg", disabled: true },
+  { id: 8, label: "Japanese", iso: "jp", flag: "./country_flags/jp.svg", disabled: true },
 ];
 
 export const APP_LANGUAGES = [
@@ -169,9 +172,9 @@ const ChooseLanguageModal = ({
   handleLearningLang,
   handleNativeLang,
   selectedOption,
-  t,
 }) => {
   const localMainLangugae = localStorage.getItem("mainLanguage");
+  const { t } = useTranslation()
 
   if (!show) return null;
   return (
@@ -189,8 +192,8 @@ const ChooseLanguageModal = ({
             <span
               key={option.iso}
               className={`${localMainLangugae === option.iso
-                  ? "border-yellow-400"
-                  : "border-gray-500"
+                ? "border-yellow-400"
+                : "border-gray-500"
                 } p-2 mr-4 border-2 rounded-xl cursor-pointer`}
               onClick={() => handleNativeLang(option)}
             >
@@ -198,32 +201,35 @@ const ChooseLanguageModal = ({
             </span>
           ))}
         </div>
+        <p className="text-xs">{t("More languages coming soon...")}</p>
       </div>
 
       <div className="m-auto mt-10" style={{ maxWidth: '280px' }}>
         <p className="text-gray-100 font-bold mb-1 ">{t("want to learn")}</p>
-        {LANGUAGES.map((option) => (
-          <li key={option.id} className="list-none flex items-center">
-            <button
-              className={`${
-                selectedOption.iso === option.iso
-                  ? "border-yellow-400"
-                  : "border-gray-500"
-              } flex w-32 p-2 mt-4 border-2 rounded-xl cursor-pointer`}
-              onClick={() => {
-                handleLearningLang(option);
-                toggleModal();
-              }}
-            >
-              <img
-                alt="flag"
-                src={option.flag}
-                className="w-6 h-6 overflow-hidden rounded-full mr-4"
-              />
-              <span>{option.label}</span>
-            </button>
-          </li>
-        ))}
+        <div className="grid grid-cols-2">
+          {LANGUAGES.map((option) => (
+            <li key={option.id} className="list-none flex items-center">
+              <button
+                className={`${selectedOption.iso === option.iso
+                    ? "border-yellow-400"
+                    : "border-gray-500"
+                  } flex w-32 p-2 mt-4 border-2 rounded-xl cursor-pointer ${option.disabled && 'opacity-50'}`}
+                onClick={() => {
+                  if (option.disabled) return;
+                  handleLearningLang(option);
+                  toggleModal();
+                }}
+              >
+                <img
+                  alt="flag"
+                  src={option.flag}
+                  className="w-6 h-6 overflow-hidden rounded-full mr-4"
+                />
+                <span>{option.label}</span>
+              </button>
+            </li>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -190,7 +190,7 @@ function CarouselPost({ postItem, isActive }) {
   )
 }
 
-const HELLO_MAP = { en: "Learn with Music!", uz: "Musiqa bilan o'rganing" }
+const HELLO_MAP = { en: "Learn with Music!", uz: "Musiqa bilan o'rganing", ru: "Учитесь с Музыкой" }
 // const INITIAL_HEADER_BY_LANG = {
 //   'zh-CN': [{ the_word: "你好!", pronounciation: "Nǐ hǎo" }],
 //   'ko': [{ the_word: "안녕하세요!", pronounciation: "annyeonghaseyo" }],
@@ -280,11 +280,13 @@ function Hero() {
           style={{ minWidth: "68px", border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
           {/* <i className="fa-regular fa-font-awesome color-secondary"></i> */}
           <svg xmlns="http://www.w3.org/2000/svg" style={{ margin: 'auto', margin: '2px auto' }} height={21} width={21} fill="red" viewBox="0 0 24 24" aria-hidden="true" class="icon "><path fill="orange" fill-rule="evenodd" d="M10.052 2.13h-2.59c-.921 0-1.667.896-1.667 2v12q0 .307.073.587l-.023.09c-.32 1.269.215 2.579 1.239 3.298-1.663-.225-2.956-1.919-2.956-3.975v-12c0-2.209 1.492-4 3.333-4h8.334c1.606 0 2.948 1.365 3.263 3.18l-2.087-.596c-.3-.36-.717-.584-1.176-.584h-.865l-2.146-.614a2.89 2.89 0 0 0-2.732.614" clip-rule="evenodd"></path><path fill="orange" fill-rule="evenodd" d="m9.94 19.75-2.934.786c-.889.239-1.841-.433-2.127-1.5L1.773 7.445c-.286-1.067.203-2.125 1.092-2.363l2.263-.607V3.13c0-.271.054-.53.152-.766l-2.932.786C.57 3.626-.41 5.742.163 7.876L3.27 19.467c.572 2.134 2.477 3.478 4.255 3.001l6.278-1.682zm2.115-18.703a2.9 2.9 0 0 0-1.658-.054l-.512.137h1.994q.086-.044.176-.083" clip-rule="evenodd"></path><path fill="orange" fill-rule="evenodd" d="m20.386 5.382-7.66-2.444c-.847-.27-1.779.388-2.083 1.47L7.342 16.17c-.304 1.083.136 2.179.982 2.449l7.66 2.444c.846.27 1.778-.388 2.082-1.47L21.368 7.83c.303-1.083-.136-2.179-.982-2.449zM13.276.978c-1.692-.54-3.557.777-4.165 2.942L5.81 15.68c-.608 2.165.271 4.358 1.963 4.898l7.66 2.444c1.693.54 3.557-.777 4.165-2.942L22.9 8.32c.607-2.165-.272-4.358-1.964-4.898z" clip-rule="evenodd"></path><path fill="orange" fill-rule="evenodd" d="M11.625 6.858c.152-.541.618-.87 1.041-.736l6.128 1.956c.423.135.643.683.491 1.224s-.618.87-1.04.736l-6.129-1.956c-.423-.135-.643-.683-.49-1.224zm-1.1 3.92c.152-.541.618-.87 1.04-.736l6.129 1.956c.423.135.643.683.49 1.224-.151.541-.617.87-1.04.736l-6.128-1.956c-.424-.135-.643-.683-.491-1.224m-1.101 3.92c.152-.541.618-.87 1.041-.736l3.064.978c.423.135.643.683.491 1.225-.152.54-.618.87-1.04.735l-3.065-.978c-.423-.135-.643-.683-.49-1.224z" clip-rule="evenodd"></path></svg>
-          <p className="text-sm text-gray-600">Explore</p>
+          <p className="text-sm text-gray-600">Shuffle</p>
         </button>
         <button disabled to="/stories" className="bg-white border p-2 rounded-lg text-center" style={{ minWidth: "68px", border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
-          <i className="fa fa-book-open color-secondary opacity-50"></i>
-          <p className="text-sm text-gray-600">Stories</p>
+          {/* <i className="fa fa-book-open color-secondary opacity-50"></i> */}
+          {/* <i className="fa fa-flag color-secondary opacity-50"></i> */}
+          <i className="fa fa-graduation-cap color-secondary opacity-50"></i>
+          <p className="text-sm text-gray-600">Guide</p>
           {/* <svg fill="orange" height={22} width={22} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" class="icon "><path fill-rule="evenodd" d="M7.422 6.122a1 1 0 0 0-1.3 1.3l2.828 7.07a1 1 0 0 0 .557.558l7.071 2.828a1 1 0 0 0 1.3-1.3l-2.828-7.07a1 1 0 0 0-.557-.558zm3.226 7.23 4.507 1.803-1.803-4.507z" clip-rule="evenodd"></path><path fill-rule="evenodd" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18m0 2c6.075 0 11-4.925 11-11S18.075 1 12 1 1 5.925 1 12s4.925 11 11 11" clip-rule="evenodd"></path></svg> */}
         </button>
         <button disabled to="/livestream" className="bg-white border p-2 rounded-lg text-center" style={{ minWidth: "68px", border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
@@ -292,10 +294,6 @@ function Hero() {
           <p className="text-sm text-gray-600">Live</p>
           {/* <svg fill="orange" height={22} width={22} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" class="icon "><path fill-rule="evenodd" d="M7.422 6.122a1 1 0 0 0-1.3 1.3l2.828 7.07a1 1 0 0 0 .557.558l7.071 2.828a1 1 0 0 0 1.3-1.3l-2.828-7.07a1 1 0 0 0-.557-.558zm3.226 7.23 4.507 1.803-1.803-4.507z" clip-rule="evenodd"></path><path fill-rule="evenodd" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18m0 2c6.075 0 11-4.925 11-11S18.075 1 12 1 1 5.925 1 12s4.925 11 11 11" clip-rule="evenodd"></path></svg> */}
         </button>
-        {/* <Link to="/dialogs" className="bg-white border p-2 rounded-lg text-center" style={{ minWidth: "68px", border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
-          <i className="fa-regular fa-message color-secondary"></i>
-          <p className="text-sm text-gray-600">Stories</p>
-        </Link> */}
         {/* <Link to="/history" className="bg-white border p-2 rounded-lg text-center" style={{ minWidth: "68px", border: "1px solid rgb(200, 200, 200)", boxShadow: '1px 1px 10px 0px rgb(20, 20, 20, 0.05)' }}>
           <i className="fa-regular fa-clock color-secondary"></i>
           <p className="text-sm text-gray-600">History</p>
@@ -308,8 +306,8 @@ function Hero() {
 function Popular() {
   const [music_pop] = useGetPlaylist("PLY_music_pop")
   const [music_cartoon] = useGetPlaylist("PLY_music_cartoon")
-  const [music_work] = useGetPlaylist("PLY_music_work")
-  const [music_traditional] = useGetPlaylist("PLY_music_classical")
+  // const [music_work] = useGetPlaylist("PLY_music_work")
+  // const [music_traditional] = useGetPlaylist("PLY_music_classical")
   const [music_morning] = useGetPlaylist("PLY_music_morning")
   const [music_calm] = useGetPlaylist("PLY_music_calm")
   
@@ -332,16 +330,16 @@ function Popular() {
       card_className="horizontal list"
     /> */}
     </div>
-    <div className="">
+    {/* <div className="">
       <h2 className="home-page__title">{t("Study & Work")}</h2>
       <HorizontalScrollMenu items={music_work} baseRoute={"movie"} card_className="full" />
     </div>
     <div className="">
       <h2 className="home-page__title">{t("Timeless Hits")}</h2>
       <HorizontalScrollMenu items={music_traditional} baseRoute={"movie"} card_className="full" />
-    </div>
+    </div> */}
     <div className="">
-      <h2 className="home-page__title">{t("Happy Mornings")}</h2>
+      <h2 className="home-page__title">{t("Morning & Upbeat")}</h2>
       <HorizontalScrollMenu items={music_morning} baseRoute={"movie"} card_className="full" />
     </div>
     <div className="">

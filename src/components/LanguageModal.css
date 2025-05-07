@@ -1,6 +1,7 @@
 .language_modal {
   width: 60%;
-  height: 80vh;
+  height: 72vh;
+  min-height: 550px;
   left: 36%;
   top: 41px;
   user-select: none;
