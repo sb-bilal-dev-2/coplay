@@ -17,7 +17,7 @@ const sortByLearningState = (items = [], repeatCountToPostponeTimeDifference = R
   const learningList = [];
   const learnedList = [];
 
-  items.forEach((item) => {
+  items?.forEach((item) => {
     const repeatCount = item.repeatCount || 0;
     const REPEAT_POSTPONE_TIME_DIFFERENCE =
       repeatCountToPostponeTimeDifference[repeatCount] || Infinity;

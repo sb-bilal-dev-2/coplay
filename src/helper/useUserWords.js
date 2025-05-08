@@ -23,7 +23,9 @@ export const fetchUserData = async () => {
 
 export function useRequestUserWordLists(cancelRequest) {
   const { repeatingList, learningList, learnedList } = useSelector((state) =>
-    sortByLearningState(state.user.user?.words)
+    sortByLearningState(state.user.user
+      && (state.user.user["words_" + localStorage.getItem("learningLanguage")] || state.user.user.words || [])
+    )
   );
 
   const dispatch = useDispatch();

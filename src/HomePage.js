@@ -45,8 +45,15 @@ const HomePage = () => {
       )}
       {category === 'Top' && !langReload && (
         <InfiniteScroll
-          // requestData={async () => (await api().get('/rec?category=Music'))}
-          requestData={() => ({ results: music_vocoplay })}
+          requestData={async () => {
+            const results = await api().get('/youtube_playlist?playlistId=PLY_music_popular')
+              .then((new_podcasts) => new_podcasts.results)
+              .catch((err) => { })
+
+              return { results }
+            }
+          }
+          // requestData={() => ({ results: music_vocoplay })}
           renderItem={(postItem, isActive) => {
             return (
               <CarouselPost postItem={postItem} isActive={isActive} />
@@ -306,6 +313,7 @@ function Hero() {
 function Popular() {
   const [music_pop] = useGetPlaylist("PLY_music_pop")
   const [music_cartoon] = useGetPlaylist("PLY_music_cartoon")
+  const [music_kids] = useGetPlaylist("PLY_music_kids")
   // const [music_work] = useGetPlaylist("PLY_music_work")
   // const [music_traditional] = useGetPlaylist("PLY_music_classical")
   const [music_morning] = useGetPlaylist("PLY_music_morning")
@@ -348,7 +356,7 @@ function Popular() {
     </div>
     <div className="">
       <h2 className="home-page__title">{t("Kids Songs")}</h2>
-      <HorizontalScrollMenu items={music_cartoon} baseRoute={"movie"} card_className="full" />
+      <HorizontalScrollMenu items={music_kids} baseRoute={"movie"} card_className="full" />
     </div>
     <div className="">
       {/* <h2 className="home-page__title">{t("Words and Phrases")}</h2> */}
