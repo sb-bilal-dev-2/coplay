@@ -25,7 +25,6 @@ const HomePage = () => {
   const [category, set_category] = useState("Top")
   const [podcasts] = useGetPlaylist("PLY_ceo_podcast")
   // const [music_vocoplay] = useGetPlaylist("PLY_music_vocoplay")
-  const [music_vocoplay] = useGetPlaylist("PLY_music_popular")
   const [movies] = useGetPlaylist("PLY_series_cartoon_avatar")
   const [series] = useGetPlaylist("PLY_series_friends")
   const { t } = useTranslation();
@@ -420,6 +419,8 @@ function useGetPopular(category) {
 
 function useGetPlaylist(category) {
   const [podcasts, set_podcasts] = useState([])
+  const learningLanguage = useSelector((state) => state.language?.learningLanguage) || localStorage.getItem("learningLanguage")
+
   const request_podcasts = async () => {
     api().get('/youtube_playlist?playlistId=' + category)
       .then((new_podcasts) => set_podcasts(new_podcasts.results))
@@ -427,7 +428,7 @@ function useGetPlaylist(category) {
   }
   useEffect(() => {
     request_podcasts()
-  }, [category])
+  }, [category, learningLanguage])
   return [podcasts, set_podcasts]
 }
 

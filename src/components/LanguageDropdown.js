@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import useRequests from "../useRequests";
 import useAuthentication from "../containers/Authentication.util";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser } from "../store";
+import { set_learningLangauge, set_reload, updateUser } from "../store";
 import { useTranslation } from "react-i18next";
 import "./LanguageModal.css";
 
@@ -175,6 +175,7 @@ const ChooseLanguageModal = ({
 }) => {
   const localMainLangugae = localStorage.getItem("mainLanguage");
   const { t } = useTranslation()
+  const dispatch = useDispatch()
 
   if (!show) return null;
   return (
@@ -216,6 +217,10 @@ const ChooseLanguageModal = ({
                   } flex w-32 p-2 mt-4 border-2 rounded-xl cursor-pointer ${option.disabled && 'opacity-50'}`}
                 onClick={() => {
                   if (option.disabled) return;
+                  if (option.iso === localStorage.getItem("learningLangauge")) return;
+                  dispatch(set_reload(true))
+                  dispatch(set_learningLangauge(option.iso))
+                  setTimeout(() => dispatch(set_reload(false)), 250)              
                   handleLearningLang(option);
                   toggleModal();
                 }}
