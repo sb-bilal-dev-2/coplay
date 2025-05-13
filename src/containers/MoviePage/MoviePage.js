@@ -15,27 +15,27 @@ import { convertQueryObjectToCommaSeparatedString } from "../../utils/objectToQu
 import YoutubePlayer from "../../components/YoutubePlayer";
 import { getPronFunc } from "../../utils/pron";
 
-const StarButton = ({ percent = 40, highlighted, onClick }) => {
+const StarButton = ({ percent = 40, scale = 1, highlighted, onClick }) => {
   return (
-    <button className="relative w-6 h-4" style={{ transform: 'rotate(-75deg) translateX(-10%)' }} onClick={onClick}>
+    <button className="relative w-6 h-4 " style={{ transform: `rotate(-${75 / scale }deg) translateX(-10%) scale(${scale})`, transition: "height 2.525s ease-in-out" }} onClick={onClick}>
       {/* Empty Star */}
       <i className={`fa-regular fa-star absolute top-0 left-0 w-full h-full text-xl ${highlighted ? "text-yellow-300" : "text-gray-100"}`}></i>
 
       {/* Filled Portion */}
-      <i style={{ height: `${percent}%`, transition: "height 0.125s ease-in-out" }} className="fa-solid fa-star text-yellow-300 w-full h-full text-xl absolute top-0 left-0 w-full overflow-hidden"></i>
+      <i style={{ height: `${percent}%`, transition: "height 0.225s ease-in-out" }} className="fa-solid fa-star text-yellow-300 w-full h-full text-xl absolute top-0 left-0 w-full overflow-hidden"></i>
     </button>
   );
 };
 
 
-export const InformedText = ({ text }) => {
+export const InformedText = ({ text, className }) => {
   const parsedTextList = text.split(' ')
   const dispatch = useDispatch()
 
   return (
     <>
       {parsedTextList.map((textPart) => {
-        return <span onClick={() => {
+        return <span className={className} onClick={() => {
           dispatch(selectText(textPart, { fullText: text }))
         }}>{textPart}</span>
       })}
@@ -47,6 +47,7 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
   const scrollRef = useRef(null);
   const [activeIndex, set_activeIndex] = useState(Infinity)
   const [userBookmarks, set_userBookmarks] = useState({})
+  const [wordInfos, set_wordInfos] = useState({})
 
   async function handleBookmarkClick(item) {
     const repeatCount = userBookmarks[item.the_word]?.repeatCount
@@ -58,14 +59,33 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
   }
 
   async function getUserWords() {
-    const response = await api().get('/self_words/repeating')
-    console.log('user words', response)
-    const mappedUserWords = response.reduce((acc, item) => (acc[item.the_word] = item, acc), {})
-    set_userBookmarks(mappedUserWords)
+    try {
+      const response = await api().get('/self_words/repeating')
+      console.log('user words', response)
+      const mappedUserWords = response.reduce((acc, item) => (acc[item.the_word] = item, acc), {})
+      set_userBookmarks(mappedUserWords)
+    } catch (err) {
+    }
+  }
+
+  async function getWordInfos() {
+    for (let item of items) {
+      console.log('item', item)
+      try {
+        const new_wordInfo = (await api().get(`/wordInfoLemma?mainLang=${localStorage.getItem("mainLanguage") || 'en'}&the_word=` + item.the_word))
+        console.log('new_wordInfo', new_wordInfo)
+  
+        // const new_wordInfos = { ...wordInfos, [item.the_word]: new_wordInfo}
+        set_wordInfos((prev_wordInfos) => ({...prev_wordInfos, [item.the_word]: new_wordInfo}))
+      } catch(err) {
+
+      }
+    }
   }
 
   useEffect(() => {
     getUserWords()
+    getWordInfos()
   }, [])
   console.log('userBookmarks', userBookmarks)
 
@@ -117,16 +137,21 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
       set_activeIndex(forcedIndexChange)
     }
   }, [forcedIndexChange])
-
+  console.log('wordInfos', wordInfos)
   return (
     <div
       className={`overflow-scroll no-scrollbar justify-items-start
-        ${vertical ? "absolute h-full pt-20" : "bg-black-100 flex w-full pl-15"}
+        ${vertical ? "absolute h-full pt-40 pb-10" : "bg-black-100 flex w-full pl-15"}
         `}
       ref={scrollRef}
     >
       {items.map((item, index) => {
         const active = index === activeIndex
+        const repeatCount = userBookmarks[item.the_word]?.repeatCount
+        if (repeatCount > 4) {
+          return;
+        }
+        const wordInfo = wordInfos[item.the_word]
         return (
           <div
             onClick={() => { }}
@@ -145,16 +170,22 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
             }}
           >
             <div className="flex justify-items-center">
-              <InformedText text={item.the_word} />
+              <b><InformedText text={item.the_word} className="text-lg text-shadow-md" /></b>
               <StarButton
-                percent={(userBookmarks && userBookmarks[item.the_word]?.repeatCount && userBookmarks[item.the_word].repeatCount * 40) || 0}
+                percent={(repeatCount * 40) || 0}
+                scale={repeatCount === 4 ? 1.1 : 1}
                 // percent={50}
                 onClick={() => handleBookmarkClick(item, index)}
                 highlighted={userBookmarks && userBookmarks[item.the_word]}
               />
             </div>
-            <br />
-            <span>{item.pronounciation}</span><br />
+            {
+              active ?
+              <>
+                {/* <span className="text-xs font-serif text-gray-100">{wordInfo?.pronounciation}</span><br /> */}
+                <span className="text-sm">{wordInfo?.shortDefinitions && wordInfo?.shortDefinitions[localStorage.getItem("mainLanguage") || 'en']}</span><br />
+              </> : <br />
+            }
             <div>
               {/* <CircularMenu /> */}
               {/* <button className="pr-0.5">+</button> */}
@@ -214,16 +245,28 @@ const MoviePage = () => {
   const [videoWords, set_videoWords] = useState([])
   const videoId = (youtubeIdOnVideo && subtitleParsed?.videoInfo?._id) || title
   const movieInfo = useMovieInfo(videoId);
+  const [noTranscript, set_noTranscript] = useState("")
+  const [loading, set_loading] = useState(false)
   async function initYoutubeVideo() {
     const learningLang = localStorage.getItem("learningLanguage")
     const list = [];
+    console.log('initiating subtitles')
+    set_loading(true)
     try {
       const response = await api().get(`/youtube_video_init/${youtubeIdOnVideo}?mediaLang=${learningLang}&${query}`)
       // list = response.wordList
       console.log('parsed', response)
-      set_subtitleParsed(response)
+      if (!subtitleParsed) {
+        set_subtitleParsed(response)
+      }
+      if (subtitleParsed?.error) {
+        set_noTranscript("No Available")
+      }
+      set_loading(false)
     } catch (err) {
-
+      console.log('Transcript error: ', err)
+      set_noTranscript(true)
+      set_loading(false)
     }
   }
 
@@ -253,6 +296,7 @@ const MoviePage = () => {
     console.log('query', query)
     if (query !== "") {
       try {
+        if (!videoId) return
         const list = (await api().get(`/movie_words/${videoId}?${query}`))
         console.log('videoLength', list.length)
         const listWithPronounciation = await Promise.all(list.map((item) => {
@@ -339,6 +383,11 @@ const MoviePage = () => {
         ]}
       />
       <div className="MainContainer flex flex-col">
+        <div className="absolute text-white left-20 top-20">
+          {noTranscript && "Not Available"}
+          {subtitleParsed && !subtitleParsed.subtitles && "Not Available"}
+          {loading && "Loading..."}
+        </div>
         <div style={{ flex: 1 }}>
           {(movieInfo?.youtubeUrl || youtubeIdOnVideo) && subtitleParsed && videoWords.length ?
             <YoutubePlayer
@@ -371,7 +420,9 @@ const MoviePage = () => {
             isActive
           /> */}
         </div>
-        <button onClick={() => set_isFilterOpen(!isFilterOpen)} className="bg-icon absolute bottom-2 right-0"><i className="fa-solid fa-filter text-gray-100"></i></button>
+        <button onClick={() => set_isFilterOpen(!isFilterOpen)} className="bg-icon absolute bottom-2 left-0 z-10"><i className="fa-solid fa-filter text-gray-100"></i></button>
+        <button onClick={() => {}} className="bg-icon absolute bottom-2 left-10 z-10"><i className="fa-solid fa-edit text-gray-100"></i></button>
+        <button onClick={() => {}} className="bg-icon absolute bottom-2 left-20 z-10"><i className="fa-solid fa-star text-gray-100"></i></button>
         <HorizontalScroll
           vertical
           items={videoWords}
@@ -389,6 +440,7 @@ const MoviePage = () => {
 function useMovieInfo(id) {
   const [movieInfo, set_movieInfo] = useState(null);
   const requestMovieInfo = async () => {
+    if (!id) return;
     try {
       const requestUri = '/movies?_id=' + id
       let response;

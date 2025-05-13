@@ -18,12 +18,40 @@
   --color-indigo-2: rgb(125 123 160);
 }
 
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
 .bg-indigo {
   background: rgb(147, 143, 233);
 }
 
 .bg-orangewhite {
   background: rgb(255 252 247);
+}
+
+.bg-primary {
+  background-color: var(--color-white);
+}
+
+.bg-secondary {
+  background: var(--color-secondary);
+}
+
+.bg-secondary-2 {
+  background: linear-gradient(#f1eee3, #ecede9);
+}
+
+.bg-video {
+  background: linear-gradient(#171717, #242424);
+}
+
+.bg-green {
+  background: linear-gradient(#dff5df, #f6feea);
+}
+
+.bg-yellow {
+  background: linear-gradient(#f5e9df, #fae4b0);
 }
 
 /* .bg-white {
@@ -48,6 +76,10 @@
 
 .color-indigo-2 {
   color: var(--color-indigo-2);
+}
+
+.color-white {
+  color: var(--color-white);
 }
 
 html {
@@ -232,30 +264,6 @@ input:-webkit-autofill:active {
 
 .color-primary {
   color: var(--color-primary);
-}
-
-.bg-primary {
-  background-color: var(--color-white);
-}
-
-.bg-secondary {
-  background: linear-gradient(#f48e4e, #f98787);
-}
-
-.bg-secondary-2 {
-  background: linear-gradient(#f1eee3, #ecede9);
-}
-
-.bg-video {
-  background: linear-gradient(#171717, #242424);
-}
-
-.bg-green {
-  background: linear-gradient(#dff5df, #f6feea);
-}
-
-.bg-yellow {
-  background: linear-gradient(#f5e9df, #fae4b0);
 }
 
 .paper {
