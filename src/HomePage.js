@@ -216,7 +216,7 @@ const INITIAL_HEADER_BY_LANG = {
   "ko": [{ "the_word": "음악으로 배워요", "pronounciation": "eumageuro baewoyo",
       occurrences: ["https://www.youtube.com/watch?v=4m48GqaOz90&t=5", "https://www.youtube.com/watch?v=mghMddhSOdY&t=5"] }],
   "en": [{ "the_word": "Learn with Music", "pronounciation": "lɜrn wɪð ˈmjuːzɪk",
-      occurrences: ["https://www.youtube.com/watch?v=450p7goxZqg&t=21", "https://www.youtube.com/watch?v=4m48GqaOz90&t=5"] }],
+      occurrences: ["https://www.youtube.com/watch?v=WA4iX5D9Z64&t=21", "https://www.youtube.com/watch?v=4m48GqaOz90&t=5"] }],
   "sp": [{ "the_word": "Aprende con música", "pronounciation": "ah-PREN-deh kon MOO-see-kah" }],
   "ru": [{ "the_word": "Учись с музыкой", "pronounciation": "oo-CHEES' s MOO-zy-koy" }],
   "fr": [{ "the_word": "Apprends avec la musique", "pronounciation": "ah-prã ah-vek lah myu-zeek" }],
