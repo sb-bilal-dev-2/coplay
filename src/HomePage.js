@@ -224,7 +224,11 @@ const INITIAL_HEADER_BY_LANG = {
   "ko": [{ "the_word": "음악으로 배워요", "pronounciation": "eumageuro baewoyo",
       occurrences: ["https://www.youtube.com/watch?v=4m48GqaOz90&t=5", "https://www.youtube.com/watch?v=mghMddhSOdY&t=5"] }],
   "en": [{ "the_word": "Learn with Music", "pronounciation": "lɜrn wɪð ˈmjuːzɪk",
-      occurrences: ["https://www.youtube.com/watch?v=WA4iX5D9Z64&t=21", "https://www.youtube.com/watch?v=4m48GqaOz90&t=5"] }],
+      occurrences: [
+        { videoUrl: "https://www.youtube.com/watch?v=Ubx4wqpcDuQ&t=10", isShorts: true },
+        { videoUrl: "https://www.youtube.com/watch?v=DT_n-5siONI&t=0", isShorts: true },
+        { videoUrl: "https://www.youtube.com/watch?v=HVevOPdVlQw&t=5", isShorts: true },
+      ] }],
   "sp": [{ "the_word": "Aprende con música", "pronounciation": "ah-PREN-deh kon MOO-see-kah" }],
   "ru": [{ "the_word": "Учись с музыкой", "pronounciation": "oo-CHEES' s MOO-zy-koy" }],
   "fr": [{ "the_word": "Apprends avec la musique", "pronounciation": "ah-prã ah-vek lah myu-zeek" }],
@@ -274,7 +278,8 @@ function Hero() {
         items={INITIAL_HEADER_BY_LANG[learningLang]?.concat(wordInfos).filter(item => item)}
         renderItem={({ the_word, shortDefinitions, pronounciation, occurrences }, index) => {
           const currentVideoIndex = heroVideoIndexes[index || 0]
-          const videoUrl = occurrences && occurrences[currentVideoIndex]
+          const videoUrl = occurrences && occurrences[currentVideoIndex]?.videoUrl
+          const isShorts = occurrences && occurrences[currentVideoIndex]?.isShorts
           const videoId = videoUrl && (new URL(videoUrl)).searchParams.get('v')
           const startTime = videoUrl && (new URL(videoUrl)).searchParams.get('t') || 0
           const canPlayPrevious = currentVideoIndex !== 0;
@@ -291,7 +296,8 @@ function Hero() {
                 }
               </p>
               <div style={{ overflow: 'hidden', height: '140px', width: '90dvw', maxWidth: "400px", position: 'relative', borderRadius: "34px" }}>
-                <div style={{ height: '155%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${85 / 4}%` }}>
+                {/* <div style={{ height: '155%', width: '190%', position: 'absolute', left: `-${90 / 2}%`, bottom: `-${85 / 4}%` }}> */}
+                <div style={{ height: '300%', width: '200%', position: 'absolute', left: `-${100 / 2}%`, bottom: `-${350 / 4}%` }}>
                   <iframe
                     style={{ height: '100%', width: '100%' }}
                     src={`https://www.youtube.com/embed/${videoId}?start=${startTime}&autoplay=1&controls=0`}
