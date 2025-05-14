@@ -1,15 +1,14 @@
 require("dotenv").config();
 const TelegramBot = require("node-telegram-bot-api");
-const { initCRUDAndDatabase } = require("./serverCRUD");
-const cron = require("node-cron");
+// const { initCRUDAndDatabase } = require("./serverCRUD");
 
 const TOKEN = process.env.TG_BOT_TOKEN;
-const TG_LOGIN = 'https://www.coplay.live/';
-const QUIZ_PAGE = process.env.TG_LOGIN + "quiz/learning";
+const TG_LOGIN = 'https://www.vocoplay.com/';
+// const QUIZ_PAGE = process.env.TG_LOGIN + "quiz/learning";
 let bot = null;
 
 // initCRUDAndDatabase();
-// telegramInit()
+telegramInit()
 function telegramInit() {
   bot = new TelegramBot(TOKEN, { polling: true })
 

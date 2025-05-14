@@ -14,27 +14,45 @@ const RELEVALNCE_LANGUAGES_MAP = {
 
 const PLAYLIST_CACHE = {}
 const PLAYLIST_URL_BY_NAME = {
-    "PLY_music_vocoplay": "",
-    "PLY_music_popular": "https://www.youtube.com/watch?v=lWA2pjMjpBs&list=RDQMggCxizMVigw&start_radio=1",
-    "PLY_music_pop": "https://www.youtube.com/watch?v=JGwWNGJdvx8&list=PLMC9KNkIncKvYin_USF1qoJQnIyMAfRxl",
-    "PLY_music_cartoon": "https://www.youtube.com/watch?v=YVVTZgwYwVo&list=PLiNVoBckLqLmdcbotc6n_MjdTDCHLiYDo",
-    "PLY_music_work": "https://www.youtube.com/watch?v=hT_nvWreIhg&list=PLhGO2bt0EkwvRUioaJMLxrMNhU44lRWg8",
-    "PLY_music_rap": "https://www.youtube.com/watch?v=xFYQQPAOz7Y&list=PLOhV0FrFphUdkuWPE2bzJEsGxXMRKVkoM",
-    "PLY_music_classical": "https://www.youtube.com/watch?v=btPJPFnesV4&list=PL3RlTwDWXaUGMvEUkGSM8PtzM6RYRztDZ",
-    "PLY_music_morning": "https://www.youtube.com/watch?v=ru0K8uYEZWw&list=PLVgakZ6MigxxNhXZae5cALEW588-sMQn6",
-    "PLY_music_calm": "https://www.youtube.com/watch?v=rtOvBOTyX00&list=PL7v1FHGMOadDghZ1m-jEIUnVUsGMT9jbH",
-    "PLY_music_trending": "https://www.youtube.com/watch?v=ekr2nIex040&list=PL3-sRm8xAzY9gpXTMGVHJWy_FMD67NBed",
-    "PLY_ceo_podcast": "https://www.youtube.com/watch?v=uxu37dqVR90&list=PL22egh3ok4cP0T7UZRmP6TMLErZYWMN-l",
-    "PLY_tedtalks": "https://www.youtube.com/watch?v=Lp7E973zozc&list=PLQltO7RlbjPJnbfHLsFJWP-DYnWPugUZ7",
-    "PLY_mel_robbins": "https://www.youtube.com/watch?v=SQ54wma-JQA&list=PLhW2xUEb-B-Y92Q1wVWw6TyMNr4idD-yv",
-    "PLY_joe_rogan": "https://www.youtube.com/watch?v=ycPr5-27vSI&list=PLmM1MkVIgsWV6Nn06Kew8MrZG-y8GS6Fx",
-    "PLY_series_cartoon_avatar": "https://www.youtube.com/watch?v=XmvkpGTwT6E&list=PLctu_t5fR-ZS2Q5LVeiw7hh9_WPpnrOpx",
-    "PLY_series_friends": "https://www.youtube.com/watch?v=BYw3XZm5e0E&list=PL7PQp2APUAPL-q1GnguwovMusN6g3RdwX&index=1",
+    "en": {
+        "PLY_music_vocoplay": "https://www.youtube.com/playlist?list=PL2NR4V9XX75WPWu-dBioI461_e0Vd7cDd",
+        "PLY_music_popular": "https://www.youtube.com/watch?v=lWA2pjMjpBs&list=RDQMggCxizMVigw&start_radio=1",
+        "PLY_music_pop": "https://www.youtube.com/watch?v=JGwWNGJdvx8&list=PLMC9KNkIncKvYin_USF1qoJQnIyMAfRxl",
+        "PLY_music_cartoon": "https://www.youtube.com/watch?v=YVVTZgwYwVo&list=PLiNVoBckLqLmdcbotc6n_MjdTDCHLiYDo",
+        "PLY_music_work": "https://www.youtube.com/watch?v=hT_nvWreIhg&list=PLhGO2bt0EkwvRUioaJMLxrMNhU44lRWg8",
+        "PLY_music_rap": "https://www.youtube.com/watch?v=xFYQQPAOz7Y&list=PLOhV0FrFphUdkuWPE2bzJEsGxXMRKVkoM",
+        "PLY_music_classical": "https://www.youtube.com/watch?v=btPJPFnesV4&list=PL3RlTwDWXaUGMvEUkGSM8PtzM6RYRztDZ",
+        "PLY_music_morning": "https://www.youtube.com/watch?v=ru0K8uYEZWw&list=PLVgakZ6MigxxNhXZae5cALEW588-sMQn6",
+        "PLY_music_calm": "https://www.youtube.com/watch?v=rtOvBOTyX00&list=PL7v1FHGMOadDghZ1m-jEIUnVUsGMT9jbH",
+        "PLY_music_trending": "https://www.youtube.com/watch?v=ekr2nIex040&list=PL3-sRm8xAzY9gpXTMGVHJWy_FMD67NBed",
+        "PLY_music_kids": "https://www.youtube.com/watch?v=XqZsoesa55w&list=PLQiKLJnked46Yrvp3mj7_vLwuwZkF21Lh",
+        "PLY_ceo_podcast": "https://www.youtube.com/watch?v=uxu37dqVR90&list=PL22egh3ok4cP0T7UZRmP6TMLErZYWMN-l",
+        "PLY_tedtalks": "https://www.youtube.com/watch?v=Lp7E973zozc&list=PLQltO7RlbjPJnbfHLsFJWP-DYnWPugUZ7",
+        "PLY_mel_robbins": "https://www.youtube.com/watch?v=SQ54wma-JQA&list=PLhW2xUEb-B-Y92Q1wVWw6TyMNr4idD-yv",
+        "PLY_joe_rogan": "https://www.youtube.com/watch?v=ycPr5-27vSI&list=PLmM1MkVIgsWV6Nn06Kew8MrZG-y8GS6Fx",
+        "PLY_series_cartoon_avatar": "https://www.youtube.com/watch?v=XmvkpGTwT6E&list=PLctu_t5fR-ZS2Q5LVeiw7hh9_WPpnrOpx",
+        "PLY_series_friends": "https://www.youtube.com/watch?v=BYw3XZm5e0E&list=PL7PQp2APUAPL-q1GnguwovMusN6g3RdwX&index=1"
+    },
+    "zh-CN": {
+        "PLY_music_vocoplay": "",
+        "PLY_music_pop": "https://www.youtube.com/watch?v=mghMddhSOdY&list=PLQtefrYeRXAXG2sZVdU0rAaPnVsBVBKRW",
+        "PLY_music_popular": "https://www.youtube.com/watch?v=bu7nU9Mhpyo&list=PLfy8tccgHcnDFjPDOhAVU-_Lchncy2i6P",
+        "PLY_music_trending": "https://www.youtube.com/watch?v=d9ktAt-Gg2k&list=PL3oW2tjiIxvSk0WKXaEiDY78KKbKghOOo",
+        "PLY_music_classical": "https://www.youtube.com/watch?v=M7GkL--nb5M&list=PLtq1ck0d2uYnQY3Zrt8oN5y-O0QDkLIpN",
+        // "PLY_music_cartoon": "https://www.youtube.com/watch?v=f10cH20d22Y&list=PLsDbJr9_0fyf2mOeKa0YbLt_yHaYNTxQW",
+        "PLY_music_cartoon": "https://www.youtube.com/watch?v=By5ql5a6Y40&list=PLZ27m2K2W5n4qxbCSu3yTS_TbRLKwK12Q",
+        "PLY_music_morning": "https://www.youtube.com/watch?v=8T3Q8PrRjgI&list=PLGloxjcg_qXocrPi4pwoYbCqvOJej6r9H",
+        "PLY_music_calm": "https://www.youtube.com/watch?v=5OWnzkC9Mag&list=PLM6HcTjupEurX3mcXHjMFrKHE4Hgj5308",
+        "PLY_ceo_podcast": "https://www.youtube.com/watch?v=gs1gx07Ty1o&list=PL-QqSp8RnmbLp63ELJK5cEBE4VltSIojc",
+        "PLY_series_friends": "https://www.youtube.com/watch?v=85TfxaezlvA&list=PL9oLHwOQGhf_Nng30IP0cMrQAgcAImbHn",
+        "PLY_music_kids": "https://www.youtube.com/watch?v=-fzPzZiKBRQ&list=PLZ27m2K2W5n6M_BAtO0Ze-Yvvvj_E5ojM",
+    }
 }
 
-async function fetchPlaylist(playlistId, limit = 20, expireMinutes = 10) {
+async function fetchPlaylist(playlistId, options) {
+    const { limit = 20, expireMinutes = 10, mediaLang = 'en' } = options
     if (playlistId.includes("PLY_")) {
-        playlistId = PLAYLIST_URL_BY_NAME[playlistId]?.split("list=")[1]
+        playlistId = PLAYLIST_URL_BY_NAME[mediaLang][playlistId]?.split("list=")[1]
     }
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${limit}&playlistId=${playlistId}&key=${apiKey}`
 

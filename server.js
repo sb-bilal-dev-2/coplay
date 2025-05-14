@@ -25,7 +25,6 @@ const splitUsedWords = require('./splitUsedWords');
 const { degausser, addVttToDB } = require('./parseUsedWords');
 const { LEVEL_TO_OCCURRENCE_MAP } = require('./levels');
 const YoutubeTranscript = require('youtube-transcript').YoutubeTranscript;
-const { telegramInit } = require('./tgbot');
 const { fetchTrendingVideos, fetchPopularVideos, searchYouTubeVideos, fetchPlaylist } = require('./youtube_api');
 const { pronKorean } = require('./utils/pronounciation');
 
@@ -46,7 +45,6 @@ const port =
   9090;
 const { createCRUDEndpoints } = initCRUDAndDatabase(app)
 const { requireAuth } = initAuth(app)
-telegramInit()
 
 app.get('/', (req, res) => res.send('hmmm...'))
 app.get("/hello_world", async (req, res) => {
@@ -125,7 +123,7 @@ app.get('/youtube_playlist', async (req, res) => {
       limit,
       // page,
     } = req.query
-    const results = await fetchPlaylist(playlistId, limit)
+    const results = await fetchPlaylist(playlistId, { limit })
 
     res.status(200).send({ results })
   } catch (err) {
@@ -604,16 +602,16 @@ app.get("/movie_words/:_id", async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(user_id)) {
       user = await users_model.findById(user_id)
     }
-    const userWords = user["words_" + mediaLang] || user.words;
+    const userWords = (user["words_" + mediaLang] || user.words) || [];
     let movieWords;
     console.log('f1')
     try {
       console.log("_id requested", _id);
       const movieSubtitle = await subtitles_model.findOne({ mediaId: _id, translateLang: { $exists: false } });
-      movieWords = movieSubtitle.subtitles.reduce(
+      movieWords = movieSubtitle?.subtitles?.reduce(
         (acc, item) => acc.concat(item.usedWords.map(the_word => ({ the_word, startTime: item.startTime, endTime: item.endTime }))),
         []
-      );
+      ) || []
       console.log('movieWords', movieWords)
       // movieWords = require(path.join(__dirname, 'files', 'movieFiles', `${title}.usedLemmas50kInfosList.json`))
       console.log('f2')
@@ -693,13 +691,13 @@ app.get("/movie_words/:_id", async (req, res) => {
     }).map(item => ({ ...item, occurrence: wordInfo_map[item.the_word].occuranceCount }))
     // console.log('movieWordsFiltered', movieWordsFiltered)
     // const movieWordsUnduplicated = movieWordsFiltered
-    const movieWordsUnduplicated = Object.values(
-      movieWordsFiltered.reduce(
-        (acc, item) => (!acc[item.the_word] && (acc[item.the_word] = item), acc),
-        {}
-      )
-    );
-    const sorted = movieWordsUnduplicated.sort((a, b) => {
+    // const movieWordsUnduplicated = Object.values(
+    //   movieWordsFiltered.reduce(
+    //     (acc, item) => (!acc[item.the_word] && (acc[item.the_word] = item), acc),
+    //     {}
+    //   )
+    // );
+    const sorted = movieWordsFiltered.sort((a, b) => {
       if (sort === 'Easy') {
         return b.occurrence - a.occurrence
       } else if (sort === 'Hard') {
