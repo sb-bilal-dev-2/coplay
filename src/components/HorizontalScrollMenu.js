@@ -134,22 +134,21 @@ export const TagsScroll = ({ tags = [], className, onIndexUpdate, forcedIndex, f
     }
   }, [forcedIndex])
   const get_typeStyles = (index) => className ? {
-    color: currentIndex === index ? 'var(--color-secondary)' : 'rgb(255 231 133 / 70%)',
-    textShadow: currentIndex === index ? "0.75px 0.75px rgba(50 50 50, 0.2)" : "0.75px 0.75px rgba(50 50 50, 0.9)",
-    // fontWeight: currentIndex === index ? 'bolder' : 'normal',
-    fontSize: currentIndex === index ? '14px' : '12px',
+    color: currentIndex === index ? 'var(--color-primary)' : '#f8c872', // #ffcc72
+    textShadow: currentIndex === index ? "1px 1px 2px rgba(20, 20, 20, 0.25)" : "1px 1px 2px #cdcc72",
+    fontWeight: currentIndex === index ? 'bolder' : 'normal',
+    fontSize: currentIndex === index ? '16px' : '12px',
     transition: '0.2s ease-out all',
     // borderBottom: currentIndex === index && '2px solid var(--color-secondary)',
     borderRadius: '9px',
-    opacity: 0.95,
+    opacity: currentIndex === index ? 0.8 : 0.7,
     fontFamily: 'Open Sans  '
   } : {
-    background: currentIndex === index ? 'black' : 'rgb(255 254 254 / 82%)',
+    background: currentIndex === index ? 'black' : 'rgb(255 254 254 / 95%)',
     color: currentIndex === index ? 'white' : '#423531',
-    border: '1px solid rgb(150 150 150)',
+    border: '0.5px solid rgb(150 150 150)',
     boxShadow: "rgba(20, 20, 20, 0.05) 1px 1px 10px 0px",
     borderRadius: '9px',
-    opacity: 0.95
   }
   const typeStylesMain = get_typeStyles(0)
   return (

@@ -127,7 +127,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
               afterLangChange={() => (getVideos(), getWordCollections())}
             />
 
-            <div className="user-menu">
+            <div className="user-menu pl-2">
               {loggedIn ? (
                 <div className="flex items-center select-none">
                   {/* <Link to="/quiz/repeating?listType=self_words" className="relative">
@@ -143,7 +143,7 @@ const StickyHeader = ({ type = "primary", authPage }) => {
                 </div>
               ) : (
                 <button>
-                  <Link to="/auth/login" className="color-white-100">
+                  <Link to="/auth/login" className="color-white-200 text-shadow-lg">
                     <b>{t("login")}</b>
                   </Link>
                 </button>
