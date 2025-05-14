@@ -134,14 +134,14 @@ export const TagsScroll = ({ tags = [], className, onIndexUpdate, forcedIndex, f
     }
   }, [forcedIndex])
   const get_typeStyles = (index) => className ? {
-    color: currentIndex === index ? 'var(--color-primary)' : '#f8c872', // #ffcc72
-    textShadow: currentIndex === index ? "1px 1px 2px rgba(20, 20, 20, 0.25)" : "1px 1px 2px #cdcc72",
+    color: currentIndex === index ? 'var(--color-primary)' : 'var(--color-secondary)', // #ffcc72
+    textShadow: currentIndex === index ? "1px 1px 2px rgba(20, 20, 20, 0.25)" : "1px 1px 2px #fdcc72",
     fontWeight: currentIndex === index ? 'bolder' : 'normal',
-    fontSize: currentIndex === index ? '16px' : '12px',
+    fontSize: currentIndex === index ? '2vh' : '1.75vh',
     transition: '0.2s ease-out all',
     // borderBottom: currentIndex === index && '2px solid var(--color-secondary)',
     borderRadius: '9px',
-    opacity: currentIndex === index ? 0.8 : 0.7,
+    opacity: currentIndex === index ? 0.75 : 0.85,
     fontFamily: 'Open Sans  '
   } : {
     background: currentIndex === index ? 'black' : 'rgb(255 254 254 / 95%)',
