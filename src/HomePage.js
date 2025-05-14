@@ -14,21 +14,24 @@ import HorizontalScrollMenu2 from "./components/HorizontalScrollMenu2";
 import { useSelector } from "react-redux";
 import { throttle } from "./utils/throttle";
 
-const TAGS = ["Top", 'Popular', 'Trending 🔥', 'Podcasts', "Series"] // add 'Courses', 'Interactive', 'Series', 'Cartoons'
-
+const TAGS = ["100Days", 'Popular', 'Trending 🔥', 'Podcasts', "Series"] // add 'Courses', 'Interactive', 'Series', 'Cartoons'
+const SUB_TAGS = {
+  '100Days': ["Elementary", "Intermediate", "Advanced"]
+}
 const HomePage = () => {
   // const { items: videos } = useDynamicReducer("movies");
   // const { items: wordCollections } = useDynamicReducer("wordCollections");
   // const movies = videos?.filter(item => item.category === 'Cartoon');
   // const clips = videos?.filter(item => item.category === 'Music');
   const langReload = useSelector((state) => state.language?.reload)
-  const [category, set_category] = useState("Top")
+  const [category, set_category] = useState("100Days")
   const [podcasts] = useGetPlaylist("PLY_ceo_podcast")
   // const [music_vocoplay] = useGetPlaylist("PLY_music_vocoplay")
   const [movies] = useGetPlaylist("PLY_series_cartoon_avatar")
   const [series] = useGetPlaylist("PLY_series_friends")
   const { t } = useTranslation();
-
+  const subcategory = SUB_TAGS[category]
+  const [currentSubcategory, set_currentSubcategory] = useState("Intermediate")
   return (
     <div className="page-container home-page" id="home">
       <PWAInstall />
@@ -39,10 +42,15 @@ const HomePage = () => {
       <div className="pb-2">
         <TagsScroll tags={TAGS} firstSticky onIndexUpdate={(item) => set_category(item)} />
       </div>
+      {subcategory && (
+        <div className="pb-2 -mt-2">
+          <TagsScroll className="text-sm" tags={subcategory} firstSticky onIndexUpdate={(item) => set_currentSubcategory(item)} />
+        </div>
+      )}
       {category === 'Popular' && !langReload && (
         <Popular />
       )}
-      {category === 'Top' && !langReload && (
+      {category === '100Days' && !langReload && (
         <InfiniteScroll
           requestData={async () => {
             const results = await api().get('/youtube_playlist?playlistId=PLY_music_popular')

@@ -90,7 +90,7 @@ export const HorizontalScrollMenuCardMain = ({
   )
 }
 
-export const TagsScroll = ({ tags = [], onIndexUpdate, forcedIndex, firstSticky }) => {
+export const TagsScroll = ({ tags = [], className, onIndexUpdate, forcedIndex, firstSticky }) => {
   const scrollRef = useRef(null);
   const [currentIndex, set_currentIndex] = useState(0)
 
@@ -133,25 +133,36 @@ export const TagsScroll = ({ tags = [], onIndexUpdate, forcedIndex, firstSticky 
       set_currentIndex(forcedIndex)
     }
   }, [forcedIndex])
-
+  const get_typeStyles = (index) => className ? {
+    color: currentIndex === index ? 'var(--color-secondary)' : 'rgb(255 231 133 / 70%)',
+    textShadow: currentIndex === index ? "0.75px 0.75px rgba(50 50 50, 0.2)" : "0.75px 0.75px rgba(50 50 50, 0.9)",
+    // fontWeight: currentIndex === index ? 'bolder' : 'normal',
+    fontSize: currentIndex === index ? '14px' : '12px',
+    transition: '0.2s ease-out all',
+    // borderBottom: currentIndex === index && '2px solid var(--color-secondary)',
+    borderRadius: '9px',
+    opacity: 0.95,
+    fontFamily: 'Open Sans  '
+  } : {
+    background: currentIndex === index ? 'black' : 'rgb(255 254 254 / 82%)',
+    color: currentIndex === index ? 'white' : '#423531',
+    border: '1px solid rgb(150 150 150)',
+    boxShadow: "rgba(20, 20, 20, 0.05) 1px 1px 10px 0px",
+    borderRadius: '9px',
+    opacity: 0.95
+  }
+  const typeStylesMain = get_typeStyles(0)
   return (
     <div className="scroll-list-container relative text-white z-10 scroll-main-container flex bg-transparent pb-1">
       {firstSticky && (
         <div className="tags-first-sticky">
           <button
             key={tags[0]}
-            className="px-3 mr-1 py-1 cursor-pointer select-none"
+            className={"px-3 mr-1 py-1 cursor-pointer font-bold select-none " + className}
             style={{
-              // borderBottom: currentIndex === index && '2px solid orangered',
-              // color: currentIndex === index ? 'orangered' : '#333',
-              // height: '42px',
+              ...typeStylesMain,
               whiteSpace: 'nowrap',
-              wordBreak: 'keep-all',
-              fontWeight: 'bolder',
-              background: currentIndex === 0 ? 'black' : 'rgb(255 249 244)',
-              color: currentIndex === 0 ? 'white' : '#423531',
-              borderRadius: '9px',
-              border: '1px solid rgb(100 100 100)',
+              wordBreak: 'keep-all'
             }}
             onClick={() => handleItemClick(tags[0], 0)}
           >
@@ -164,20 +175,15 @@ export const TagsScroll = ({ tags = [], onIndexUpdate, forcedIndex, firstSticky 
           if (firstSticky) {
             ++index;
           }
+          const typeStylesMain = get_typeStyles(index)
           return (
             <button
               key={item.label}
-              className="px-3 mx-0.5 py-1 cursor-pointer select-none"
+              className={"px-3 mx-0.5 py-1 font-bold cursor-pointer select-none " + className}
               style={{
-                // borderBottom: currentIndex === index && '2px solid orangered',
-                // color: currentIndex === index ? 'orangered' : '#333',
-                // padding: '4px',
+                ...typeStylesMain,
                 whiteSpace: 'nowrap',
-                fontWeight: 'bolder',
-                background: currentIndex === index ? 'black' : 'rgb(255 255 255)',
-                color: currentIndex === index ? 'white' : '#423531',
-                borderRadius: '9px',
-                border: '1px solid rgb(255 164 104)',
+                wordBreak: 'keep-all'
               }}
               onClick={() => handleItemClick(item, index)}>
               {item}
