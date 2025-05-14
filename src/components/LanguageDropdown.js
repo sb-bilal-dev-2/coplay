@@ -9,7 +9,7 @@ import "./LanguageModal.css";
 export const LANGUAGES = [
   // { id: 0, label: "Uzbek", iso: "uz", flag: "./uzb.png" },
   { id: 1, label: "English", iso: "en", flag: "./USA.webp" },
-  { id: 2, label: "Chinese", iso: "zh-CN", flag: "./china.png" },
+  { id: 2, label: "Chinese", iso: "zh-CN", flag: "./china.png", disabled: true },
   { id: 3, label: "Korean", iso: "ko", flag: "./korea.webp", disabled: true },
   { id: 4, label: "Turkish", iso: "tr", flag: "./country_flags/tr.svg", disabled: true },
   { id: 5, label: "Russian", iso: "ru", flag: "./country_flags/ru.svg", disabled: true },

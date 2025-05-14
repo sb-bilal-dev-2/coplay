@@ -85,8 +85,13 @@ const HorizontalScroll = ({ items, onTimeClick, forcedIndexChange, autoScroll = 
 
   useEffect(() => {
     getUserWords()
-    getWordInfos()
   }, [])
+
+  useEffect(() => {
+    if (items.length) {
+      getWordInfos()
+    }
+  }, [items.length])
   console.log('userBookmarks', userBookmarks)
 
   const scrollToIndex = (index) => {
