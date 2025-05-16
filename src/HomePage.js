@@ -53,7 +53,7 @@ const HomePage = () => {
       {category === '100Days' && !langReload && (
         <InfiniteScroll
           requestData={async () => {
-            const results = await api().get('/youtube_playlist?playlistId=PLY_music_popular')
+            const results = await api().get('/youtube_playlist?playlistId=PLY_music_vocoplay')
               .then((new_podcasts) => new_podcasts.results)
               .catch((err) => { })
 

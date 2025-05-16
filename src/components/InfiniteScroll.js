@@ -105,7 +105,7 @@ const ComposedInfiniteScroll = ({ requestData, renderItem }) => {
         setLoading(false)
         setHasMore(false)
       }
-      if (items.find((item) => item.id === newItems[0]?.id) || !newItems.length) {
+      if (items?.find((item) => item.id === newItems[0]?.id) || !newItems.length) {
         setHasMore(false)
         return;
       }
