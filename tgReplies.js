@@ -190,7 +190,7 @@ async function handleLevelSelection(chatId, callbackQuery) {
     return;
   }
   bot.answerCallbackQuery(callbackQuery.id);
-  bot.sendMessage(chatId, `📚 Words for ${level} ${lang}:\n\`${words.join(', ')}\``, {parse_mode: 'MarkdownV2'});
+  bot.sendMessage(chatId, `📚 Words for day ${day} of level (${LEVELS_BY_LANG[lang]}) ${lang}:\n\`${words.join(', ')}\``, {parse_mode: 'MarkdownV2'});
   try {
       bot.sendMessage(chatId, `Generating song text \-`, {parse_mode: 'MarkdownV2'})
       const lyrics = await promptAI(undefined, {
