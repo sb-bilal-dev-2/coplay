@@ -118,9 +118,7 @@ const WORD_DB = {
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
 
-    bot.sendMessage(chatId, 'Select your language: with /language', {
-      reply_markup: { inline_keyboard: langButtons },
-    });
+    bot.sendMessage(chatId, 'Select your language: with /language');
 });
   
 // Command: /language
