@@ -169,7 +169,7 @@ function handleLanguageSelection(chatId, callbackQuery) {
 
   const langName = langCode === 'en' ? 'English' : langCode === 'zh' ? 'Chinese' : 'Unknown';
   bot.answerCallbackQuery(callbackQuery.id, { text: `Language set to ${langName}` });
-  bot.sendMessage(chatId, `✅ Language set to ${langName}. Use /100 to select your level.`);
+  bot.sendMessage(chatId, `✅ Language set to ${langName}. Use /100 1 to get words for day 1.`);
 }
 
 // Handle level selection and send words
@@ -190,7 +190,7 @@ async function handleLevelSelection(chatId, callbackQuery) {
     return;
   }
   bot.answerCallbackQuery(callbackQuery.id);
-  bot.sendMessage(chatId, `📚 Words for day ${day} of level ${LEVELS_BY_LANG[lang]} ${lang}:\n\`${words.join(', ')}\``, {parse_mode: 'MarkdownV2'});
+  bot.sendMessage(chatId, `📚 Words for day ${day} of level ${level} ${lang}:\n\`${words.join(', ')}\``, {parse_mode: 'MarkdownV2'});
   try {
       bot.sendMessage(chatId, `Generating song text \-`, {parse_mode: 'MarkdownV2'})
       const lyrics = await promptAI(undefined, {
