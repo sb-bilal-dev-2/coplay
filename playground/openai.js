@@ -22,14 +22,14 @@ try {
 //   "IT Vocabulary 101",
 //   "Travel Vocabulary 101"
 // ]);
+// getTranscriptionOfAudio('/Users/cosmo/Desktop/Cosmo/movieplayer/playground/glimpse_of_morning_light.mp4')
 
 async function getTranscriptionOfAudio(filePath) {
   try {
-    // const filePath = "public/pizza.mp3";
     // Check if the file exists and is readable
-    // if (!fs.existsSync(filePath)) {
-    //   throw new Error(`File ${filePath} does not exist.`);
-    // }
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File ${filePath} does not exist.`);
+    }
 
     console.log("Starting transcription... for: " + filePath, path.resolve(filePath));
     const readStream = fs.createReadStream(path.resolve(filePath));
@@ -39,12 +39,12 @@ async function getTranscriptionOfAudio(filePath) {
 
     const transcription = await openai.audio.transcriptions.create({
       file: readStream, // Update the path if needed
-      model: "whisper-1",
-      response_format: "verbose_json",
+      model: "gpt-4o-mini-transcribe", // "whisper-1"
+      response_format: "json",
       timestamp_granularities: ["segment"],
       
     });
-
+    console.log('transcription', transcription)
     if (transcription) {
       console.log("Transcription completed for: " + filePath);
 
