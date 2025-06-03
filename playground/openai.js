@@ -59,16 +59,16 @@ async function getTranscriptionOfAudio(filePath) {
 
 // Call the function to execute it
 async function promptAI(content, options = {}) {
-  const { system, customMessages } = options
+  const { system, contents } = options
   let messages = [{ role: 'user', content }]
   if (!content) {
-    messages = customMessages
+    messages = contents
   }
-
   if (system) {
     messages.unshift({ role: "system", content: system })
   }
   
+  console.log('messages', messages)
   if (!openai) {
     throw new Error('NetworkError')
   }

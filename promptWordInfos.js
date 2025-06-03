@@ -97,9 +97,9 @@ async function promptWordInfos(words, langCode) {
                     let responseMessage = await promptAI(getWordInfoPromptByLanguage(wrdInfo, langCode))
                     try {
                         console.log('response 1', responseMessage)
-                        if (responseMessage?.content?.includes("REAL_RESPONSE: ")) {
+                        if (responseMessage?.includes("REAL_RESPONSE: ")) {
                             console.log('response 2')
-                            const parsableResponse = responseMessage?.content?.split('REAL_RESPONSE: ')[1]
+                            const parsableResponse = responseMessage?.split('REAL_RESPONSE: ')[1]
                             console.log('parsableResponse', parsableResponse)
 
                             wordPromptInfo = JSON.parse(parsableResponse)
