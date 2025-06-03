@@ -1,7 +1,7 @@
 // Replace with your actual Telegram Bot API token and DeepSeek API key
 // const GEMINI_API_KEY = "AIzaSyBz8qidXm7iqQW6hdStEDhsFBxN3yWW64k"
 // const { GoogleGenAI } = require("@google/genai");
-const db = require("./serverCRUD").initCRUDAndDatabase();
+// const db = require("./serverCRUD").initCRUDAndDatabase();
 const words5k = require("./wordsResearchData/en_5kLemmas.json")
 const fs = require('fs')
 
